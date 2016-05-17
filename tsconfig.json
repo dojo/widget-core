@@ -13,11 +13,13 @@
 		"moduleResolution": "classic"
 	},
 	"filesGlob": [
+		"./typings/main.d.ts",
 		"./typings/tsd.d.ts",
 		"./src/**/*.ts",
 		"./tests/**/*.ts"
 	],
 	"files": [
+		"./typings/main.d.ts",
 		"./typings/tsd.d.ts",
 		"./src/createButton.ts",
 		"./src/createContainer.ts",
@@ -64,9 +66,7 @@
 		"./tests/typings/dojo2/dojo.d.ts",
 		"./tests/typings/intern/intern.d.ts",
 		"./tests/typings/jquery/jquery.d.ts",
-		"./tests/typings/jsdom/jsdom.d.ts",
 		"./tests/typings/leadfoot/leadfoot.d.ts",
-		"./tests/typings/node/node.d.ts",
 		"./tests/typings/tsd.d.ts",
 		"./tests/unit/all.ts",
 		"./tests/unit/createButton.ts",

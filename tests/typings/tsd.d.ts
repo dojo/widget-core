@@ -1,5 +1,4 @@
 /// <reference path="intern/intern.d.ts" />
-/// <reference path="jsdom/jsdom.d.ts" />
 
 declare module 'intern/dojo/Promise' {
 	import Promise = require('dojo/Promise');

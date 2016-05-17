@@ -1,0 +1,14 @@
+{
+	"name": "dojo-widgets",
+	"dependencies": {
+		"@reactivex/RxJS": "npm:@reactivex/rxjs",
+		"immutable": "npm:immutable",
+		"maquette": "npm:maquette"
+	},
+	"ambientDependencies": {
+		"es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#6697d6f7dadbf5773cb40ecda35a76027e0783b2",
+		"dojo-compose": "npm:dojo-compose",
+		"jsdom": "registry:dt/jsdom#2.0.0+20160316155526",
+		"node": "github:dojo/compose/typings/node/node.d.ts#77042c0e0f48396a6d77c592cfdb1ce0f71438cf"
+	}
+}
