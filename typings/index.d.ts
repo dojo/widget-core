@@ -1,5 +1,4 @@
 /// <reference path="globals/digdug/index.d.ts" />
-/// <reference path="globals/dojo-compose/index.d.ts" />
 /// <reference path="globals/dojo-loader/index.d.ts" />
 /// <reference path="globals/dojo2-dev/index.d.ts" />
 /// <reference path="globals/dojo2/index.d.ts" />
