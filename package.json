@@ -11,6 +11,10 @@
 		"type": "git",
 		"url": "https://github.com/dojo/widgets.git"
 	},
+	"scripts": {
+		"prepublish": "grunt dist",
+		"test": "grunt test"
+	},
 	"peerDependencies": {
 		"@reactivex/rxjs": "5.0.0-beta.6",
 		"dojo-compose": ">=2.0.0-beta.2",
