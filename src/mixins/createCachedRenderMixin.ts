@@ -57,6 +57,13 @@ export interface CachedRender {
 	invalidate(): void;
 
 	/**
+	 * The ID of the widget
+	 *
+	 * TODO: Mark readonly in TS2
+	 */
+	id: string;
+
+	/**
 	 * An array of strings that represent classes to be set on the widget.  If classes are present in the state, getting and
 	 * setting classes is done on the state, otherwise they are shadowed on the instance.
 	 */
@@ -80,7 +87,9 @@ export interface CachedRenderOverrides {
 
 export type CachedRenderMixin<S extends CachedRenderState> = Stateful<S> & Renderable & CachedRender & VNodeEvented & CachedRenderOverrides;
 
-export interface CachedRenderFactory extends ComposeFactory<CachedRenderMixin<CachedRenderState>, StatefulOptions<CachedRenderState>> { }
+export interface CachedRenderFactory extends ComposeFactory<CachedRenderMixin<CachedRenderState>, StatefulOptions<CachedRenderState>> {
+	idBase: string;
+}
 
 /**
  * A map of dirty flags used when determining if the render function
@@ -104,7 +113,21 @@ const shadowClasses = new WeakMap<CachedRenderMixin<CachedRenderState>, string[]
  */
 const shadowStyles = new WeakMap<CachedRenderMixin<CachedRenderState>, StylesHash>();
 
-const createCachedRenderMixin: CachedRenderFactory = createStateful
+/**
+ * The counter for generating a unique ID
+ */
+let cachedRenderCount = 0;
+
+/**
+ * A function that generates an ID
+ */
+function generateID(cachedRender: CachedRenderMixin<CachedRenderState>): string {
+	const id = `${createCachedRenderMixin.idBase}${++cachedRenderCount}`;
+	cachedRender.setState({ id });
+	return id;
+}
+
+const createCachedRenderMixin = createStateful
 	.mixin(createRenderable)
 	.mixin({
 		mixin: createVNodeEvented,
@@ -165,6 +188,11 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 				}
 			},
 
+			get id(): string {
+				const cachedRender: CachedRenderMixin<CachedRenderState> = this;
+				return (cachedRender.state && cachedRender.state.id) || generateID(cachedRender);
+			},
+
 			get classes(): string[] {
 				const cachedRender: CachedRenderMixin<CachedRenderState> = this;
 				return (cachedRender.state && cachedRender.state.classes) || shadowClasses.get(cachedRender);
@@ -203,6 +231,9 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 			dirtyMap.set(instance, true);
 			shadowClasses.set(instance, []);
 		}
-	});
+	})
+	.static({
+		idBase: 'widget'
+	}) as CachedRenderFactory;
 
 export default createCachedRenderMixin;
