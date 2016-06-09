@@ -122,7 +122,7 @@ const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixin
 					if (widget.parent !== parent) {
 						widget.parent = parent;
 						/* TODO: If a child gets attached and reattached it may own multiple handles */
-						widget.own(getRemoveHandle(parent, widget));
+						getRemoveHandle(parent, widget);
 					}
 				});
 				childrenMap.set(parent, value);
