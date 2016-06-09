@@ -1,4 +1,6 @@
 import { List } from 'immutable/immutable';
+import { Handle } from 'dojo-core/interfaces';
+import { Parent, Child } from '../mixins/interfaces';
 
 export type Position = number | 'first' | 'last' | 'before' | 'after';
 
@@ -94,5 +96,60 @@ export function stringToValue(str: string): any {
 			return str;
 		}
 		return undefined;
+	}
+}
+
+/**
+ * A type guard that deterimines if a value is an immutable List or not
+ */
+function isList<T>(value: any): value is List<T> {
+	return value instanceof List;
+}
+
+/**
+ * A utility function that generates a handle that destroys any children
+ * @param parent The parent that the handle relates to
+ * @param child The child (or array of children) that the handle relates to
+ */
+export function getRemoveHandle(parent: Parent, child: Child | Child[]): Handle {
+	function getDestroyHandle(c: Child): Handle {
+		let destroyed = false;
+		return c.own({
+			destroy() {
+				if (destroyed) {
+					return;
+				}
+				const { children } = parent;
+				if (children.includes(c)) {
+					parent.children = isList(children) ? children.delete(children.lastIndexOf(c)) : children.delete(children.keyOf(c));
+				}
+				destroyed = true;
+				if (c.parent === parent) {
+					c.parent = undefined;
+				}
+			}
+		});
+	}
+
+	if (Array.isArray(child)) {
+		let destroyed = false;
+		const handles = child.map((c) => getDestroyHandle(c));
+		return {
+			destroy() {
+				if (destroyed) {
+					return;
+				}
+				handles.forEach((handle) => handle.destroy());
+				destroyed = true;
+			}
+		};
+	}
+	else {
+		const handle = getDestroyHandle(child);
+		return {
+			destroy() {
+				handle.destroy();
+			}
+		};
 	}
 }

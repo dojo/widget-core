@@ -3,7 +3,7 @@ import compose, { ComposeFactory } from 'dojo-compose/compose';
 import createEvented, { Evented, EventedListener, TargettedEventObject } from 'dojo-compose/mixins/createEvented';
 import { Handle } from 'dojo-core/interfaces';
 import WeakMap from 'dojo-core/WeakMap';
-import { Position, insertInList } from '../util/lang';
+import { getRemoveHandle, insertInList, Position } from '../util/lang';
 import { Renderable } from './createRenderable';
 
 export interface ParentMixinOptions<C extends Child> {
@@ -63,52 +63,6 @@ export interface ParentMixinFactory extends ComposeFactory<ParentMixin<Child>, P
  * Contains a List of children per instance
  */
 const childrenMap = new WeakMap<ParentMixin<Child>, List<Child>>();
-
-/**
- * A utility function that generates a handle that destroys any children
- */
-function getRemoveHandle(parent: ParentMixin<Child>, child: Child | Child[]): Handle {
-	function getDestroyHandle(c: Child): Handle {
-		let destroyed = false;
-		return c.own({
-			destroy() {
-				if (destroyed) {
-					return;
-				}
-				const idx = parent.children.lastIndexOf(c);
-				if (idx > -1) {
-					parent.children = parent.children.delete(idx);
-				}
-				destroyed = true;
-				if (c.parent === parent) {
-					c.parent = undefined;
-				}
-			}
-		});
-	}
-
-	if (Array.isArray(child)) {
-		let destroyed = false;
-		const handles = child.map((c) => getDestroyHandle(c));
-		return {
-			destroy() {
-				if (destroyed) {
-					return;
-				}
-				handles.forEach((handle) => handle.destroy());
-				destroyed = true;
-			}
-		};
-	}
-	else {
-		const handle = getDestroyHandle(child);
-		return {
-			destroy() {
-				handle.destroy();
-			}
-		};
-	}
-}
 
 const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixinOptions<Child>>({
 		get children(): List<Child> {

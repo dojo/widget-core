@@ -7,9 +7,10 @@ export type Child = Renderable;
 export interface ChildListEvent<T, C extends Child> {
 	children: Map<string, C> | List<C>;
 	target: T;
-	type: 'childlist'
+	type: 'childlist';
 }
 
 export interface Parent {
+	children: Map<string, Child> | List<Child>;
 	append(child: Child | Child[]): Handle;
 }
