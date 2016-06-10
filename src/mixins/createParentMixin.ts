@@ -4,21 +4,13 @@ import createEvented, { Evented, EventedListener, TargettedEventObject } from 'd
 import { Handle } from 'dojo-core/interfaces';
 import WeakMap from 'dojo-core/WeakMap';
 import { getRemoveHandle, insertInList, Position } from '../util/lang';
-import { Renderable } from './createRenderable';
+import { Child, ChildListEvent } from './interfaces';
 
 export interface ParentMixinOptions<C extends Child> {
 	/**
 	 * Children that are owned by the parent on creation
 	 */
 	children?: C[];
-}
-
-export type Child = Renderable;
-
-export interface ChildListEvent<T extends Parent<C>, C extends Child> {
-	type: 'childlist';
-	target: T;
-	children: List<C>;
 }
 
 export interface Parent<C extends Child> {
@@ -93,7 +85,7 @@ const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixin
 
 		append(child: Child | Child[]): Handle {
 			const parent: ParentMixin<Child> = this;
-			parent.children = Array.isArray(child) ? <List<Child>> parent.children.concat(child) : parent.children = parent.children.push(child);
+			parent.children = Array.isArray(child) ? <List<Child>> parent.children.concat(child) : parent.children.push(child);
 			return getRemoveHandle(parent, child);
 		},
 

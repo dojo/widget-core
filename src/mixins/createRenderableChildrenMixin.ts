@@ -1,7 +1,7 @@
 import { VNode } from 'maquette/maquette';
 import { List } from 'immutable/immutable';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { Child } from './createParentMixin';
+import { Child } from './interfaces';
 
 export interface RenderableChildrenOptions {}
 

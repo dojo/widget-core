@@ -1,8 +1,9 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createWidget, { Widget, WidgetState, WidgetOptions } from './createWidget';
-import createParentMixin, { ParentMixin, Child } from './mixins/createParentMixin';
+import createParentMixin, { ParentMixin } from './mixins/createParentMixin';
 import createRenderableChildrenMixin from './mixins/createRenderableChildrenMixin';
 import createStatefulChildrenMixin, { StatefulChildrenState, StatefulChildrenOptions } from './mixins/createStatefulChildrenMixin';
+import { Child } from './mixins/interfaces';
 
 export interface ContainerState extends WidgetState, StatefulChildrenState { }
 

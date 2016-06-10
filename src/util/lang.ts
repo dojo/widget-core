@@ -1,6 +1,6 @@
 import { List } from 'immutable/immutable';
 import { Handle } from 'dojo-core/interfaces';
-import { Parent, Child } from '../mixins/interfaces';
+import { Parent, Child, ChildrenMap } from '../mixins/interfaces';
 
 export type Position = number | 'first' | 'last' | 'before' | 'after';
 
@@ -102,8 +102,16 @@ export function stringToValue(str: string): any {
 /**
  * A type guard that deterimines if a value is an immutable List or not
  */
-function isList<T>(value: any): value is List<T> {
+export function isList<T>(value: any): value is List<T> {
 	return value instanceof List;
+}
+
+/**
+ * A type guard that checks to see if the value is a Child
+ * @param value the value to guard for
+ */
+export function isChild<C extends Child>(value: any): value is C {
+	return value && typeof value === 'object' && typeof value.render === 'function';
 }
 
 /**
@@ -111,7 +119,7 @@ function isList<T>(value: any): value is List<T> {
  * @param parent The parent that the handle relates to
  * @param child The child (or array of children) that the handle relates to
  */
-export function getRemoveHandle(parent: Parent, child: Child | Child[]): Handle {
+export function getRemoveHandle<C extends Child>(parent: Parent, child: C | C[] | ChildrenMap<C>): Handle {
 	function getDestroyHandle(c: Child): Handle {
 		let destroyed = false;
 		return c.own({
@@ -131,20 +139,21 @@ export function getRemoveHandle(parent: Parent, child: Child | Child[]): Handle 
 		});
 	}
 
+	let destroyed = false;
+
 	if (Array.isArray(child)) {
-		let destroyed = false;
 		const handles = child.map((c) => getDestroyHandle(c));
 		return {
 			destroy() {
 				if (destroyed) {
 					return;
 				}
-				handles.forEach((handle) => handle.destroy());
+				handles.forEach(({ destroy }) => destroy());
 				destroyed = true;
 			}
 		};
 	}
-	else {
+	else if (isChild(child)) {
 		const handle = getDestroyHandle(child);
 		return {
 			destroy() {
@@ -152,4 +161,20 @@ export function getRemoveHandle(parent: Parent, child: Child | Child[]): Handle 
 			}
 		};
 	}
+	else {
+		const handles: Handle[] = [];
+		for (let key in child) {
+			handles.push(getDestroyHandle(child[key]));
+		}
+		return {
+			destroy() {
+				if (destroyed) {
+					return;
+				}
+				handles.forEach(({ destroy }) => destroy());
+				destroyed = true;
+			}
+		};
+	}
+
 }

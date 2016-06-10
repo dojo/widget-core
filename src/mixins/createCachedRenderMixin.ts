@@ -4,9 +4,10 @@ import createStateful, { State, Stateful, StatefulOptions } from 'dojo-compose/m
 import { assign } from 'dojo-core/lang';
 import Map from 'dojo-core/Map';
 import WeakMap from 'dojo-core/WeakMap';
-import { ParentMixin, Child } from './createParentMixin';
+import { ParentMixin } from './createParentMixin';
 import createRenderable, { Renderable } from './createRenderable';
 import createVNodeEvented, { VNodeEvented } from './createVNodeEvented';
+import { Child } from './interfaces';
 
 export type StylesHash = { [style: string]: string; };
 

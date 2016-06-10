@@ -5,9 +5,10 @@ import { Handle } from 'dojo-core/interfaces';
 import { on } from 'dojo-core/aspect';
 import WeakMap from 'dojo-core/WeakMap';
 import createWidget, { Widget, WidgetState, WidgetOptions } from './createWidget';
-import createParentMixin, { ParentMixin, ParentMixinOptions, Child } from './mixins/createParentMixin';
+import createParentMixin, { ParentMixin, ParentMixinOptions } from './mixins/createParentMixin';
 import createRenderableChildrenMixin from './mixins/createRenderableChildrenMixin';
 import createStatefulChildrenMixin, { StatefulChildrenState, StatefulChildrenOptions } from './mixins/createStatefulChildrenMixin';
+import { Child } from './mixins/interfaces';
 import { Projector } from './projector';
 
 /* TODO: Abstract logic to a mixin */

@@ -5,7 +5,8 @@ import Map from 'dojo-core/Map';
 import Promise from 'dojo-core/Promise';
 import WeakMap from 'dojo-core/WeakMap';
 import { List } from 'immutable/immutable';
-import { Child, ChildListEvent } from './createParentMixin';
+import { Child, ChildListEvent } from './interfaces';
+import { isList } from '../util/lang';
 
 export interface ChildrenRegistry<C extends Child> {
 	get<D extends C>(id: string | symbol): Promise<D>;
@@ -111,7 +112,10 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 		return;
 	}
 
-	const currentChildrenIDs = <List<string>> evt.children.map((widget) => widgetRegistry.identify(widget));
+	const evtChildren = evt.children;
+
+	/* TODO: Handle maps */
+	const currentChildrenIDs = <List<string>> (isList(evtChildren) ? evtChildren.map((widget) => widgetRegistry.identify(widget)) : undefined);
 
 	if (!currentChildrenIDs.equals(List(parent.state.children))) {
 		const children = currentChildrenIDs.toArray();

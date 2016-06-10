@@ -1,9 +1,10 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createWidget, { Widget, WidgetState, WidgetOptions } from './createWidget';
 import createCloseableMixin, { Closeable, CloseableState } from './mixins/createCloseableMixin';
-import createParentMixin, { ParentMixin, ParentMixinOptions, Child } from './mixins/createParentMixin';
+import createParentMixin, { ParentMixin, ParentMixinOptions } from './mixins/createParentMixin';
 import createRenderableChildrenMixin from './mixins/createRenderableChildrenMixin';
 import createStatefulChildrenMixin, { StatefulChildrenState, StatefulChildrenOptions } from './mixins/createStatefulChildrenMixin';
+import { Child } from './mixins/interfaces';
 
 export interface PanelState extends WidgetState, CloseableState, StatefulChildrenState {
 	label?: string;

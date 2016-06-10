@@ -8,7 +8,8 @@ import { assign } from 'dojo-core/lang';
 import { queueTask } from 'dojo-core/queue';
 import WeakMap from 'dojo-core/WeakMap';
 import createVNodeEvented, { VNodeEvented } from './mixins/createVNodeEvented';
-import createParentMixin, { ParentMixin, ParentMixinOptions, Child } from './mixins/createParentMixin';
+import createParentMixin, { ParentMixin, ParentMixinOptions } from './mixins/createParentMixin';
+import { Child } from './mixins/interfaces';
 
 /* maquette polyfills changed from 2.2 to 2.3 */
 global.requestAnimationFrame = global.requestAnimationFrame || global.window.requestAnimationFrame;

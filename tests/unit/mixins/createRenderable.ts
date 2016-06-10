@@ -1,7 +1,8 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createRenderable, { isRenderable } from 'src/mixins/createRenderable';
-import { ParentMixin, Child } from 'src/mixins/createParentMixin';
+import { ParentMixin } from 'src/mixins/createParentMixin';
+import { Child } from 'src/mixins/interfaces';
 import { h } from 'maquette/maquette';
 import Promise from 'dojo-core/Promise';
 import { List } from 'immutable/immutable';

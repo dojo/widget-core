@@ -7,7 +7,8 @@ import { List } from 'immutable/immutable';
 import WeakMap from 'dojo-core/WeakMap';
 import createCachedRenderMixin, { CachedRenderMixin, CachedRenderState } from './createCachedRenderMixin';
 import { CloseableMixin, CloseableState } from './createCloseableMixin';
-import createParentMixin, { ParentMixin, ParentMixinOptions, Child } from './createParentMixin';
+import createParentMixin, { ParentMixin, ParentMixinOptions } from './createParentMixin';
+import { Child } from './interfaces';
 
 export interface TabbedChildState extends CachedRenderState, CloseableState {
 	/**
