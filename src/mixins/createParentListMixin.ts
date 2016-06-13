@@ -6,14 +6,14 @@ import WeakMap from 'dojo-core/WeakMap';
 import { getRemoveHandle, insertInList, Position } from '../util/lang';
 import { Child, ChildListEvent } from './interfaces';
 
-export interface ParentMixinOptions<C extends Child> {
+export interface ParentListMixinOptions<C extends Child> {
 	/**
 	 * Children that are owned by the parent on creation
 	 */
 	children?: C[];
 }
 
-export interface Parent<C extends Child> {
+export interface ParentList<C extends Child> {
 	/**
 	 * An immutable list of children for this parent
 	 */
@@ -47,22 +47,22 @@ export interface Parent<C extends Child> {
 	on?(type: string, listener: EventedListener<TargettedEventObject>): Handle;
 }
 
-export type ParentMixin<C extends Child> = Parent<C> & Evented;
+export type ParentListMixin<C extends Child> = ParentList<C> & Evented;
 
-export interface ParentMixinFactory extends ComposeFactory<ParentMixin<Child>, ParentMixinOptions<Child>> { }
+export interface ParentListMixinFactory extends ComposeFactory<ParentListMixin<Child>, ParentListMixinOptions<Child>> { }
 
 /**
  * Contains a List of children per instance
  */
-const childrenMap = new WeakMap<ParentMixin<Child>, List<Child>>();
+const childrenMap = new WeakMap<ParentListMixin<Child>, List<Child>>();
 
-const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixinOptions<Child>>({
+const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, ParentListMixinOptions<Child>>({
 		get children(): List<Child> {
 			return childrenMap.get(this);
 		},
 
 		set children(value: List<Child>) {
-			const parent: ParentMixin<Child> & { invalidate?(): void; } = this;
+			const parent: ParentListMixin<Child> & { invalidate?(): void; } = this;
 			if (!value.equals(childrenMap.get(parent))) {
 				value.forEach((widget) => {
 					if (widget.parent !== parent) {
@@ -84,13 +84,13 @@ const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixin
 		},
 
 		append(child: Child | Child[]): Handle {
-			const parent: ParentMixin<Child> = this;
+			const parent: ParentListMixin<Child> = this;
 			parent.children = Array.isArray(child) ? <List<Child>> parent.children.concat(child) : parent.children.push(child);
 			return getRemoveHandle(parent, child);
 		},
 
 		clear(): void {
-			const parent: ParentMixin<Child> = this;
+			const parent: ParentListMixin<Child> = this;
 			const children = childrenMap.get(parent);
 			if (children) {
 				children.forEach((child) => { child.parent === undefined; });
@@ -99,7 +99,7 @@ const createParentMixin: ParentMixinFactory = compose<Parent<Child>, ParentMixin
 		},
 
 		insert(child: Child, position: Position, reference?: Child): Handle {
-			const parent: ParentMixin<Child> = this;
+			const parent: ParentListMixin<Child> = this;
 			child.parent = parent;
 			parent.children = insertInList(childrenMap.get(parent), child, position, reference);
 			return getRemoveHandle(parent, child);

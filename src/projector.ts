@@ -8,13 +8,13 @@ import { assign } from 'dojo-core/lang';
 import { queueTask } from 'dojo-core/queue';
 import WeakMap from 'dojo-core/WeakMap';
 import createVNodeEvented, { VNodeEvented } from './mixins/createVNodeEvented';
-import createParentMixin, { ParentMixin, ParentMixinOptions } from './mixins/createParentMixin';
+import createParentListMixin, { ParentListMixin, ParentListMixinOptions } from './mixins/createParentListMixin';
 import { Child } from './mixins/interfaces';
 
 /* maquette polyfills changed from 2.2 to 2.3 */
 global.requestAnimationFrame = global.requestAnimationFrame || global.window.requestAnimationFrame;
 
-export interface ProjectorOptions extends ParentMixinOptions<Child>, EventedOptions {
+export interface ProjectorOptions extends ParentListMixinOptions<Child>, EventedOptions {
 	/**
 	 * The root element for the projector
 	 */
@@ -95,7 +95,7 @@ export interface ProjectorMixin {
 	state: ProjectorState;
 }
 
-export type Projector = VNodeEvented & ParentMixin<Child> & ProjectorMixin;
+export type Projector = VNodeEvented & ParentListMixin<Child> & ProjectorMixin;
 
 export interface ProjectorFactory extends ComposeFactory<Projector, ProjectorOptions> { }
 
@@ -231,7 +231,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		}
 	})
 	.mixin({
-		mixin: createParentMixin,
+		mixin: createParentListMixin,
 		initialize(instance, options) {
 			const projector = createMaquetteProjector({});
 			const root = options && options.root || document.body;
