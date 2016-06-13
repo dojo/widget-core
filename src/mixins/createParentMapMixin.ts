@@ -14,14 +14,29 @@ export interface ParentMapMixinOptions<C extends Child> {
 }
 
 export interface ParentMap<C extends Child> {
+	/**
+	 * An immutable map of children associated with this parent
+	 */
 	children: Map<string, C>;
 
-	add(name: string, child: C): Handle;
-
+	/**
+	 * Append a child (or an array of children) to this parent
+	 *
+	 * Appending will attempt to determine the child's ID and use that as the key in the
+	 * children map.  If it cannot be determined, a unique ID will be generated
+	 * @param child The child (or children) to append
+	 */
 	append(child: C | C[]): Handle;
 
+	/**
+	 * Clear all the children from this parent
+	 */
 	clear(): void;
 
+	/**
+	 * Merge a map of children with any existing children of this parent
+	 * @param children The Map of the children
+	 */
 	merge(children: ChildrenMap<C>): Handle;
 
 	on?(type: 'childlist', listener: EventedListener<ChildListEvent<this, C>>): Handle;
@@ -51,6 +66,8 @@ function getChildKey(parent: ParentMap<Child>, child: Child): string {
 function mapChildArray<C extends Child>(parent: ParentMap<C>, children: C[]): ChildrenMap<C> {
 	const childMap: ChildrenMap<C> = {};
 	let keyCount = parent.children.size;
+	/* TODO: in theory, if children are added, then removed and then added again, duplicate keys could
+	 * be generated*/
 	children.forEach((child) => childMap[child.id || 'child' + keyCount++] = child);
 	return childMap;
 }
@@ -80,12 +97,6 @@ const createParentMapMixin: ParentMapMixinFactory = compose<ParentMap<Child>, Pa
 					parent.invalidate();
 				}
 			}
-		},
-
-		add(name: string, child: Child): Handle {
-			const parent: ParentMapMixin<Child> = this;
-			parent.children = parent.children.set(name, child);
-			return getRemoveHandle(parent, child);
 		},
 
 		append(child: Child | Child[]): Handle {
