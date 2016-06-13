@@ -104,6 +104,11 @@ const shadowClasses = new WeakMap<CachedRenderMixin<CachedRenderState>, string[]
  */
 const shadowStyles = new WeakMap<CachedRenderMixin<CachedRenderState>, StylesHash>();
 
+/**
+ * A weak map of the historic classes associated to a specific widget
+ */
+const widgetClassesMap = new WeakMap<CachedRenderMixin<CachedRenderState>, string[]>();
+
 const createCachedRenderMixin: CachedRenderFactory = createStateful
 	.mixin(createRenderable)
 	.mixin({
@@ -121,9 +126,15 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 					props[key] = cachedRender.listeners[key];
 				}
 				const classes: { [index: string]: boolean; } = {};
+				const widgetClasses: string[] = widgetClassesMap.get(cachedRender) || [];
+
+				widgetClasses.forEach((c) => classes[c] = false);
+
 				if (cachedRender.classes) {
 					cachedRender.classes.forEach((c) => classes[c] = true);
 				}
+
+				widgetClassesMap.set(cachedRender, cachedRender.classes || []);
 				props.classes = classes;
 				props.styles = cachedRender.styles || {};
 				props.key = cachedRender;
