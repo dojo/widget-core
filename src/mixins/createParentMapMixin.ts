@@ -13,12 +13,8 @@ export interface ParentMapMixinOptions<C extends Child> {
 	children?: ChildrenMap<C>;
 }
 
-export type ChildMapEntry<C> = [ string, C ];
-
 export interface ParentMap<C extends Child> {
 	children: Map<string, C>;
-
-	sort?(valueA: ChildMapEntry<C>, valueB: ChildMapEntry<C>): number;
 
 	add(name: string, child: C): Handle;
 

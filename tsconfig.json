@@ -80,6 +80,7 @@
 		"./tests/unit/mixins/createParentListMixin.ts",
 		"./tests/unit/mixins/createParentMapMixin.ts",
 		"./tests/unit/mixins/createRenderable.ts",
+		"./tests/unit/mixins/createRenderableChildrenMixin.ts",
 		"./tests/unit/mixins/createStatefulChildrenMixin.ts",
 		"./tests/unit/mixins/createTabbedMixin.ts",
 		"./tests/unit/mixins/createVNodeEvented.ts",
