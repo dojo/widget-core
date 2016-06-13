@@ -1,6 +1,7 @@
 import { h, createProjector as createMaquetteProjector, Projector as MaquetteProjector, VNode, VNodeProperties } from 'maquette/maquette';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { EventedOptions } from 'dojo-compose/mixins/createEvented';
+import global from 'dojo-core/global';
 import { Handle } from 'dojo-core/interfaces';
 import { assign } from 'dojo-core/lang';
 import { queueTask } from 'dojo-core/queue';
@@ -262,6 +263,6 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		}
 	});
 
-const defaultProjector: Projector = createProjector();
+const defaultProjector: Projector = typeof global.document === 'undefined' ? null : createProjector();
 
 export default defaultProjector;
