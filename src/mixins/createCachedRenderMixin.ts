@@ -115,6 +115,11 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 		mixin: createVNodeEvented,
 		initialize(instance: CachedRenderMixin<CachedRenderState>) {
 			instance.own(instance.on('statechange', () => { instance.invalidate(); } ));
+			instance.own({
+				destroy() {
+					widgetClassesMap.delete(instance);
+				}
+			});
 		}
 	})
 	.mixin({
@@ -126,15 +131,15 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 					props[key] = cachedRender.listeners[key];
 				}
 				const classes: { [index: string]: boolean; } = {};
-				const widgetClasses: string[] = widgetClassesMap.get(cachedRender) || [];
+				const widgetClasses: string[] = widgetClassesMap.get(cachedRender);
 
 				widgetClasses.forEach((c) => classes[c] = false);
 
 				if (cachedRender.classes) {
 					cachedRender.classes.forEach((c) => classes[c] = true);
+					widgetClassesMap.set(cachedRender, cachedRender.classes);
 				}
 
-				widgetClassesMap.set(cachedRender, cachedRender.classes || []);
 				props.classes = classes;
 				props.styles = cachedRender.styles || {};
 				props.key = cachedRender;
@@ -213,6 +218,7 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 			* cast as any */
 			dirtyMap.set(instance, true);
 			shadowClasses.set(instance, []);
+			widgetClassesMap.set(instance, []);
 		}
 	});
 
