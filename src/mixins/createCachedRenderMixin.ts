@@ -131,7 +131,7 @@ const createCachedRenderMixin: CachedRenderFactory = createStateful
 					props[key] = cachedRender.listeners[key];
 				}
 				const classes: { [index: string]: boolean; } = {};
-				const widgetClasses: string[] = widgetClassesMap.get(cachedRender);
+				const widgetClasses = widgetClassesMap.get(cachedRender);
 
 				widgetClasses.forEach((c) => classes[c] = false);
 
