@@ -46,7 +46,7 @@ registerSuite({
 			setTimeout(dfd.callback(() => {
 				assert.strictEqual(dijit.Ctor, 'tests/support/dijit/Dijit');
 				assert.deepEqual(dijit.params, { foo: 'bar' });
-			}), 10);
+			}), 50);
 		}
 	},
 	'render()': {
