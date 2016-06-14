@@ -239,7 +239,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		}
 	})
 	.mixin({
-		mixin: createParentMixin,
+		mixin: createParentListMixin,
 		initialize(instance: Projector, { autoAttach = false, root = document.body }: ProjectorOptions = {}) {
 			const projector = createMaquetteProjector({});
 			projectorDataMap.set(instance, {
