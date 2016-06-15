@@ -44,7 +44,7 @@ registerSuite({
 			}, 100);
 		}).catch(dfd.reject);
 	},
-	'lifycycle'() {
+	'lifecycle'() {
 		const dfd = this.async();
 		const div = document.createElement('div');
 		document.body.appendChild(div);
@@ -74,6 +74,31 @@ registerSuite({
 				}), 100);
 			}, 100);
 		}).catch(dfd.reject);
+	},
+	'\'attach\' event'() {
+		const div = document.createElement('div');
+		document.body.appendChild(div);
+		const projector1 = createProjector({});
+		projector1.setRoot(div);
+		let nodeText = 'bar';
+		const renderable = createRenderableChild({
+			render() {
+				return h('h1', [ nodeText ]);
+			}
+		});
+		projector1.append(renderable);
+		assert.strictEqual(div.childNodes.length, 0, 'there should be no children');
+		let eventFired = false;
+		projector1.on('attach', () => {
+			eventFired = true;
+			assert.strictEqual(div.childNodes.length, 1, 'a child should be added');
+			assert.strictEqual((<HTMLElement> div.firstChild).tagName.toLowerCase(), 'h1');
+			assert.strictEqual((<HTMLElement> div.firstChild).innerHTML, nodeText);
+		});
+		return projector1.attach().then(() => {
+			assert.isTrue(eventFired);
+			projector1.destroy();
+		});
 	},
 	'reattach'() {
 		const projector1 = createProjector({});

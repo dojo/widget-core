@@ -1,6 +1,6 @@
 import { h, createProjector as createMaquetteProjector, Projector as MaquetteProjector, VNode, VNodeProperties } from 'maquette/maquette';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { EventedOptions } from 'dojo-compose/mixins/createEvented';
+import { EventedListener, EventedOptions, TargettedEventObject } from 'dojo-compose/mixins/createEvented';
 import global from 'dojo-core/global';
 import { Handle } from 'dojo-core/interfaces';
 import { assign } from 'dojo-core/lang';
@@ -105,6 +105,15 @@ export interface ProjectorMixin {
 	state: ProjectorState;
 }
 
+export interface ProjectorOverrides {
+	/**
+	 * Event emitted after the projector has been attached to the DOM.
+	 */
+	on(type: 'attach', listener: EventedListener<TargettedEventObject>): Handle;
+
+	on(type: string, listener: EventedListener<TargettedEventObject>): Handle;
+}
+
 export type Projector = VNodeEvented & ParentListMixin<Child> & ProjectorMixin;
 
 export interface ProjectorFactory extends ComposeFactory<Projector, ProjectorOptions> { }
@@ -190,9 +199,14 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 					projectorData.attachHandle = noopHandle;
 				}
 			});
-			projectorData.attachPromise = new Promise((resolve) => {
+			projectorData.attachPromise = new Promise((resolve, reject) => {
 				projectorData.afterInitialCreate = () => {
-					resolve(projectorData.attachHandle);
+					try {
+						projector.emit({ type: 'attach' });
+						resolve(projectorData.attachHandle);
+					} catch (err) {
+						reject(err);
+					}
 				};
 			});
 
