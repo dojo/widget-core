@@ -128,12 +128,22 @@ function generateID(cachedRender: CachedRenderMixin<CachedRenderState>): string 
 	return id;
 }
 
+/**
+ * A weak map of the historic classes associated to a specific widget
+ */
+const widgetClassesMap = new WeakMap<CachedRenderMixin<CachedRenderState>, string[]>();
+
 const createCachedRenderMixin = createStateful
 	.mixin(createRenderable)
 	.mixin({
 		mixin: createVNodeEvented,
 		initialize(instance: CachedRenderMixin<CachedRenderState>) {
 			instance.own(instance.on('statechange', () => { instance.invalidate(); } ));
+			instance.own({
+				destroy() {
+					widgetClassesMap.delete(instance);
+				}
+			});
 		}
 	})
 	.mixin({
@@ -145,9 +155,15 @@ const createCachedRenderMixin = createStateful
 					props[key] = cachedRender.listeners[key];
 				}
 				const classes: { [index: string]: boolean; } = {};
+				const widgetClasses = widgetClassesMap.get(cachedRender);
+
+				widgetClasses.forEach((c) => classes[c] = false);
+
 				if (cachedRender.classes) {
 					cachedRender.classes.forEach((c) => classes[c] = true);
+					widgetClassesMap.set(cachedRender, cachedRender.classes);
 				}
+
 				props.classes = classes;
 				props.styles = cachedRender.styles || {};
 				props.key = cachedRender;
@@ -231,6 +247,7 @@ const createCachedRenderMixin = createStateful
 			* cast as any */
 			dirtyMap.set(instance, true);
 			shadowClasses.set(instance, []);
+			widgetClassesMap.set(instance, []);
 		}
 	})
 	.static({
