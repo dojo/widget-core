@@ -57,7 +57,7 @@ registerSuite({
 	'close child'() {
 		const foo = createPanel({ state: { closeable: true, id: 'foo', label: 'foo' }});
 		const tabbed = createTabbedMixin({ children: { foo } });
-		const [ tabBar ] = tabbed.render().children;
+		// const [ tabBar ] = tabbed.render().children;
 		/* TODO: Complete */
 	},
 	'activeTab': {
