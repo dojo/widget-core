@@ -13,3 +13,4 @@ tests/typings/dist/
 .baseDir.ts
 html-report
 *.lcov
+npm-debug.log
