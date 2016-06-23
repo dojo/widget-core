@@ -50,12 +50,8 @@ const cachedChildrenIDs = new WeakMap<StatefulChildren<Child, StatefulChildrenSt
 function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	const parent: StatefulChildren<Child, StatefulChildrenState> = <any> evt.target;
 
+	/* Assume this function cannot be called without the widget being in the registry map */
 	const widgetRegistry = registryMap.get(parent);
-	if (!widgetRegistry) {
-		/* We cannot manage children via state, as we have no way of resolving
-		 * the children IDs */
-		return;
-	}
 	if (!cachedChildrenIDs.has(parent)) {
 		cachedChildrenIDs.set(parent, List<string>());
 	}
@@ -117,12 +113,8 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 function manageChildrenState(evt: ChildListEvent<any, Child>) {
 	const parent: StatefulChildren<Child, StatefulChildrenState> = evt.target;
 
+	/* Assume this function cannot be called without the widget being in the registry map */
 	const widgetRegistry = registryMap.get(parent);
-	if (!widgetRegistry) {
-		/* We cannot manage children via state, as we have no way of resolving
-		 * the children IDs */
-		return;
-	}
 
 	const evtChildren = evt.children;
 
