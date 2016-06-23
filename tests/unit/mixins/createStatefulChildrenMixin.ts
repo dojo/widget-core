@@ -76,7 +76,7 @@ registerSuite({
 				assert.isTrue(List([ widget2 ]).equals(parent.children));
 			}), 50);
 		},
-		'chaching widgets'() {
+		'caching widgets'() {
 			const dfd = this.async();
 			const parent = createStatefulChildrenList({
 				widgetRegistry
@@ -147,7 +147,7 @@ registerSuite({
 				assert.isTrue(Map({ widget2 }).equals(parent.children));
 			}), 50);
 		},
-		'chaching widgets'() {
+		'caching widgets'() {
 			const dfd = this.async();
 			const parent = createStatefulChildrenMap({
 				widgetRegistry
