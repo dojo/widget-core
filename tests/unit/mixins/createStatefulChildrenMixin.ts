@@ -284,5 +284,56 @@ registerSuite({
 			assert.strictEqual(evt.target, parent);
 			assert.strictEqual(evt.error, expected);
 		}));
+	},
+	'latest state determines the children'() {
+		const { get } = widgetRegistry;
+		let registry = Object.create(widgetRegistry);
+
+		const parent = createStatefulChildrenList({
+			widgetRegistry: registry,
+			state: {
+				children: ['widget1']
+			}
+		});
+
+		let resolveFirst: () => void;
+		let resolveSecond: () => void;
+		return delay().then(() => {
+			registry.get = (id: string) => {
+				return new Promise((resolve) => {
+					const first = get.call(registry, id);
+					resolveFirst = () => resolve(first);
+				});
+			};
+
+			parent.setState({
+				children: ['widget2']
+			});
+
+			assert.ok(resolveFirst);
+		}).then(() => {
+			registry.get = (id: string) => {
+				return new Promise((resolve) => {
+					const second = get.call(registry, id);
+					resolveSecond = () => resolve(second);
+				});
+			};
+
+			parent.setState({
+				children: ['widget3']
+			});
+
+			assert.ok(resolveSecond);
+			resolveSecond();
+
+			return delay();
+		}).then(() => {
+			assert.isTrue(List([ widget3 ]).equals(parent.children));
+
+			resolveFirst();
+			return delay();
+		}).then(() => {
+			assert.isTrue(List([ widget3 ]).equals(parent.children));
+		});
 	}
 });

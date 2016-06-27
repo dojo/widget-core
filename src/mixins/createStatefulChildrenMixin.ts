@@ -31,6 +31,7 @@ export interface StatefulChildrenMixinFactory extends ComposeFactory<Stateful<St
 
 interface ManagementState {
 	cache?: Map<string, Child>;
+	generation?: number;
 	current?: List<string>;
 	registry: ChildrenRegistry<Child>;
 }
@@ -56,6 +57,9 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	if (!internalState.current) {
 		internalState.current = List<string>();
 	}
+	/* Increment the generation vector. Used when children are replaced asynchronously to ensure
+	 * no newer state is overriden. */
+	const generation = internalState.generation = (internalState.generation || 0) + 1;
 
 	const currentChildrenIDs = List(evt.state.children);
 	if (currentChildrenIDs.equals(internalState.current)) {
@@ -85,6 +89,12 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	if (resolvingWidgets.length) {
 		Promise.all(resolvingWidgets.map(([ promise ]) => promise))
 			.then((widgets) => {
+				/* Only replace children if there is no newer state that either already has, or soon will,
+				 * replace the original listeners. */
+				if (internalState.generation !== generation) {
+					return;
+				}
+
 				widgets.forEach((widget, idx) => {
 					const [ , id, key ] = resolvingWidgets[idx];
 					if (childrenIsList) {
