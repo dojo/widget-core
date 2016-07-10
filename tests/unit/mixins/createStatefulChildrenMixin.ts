@@ -1,10 +1,12 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createStatefulChildrenMixin from 'src/mixins/createStatefulChildrenMixin';
-import createRenderable, { Renderable } from 'src/mixins/createRenderable';
+import createRenderable, { Renderable, RenderableOptions } from 'src/mixins/createRenderable';
 import Promise from 'dojo-shim/Promise';
 import { List, Map } from 'immutable/immutable';
 import { Child, RegistryProvider } from 'src/mixins/interfaces';
+import compose, { ComposeFactory } from 'dojo-compose/compose';
+import { h } from 'maquette/maquette';
 
 const widget1 = createRenderable();
 const widget2 = createRenderable();
@@ -18,6 +20,8 @@ const widgetMap: { [id: string]: Renderable } = {
 	widget4
 };
 
+let widgetUID = 5;
+
 const widgetRegistry = {
 	stack: <(string | symbol)[]> [],
 	get(id: string | symbol): Promise<Renderable> {
@@ -30,6 +34,9 @@ const widgetRegistry = {
 			? 'widget2' : value === widget3
 			? 'widget3' : value === widget4
 			? 'widget4' : undefined;
+	},
+	create<C extends Renderable>(parent: any, factory: ComposeFactory<C, any>, options?: any): Promise<[string | symbol, C]> {;
+		return Promise.resolve<[ string, C ]>([`widget${widgetUID++}`, factory(options)]);
 	}
 };
 
@@ -286,7 +293,7 @@ registerSuite({
 				}
 			},
 			state: {
-				children: ['widget1']
+				children: [ 'widget1' ]
 			}
 		});
 
@@ -306,7 +313,7 @@ registerSuite({
 				}
 			},
 			state: {
-				children: ['widget1']
+				children: [ 'widget1' ]
 			}
 		});
 
@@ -321,7 +328,7 @@ registerSuite({
 			};
 
 			parent.setState({
-				children: ['widget2']
+				children: [ 'widget2' ]
 			});
 
 			assert.ok(resolveFirst);
@@ -334,7 +341,7 @@ registerSuite({
 			};
 
 			parent.setState({
-				children: ['widget3']
+				children: [ 'widget3' ]
 			});
 
 			assert.ok(resolveSecond);
@@ -349,5 +356,47 @@ registerSuite({
 		}).then(() => {
 			assert.isTrue(List([ widget3 ]).equals(parent.children));
 		});
+	},
+	'createChild()': {
+		'creation during mixin'() {
+			let p: Promise<[string, Renderable]>;
+			const registry = Object.create(widgetRegistry);
+			const createFoo = compose({})
+				.mixin({
+					mixin: createStatefulChildrenMixin,
+					initialize(instance) {
+						p = instance.createChild(createRenderable, <RenderableOptions> {
+							render() {
+								return h('div');
+							}
+						});
+					}
+				});
+			const foo = createFoo({
+				registryProvider: {
+					get(type: string) {
+						return type === 'widgets' ? registry : null;
+					}
+				}
+			});
+			assert(foo);
+			assert(p);
+			return p.then((result) => {
+				const [ id, widget ] = result;
+				assert.include(id, 'widget');
+				assert.strictEqual(widget.render().vnodeSelector, 'div');
+			});
+		},
+		'non-registry rejects'() {
+			const dfd = this.async();
+			const stateful = createStatefulChildrenMixin();
+			stateful.createChild(createRenderable)
+				.then(() => {
+					throw new Error('Should not have called');
+				}, dfd.callback((err: Error) => {
+					assert.instanceOf(err, Error);
+					assert.strictEqual(err.message, 'Unable to create child, unable to resolve registry');
+				}));
+		}
 	}
 });

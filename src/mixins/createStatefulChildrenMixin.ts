@@ -1,11 +1,11 @@
-import { ComposeFactory } from 'dojo-compose/compose';
+import compose, { ComposeFactory } from 'dojo-compose/compose';
 import createEvented from 'dojo-compose/mixins/createEvented';
 import createStateful, { Stateful, StatefulOptions, StateChangeEvent } from 'dojo-compose/mixins/createStateful';
 import Map from 'dojo-shim/Map';
 import Promise from 'dojo-shim/Promise';
 import WeakMap from 'dojo-shim/WeakMap';
 import { List, Map as ImmutableMap } from 'immutable/immutable';
-import { Child, ChildListEvent, Registry, RegistryProvider } from './interfaces';
+import { Child, ChildListEvent, CreatableRegistry, RegistryProvider } from './interfaces';
 import { isList } from '../util/lang';
 
 export interface StatefulChildrenState {
@@ -17,18 +17,27 @@ export interface StatefulChildrenOptions<C extends Child, S extends StatefulChil
 }
 
 export type StatefulChildren<C extends Child, S extends StatefulChildrenState> = Stateful<S> & {
+	/**
+	 * The children that are associated with this widget
+	 */
 	children: List<C> | ImmutableMap<string, C>;
+
+	/**
+	 * Creates an instance based on the supplied factory and adds the child to this parent
+	 * returning a promise which resolves with the ID and the instace.
+	 */
+	createChild<D extends C, O>(factory: ComposeFactory<D, O>, options?: O): Promise<[string | symbol, D]>;
 }
 
-export interface StatefulChildrenMixinFactory extends ComposeFactory<Stateful<StatefulChildrenState>, StatefulChildrenOptions<Child, StatefulChildrenState>> {
-	<C extends Child>(options?: StatefulChildrenOptions<C, StatefulChildrenState>): Stateful<StatefulChildrenState>;
+export interface StatefulChildrenMixinFactory extends ComposeFactory<StatefulChildren<Child, StatefulChildrenState>, StatefulChildrenOptions<Child, StatefulChildrenState>> {
+	<C extends Child>(options?: StatefulChildrenOptions<C, StatefulChildrenState>): StatefulChildren<C, StatefulChildrenState>;
 }
 
 interface ManagementState {
 	cache?: Map<string, Child>;
 	generation?: number;
 	current?: List<string>;
-	registry: Registry<Child>;
+	registry: CreatableRegistry<Child>;
 }
 
 /**
@@ -135,7 +144,17 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 	}
 }
 
-const createStatefulChildrenMixin: StatefulChildrenMixinFactory = createStateful
+const createStatefulChildrenMixin = compose({
+		createChild<C extends Child, O>(factory: ComposeFactory<C, O>, options?: O): Promise<[string | symbol, C]> {
+			const stateful: StatefulChildren<Child, StatefulChildrenState> = this;
+			if (managementMap.has(stateful)) {
+				const { registry } = managementMap.get(stateful);
+				return registry.create(stateful, factory, options);
+			}
+			return Promise.reject(new Error('Unable to create child, unable to resolve registry'));
+		}
+	})
+	.mixin(createStateful)
 	.mixin({
 		mixin: createEvented,
 		initialize(instance: StatefulChildren<Child, StatefulChildrenState>, { registryProvider }: StatefulChildrenOptions<Child, StatefulChildrenState> = {}) {
@@ -152,6 +171,6 @@ const createStatefulChildrenMixin: StatefulChildrenMixinFactory = createStateful
 				});
 			}
 		}
-	});
+	}) as StatefulChildrenMixinFactory;
 
 export default createStatefulChildrenMixin;
