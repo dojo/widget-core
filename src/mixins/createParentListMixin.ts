@@ -86,7 +86,7 @@ const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, Par
 		append(child: Child | Child[]): Handle {
 			const parent: ParentListMixin<Child> = this;
 			parent.children = Array.isArray(child) ? <List<Child>> parent.children.concat(child) : parent.children.push(child);
-			return getRemoveHandle(parent, child);
+			return getRemoveHandle<Child>(parent, child);
 		},
 
 		clear(): void {

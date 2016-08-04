@@ -104,7 +104,7 @@ const createParentMapMixin: ParentMapMixinFactory = compose<ParentMap<Child>, Pa
 			parent.children = Array.isArray(child) ?
 				parent.children.merge(mapChildArray(parent, child)) :
 				parent.children.set(getChildKey(parent, child), child);
-			return getRemoveHandle(parent, child);
+			return getRemoveHandle<Child>(parent, child);
 		},
 
 		merge(children: ChildrenMap<Child>): Handle {
