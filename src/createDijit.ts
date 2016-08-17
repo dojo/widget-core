@@ -165,7 +165,7 @@ function resolveCtor<D extends DijitWidget>(Ctor: DijitWidgetConstructor<D> | st
 				handle.remove();
 				reject(error);
 			});
-			const mid = <string> Ctor;
+			const mid = Ctor;
 			require([ mid ], (Ctor: DijitWidgetConstructor<D>) => {
 				handle.remove();
 				if (Ctor && typeof Ctor === 'function') {
