@@ -47,6 +47,6 @@
 		"jsdom": "7.2.2",
 		"remap-istanbul": "0.6.4",
 		"tslint": "next",
-		"typescript": "next"
+		"typescript": "2.1.0-dev.20160819"
 	}
 }
