@@ -11,11 +11,13 @@ import createRenderableChildrenMixin from './mixins/createRenderableChildrenMixi
 import createStatefulChildrenMixin, { StatefulChildrenState, StatefulChildrenOptions } from './mixins/createStatefulChildrenMixin';
 import { Child } from './mixins/interfaces';
 import { Projector } from './projector';
+import css from './themes/structural/modules/ResizePanel';
 
 /* TODO: Abstract logic to a mixin */
 
 export interface ResizePanelState extends WidgetState, StatefulChildrenState {
 	width?: string;
+	height?: string;
 }
 
 export type ResizePanelOptions = WidgetOptions<ResizePanelState> & ParentListMixinOptions<Child> & StatefulChildrenOptions<Child, ResizePanelState>;
@@ -25,6 +27,7 @@ export interface ResizePanelMixin {
 		handle: string;
 	};
 	width: string;
+	height: string;
 }
 
 export type ResizePanel = Widget<ResizePanelState> & ParentListMixin<Child> & Destroyable & ResizePanelMixin;
@@ -32,7 +35,12 @@ export type ResizePanel = Widget<ResizePanelState> & ParentListMixin<Child> & De
 export interface ResizePanelFactory extends ComposeFactory<ResizePanel, ResizePanelOptions> { }
 
 const resizeNodePropertiesMap = new WeakMap<ResizePanel, VNodeProperties>();
-const resizingMap = new WeakMap<ResizePanel, { width: number, clientX: number }>();
+const resizingMap = new WeakMap<ResizePanel, {
+	width: number,
+	height: number,
+	clientX: number,
+	clientY: number
+}>();
 
 function getProjector(resizePanel: ResizePanel): Projector {
 	let child: any = resizePanel;
@@ -63,13 +71,14 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	}
 
 	function onmousemoveListener(evt: MouseEvent): boolean {
-		const originalWidth = resizingMap.get(resizePanel);
-		if (!originalWidth) {
-			return false;
+		const original = resizingMap.get(resizePanel);
+		if (!original) {
+			return;
 		}
 
 		evt.preventDefault();
-		resizePanel.width = String(originalWidth.width + evt.clientX - originalWidth.clientX) + 'px';
+		resizePanel.width = String(original.width + evt.clientX - original.clientX) + 'px';
+		resizePanel.height = String(original.height + evt.clientY - original.clientY) + 'px';
 		return true;
 	}
 
@@ -78,7 +87,12 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 			const projector = getProjector(resizePanel);
 			if (projector && projector.document) {
 				evt.preventDefault();
-				resizingMap.set(resizePanel, { width: parseInt(resizePanel.width, 10), clientX: evt.clientX });
+				resizingMap.set(resizePanel, {
+					width: parseInt(resizePanel.width, 10),
+					clientX: evt.clientX,
+					height: parseInt(resizePanel.height, 10),
+					clientY: evt.clientY
+				});
 				onmouseupHandle = on(projector.document, 'onmouseup', onmouseupListener);
 				onmousemoveHandle = on(projector.document, 'onmousemove', onmousemoveListener);
 				resizePanel.invalidate();
@@ -92,7 +106,6 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	function ontouchendListener(evt: TouchEvent): boolean {
 		const originalWidth = resizingMap.get(resizePanel);
 		if (originalWidth) {
-			console.log('ontouchend');
 			evt.preventDefault();
 			resizingMap.delete(resizePanel);
 			ontouchendHandle.destroy();
@@ -104,11 +117,11 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	}
 
 	function ontouchmoveListener(evt: TouchEvent): boolean {
-		const originalWidth = resizingMap.get(resizePanel);
-		if (originalWidth && evt.touches.length === 1) {
-			console.log('ontouchmove');
+		const original = resizingMap.get(resizePanel);
+		if (original && evt.touches.length === 1) {
 			evt.preventDefault();
-			resizePanel.width = String(originalWidth.width + evt.touches[0].clientX - originalWidth.clientX) + 'px';
+			resizePanel.width = String(original.width + evt.touches[0].clientX - original.clientX) + 'px';
+			resizePanel.height = String(original.height + evt.touches[0].clientY - original.clientY) + 'px';
 		}
 		return false;
 	}
@@ -117,9 +130,13 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 		if (evt.touches.length === 1 && !resizingMap.get(resizePanel)) {
 			const projector = getProjector(resizePanel);
 			if (projector) {
-				console.log('ontouchstart');
 				evt.preventDefault();
-				resizingMap.set(resizePanel, { width: parseInt(resizePanel.width, 10), clientX: evt.touches[0].clientX });
+				resizingMap.set(resizePanel, {
+					width: parseInt(resizePanel.width, 10),
+					clientX: evt.touches[0].clientX,
+					height: parseInt(resizePanel.height, 10),
+					clientY: evt.touches[0].clientY
+				});
 				ontouchendHandle = projector.on('touchend', ontouchendListener);
 				ontouchmoveHandle = projector.on('touchmove', ontouchmoveListener);
 				resizePanel.invalidate();
@@ -161,12 +178,19 @@ const createResizePanel: ResizePanelFactory = createWidget
 			},
 
 			get width(this: ResizePanel): string {
-				return this.state && this.state && this.state.width || '200px';
+				return this.state && this.state.width ? this.state.width : '100px';
 			},
 
 			set width(value: string) {
 				const resizePanel: ResizePanel = this;
 				resizePanel.setState({ width: value });
+			},
+			get height(this: ResizePanel): string {
+				return this.state && this.state.height ? this.state.height : '100px';
+			},
+			set height(value: string) {
+				const resizePanel: ResizePanel = this;
+				resizePanel.setState({ height: value });
 			}
 		},
 		aspectAdvice: {
@@ -179,7 +203,8 @@ const createResizePanel: ResizePanelFactory = createWidget
 		}
 	})
 	.extend({
-		tagName: 'dojo-panel-resize'
+		tagName: 'dojo-panel-resize',
+		classes: [ css.panel ]
 	})
 	.mixin({
 		mixin: createDestroyable,

@@ -1,0 +1,18 @@
+._panel_j8vb9_1 {
+	display: block;
+	position: relative;
+}
+
+._panel_j8vb9_1 dojo-resize-handle {
+	display: block;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+._panel_j8vb9_1 dojo-resize-handle:after {
+	content: '\21F2';
+	display: block;
+}
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL1Jlc2l6ZVBhbmVsLmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtDQUNDLGVBQWU7Q0FDZixtQkFBbUI7Q0FDbkI7O0FBRUQ7Q0FDQyxlQUFlO0NBQ2YsbUJBQW1CO0NBQ25CLFNBQVM7Q0FDVCxVQUFVO0NBQ1Y7O0FBRUQ7Q0FDQyxpQkFBaUI7Q0FDakIsZUFBZTtDQUNmIiwiZmlsZSI6IlJlc2l6ZVBhbmVsLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi5wYW5lbCB7XHJcblx0ZGlzcGxheTogYmxvY2s7XHJcblx0cG9zaXRpb246IHJlbGF0aXZlO1xyXG59XHJcblxyXG4ucGFuZWwgZG9qby1yZXNpemUtaGFuZGxlIHtcclxuXHRkaXNwbGF5OiBibG9jaztcclxuXHRwb3NpdGlvbjogYWJzb2x1dGU7XHJcblx0cmlnaHQ6IDA7XHJcblx0Ym90dG9tOiAwO1xyXG59XHJcblxyXG4ucGFuZWwgZG9qby1yZXNpemUtaGFuZGxlOmFmdGVyIHtcclxuXHRjb250ZW50OiAnXFwyMUYyJztcclxuXHRkaXNwbGF5OiBibG9jaztcclxufVxyXG4iXX0= */

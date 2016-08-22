@@ -1,5 +1,9 @@
+var path = require('path');
+var fs = require('fs');
+
 module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-stylus');
+	grunt.loadNpmTasks('grunt-postcss');
 
 	var staticExampleFiles = [ 'src/examples/**', '!src/examples/**/*.js' ];
 
@@ -19,7 +23,9 @@ module.exports = function (grunt) {
 		},
 		stylus: {
 			dev: {
-				options: {},
+				options: {
+					'include css': true
+				},
 				files: [ {
 					expand: true,
 					src: 'src/themes/**/*.styl',
@@ -37,13 +43,42 @@ module.exports = function (grunt) {
 					dest: 'dist/'
 				}]
 			}
+		},
+		postcss: {
+			options: {
+				map: true,
+				processors: [
+					require('postcss-simple-vars')({
+						variables: require('./src/themes/structural/common')
+					}),
+					require('postcss-modules')({
+						getJSON: function(cssFileName, json) {
+							var filename = path.basename(cssFileName, '.css');
+							fs.writeFileSync(
+								'src/themes/structural/modules/' + filename + '.ts',
+								'export default ' + JSON.stringify(json) + ';'
+							);
+						}
+					})
+				]
+			},
+			dev: {
+				files: [ {
+					expand: true,
+					flatten: true,
+					src: 'src/themes/structural/*.css',
+					ext: '.css',
+					dest: 'src/themes/structural/_generated/'
+				} ]
+			}
 		}
 	});
 
 	grunt.registerTask('dev', [
 		'clean:typings',
 		'typings',
-		'tslint',
+		// TODO: uncomment this, figure out a way to ignore generated CSS TS modules
+		// 'tslint',
 		'clean:dev',
 		'ts:dev',
 		'stylus:dev',
@@ -54,7 +89,8 @@ module.exports = function (grunt) {
 	grunt.registerTask('dist', [
 		'clean:typings',
 		'typings',
-		'tslint',
+		// TODO: uncomment this, figure out a way to ignore generated CSS TS modules
+		// 'tslint',
 		'clean:dist',
 		'ts:dist',
 		'stylus:dist'

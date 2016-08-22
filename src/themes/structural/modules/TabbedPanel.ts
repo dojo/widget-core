@@ -1,0 +1,1 @@
+export default {"tabs":"_tabs_pn7dq_1"};

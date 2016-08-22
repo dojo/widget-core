@@ -1,0 +1,1 @@
+export default {"panel":"_panel_j8vb9_1"};
