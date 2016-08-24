@@ -66,7 +66,7 @@ registerSuite({
 		widgetRegistry.stack = [];
 	},
 	'List children': {
-		creation() {
+		creation(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenList({
 				registryProvider,
@@ -80,7 +80,7 @@ registerSuite({
 				assert.isTrue(List([ widget1 ]).equals(parent.children));
 			}), 50);
 		},
-		setState() {
+		setState(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenList({
 				registryProvider
@@ -93,7 +93,7 @@ registerSuite({
 				assert.isTrue(List([ widget2 ]).equals(parent.children));
 			}), 50);
 		},
-		'caching widgets'() {
+		'caching widgets'(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenList({
 				registryProvider
@@ -113,7 +113,7 @@ registerSuite({
 				}), 100);
 			}, 100);
 		},
-		'childList'() {
+		'childList'(this: any) {
 			const dfd = this.async();
 
 			const parent = createStatefulChildrenList({
@@ -140,7 +140,7 @@ registerSuite({
 		}
 	},
 	'Map children': {
-		creation() {
+		creation(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenMap({
 				registryProvider,
@@ -154,7 +154,7 @@ registerSuite({
 				assert.isTrue(Map({ widget1 }).equals(parent.children));
 			}), 50);
 		},
-		setState() {
+		setState(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenMap({
 				registryProvider
@@ -167,7 +167,7 @@ registerSuite({
 				assert.isTrue(Map({ widget2 }).equals(parent.children));
 			}), 50);
 		},
-		'caching widgets'() {
+		'caching widgets'(this: any) {
 			const dfd = this.async();
 			const parent = createStatefulChildrenMap({
 				registryProvider
@@ -187,7 +187,7 @@ registerSuite({
 				}), 100);
 			}, 100);
 		},
-		'childList'() {
+		'childList'(this: any) {
 			const dfd = this.async();
 
 			const parent = createStatefulChildrenList({
@@ -279,7 +279,7 @@ registerSuite({
 			});
 		});
 	},
-	'emits error if registry rejects get()'() {
+	'emits error if registry rejects get()'(this: any) {
 		let rejectingRegistry = Object.create(widgetRegistry);
 		const expected = new Error();
 		rejectingRegistry.get = () => Promise.reject(expected);

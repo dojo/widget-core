@@ -132,16 +132,16 @@ registerSuite({
 					assert.deepEqual(item, { id: 1, foo: 'qat', bar: 1 });
 				});
 		},
-		'missing rejects'() {
+		'missing adds'() {
 			const store = createMemoryStore();
 
 			return store
-				.patch({ foo: 'qat', bar: 1}, { id: 1 })
+				.patch({ foo: 'qat', bar: 1 }, { id: 1 })
 				.then(() => {
-					throw new Error('Should have rejected');
-				}, (error) => {
-					assert.instanceOf(error, Error);
-					assert.strictEqual(error.message, 'Object with ID "1" not found, unable to patch.');
+					return store.get(1);
+				})
+				.then((item) => {
+					assert.deepEqual(item, { foo: 'qat', bar: 1, id: 1 });
 				});
 		},
 		'missing id rejects'() {
@@ -158,7 +158,7 @@ registerSuite({
 		}
 	},
 	'observer()': {
-		'subscribe'() {
+		'subscribe'(this: any) {
 			const dfd = this.async();
 			const store = createMemoryStore<{ id: number; foo: string; }>();
 			store
@@ -170,7 +170,7 @@ registerSuite({
 					}));
 				});
 		},
-		'receive updates'() {
+		'receive updates'(this: any) {
 			const dfd = this.async();
 			const store = createMemoryStore({
 				data: [
@@ -200,7 +200,7 @@ registerSuite({
 				store.put(item);
 			});
 		},
-		'subscribe to missing id'() {
+		'subscribe to missing id'(this: any) {
 			const dfd = this.async();
 			let callbackCount = 0;
 			let errorCount = 0;
@@ -259,7 +259,7 @@ registerSuite({
 					assert.isFalse(result);
 				});
 		},
-		'complete observable'() {
+		'complete observable'(this: any) {
 			const dfd = this.async();
 			const stack: any[] = [];
 			let complete = false;
