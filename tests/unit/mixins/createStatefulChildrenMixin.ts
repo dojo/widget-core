@@ -35,7 +35,7 @@ const widgetRegistry = {
 			? 'widget3' : value === widget4
 			? 'widget4' : undefined;
 	},
-	create<C extends Renderable>(parent: any, factory: ComposeFactory<C, any>, options?: any): Promise<[string | symbol, C]> {;
+	create<C extends Renderable>(factory: ComposeFactory<C, any>, options?: any): Promise<[string | symbol, C]> {;
 		return Promise.resolve<[ string, C ]>([`widget${widgetUID++}`, factory(options)]);
 	}
 };
@@ -387,7 +387,7 @@ registerSuite({
 				assert.strictEqual(widget.render().vnodeSelector, 'div');
 			});
 		},
-		'non-registry rejects'() {
+		'non-registry rejects'(this: any) {
 			const dfd = this.async();
 			const stateful = createStatefulChildrenMixin();
 			stateful.createChild(createRenderable)

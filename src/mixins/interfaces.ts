@@ -58,7 +58,7 @@ export interface CreatableRegistry<T extends Child> extends Registry<T> {
 	 * @param factory The factory that should be used to realize the child
 	 * @param options Any options that should be passed to the factory when realizing the child
 	 */
-	create<U extends T, O>(parent: { children: Map<string, Child> | List<Child>; }, factory: ComposeFactory<U, O>, options?: O): Promise<[ string | symbol, U ]>;
+	create<U extends T, O>(factory: ComposeFactory<U, O>, options?: O): Promise<[ string, U ]>;
 }
 
 /**

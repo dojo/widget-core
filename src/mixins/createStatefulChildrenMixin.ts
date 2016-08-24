@@ -145,11 +145,16 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 }
 
 const createStatefulChildrenMixin = compose({
-		createChild<C extends Child, O>(factory: ComposeFactory<C, O>, options?: O): Promise<[string | symbol, C]> {
-			const stateful: StatefulChildren<Child, StatefulChildrenState> = this;
-			if (managementMap.has(stateful)) {
-				const { registry } = managementMap.get(stateful);
-				return registry.create(stateful, factory, options);
+		createChild<C extends Child, O>(this: StatefulChildren<Child, StatefulChildrenState>, factory: ComposeFactory<C, O>, options?: O): Promise<[string, C]> {
+			if (managementMap.has(this)) {
+				const { registry } = managementMap.get(this);
+				return registry.create(factory, options)
+					.then(([ id, child ]): [ string, C ] => {
+						/* This mixin doesn't understand how to directly append a child widget, so instead it will modify
+						 * the widget's state and append the id to the children state */
+						this.setState({ children: (this.state.children || []).concat([ id ]) });
+						return [ id, child ];
+					});
 			}
 			return Promise.reject(new Error('Unable to create child, unable to resolve registry'));
 		}
