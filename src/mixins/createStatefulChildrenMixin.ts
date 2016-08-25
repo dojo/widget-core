@@ -26,7 +26,9 @@ export type StatefulChildren<C extends Child, S extends StatefulChildrenState> =
 	 * Creates an instance based on the supplied factory and adds the child to this parent
 	 * returning a promise which resolves with the ID and the instace.
 	 */
-	createChild<D extends C, O>(factory: ComposeFactory<D, O>, options?: O): Promise<[string | symbol, D]>;
+	createChild<D extends C, O extends { id?: string }>(factory: ComposeFactory<D, O>, options?: O): Promise<[string, D]>;
+
+	id?: string;
 }
 
 export interface StatefulChildrenMixinFactory extends ComposeFactory<StatefulChildren<Child, StatefulChildrenState>, StatefulChildrenOptions<Child, StatefulChildrenState>> {
@@ -35,8 +37,10 @@ export interface StatefulChildrenMixinFactory extends ComposeFactory<StatefulChi
 
 interface ManagementState {
 	cache?: Map<string, Child>;
-	generation?: number;
 	current?: List<string>;
+	generation: number;
+	childrenUID: number;
+	id: string | undefined;
 	registry: CreatableRegistry<Child>;
 }
 
@@ -63,7 +67,7 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	}
 	/* Increment the generation vector. Used when children are replaced asynchronously to ensure
 	 * no newer state is overriden. */
-	const generation = internalState.generation = (internalState.generation || 0) + 1;
+	const generation = ++internalState.generation;
 
 	const currentChildrenIDs = List(evt.state.children);
 	if (currentChildrenIDs.equals(internalState.current)) {
@@ -145,9 +149,22 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 }
 
 const createStatefulChildrenMixin = compose({
-		createChild<C extends Child, O>(this: StatefulChildren<Child, StatefulChildrenState>, factory: ComposeFactory<C, O>, options?: O): Promise<[string, C]> {
+		createChild<C extends Child>(
+			this: StatefulChildren<Child, StatefulChildrenState>,
+			factory: ComposeFactory<C, any>,
+			options: any = {}
+		): Promise<[string, C]> {
 			if (managementMap.has(this)) {
-				const { registry } = managementMap.get(this);
+				const management = managementMap.get(this);
+				const { registry, id } = management;
+				if (!options.id) {
+					/* depending upon the construction lifecycle, the this.id may not have been properly set and will
+					 * auto-generate an ID, therefore we have copied the ID out of options, if it was present and will
+					 * use that as a base for autogenerating the child widget's ID */
+					options.id = id
+						? `${id}-child-${++management.childrenUID}`
+						: `${this.id}-child-${++management.childrenUID}`;
+				}
 				return registry.create(factory, options)
 					.then(([ id, child ]): [ string, C ] => {
 						/* This mixin doesn't understand how to directly append a child widget, so instead it will modify
@@ -162,10 +179,15 @@ const createStatefulChildrenMixin = compose({
 	.mixin(createStateful)
 	.mixin({
 		mixin: createEvented,
-		initialize(instance: StatefulChildren<Child, StatefulChildrenState>, { registryProvider }: StatefulChildrenOptions<Child, StatefulChildrenState> = {}) {
+		initialize(instance: StatefulChildren<Child, StatefulChildrenState>, { registryProvider, id }: StatefulChildrenOptions<Child, StatefulChildrenState> = {}) {
 			if (registryProvider) {
 				const registry = registryProvider.get('widgets');
-				managementMap.set(instance, { registry });
+				managementMap.set(instance, {
+					registry,
+					generation: 0,
+					childrenUID: 0,
+					id: id
+				});
 
 				instance.own(instance.on('statechange', manageChildren));
 				instance.own(instance.on('childlist', manageChildrenState));
