@@ -9,10 +9,16 @@ import { Child, ChildListEvent, CreatableRegistry, RegistryProvider } from './in
 import { isList } from '../util/lang';
 
 export interface StatefulChildrenState {
+	/**
+	 * Any children that the widget should "own"
+	 */
 	children?: string[];
 }
 
 export interface StatefulChildrenOptions<C extends Child, S extends StatefulChildrenState> extends StatefulOptions<S> {
+	/**
+	 * The registry provider that should be used to resolve a widget registry and subsequently, widgets
+	 */
 	registryProvider?: RegistryProvider<C>;
 }
 
@@ -28,6 +34,9 @@ export type StatefulChildren<C extends Child, S extends StatefulChildrenState> =
 	 */
 	createChild<D extends C, O extends { id?: string }>(factory: ComposeFactory<D, O>, options?: O): Promise<[string, D]>;
 
+	/**
+	 * The ID for this widget
+	 */
 	id?: string;
 }
 
@@ -36,11 +45,34 @@ export interface StatefulChildrenMixinFactory extends ComposeFactory<StatefulChi
 }
 
 interface ManagementState {
+	/**
+	 * A map of children to widget instances, so they don't have to be requested subsequently from the registry
+	 */
 	cache?: Map<string, Child>;
+
+	/**
+	 * The current set of children widgets
+	 */
 	current?: List<string>;
+
+	/**
+	 * A generation number to avoid race conditions when managing children
+	 */
 	generation: number;
+
+	/**
+	 * A instance UID to be used when generating child widget IDs
+	 */
 	childrenUID: number;
+
+	/**
+	 * This widget's ID which was potentially passed in creation options
+	 */
 	id: string | undefined;
+
+	/**
+	 * A reference to the widget registry that is used for resolving and creating children
+	 */
 	registry: CreatableRegistry<Child>;
 }
 
@@ -50,7 +82,10 @@ interface ManagementState {
 const managementMap = new WeakMap<StatefulChildren<Child, StatefulChildrenState>, ManagementState>();
 
 /**
- * Internal statechange listener which deals with
+ * Internal statechange listener which deals with managing the children when a state
+ * change occurs on the parent
+ *
+ * @param evt The state change event of the parent
  */
 function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	const parent: StatefulChildren<Child, StatefulChildrenState> = <any> evt.target;
@@ -130,6 +165,11 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	}
 }
 
+/**
+ * Internal function to manage the state of the children when a child list event occurs
+ *
+ * @param evt The child list event from the parent
+ */
 function manageChildrenState(evt: ChildListEvent<any, Child>) {
 	const parent: StatefulChildren<Child, StatefulChildrenState> = evt.target;
 
@@ -179,7 +219,10 @@ const createStatefulChildrenMixin = compose({
 	.mixin(createStateful)
 	.mixin({
 		mixin: createEvented,
-		initialize(instance: StatefulChildren<Child, StatefulChildrenState>, { registryProvider, id }: StatefulChildrenOptions<Child, StatefulChildrenState> = {}) {
+		initialize(
+			instance: StatefulChildren<Child, StatefulChildrenState>,
+			{ registryProvider, id }: StatefulChildrenOptions<Child, StatefulChildrenState> = {}
+		) {
 			if (registryProvider) {
 				const registry = registryProvider.get('widgets');
 				managementMap.set(instance, {
