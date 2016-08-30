@@ -207,7 +207,8 @@ const createStatefulChildrenMixin = compose({
 					.then(([ id, child ]): [ string, C ] => {
 						/* Because this mixin manages children in the state, we will append the child to the state
 						 * of the parent */
-						this.setState({ children: (this.state.children || []).concat([ id ]) });
+						const children = this.state.children ? [ ...this.state.children, id ] : [ id ];
+						this.setState({ children });
 						return [ id, child ];
 					});
 			}
@@ -227,7 +228,7 @@ const createStatefulChildrenMixin = compose({
 					registry,
 					generation: 0,
 					childrenUID: 0,
-					id: id
+					id
 				});
 
 				instance.own(instance.on('statechange', manageChildren));
