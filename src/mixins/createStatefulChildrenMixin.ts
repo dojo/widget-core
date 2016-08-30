@@ -201,14 +201,12 @@ const createStatefulChildrenMixin = compose({
 					/* depending upon the construction lifecycle, the this.id may not have been properly set and will
 					 * auto-generate an ID, therefore we have copied the ID out of options, if it was present and will
 					 * use that as a base for autogenerating the child widget's ID */
-					options.id = id
-						? `${id}-child-${++management.childrenUID}`
-						: `${this.id}-child-${++management.childrenUID}`;
+					options.id = `${id || this.id}-child-${++management.childrenUID}`;
 				}
 				return registry.create(factory, options)
 					.then(([ id, child ]): [ string, C ] => {
-						/* This mixin doesn't understand how to directly append a child widget, so instead it will modify
-						 * the widget's state and append the id to the children state */
+						/* Because this mixin manages children in the state, we will append the child to the state
+						 * of the parent */
 						this.setState({ children: (this.state.children || []).concat([ id ]) });
 						return [ id, child ];
 					});

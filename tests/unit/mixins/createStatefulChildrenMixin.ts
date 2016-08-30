@@ -36,7 +36,7 @@ const widgetRegistry = {
 			? 'widget4' : undefined;
 	},
 	create<C extends Renderable>(factory: ComposeFactory<C, any>, options?: any): Promise<[string | symbol, C]> {;
-		return Promise.resolve<[ string, C ]>([`widget${widgetUID++}`, factory(options)]);
+		return Promise.resolve<[ string, C ]>([options && options.id || `widget${widgetUID++}`, factory(options)]);
 	}
 };
 
@@ -383,8 +383,63 @@ registerSuite({
 			assert(p);
 			return p.then((result) => {
 				const [ id, widget ] = result;
-				assert.include(id, 'widget');
+				assert.include(id, 'undefined-child');
 				assert.strictEqual(widget.render().vnodeSelector, 'div');
+			});
+		},
+		'creation during mixin - with parent options.id'() {
+			let p: Promise<[string, Renderable]>;
+			const registry = Object.create(widgetRegistry);
+			const createFoo = compose({})
+				.mixin({
+					mixin: createStatefulChildrenMixin,
+					initialize(instance) {
+						p = instance.createChild(createRenderable, <RenderableOptions> {
+							render() {
+								return h('div');
+							}
+						});
+					}
+				});
+			createFoo({
+				registryProvider: {
+					get(type: string) {
+						return type === 'widgets' ? registry : null;
+					}
+				},
+				id: 'parent'
+			});
+			return p.then((result) => {
+				const [ id ] = result;
+				assert.include(id, 'parent-child');
+			});
+		},
+		'creation during mixin - with setting ID'() {
+			let p: Promise<[string, Renderable]>;
+			const registry = Object.create(widgetRegistry);
+			const createFoo = compose({})
+				.mixin({
+					mixin: createStatefulChildrenMixin,
+					initialize(instance) {
+						p = instance.createChild(createRenderable, <RenderableOptions> {
+							render() {
+								return h('div');
+							},
+							id: 'foo'
+						});
+					}
+				});
+			createFoo({
+				registryProvider: {
+					get(type: string) {
+						return type === 'widgets' ? registry : null;
+					}
+				},
+				id: 'parent'
+			});
+			return p.then((result) => {
+				const [ id ] = result;
+				assert.strictEqual(id, 'foo');
 			});
 		},
 		'non-registry rejects'(this: any) {
