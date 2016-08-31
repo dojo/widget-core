@@ -1,6 +1,6 @@
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import createEvented from 'dojo-compose/mixins/createEvented';
-import createStateful, { Stateful, StatefulOptions, StateChangeEvent } from 'dojo-compose/mixins/createStateful';
+import createStateful, { Stateful, StatefulOptions, StateChangeEvent, State } from 'dojo-compose/mixins/createStateful';
 import Map from 'dojo-shim/Map';
 import Promise from 'dojo-shim/Promise';
 import WeakMap from 'dojo-shim/WeakMap';
@@ -22,6 +22,10 @@ export interface StatefulChildrenOptions<C extends Child, S extends StatefulChil
 	registryProvider?: RegistryProvider<C>;
 }
 
+export interface CreateChildrenMap<C extends Child> {
+	[label: string]: [ComposeFactory<C, StatefulOptions<State>>, StatefulOptions<State>];
+}
+
 export type StatefulChildren<C extends Child, S extends StatefulChildrenState> = Stateful<S> & {
 	/**
 	 * The children that are associated with this widget
@@ -31,8 +35,20 @@ export type StatefulChildren<C extends Child, S extends StatefulChildrenState> =
 	/**
 	 * Creates an instance based on the supplied factory and adds the child to this parent
 	 * returning a promise which resolves with the ID and the instace.
+	 *
+	 * @param factory The factory to use to create the child
+	 * @param options Any options that should be used when creating the child
 	 */
-	createChild<D extends C, O extends { id?: string }>(factory: ComposeFactory<D, O>, options?: O): Promise<[string, D]>;
+	createChild<D extends C, O extends StatefulOptions<S>, S extends State>(
+		factory: ComposeFactory<D, O>, options?: O): Promise<[string, D]>;
+
+	/**
+	 * Creates a set or map of instances based upon the supplied data
+	 *
+	 * @param children the set or map of children factories and options
+	 */
+	createChildren(children: [ComposeFactory<C, StatefulOptions<State>>, StatefulOptions<State>][]): Promise<[string, C][]>;
+	createChildren(children: CreateChildrenMap<C>): Promise<{ [label: string]: [string, C]}>
 
 	/**
 	 * The ID for this widget

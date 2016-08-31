@@ -364,7 +364,8 @@ registerSuite({
 			const createFoo = compose({})
 				.mixin({
 					mixin: createStatefulChildrenMixin,
-					initialize(instance) {
+					initialize(instance, options) {
+						instance.id = options && options.id;
 						p = instance.createChild(createRenderable, <RenderableOptions> {
 							render() {
 								return h('div');
@@ -373,6 +374,7 @@ registerSuite({
 					}
 				});
 			const foo = createFoo({
+				id: 'foo',
 				registryProvider: {
 					get(type: string) {
 						return type === 'widgets' ? registry : null;
@@ -383,7 +385,7 @@ registerSuite({
 			assert(p);
 			return p.then((result) => {
 				const [ id, widget ] = result;
-				assert.include(id, 'undefined-child');
+				assert.include(id, 'foo-child');
 				assert.strictEqual(widget.render().vnodeSelector, 'div');
 			});
 		},
