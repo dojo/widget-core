@@ -6,6 +6,7 @@ import Promise from 'dojo-shim/Promise';
 import { List, Map } from 'immutable/immutable';
 import { Child, RegistryProvider } from 'src/mixins/interfaces';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
+import createDestroyable from 'dojo-compose/mixins/createDestroyable';
 import { h } from 'maquette/maquette';
 
 const widget1 = createRenderable();
@@ -577,6 +578,51 @@ registerSuite({
 			});
 		},
 
+		'destroy with map destroys children'() {
+			let p: Promise<CreateChildrenResults<Child>>;
+			const registry = Object.create(widgetRegistry);
+			let destroyCount = 0;
+			const createDestroyRenderable = createRenderable
+				.mixin({
+					mixin: createDestroyable,
+					initialize(instance) {
+						instance.own({
+							destroy() {
+								destroyCount++;
+							}
+						});
+					}
+				});
+
+			const createFoo = compose({})
+				.mixin({
+					mixin: createStatefulChildrenMixin,
+					initialize(instance) {
+						p = instance.createChildren({
+							foo: { factory: createDestroyRenderable, options: { id: 'foo' } },
+							bar: { factory: createDestroyRenderable, options: { id: 'bar' } }
+						});
+					}
+				});
+
+			const foo = createFoo({
+				id: 'foo',
+				registryProvider: {
+					get(type: string) {
+						return type === 'widgets' ? registry : null;
+					}
+				}
+			});
+
+			return p.then(() => {
+				assert.strictEqual(destroyCount, 0);
+				return foo.destroy();
+			})
+			.then(() => {
+				assert.strictEqual(destroyCount, 2);
+			});
+		},
+
 		'with array'() {
 			let p: Promise<[string, Child][]>;
 			const registry = Object.create(widgetRegistry);
@@ -674,6 +720,51 @@ registerSuite({
 				assert.strictEqual(aWidget.render().vnodeSelector, 'div');
 				assert.strictEqual(bWidget.render().vnodeSelector, 'div');
 				assert.deepEqual(widget.state.children, [ aID, bID ]);
+			});
+		},
+
+		'destroy with array destroys children'() {
+			let p: Promise<[string, Child][]>;
+			const registry = Object.create(widgetRegistry);
+			let destroyCount = 0;
+			const createDestroyRenderable = createRenderable
+				.mixin({
+					mixin: createDestroyable,
+					initialize(instance) {
+						instance.own({
+							destroy() {
+								destroyCount++;
+							}
+						});
+					}
+				});
+
+			const createFoo = compose({})
+				.mixin({
+					mixin: createStatefulChildrenMixin,
+					initialize(instance) {
+						p = instance.createChildren([
+							[ createDestroyRenderable, { id: 'foo' } ],
+							[ createDestroyRenderable, { id: 'bar' } ]
+						]);
+					}
+				});
+
+			const foo = createFoo({
+				id: 'foo',
+				registryProvider: {
+					get(type: string) {
+						return type === 'widgets' ? registry : null;
+					}
+				}
+			});
+
+			return p.then(() => {
+				assert.strictEqual(destroyCount, 0);
+				return foo.destroy();
+			})
+			.then(() => {
+				assert.strictEqual(destroyCount, 2);
 			});
 		},
 

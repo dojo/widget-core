@@ -22,10 +22,10 @@ export interface StatefulChildrenOptions<C extends Child, S extends StatefulChil
 	registryProvider?: RegistryProvider<C>;
 }
 
-export interface CreateChildrenMap<C extends Child> {
+export interface CreateChildrenMap<C extends Child, O extends StatefulOptions<State>> {
 	[label: string]: {
-		factory: ComposeFactory<C, StatefulOptions<State>>;
-		options?: StatefulOptions<State>;
+		factory: ComposeFactory<C, O>;
+		options?: O;
 	};
 }
 
@@ -57,8 +57,8 @@ export type StatefulChildren<C extends Child, S extends StatefulChildrenState> =
 	 *
 	 * @param children the set or map of children factories and options
 	 */
-	createChildren(children: [ComposeFactory<C, StatefulOptions<State>>, StatefulOptions<State>][]): Promise<[string, C][]>;
-	createChildren(children: CreateChildrenMap<C>): Promise<CreateChildrenResults<C>>;
+	createChildren(children: [ComposeFactory<C, any>, any][]): Promise<[string, any][]>;
+	createChildren(children: CreateChildrenMap<C, any>): Promise<CreateChildrenResults<C>>;
 
 	/**
 	 * The ID for this widget
@@ -214,14 +214,14 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 	}
 }
 
-function isCreateChildrenMap<C extends Child>(value: any): value is CreateChildrenMap<C> {
+function isCreateChildrenMap<C extends Child, O extends StatefulOptions<S>, S extends State>(value: any): value is CreateChildrenMap<C, O> {
 	return typeof value === 'object' && !Array.isArray(value);
 }
 
 const createStatefulChildrenMixin = compose({
 		createChildren(
 			this: StatefulChildren<Child, StatefulChildrenState>,
-			children: CreateChildrenMap<Child> | [ComposeFactory<Child, StatefulOptions<State>>, StatefulOptions<State>][]
+			children: CreateChildrenMap<Child, StatefulOptions<State>> | [ComposeFactory<Child, StatefulOptions<State>>, StatefulOptions<State>][]
 		): Promise<[string, Child][]> | Promise<CreateChildrenResults<Child>> {
 			if (managementMap.has(this)) {
 				const management = managementMap.get(this);
@@ -243,6 +243,14 @@ const createStatefulChildrenMixin = compose({
 					return Promise
 						.all(promises)
 						.then((items) => {
+							/* create a handle which will destroy the children created */
+							const instances = items.map(([ , child ]) => child );
+							this.own({
+								destroy() {
+									return instances.map((instance) => instance.destroy());
+								}
+							});
+
 							/* Now we need to constitute our map to return it */
 							const results: CreateChildrenResults<Child> = {};
 							const newChildren = items.map(([ id, widget ], idx) => {
@@ -266,6 +274,14 @@ const createStatefulChildrenMixin = compose({
 							return registry.create(factory, options);
 						}))
 						.then((items) => {
+							/* create a handle which will destroy the children created */
+							const instances = items.map(([ , child ]) => child );
+							this.own({
+								destroy() {
+									return instances.map((instance) => instance.destroy());
+								}
+							});
+
 							const newChildren = items.map(([ id ]) => id);
 							const children = this.state.children ? [ ...this.state.children, ...newChildren ] : newChildren;
 							this.setState({ children });
