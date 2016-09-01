@@ -23,7 +23,17 @@ export interface StatefulChildrenOptions<C extends Child, S extends StatefulChil
 }
 
 export interface CreateChildrenMap<C extends Child> {
-	[label: string]: [ComposeFactory<C, StatefulOptions<State>>, StatefulOptions<State>];
+	[label: string]: {
+		factory: ComposeFactory<C, StatefulOptions<State>>;
+		options?: StatefulOptions<State>;
+	};
+}
+
+export interface CreateChildrenResults<C extends Child> {
+	[label: string]: {
+		id: string;
+		widget: C;
+	};
 }
 
 export type StatefulChildren<C extends Child, S extends StatefulChildrenState> = Stateful<S> & {
@@ -48,7 +58,7 @@ export type StatefulChildren<C extends Child, S extends StatefulChildrenState> =
 	 * @param children the set or map of children factories and options
 	 */
 	createChildren(children: [ComposeFactory<C, StatefulOptions<State>>, StatefulOptions<State>][]): Promise<[string, C][]>;
-	createChildren(children: CreateChildrenMap<C>): Promise<{ [label: string]: [string, C]}>
+	createChildren(children: CreateChildrenMap<C>): Promise<CreateChildrenResults<C>>;
 
 	/**
 	 * The ID for this widget
@@ -204,31 +214,74 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 	}
 }
 
+function isCreateChildrenMap<C extends Child>(value: any): value is CreateChildrenMap<C> {
+	return typeof value === 'object' && !Array.isArray(value);
+}
+
 const createStatefulChildrenMixin = compose({
+		createChildren(
+			this: StatefulChildren<Child, StatefulChildrenState>,
+			children: CreateChildrenMap<Child> | [ComposeFactory<Child, StatefulOptions<State>>, StatefulOptions<State>][]
+		): Promise<[string, Child][]> | Promise<CreateChildrenResults<Child>> {
+			if (managementMap.has(this)) {
+				const management = managementMap.get(this);
+				const { registry, id } = management;
+				if (isCreateChildrenMap(children)) {
+					/* Because we have a map, but Promise.all only takes an array, we have to "flatten" the map into
+					 * two arrays, of promises and labels */
+					const promises: Promise<[ string, Child ]>[] = [];
+					const labels: string[] = [];
+					for (const label in children) {
+						const { factory, options = {} } = children[label];
+						if (!options.id) {
+							/* See createChild for explination of this logic */
+							options.id = `${id || this.id}-child-${++management.childrenUID}`;
+						}
+						promises.push(registry.create(factory, options));
+						labels.push(label);
+					}
+					return Promise
+						.all(promises)
+						.then((items) => {
+							/* Now we need to constitute our map to return it */
+							const results: CreateChildrenResults<Child> = {};
+							const newChildren = items.map(([ id, widget ], idx) => {
+								results[labels[idx]] = { id, widget };
+								return id;
+							});
+							const children = this.state.children ? [ ...this.state.children, ...newChildren ] : newChildren;
+							this.setState({ children });
+							return results;
+						});
+				}
+				else {
+					return Promise
+						.all(children.map(([ factory, options ]) => {
+							if (!options.id) {
+								/* depending upon the construction lifecycle, the this.id may not have been properly set and will
+								 * auto-generate an ID, therefore we have copied the ID out of options, if it was present and will
+								 * use that as a base for autogenerating the child widget's ID */
+								options.id = `${id || this.id}-child-${++management.childrenUID}`;
+							}
+							return registry.create(factory, options);
+						}))
+						.then((items) => {
+							const newChildren = items.map(([ id ]) => id);
+							const children = this.state.children ? [ ...this.state.children, ...newChildren ] : newChildren;
+							this.setState({ children });
+							return items;
+						});
+				}
+			}
+			return Promise.reject(new Error('Unable to resolve registry'));
+		},
+
 		createChild<C extends Child>(
 			this: StatefulChildren<Child, StatefulChildrenState>,
 			factory: ComposeFactory<C, any>,
 			options: any = {}
 		): Promise<[string, C]> {
-			if (managementMap.has(this)) {
-				const management = managementMap.get(this);
-				const { registry, id } = management;
-				if (!options.id) {
-					/* depending upon the construction lifecycle, the this.id may not have been properly set and will
-					 * auto-generate an ID, therefore we have copied the ID out of options, if it was present and will
-					 * use that as a base for autogenerating the child widget's ID */
-					options.id = `${id || this.id}-child-${++management.childrenUID}`;
-				}
-				return registry.create(factory, options)
-					.then(([ id, child ]): [ string, C ] => {
-						/* Because this mixin manages children in the state, we will append the child to the state
-						 * of the parent */
-						const children = this.state.children ? [ ...this.state.children, id ] : [ id ];
-						this.setState({ children });
-						return [ id, child ];
-					});
-			}
-			return Promise.reject(new Error('Unable to create child, unable to resolve registry'));
+			return this.createChildren([ [ factory, options ] ]).then(([ tuple ]) => tuple);
 		}
 	})
 	.mixin(createStateful)
