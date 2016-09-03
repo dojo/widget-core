@@ -23,10 +23,15 @@
     "dojo-core": ">=2.0.0-alpha.12",
     "dojo-has": ">=2.0.0-alpha.4",
     "dojo-shim": ">=2.0.0-alpha.4",
-    "immutable": "^3.7.6",
-    "maquette": "^2.3.1"
+    "immutable": "^3.8.1",
+    "maquette": "^2.3.5"
   },
   "devDependencies": {
+    "@types/chai": "3.4.*",
+    "@types/es6-shim": "0.0.*",
+    "@types/glob": "5.0.*",
+    "@types/grunt": "0.4.*",
+    "@types/jsdom": "2.0.*",
     "codecov.io": "0.1.6",
     "dojo-loader": ">=2.0.0-beta.5",
     "dts-generator": "~1.7.0",
@@ -44,7 +49,7 @@
     "grunt-typings": ">=0.1.5",
     "intern": "^3.2.3",
     "istanbul": "0.4.3",
-    "jsdom": "7.2.2",
+    "jsdom": "9.4.5",
     "remap-istanbul": "0.6.4",
     "tslint": "next",
     "typescript": "2.0.2"
