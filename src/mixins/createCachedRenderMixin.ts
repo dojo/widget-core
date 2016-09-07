@@ -39,9 +39,24 @@ export type CachedRenderParent = Parent & {
 	invalidate(): void;
 }
 
+/**
+ * A function that is called when collecting the node attributes on render, accepting the current set of
+ * attributes and returning a set of VNode properties that should mixed into the current attributes.
+ */
+export interface NodeAttributeFunction {
+	(attributes: VNodeProperties): VNodeProperties;
+}
+
 export interface CachedRender {
 	/**
+	 * An array of strings that represent classes to be set on the widget.  If classes are present in the state, getting and
+	 * setting classes is done on the state, otherwise they are shadowed on the instance.
+	 */
+	classes: string[];
+
+	/**
 	 * Returns the node attribute properties to be used by a render function
+	 *
 	 * @param overrides Any optional overrides of properties
 	 */
 	getNodeAttributes(overrides?: VNodeProperties): VNodeProperties;
@@ -58,16 +73,10 @@ export interface CachedRender {
 
 	/**
 	 * The ID of the widget
-	 *
-	 * TODO: Mark readonly in TS2
 	 */
-	id: string;
+	readonly id: string;
 
-	/**
-	 * An array of strings that represent classes to be set on the widget.  If classes are present in the state, getting and
-	 * setting classes is done on the state, otherwise they are shadowed on the instance.
-	 */
-	classes: string[];
+	nodeAttributes: NodeAttributeFunction[];
 
 	render(): VNode;
 
@@ -142,24 +151,30 @@ const createCachedRenderMixin = createStateful
 	})
 	.mixin({
 		mixin: <CachedRender> {
+			get classes(this: CachedRenderMixin<CachedRenderState>): string[] {
+				return (this.state && this.state.classes) || shadowClasses.get(this);
+			},
+
+			set classes(this: CachedRenderMixin<CachedRenderState>, value: string[]) {
+				if (this.state.classes) {
+					this.setState({ classes: value });
+				}
+				else {
+					shadowClasses.set(this, value);
+					this.invalidate();
+				}
+			},
+
 			getNodeAttributes(this: CachedRenderMixin<CachedRenderState>, overrides?: VNodeProperties): VNodeProperties {
-				const props: VNodeProperties = this.state && this.state.id ? { 'data-widget-id': this.state.id } : {};
-				for (let key in this.listeners) {
-					props[key] = this.listeners[key];
-				}
-				const classes: { [index: string]: boolean; } = {};
-				const widgetClasses = widgetClassesMap.get(this);
+				const props: VNodeProperties = {};
 
-				widgetClasses.forEach((c) => classes[c] = false);
+				this.nodeAttributes.forEach((fn) => {
+					const newProps: VNodeProperties = fn.call(this, assign({}, props));
+					if (newProps) {
+						assign(props, newProps);
+					}
+				});
 
-				if (this.classes) {
-					this.classes.forEach((c) => classes[c] = true);
-					widgetClassesMap.set(this, this.classes);
-				}
-
-				props.classes = classes;
-				props.styles = this.styles || {};
-				props.key = this;
 				if (overrides) {
 					assign(props, overrides);
 				}
@@ -169,6 +184,31 @@ const createCachedRenderMixin = createStateful
 			getChildrenNodes(this: CachedRenderMixin<CachedRenderState>): (VNode | string)[] {
 				return this.state.label ? [ this.state.label ] : undefined;
 			},
+
+			nodeAttributes: [
+				function (this: CachedRenderMixin<CachedRenderState>): VNodeProperties {
+					const props: VNodeProperties = this.state && this.state.id
+						? { 'data-widget-id': this.state.id }
+						: {};
+					for (const key in this.listeners) {
+						props[key] = this.listeners[key];
+					}
+					const classes: { [index: string]: boolean; } = {};
+					const widgetClasses = widgetClassesMap.get(this);
+
+					widgetClasses.forEach((c) => classes[c] = false);
+
+					if (this.classes) {
+						this.classes.forEach((c) => classes[c] = true);
+						widgetClassesMap.set(this, this.classes);
+					}
+
+					props.classes = classes;
+					props.styles = this.styles || {};
+					props.key = this;
+					return props;
+				}
+			],
 
 			render(this: CachedRenderMixin<CachedRenderState>): VNode {
 				const cachedRender: CachedRenderMixin<CachedRenderState> = this;
@@ -184,6 +224,10 @@ const createCachedRenderMixin = createStateful
 				}
 			},
 
+			get id(this: CachedRenderMixin<CachedRenderState>): string {
+				return (this.state && this.state.id) || generateID(this);
+			},
+
 			invalidate(this: CachedRenderMixin<CachedRenderState>): void {
 				if (dirtyMap.get(this)) { /* short circuit if already dirty */
 					return;
@@ -193,24 +237,6 @@ const createCachedRenderMixin = createStateful
 				renderCache.delete(this); /* Allow GC to occur on renderCache */
 				if (parent && parent.invalidate) {
 					parent.invalidate();
-				}
-			},
-
-			get id(this: CachedRenderMixin<CachedRenderState>): string {
-				return (this.state && this.state.id) || generateID(this);
-			},
-
-			get classes(this: CachedRenderMixin<CachedRenderState>): string[] {
-				return (this.state && this.state.classes) || shadowClasses.get(this);
-			},
-
-			set classes(this: CachedRenderMixin<CachedRenderState>, value: string[]) {
-				if (this.state.classes) {
-					this.setState({ classes: value });
-				}
-				else {
-					shadowClasses.set(this, value);
-					this.invalidate();
 				}
 			},
 

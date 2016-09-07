@@ -104,7 +104,7 @@ registerSuite({
 		'is read only'() {
 			const cachedRender = createCachedRenderMixin();
 			assert.throws(() => {
-				cachedRender.id = 'foo';
+				(<any> cachedRender).id = 'foo';
 			});
 		}
 	},

@@ -3,6 +3,7 @@ import { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable, { Destroyable } from 'dojo-compose/mixins/createDestroyable';
 import { Handle } from 'dojo-core/interfaces';
 import { on } from 'dojo-core/aspect';
+import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
 import createWidget, { Widget, WidgetState, WidgetOptions } from './createWidget';
 import createParentListMixin, { ParentListMixin, ParentListMixinOptions } from './mixins/createParentListMixin';
@@ -141,12 +142,20 @@ const createResizePanel: ResizePanelFactory = createWidget
 	.mixin(createStatefulChildrenMixin)
 	.mixin({
 		mixin: <ResizePanelMixin> {
+			nodeAttributes: [ function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
+				const styles = assign({}, attributes.styles);
+				styles['width'] = this.width || '200px';
+				return { styles };
+			} ],
+
 			tagNames: {
 				handle: 'dojo-resize-handle'
 			},
+
 			get width(this: ResizePanel): string {
 				return this.state && this.state && this.state.width;
 			},
+
 			set width(value: string) {
 				const resizePanel: ResizePanel = this;
 				resizePanel.setState({ width: value });
@@ -156,12 +165,6 @@ const createResizePanel: ResizePanelFactory = createWidget
 			after: {
 				getChildrenNodes(this: ResizePanel, result: (VNode | string)[]): (VNode | string)[] {
 					result.push(h(this.tagNames.handle, resizeNodePropertiesMap.get(this)));
-					return result;
-				},
-				getNodeAttributes(this: ResizePanel, result: VNodeProperties) {
-					result = result || {};
-					result.styles = result.styles || {};
-					result.styles['width'] = this.width || '200px';
 					return result;
 				}
 			}
