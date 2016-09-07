@@ -7,7 +7,7 @@ import { List, Map } from 'immutable';
 import { Child, RegistryProvider } from 'src/mixins/interfaces';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/mixins/createDestroyable';
-import { h } from 'maquette/maquette';
+import { h } from 'maquette';
 
 const widget1 = createRenderable();
 const widget2 = createRenderable();
