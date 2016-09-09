@@ -6,7 +6,7 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"module": "umd",
-		"moduleResolution": "classic",
+		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"outDir": "_build/",
