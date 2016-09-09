@@ -1,12 +1,11 @@
 {
 	"version": "2.0.2",
 	"compilerOptions": {
-		"baseUrl": "node_modules",
 		"declaration": false,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"module": "umd",
-		"moduleResolution": "classic",
+		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"outDir": "_build/",
