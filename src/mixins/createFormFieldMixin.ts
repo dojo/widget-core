@@ -4,7 +4,7 @@ import { EventedListener, TargettedEventObject } from 'dojo-compose/mixins/creat
 import createStateful, { Stateful, State, StatefulOptions } from 'dojo-compose/mixins/createStateful';
 import { Handle } from 'dojo-core/interfaces';
 import { assign } from 'dojo-core/lang';
-import createCachedRenderMixin, { CachedRenderMixin, CachedRenderState, NodeAttributeFunction } from './createCachedRenderMixin';
+import { NodeAttributeFunction } from './createRenderMixin';
 import createCancelableEvent, { CancelableEvent } from '../util/createCancelableEvent';
 import { stringToValue, valueToString } from '../util/lang';
 
@@ -20,7 +20,7 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 	value?: V;
 }
 
-export interface FormFieldMixinState<V> extends State, CachedRenderState {
+export interface FormFieldMixinState<V> extends State {
 	/**
 	 * Whether the field is currently disabled or not
 	 */
@@ -77,7 +77,7 @@ export interface FormField<V> {
 	value?: string;
 }
 
-export type FormFieldMixin<V, S extends FormFieldMixinState<V>> = FormField<V> & Stateful<S> & CachedRenderMixin<S>;
+export type FormFieldMixin<V, S extends FormFieldMixinState<V>> = FormField<V> & Stateful<S>;
 
 export interface FormMixinFactory extends ComposeFactory<FormFieldMixin<any, FormFieldMixinState<any>>, FormFieldMixinOptions<any, FormFieldMixinState<any>>> {
 	<V>(options?: FormFieldMixinOptions<V, FormFieldMixinState<V>>): FormFieldMixin<V, FormFieldMixinState<V>>;
@@ -112,7 +112,7 @@ const createFormMixin: FormMixinFactory = compose({
 			}
 			/* value should always be copied */
 			props.value = this.value;
-			if ('name' in this.state) {
+			if (this.state && this.state.name) {
 				props.name = this.state.name;
 			}
 			if (this.state.disabled) {
@@ -126,7 +126,6 @@ const createFormMixin: FormMixinFactory = compose({
 			instance.type = type;
 		}
 	})
-	.mixin(createCachedRenderMixin) /* TODO: We can likely remove this, but we would have to rewrite unit tests */
 	.mixin({
 		mixin: createStateful,
 		initialize(

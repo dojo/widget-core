@@ -7,7 +7,7 @@ export interface TypedTargetEvent<T extends EventTarget> extends Event {
 	target: T;
 }
 
-export interface TextInputOptions extends WidgetOptions<FormFieldMixinState<string>>, FormFieldMixinOptions<string, FormFieldMixinState<string>> { }
+export type TextInputOptions = WidgetOptions<FormFieldMixinState<string>> & FormFieldMixinOptions<string, FormFieldMixinState<string>>;
 
 export type TextInput = Widget<FormFieldMixinState<string>> & FormFieldMixin<string, FormFieldMixinState<string>>;
 

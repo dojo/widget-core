@@ -18,7 +18,7 @@ export interface ResizePanelState extends WidgetState, StatefulChildrenState {
 	width?: string;
 }
 
-export interface ResizePanelOptions extends WidgetOptions<ResizePanelState>, ParentListMixinOptions<Child>, StatefulChildrenOptions<Child, ResizePanelState> { }
+export type ResizePanelOptions = WidgetOptions<ResizePanelState> & ParentListMixinOptions<Child> & StatefulChildrenOptions<Child, ResizePanelState>;
 
 export interface ResizePanelMixin {
 	tagNames: {
