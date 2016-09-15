@@ -45,8 +45,6 @@ addClassButton.on('click', (e: MouseEvent) => {
 	header.setState(nextState);
 });
 
-console.log(addClassButton);
-
 projector.append(addClassButton);
 projector.append(header);
 

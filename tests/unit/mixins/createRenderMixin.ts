@@ -50,7 +50,6 @@ registerSuite({
 		const cachedRender = createRenderMixin({
 			state: { id: 'foo', label: 'foo' }
 		});
-		// cachedRender.on('statechange', () => cachedRender.invalidate());
 		const result1 = cachedRender.render();
 		const result2 = cachedRender.render();
 		cachedRender.invalidate();
@@ -97,7 +96,7 @@ registerSuite({
 		'is read only'() {
 			const cachedRender = createRenderMixin();
 			assert.throws(() => {
-				(<any> cachedRender).id = 'foo';
+				(<any> cachedRender).id = 'foo'; /* .id is readonly, so TypeScript will prevent mutation */
 			});
 		}
 	},

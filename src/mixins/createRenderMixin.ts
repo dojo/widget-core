@@ -8,6 +8,11 @@ import { Parent, RenderFunction, StylesHash } from './interfaces';
 
 export interface RenderMixinState extends State {
 	/**
+	 * Any classes to set at construction to the VNode
+	 */
+	classes?: string[];
+
+	/**
 	 * The ID of this widget
 	 */
 	id?: string;
@@ -16,11 +21,6 @@ export interface RenderMixinState extends State {
 	 * Any label text for this widget
 	 */
 	label?: string;
-
-	/**
-	 * Any classes to set at construction to the VNode
-	 */
-	classes?: string[];
 
 	/**
 	 * Any styles to set at startup to the VNode
@@ -55,6 +55,9 @@ export interface Render {
 	 */
 	getChildrenNodes(): (VNode | string)[];
 
+	/**
+	 * The ID of the current widget
+	 */
 	readonly id: string;
 
 	/**
