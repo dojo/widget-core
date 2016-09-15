@@ -142,11 +142,13 @@ const createResizePanel: ResizePanelFactory = createWidget
 	.mixin(createStatefulChildrenMixin)
 	.mixin({
 		mixin: <ResizePanelMixin> {
-			nodeAttributes: [ function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
-				const styles = assign({}, attributes.styles);
-				styles['width'] = this.width || '200px';
-				return { styles };
-			} ],
+			nodeAttributes: [
+				function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
+					const styles = assign({}, attributes.styles);
+					styles['width'] = this.width || '200px';
+					return { styles };
+				}
+			],
 
 			tagNames: {
 				handle: 'dojo-resize-handle'

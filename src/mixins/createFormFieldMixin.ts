@@ -104,23 +104,25 @@ const createFormMixin: FormMixinFactory = compose({
 			}
 		},
 
-		nodeAttributes: [ function (this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
-			const props: VNodeProperties = {};
+		nodeAttributes: [
+			function (this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
+				const props: VNodeProperties = {};
 
-			if (this.type) {
-				props['type'] = this.type;
-			}
-			/* value should always be copied */
-			props.value = this.value;
-			if (this.state && this.state.name) {
-				props.name = this.state.name;
-			}
-			if (this.state.disabled) {
-				props['disabled'] = 'disabled';
-			}
+				if (this.type) {
+					props['type'] = this.type;
+				}
+				/* value should always be copied */
+				props.value = this.value;
+				if (this.state && this.state.name) {
+					props.name = this.state.name;
+				}
+				if (this.state.disabled) {
+					props['disabled'] = 'disabled';
+				}
 
-			return props;
-		} ]
+				return props;
+			}
+		]
 	}, (instance: FormField<any>, { type } = <any> {}) => {
 		if (type) {
 			instance.type = type;

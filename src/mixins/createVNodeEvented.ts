@@ -140,9 +140,11 @@ const createVNodeEvented: VNodeEventedFactory = createEvented
 		mixin: {
 			listeners: <VNodeListeners> null,
 
-			nodeAttributes: [ function (this: VNodeEvented): VNodeProperties {
-				return assign({}, this.listeners);
-			} ]
+			nodeAttributes: [
+				function (this: VNodeEvented): VNodeProperties {
+					return assign({}, this.listeners);
+				}
+			]
 		},
 		aspectAdvice: {
 			around: {
