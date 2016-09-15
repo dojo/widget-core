@@ -32,7 +32,7 @@ export interface ChildrenMap<C extends Child> {
 }
 
 export interface Parent {
-	append(child: Child | Child[]): Handle;
+	append(child: Child[] | Child): Handle;
 
 	children: Map<string, Child> | List<Child>;
 
