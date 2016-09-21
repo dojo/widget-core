@@ -55,8 +55,8 @@ module.exports = function (grunt) {
 						getJSON: function(cssFileName, json) {
 							var filename = path.basename(cssFileName, '.css');
 							fs.writeFileSync(
-								'src/themes/structural/modules/' + filename + '.ts',
-								'export default ' + JSON.stringify(json) + ';'
+								`src/themes/structural/modules/${ filename }.ts`,
+								`/* tslint:disable:object-literal-key-quotes quotemark whitespace */\nexport default ${ JSON.stringify(json) };\n`
 							);
 						}
 					})
@@ -76,9 +76,9 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('dev', [
 		'clean:typings',
+		'postcss',
 		'typings',
-		// TODO: uncomment this, figure out a way to ignore generated CSS TS modules
-		// 'tslint',
+		'tslint',
 		'clean:dev',
 		'ts:dev',
 		'stylus:dev',
@@ -88,9 +88,9 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('dist', [
 		'clean:typings',
+		'postcss',
 		'typings',
-		// TODO: uncomment this, figure out a way to ignore generated CSS TS modules
-		// 'tslint',
+		'tslint',
 		'clean:dist',
 		'ts:dist',
 		'stylus:dist'

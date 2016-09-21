@@ -1,1 +1,0 @@
-export default {"tab-label":"_tab-label_1vvbx_1","panels":"_panels_1vvbx_9"};

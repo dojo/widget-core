@@ -1,1 +1,0 @@
-export default {"button":"_button_312p3_1"};
