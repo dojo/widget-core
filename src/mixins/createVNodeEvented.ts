@@ -14,32 +14,34 @@ import Set from 'dojo-shim/Set';
 import { VNodeProperties } from 'maquette';
 import { NodeAttributeFunction } from './createRenderMixin';
 
+export type VNodeListenerReturn = boolean | undefined | null;
+
 export interface VNodeListeners {
-	[on: string]: (ev?: TargettedEventObject) => boolean | undefined | null;
-	ontouchcancel?(ev?: TouchEvent): boolean | undefined | null;
-	ontouchend?(ev?: TouchEvent): boolean | undefined | null;
-	ontouchmove?(ev?: TouchEvent): boolean | undefined | null;
-	ontouchstart?(ev?: TouchEvent): boolean | undefined | null;
-	onblur?(ev?: FocusEvent): boolean | undefined | null;
-	onchange?(ev?: Event): boolean | undefined | null;
-	onclick?(ev?: MouseEvent): boolean | undefined | null;
-	ondblclick?(ev?: MouseEvent): boolean | undefined | null;
-	onfocus?(ev?: FocusEvent): boolean | undefined | null;
-	oninput?(ev?: Event): boolean | undefined | null;
-	onkeydown?(ev?: KeyboardEvent): boolean | undefined | null;
-	onkeypress?(ev?: KeyboardEvent): boolean | undefined | null;
-	onkeyup?(ev?: KeyboardEvent): boolean | undefined | null;
-	onload?(ev?: Event): boolean | undefined | null;
-	onmousedown?(ev?: MouseEvent): boolean | undefined | null;
-	onmouseenter?(ev?: MouseEvent): boolean | undefined | null;
-	onmouseleave?(ev?: MouseEvent): boolean | undefined | null;
-	onmousemove?(ev?: MouseEvent): boolean | undefined | null;
-	onmouseout?(ev?: MouseEvent): boolean | undefined | null;
-	onmouseover?(ev?: MouseEvent): boolean | undefined | null;
-	onmouseup?(ev?: MouseEvent): boolean | undefined | null;
-	onmousewheel?(ev?: MouseWheelEvent): boolean | undefined | null;
-	onscroll?(ev?: UIEvent): boolean | undefined | null;
-	onsubmit?(ev?: Event): boolean | undefined | null;
+	[on: string]: (ev?: TargettedEventObject) => VNodeListenerReturn;
+	ontouchcancel?(ev?: TouchEvent): VNodeListenerReturn;
+	ontouchend?(ev?: TouchEvent): VNodeListenerReturn;
+	ontouchmove?(ev?: TouchEvent): VNodeListenerReturn;
+	ontouchstart?(ev?: TouchEvent): VNodeListenerReturn;
+	onblur?(ev?: FocusEvent): VNodeListenerReturn;
+	onchange?(ev?: Event): VNodeListenerReturn;
+	onclick?(ev?: MouseEvent): VNodeListenerReturn;
+	ondblclick?(ev?: MouseEvent): VNodeListenerReturn;
+	onfocus?(ev?: FocusEvent): VNodeListenerReturn;
+	oninput?(ev?: Event): VNodeListenerReturn;
+	onkeydown?(ev?: KeyboardEvent): VNodeListenerReturn;
+	onkeypress?(ev?: KeyboardEvent): VNodeListenerReturn;
+	onkeyup?(ev?: KeyboardEvent): VNodeListenerReturn;
+	onload?(ev?: Event): VNodeListenerReturn;
+	onmousedown?(ev?: MouseEvent): VNodeListenerReturn;
+	onmouseenter?(ev?: MouseEvent): VNodeListenerReturn;
+	onmouseleave?(ev?: MouseEvent): VNodeListenerReturn;
+	onmousemove?(ev?: MouseEvent): VNodeListenerReturn;
+	onmouseout?(ev?: MouseEvent): VNodeListenerReturn;
+	onmouseover?(ev?: MouseEvent): VNodeListenerReturn;
+	onmouseup?(ev?: MouseEvent): VNodeListenerReturn;
+	onmousewheel?(ev?: MouseWheelEvent): VNodeListenerReturn;
+	onscroll?(ev?: UIEvent): VNodeListenerReturn;
+	onsubmit?(ev?: Event): VNodeListenerReturn;
 }
 
 const vnodeEvents = new Set([
