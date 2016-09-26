@@ -108,7 +108,7 @@ function constructDijitWidget(dijit: Dijit<DijitWidget>, srcNodeRef: Node): Prom
 	const dijitData = dijitDataWeakMap.get(dijit);
 	return resolveCtor(dijitData.Ctor)
 		.then((/* tslint:disable */Ctor/* tslint:enable */) => {
-			const dijitWidget = new Ctor(dijitData.params, srcNodeRef);
+			const dijitWidget = new Ctor(dijitData.params || {}, srcNodeRef);
 			dijitWidget.startup();
 			return dijitWidget;
 		});
@@ -246,7 +246,7 @@ const createDijit: DijitFactory = createRenderMixin
 			dijitData.afterCreate = afterCreate.bind(instance);
 			if (options) {
 				dijitData.Ctor = options.Ctor;
-				dijitData.params = options.params || {};
+				dijitData.params = options.params;
 			}
 		}
 	})

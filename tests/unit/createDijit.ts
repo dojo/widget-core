@@ -3,6 +3,14 @@ import * as assert from 'intern/chai!assert';
 import createDijit from '../../src/createDijit';
 import * as Dijit from '../support/dijit/Dijit';
 
+class ParamsSpy extends Dijit {
+	constructor(params: any, srcNodeRef: any) {
+		super(params, srcNodeRef);
+		this.spiedParams = params;
+	}
+	spiedParams: any;
+}
+
 registerSuite({
 	name: 'createDijit',
 	creation: {
@@ -163,6 +171,21 @@ registerSuite({
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
 			vnode.properties.afterCreate(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+		},
+		'afterCreate - default empty params'(this: any) {
+			const dfd = this.async();
+
+			const dijit = createDijit({
+				Ctor: ParamsSpy
+			});
+
+			const vnode = dijit.render();
+			const domNode = document.createElement(vnode.vnodeSelector);
+			vnode.properties.afterCreate(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+
+			setTimeout(dfd.callback(() => {
+				assert.deepEqual(dijit.dijit.spiedParams, {});
+			}), 50);
 		},
 		'afterCreate - new dom node'(this: any) {
 			const dfd = this.async();
