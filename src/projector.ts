@@ -131,9 +131,9 @@ export enum ProjectorState {
 
 interface ProjectorData {
 	afterInitialCreate?: () => void;
-	attachHandle?: Handle;
+	attachHandle: Handle;
 	attachPromise?: Promise<Handle>;
-	boundRender?: () => VNode;
+	boundRender: () => VNode;
 	projector: MaquetteProjector;
 	root: Element;
 	state: ProjectorState;
@@ -314,6 +314,8 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 			}
 			const projector = createMaquetteProjector(options);
 			projectorDataMap.set(instance, {
+				attachHandle: noopHandle,
+				boundRender: noopVNode,
 				projector,
 				root,
 				state: ProjectorState.Detached,
