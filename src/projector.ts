@@ -137,7 +137,7 @@ interface ProjectorData {
 	projector?: MaquetteProjector;
 	root?: Element;
 	state?: ProjectorState;
-	tagName?: string;
+	tagName: string;
 }
 
 const projectorDataMap = new WeakMap<Projector, ProjectorData>();
@@ -191,13 +191,15 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 			props.afterCreate = projectorData.afterInitialCreate;
 			return h(projectorData.tagName, props, childVNodes);
 		},
-		attach(this: Projector, { type, tagName = 'div' }: AttachOptions = {}): Promise<Handle> {
+		attach(this: Projector, { type, tagName }: AttachOptions = {}): Promise<Handle> {
 			const projectorData = projectorDataMap.get(this);
 			if (projectorData.state === ProjectorState.Attached) {
 				return projectorData.attachPromise;
 			}
 			projectorData.boundRender = this.render.bind(this);
-			projectorData.tagName = tagName;
+			if (tagName !== undefined) {
+				projectorData.tagName = tagName;
+			}
 			projectorData.state = ProjectorState.Attached;
 			projectorData.attachHandle = this.own({
 				destroy() {
@@ -314,7 +316,8 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 			projectorDataMap.set(instance, {
 				projector,
 				root,
-				state: ProjectorState.Detached
+				state: ProjectorState.Detached,
+				tagName: 'div'
 			});
 			if (autoAttach === true) {
 				instance.attach({ type: 'merge' });
