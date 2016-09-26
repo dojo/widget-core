@@ -155,12 +155,24 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 
 	/* Iterate through children ids, retrieving reference to widget or otherwise
 	 * requesting the widget from the registry */
-	currentChildrenIDs.forEach((id, key) => internalState.cache.has(id)
-		? childrenIsList
-			? childrenList[key] = internalState.cache.get(id)
-			: childrenMap[id] = internalState.cache.get(id)
-		/* Tuple of Promise, child ID, position in child list */
-		: resolvingWidgets.push([ internalState.registry.get(id), id, key ]));
+	currentChildrenIDs.forEach((id, key) => {
+		// Workaround for https://github.com/facebook/immutable-js/pull/919
+		// istanbul ignore else
+		if (id !== undefined && key !== undefined) {
+			if (internalState.cache.has(id)) {
+				if (childrenIsList) {
+					childrenList[key] = internalState.cache.get(id);
+				}
+				else {
+					childrenMap[id] = internalState.cache.get(id);
+				}
+			}
+			else {
+				/* Tuple of Promise, child ID, position in child list */
+				resolvingWidgets.push([ internalState.registry.get(id), id, key ]);
+			}
+		}
+	});
 
 	/* If we have requests for widgets outstanding, we need to wait for them to be
 	 * resolved and then populate them in the children */
@@ -213,9 +225,19 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 
 	const evtChildren = evt.children;
 
-	const currentChildrenIDs = <List<string>> (isList(evtChildren)
-		? evtChildren.map((widget) => registry.identify(widget))
-		: List(evtChildren.keys()));
+	let currentChildrenIDs: List<string>;
+	if (isList(evtChildren)) {
+		currentChildrenIDs = <List<string>> evtChildren.map((widget) => {
+			// Workaround for https://github.com/facebook/immutable-js/pull/919
+			// istanbul ignore else
+			if (widget) {
+				return registry.identify(widget);
+			}
+		});
+	}
+	else {
+		currentChildrenIDs = List(evtChildren.keys());
+	}
 
 	if (!currentChildrenIDs.equals(List(parent.state.children))) {
 		const children = currentChildrenIDs.toArray();

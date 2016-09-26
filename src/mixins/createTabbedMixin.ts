@@ -69,8 +69,12 @@ export type TabbedMixin<C extends TabbedChild> = Tabbed<C> & ParentMapMixin<C> &
 function setActiveTab(tabbed: TabbedMixin<TabbedChild>, activeTab: TabbedChild) {
 	if (activeTab.parent === tabbed) {
 		tabbed.children.forEach((tab) => {
-			if (tab !== activeTab && tab.state.active) {
-				tab.setState({ active: false });
+			// Workaround for https://github.com/facebook/immutable-js/pull/919
+			// istanbul ignore else
+			if (tab) {
+				if (tab !== activeTab && tab.state.active) {
+					tab.setState({ active: false });
+				}
 			}
 		});
 		if (!activeTab.state.active) {
@@ -84,7 +88,14 @@ function setActiveTab(tabbed: TabbedMixin<TabbedChild>, activeTab: TabbedChild) 
  * @param tabbed The tabbed mixin to return the active child for
  */
 function getActiveTab(tabbed: TabbedMixin<TabbedChild>): TabbedChild {
-	let activeTab = tabbed.children.find((tab) => tab.state.active);
+	let activeTab = tabbed.children.find((tab) => {
+		// Workaround for https://github.com/facebook/immutable-js/pull/919
+		// istanbul ignore if
+		if (!tab) {
+			return false;
+		}
+		return tab.state.active;
+	});
 	/* TODO: when a tab closes, instead of going back to the previous active tab, it will always
 	 * revert to the first tab, maybe it would be better to keep track of a stack of tabs? */
 	if (!activeTab) {

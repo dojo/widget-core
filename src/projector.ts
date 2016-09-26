@@ -180,7 +180,13 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		render(this: Projector): VNode {
 			const projectorData = projectorDataMap.get(this);
 			const childVNodes: VNode[] = [];
-			this.children.forEach((child) => childVNodes.push(child.render()));
+			this.children.forEach((child) => {
+				// Workaround for https://github.com/facebook/immutable-js/pull/919
+				// istanbul ignore else
+				if (child) {
+					childVNodes.push(child.render());
+				}
+			});
 			const props = this.getNodeAttributes();
 			props.afterCreate = projectorData.afterInitialCreate;
 			return h(projectorData.tagName, props, childVNodes);
