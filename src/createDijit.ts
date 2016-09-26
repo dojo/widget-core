@@ -151,7 +151,10 @@ const ctorMap = new Map<string, DijitWidgetConstructor<DijitWidget>>();
  * Returns a `Promise` which resolves with the constructor.
  * @param Ctor The Dijit widget constructor to be resolved
  */
-function resolveCtor<D extends DijitWidget>(/* tslint:disable */Ctor/* tslint:enable */: DijitWidgetConstructor<D> | string): Promise<DijitWidgetConstructor<D>> {
+function resolveCtor<D extends DijitWidget>(/* tslint:disable */Ctor/* tslint:enable */: DijitWidgetConstructor<D> | string | undefined): Promise<DijitWidgetConstructor<D>> {
+	if (Ctor === undefined) {
+		return Promise.reject(new Error('Cannot load undefined constructor'));
+	}
 	if (typeof Ctor !== 'string') {
 		return Promise.resolve(Ctor);
 	}
