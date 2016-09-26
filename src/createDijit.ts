@@ -222,15 +222,15 @@ const createDijit: DijitFactory = createRenderMixin
 				const afterCreate = dijitDataWeakMap.get(this).afterCreate;
 				return h(this.tagName, { afterCreate });
 			},
-			get dijit(this: Dijit<DijitWidget>): DijitWidget {
+			get dijit(this: Dijit<DijitWidget>): DijitWidget | undefined {
 				return dijitDataWeakMap.get(this).dijitWidget;
 			},
 
-			get Ctor(this: Dijit<DijitWidget>): DijitWidgetConstructor<DijitWidget> | string {
+			get Ctor(this: Dijit<DijitWidget>): DijitWidgetConstructor<DijitWidget> | string | undefined {
 				return dijitDataWeakMap.get(this).Ctor;
 			},
 
-			get params(this: Dijit<DijitWidget>): DijitWidgetParams {
+			get params(this: Dijit<DijitWidget>): DijitWidgetParams | undefined {
 				return dijitDataWeakMap.get(this).params;
 			}
 		},
