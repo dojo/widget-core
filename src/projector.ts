@@ -134,9 +134,9 @@ interface ProjectorData {
 	attachHandle?: Handle;
 	attachPromise?: Promise<Handle>;
 	boundRender?: () => VNode;
-	projector?: MaquetteProjector;
-	root?: Element;
-	state?: ProjectorState;
+	projector: MaquetteProjector;
+	root: Element;
+	state: ProjectorState;
 	tagName: string;
 }
 
