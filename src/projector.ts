@@ -194,7 +194,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		attach(this: Projector, { type, tagName }: AttachOptions = {}): Promise<Handle> {
 			const projectorData = projectorDataMap.get(this);
 			if (projectorData.state === ProjectorState.Attached) {
-				return projectorData.attachPromise;
+				return projectorData.attachPromise || Promise.resolve(noopHandle);
 			}
 			projectorData.boundRender = this.render.bind(this);
 			if (tagName !== undefined) {
