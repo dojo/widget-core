@@ -42,7 +42,7 @@ registerSuite({
 	},
 	'getChildrenNodes()'() {
 		const cachedRender = createRenderMixin();
-		assert.isUndefined(cachedRender.getChildrenNodes());
+		assert.deepEqual(cachedRender.getChildrenNodes(), []);
 		cachedRender.setState({ label: 'foo' });
 		assert.deepEqual(cachedRender.getChildrenNodes(), [ 'foo' ]);
 	},

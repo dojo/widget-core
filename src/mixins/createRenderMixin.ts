@@ -191,7 +191,7 @@ const createRenderMixin = createStateful
 			},
 
 			getChildrenNodes(this: RenderMixin<RenderMixinState>): (VNode | string)[] {
-				return this.state.label ? [ this.state.label ] : undefined;
+				return this.state.label ? [ this.state.label ] : [];
 			},
 
 			get id(this: RenderMixin<RenderMixinState>): string {
