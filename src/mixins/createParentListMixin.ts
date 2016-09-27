@@ -52,11 +52,11 @@ export interface ParentListMixinFactory extends ComposeFactory<ParentListMixin<C
 const childrenMap = new WeakMap<ParentListMixin<Child>, List<Child>>();
 
 const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, ParentListMixinOptions<Child>>({
-		get children(this: ParentListMixin<Child> & { invalidate?(): void; } ): List<Child> {
+		get children(this: ParentListMixin<Child>): List<Child> {
 			return childrenMap.get(this);
 		},
 
-		set children(this: ParentListMixin<Child> & { invalidate?(): void; }, value: List<Child>) {
+		set children(this: ParentListMixin<Child>, value: List<Child>) {
 			if (!value.equals(childrenMap.get(this))) {
 				value.forEach((widget) => {
 					// Workaround for https://github.com/facebook/immutable-js/pull/919
