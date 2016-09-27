@@ -260,7 +260,7 @@ const createRenderMixin = createStateful
 
 			tagName: 'div'
 		},
-		initialize(instance, options = {}) {
+		initialize(instance: RenderMixin<RenderMixinState>, options: RenderMixinOptions<RenderMixinState> = {}) {
 			const { tagName, render, parent } = options;
 			instance.tagName = tagName || instance.tagName;
 			instance.render = render || instance.render;
