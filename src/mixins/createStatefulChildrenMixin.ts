@@ -128,8 +128,9 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	/* Assume this function cannot be called without the widget being in the management map */
 	const internalState = managementMap.get(parent);
 	/* Initialize cache */
+	const { cache = new Map<string, Child>() } = internalState;
 	if (!internalState.cache) {
-		internalState.cache = new Map<string, Child>();
+		internalState.cache = cache;
 	}
 	/* Initialize current children IDs */
 	if (!internalState.current) {
@@ -159,12 +160,12 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 		// Workaround for https://github.com/facebook/immutable-js/pull/919
 		// istanbul ignore else
 		if (id !== undefined && key !== undefined) {
-			if (internalState.cache.has(id)) {
+			if (cache.has(id)) {
 				if (childrenIsList) {
-					childrenList[key] = internalState.cache.get(id);
+					childrenList[key] = <Child> cache.get(id);
 				}
 				else {
-					childrenMap[id] = internalState.cache.get(id);
+					childrenMap[id] = <Child> cache.get(id);
 				}
 			}
 			else {
@@ -193,7 +194,7 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 					else {
 						childrenMap[id] = widget;
 					}
-					internalState.cache.set(id, widget);
+					cache.set(id, widget);
 				});
 				/* Some parents have a List, some have a Map, so setting them varies */
 				parent.children = isList(parent.children) ? List(childrenList) : ImmutableMap<string, Child>(childrenMap);
