@@ -337,6 +337,42 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		}
 	});
 
-const defaultProjector: Projector = typeof global.document === 'undefined' ? null : createProjector();
+// Projectors cannot be created outside of browser environments. Ensure that a default projector can always be
+// exported, even if it can't do anything.
+const createStubbedProjector: ProjectorFactory = compose({
+		getNodeAttributes(): VNodeProperties {
+			throw new Error('Projector is stubbed');
+		},
+		render(): VNode {
+			throw new Error('Projector is stubbed');
+		},
+		attach(): Promise<Handle> {
+			throw new Error('Projector is stubbed');
+		},
+		invalidate() {
+			throw new Error('Projector is stubbed');
+		},
+		setRoot(root: Element) {
+			throw new Error('Projector is stubbed');
+		},
+		get projector(): MaquetteProjector {
+			throw new Error('Projector is stubbed');
+		},
+		get root(): Element {
+			throw new Error('Projector is stubbed');
+		},
+		get document(): Document {
+			throw new Error('Projector is stubbed');
+		},
+		get state(): ProjectorState {
+			throw new Error('Projector is stubbed');
+		}
+	})
+	.mixin(createVNodeEvented)
+	.mixin(createParentListMixin);
+
+const defaultProjector: Projector = typeof global.document === 'undefined' ?
+	createStubbedProjector() :
+	createProjector();
 
 export default defaultProjector;
