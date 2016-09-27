@@ -140,7 +140,7 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 	 * no newer state is overriden. */
 	const generation = ++internalState.generation;
 
-	const currentChildrenIDs = List(evt.state.children);
+	const currentChildrenIDs = evt.state.children ? List(evt.state.children) : List<string>();
 	if (currentChildrenIDs.equals(internalState.current)) {
 		/* There are no changes to the children */
 		return;
@@ -240,7 +240,8 @@ function manageChildrenState(evt: ChildListEvent<any, Child>) {
 		currentChildrenIDs = List(evtChildren.keys());
 	}
 
-	if (!currentChildrenIDs.equals(List(parent.state.children))) {
+	const storedChildren = parent.state.children ? List(parent.state.children) : List<string>();
+	if (!currentChildrenIDs.equals(storedChildren)) {
 		const children = currentChildrenIDs.toArray();
 		parent.setState({ children });
 	}
