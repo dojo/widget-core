@@ -107,8 +107,9 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 	// Assume this function cannot be called without the widget being in the management map.
 	const internalState = managementMap.get(widget);
 	// Initialize cache.
+	const { cache = new Map<string | symbol, EventedListener<TargettedEventObject>>() } = internalState;
 	if (!internalState.cache) {
-		internalState.cache = new Map<string | symbol, Actionable<TargettedEventObject>>();
+		internalState.cache = cache;
 	}
 	// Increment the generation vector. Used when listeners are replaced asynchronously to ensure
 	// no newer state is overriden.
@@ -122,7 +123,7 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 	const newListeners: EventedListenersMap = {};
 	// `promise` will be undefined if all actions are resolved synchronously
 	const promise = eventTypes.reduce<Promise<void>>((promise, eventType) => {
-		const [ value, listenersPromise ] = resolveListeners(internalState.registry, internalState.cache, listeners[eventType]);
+		const [ value, listenersPromise ] = resolveListeners(internalState.registry, cache, listeners[eventType]);
 		if (value) {
 			newListeners[eventType] = value;
 			return promise;
