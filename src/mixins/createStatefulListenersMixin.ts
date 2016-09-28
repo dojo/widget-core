@@ -122,7 +122,7 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 
 	const newListeners: EventedListenersMap = {};
 	// `promise` will be undefined if all actions are resolved synchronously
-	const promise = eventTypes.reduce<Promise<void>>((promise, eventType) => {
+	const promise = eventTypes.reduce<Promise<void> | undefined>((promise, eventType) => {
 		const [ value, listenersPromise ] = resolveListeners(internalState.registry, cache, listeners[eventType]);
 		if (value) {
 			newListeners[eventType] = value;
