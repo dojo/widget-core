@@ -17,7 +17,7 @@ import { NodeAttributeFunction } from './createRenderMixin';
 export type VNodeListenerReturn = boolean | undefined | null;
 
 export interface VNodeListeners {
-	[on: string]: (ev?: TargettedEventObject) => VNodeListenerReturn;
+	[on: string]: undefined | ((ev?: TargettedEventObject) => VNodeListenerReturn);
 	ontouchcancel?(ev?: TouchEvent): VNodeListenerReturn;
 	ontouchend?(ev?: TouchEvent): VNodeListenerReturn;
 	ontouchmove?(ev?: TouchEvent): VNodeListenerReturn;
