@@ -115,6 +115,7 @@ const createParentMapMixin: ParentMapMixinFactory = compose<ParentMap<Child>, Pa
 		}
 	})
 	.mixin({
+		className: 'ParentMapMixin',
 		mixin: createEvented,
 		initialize(instance, options) {
 			childrenMap.set(instance, Map<string, Child>());

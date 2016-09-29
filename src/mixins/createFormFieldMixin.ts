@@ -109,7 +109,7 @@ const createFormMixin: FormMixinFactory = compose({
 				const props: VNodeProperties = {};
 
 				if (this.type) {
-					props['type'] = this.type;
+					props.type = this.type;
 				}
 				/* value should always be copied */
 				props.value = this.value;
@@ -117,7 +117,7 @@ const createFormMixin: FormMixinFactory = compose({
 					props.name = this.state.name;
 				}
 				if (this.state.disabled) {
-					props['disabled'] = 'disabled';
+					props.disabled = true;
 				}
 
 				return props;
@@ -129,6 +129,7 @@ const createFormMixin: FormMixinFactory = compose({
 		}
 	})
 	.mixin({
+		className: 'FormFieldMixin',
 		mixin: createStateful,
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,

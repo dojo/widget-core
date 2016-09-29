@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createVNodeEvented from '../../../src/mixins/createVNodeEvented';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createVNodeEvented',
@@ -117,5 +118,12 @@ registerSuite({
 			vnodeEvented.emit({ type: 'touchcancel' });
 			assert.strictEqual(count, 1);
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createVNodeEvented();
+		assert.strictEqual((<any> closeable).toString(), '[object VNodeEvented]');
 	}
 });

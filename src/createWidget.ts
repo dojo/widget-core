@@ -13,6 +13,7 @@ export interface WidgetFactory extends ComposeFactory<Widget<WidgetState>, Widge
 }
 
 const createWidget: WidgetFactory = createRenderMixin
-	.mixin(createVNodeEvented);
+	.mixin(createVNodeEvented)
+	.extend('Widget', {});
 
 export default createWidget;

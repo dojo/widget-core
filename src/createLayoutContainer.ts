@@ -17,7 +17,7 @@ const createContainer: LayoutContainerFactory = createWidget
 	.mixin(createParentListMixin)
 	.mixin(createRenderableChildrenMixin)
 	.mixin(createStatefulChildrenMixin)
-	.extend({
+	.extend('LayoutContainer', {
 		tagName: 'dojo-container-layout'
 	});
 

@@ -164,6 +164,7 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 
 const createStatefulListenersMixin: StatefulListenersMixinFactory = createStateful
 	.mixin({
+		className: 'StatefulListenersMixin',
 		initialize(instance: StatefulListeners<any>, { registryProvider, state }: StatefulListenersOptions<any> = {}) {
 			if (registryProvider) {
 				const registry = registryProvider.get('actions');

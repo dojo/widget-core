@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createCloseableMixin from '../../../src/mixins/createCloseableMixin';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createCloseableMixin',
@@ -113,5 +114,12 @@ registerSuite({
 				assert.strictEqual(count, 0, 'destroy should not have been called');
 			});
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createCloseableMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object CloseableMixin]');
 	}
 });

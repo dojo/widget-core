@@ -8,6 +8,7 @@ import { Child, RegistryProvider } from '../../../src/mixins/interfaces';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/mixins/createDestroyable';
 import { h } from 'maquette';
+import { hasConfigurableName } from '../../support/util';
 
 const widget1 = createRenderMixin();
 const widget2 = createRenderMixin();
@@ -779,5 +780,12 @@ registerSuite({
 					assert.strictEqual(err.message, 'Unable to resolve registry');
 				}));
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createStatefulChildrenMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object StatefulChildrenMixin]');
 	}
 });

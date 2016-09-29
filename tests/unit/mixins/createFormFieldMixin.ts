@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createFormFieldMixin, { ValueChangeEvent } from '../../../src/mixins/createFormFieldMixin';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createFormFieldMixin',
@@ -112,7 +113,7 @@ registerSuite({
 			assert.strictEqual(nodeAttributes['type'], 'foo');
 			assert.strictEqual(nodeAttributes['value'], 'bar');
 			assert.strictEqual(nodeAttributes['name'], 'baz');
-			assert.strictEqual(nodeAttributes['disabled'], 'disabled');
+			assert.isTrue(nodeAttributes['disabled']);
 
 			formfield.setState({ disabled: false });
 
@@ -142,5 +143,12 @@ registerSuite({
 			assert.isUndefined(formfield.state.value);
 			assert.strictEqual(nodeAttributes['value'], '');
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createFormFieldMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object FormFieldMixin]');
 	}
 });

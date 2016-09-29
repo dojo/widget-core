@@ -97,6 +97,7 @@ const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, Par
 		}
 	})
 	.mixin({
+		className: 'ParentListMixin',
 		mixin: createEvented,
 		initialize(instance, options) {
 			childrenMap.set(instance, List<any>());

@@ -4,6 +4,7 @@ import { Actionable, TargettedEventObject } from 'dojo-compose/mixins/createEven
 import Promise from 'dojo-shim/Promise';
 import createStatefulListenersMixin from '../../../src/mixins/createStatefulListenersMixin';
 import { RegistryProvider } from '../../../src/mixins/interfaces';
+import { hasConfigurableName } from '../../support/util';
 
 type Action = Actionable<TargettedEventObject>;
 
@@ -299,5 +300,12 @@ registerSuite({
 			assert.equal(action2.callCount, 0);
 			assert.equal(action3.callCount, 2);
 		});
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createStatefulListenersMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object StatefulListenersMixin]');
 	}
 });

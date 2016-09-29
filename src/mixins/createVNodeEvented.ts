@@ -139,6 +139,7 @@ function handlesArraytoHandle(handles: Handle[]): Handle {
 
 const createVNodeEvented: VNodeEventedFactory = createEvented
 	.mixin({
+		className: 'VNodeEvented',
 		mixin: {
 			listeners: <VNodeListeners> null,
 

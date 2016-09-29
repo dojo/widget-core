@@ -229,6 +229,7 @@ function isCreateChildrenMap<C extends Child, O extends StatefulOptions<S>, S ex
 
 const createStatefulChildrenMixin: StatefulChildrenMixinFactory = createStateful
 	.mixin({
+		className: 'StatefulChildrenMixin',
 		mixin: <StatefulChildren<any>> {
 			createChildren(
 				this: StatefulChildrenMixin<Child, StatefulChildrenState>,

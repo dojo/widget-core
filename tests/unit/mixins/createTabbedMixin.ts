@@ -3,6 +3,7 @@ import * as assert from 'intern/chai!assert';
 import createTabbedMixin from '../../../src/mixins/createTabbedMixin';
 import createPanel from '../../../src/createPanel';
 import { from as arrayFrom } from 'dojo-shim/array';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/ceateTabbedMixin',
@@ -113,5 +114,12 @@ registerSuite({
 	'destroy()'() {
 		const tabbed = createTabbedMixin();
 		return tabbed.destroy();
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createTabbedMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object TabbedMixin]');
 	}
 });

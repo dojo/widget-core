@@ -14,7 +14,7 @@ export interface ButtonFactory extends ComposeFactory<Button, ButtonOptions> { }
 const createButton: ButtonFactory = createRenderMixin
 	.mixin(createFormFieldMixin)
 	.mixin(createVNodeEvented)
-	.extend({
+	.extend('Button', {
 		tagName: 'button',
 		type: 'button'
 	});

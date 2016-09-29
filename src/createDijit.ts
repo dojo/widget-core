@@ -217,6 +217,7 @@ const dijitDataWeakMap = new WeakMap<Dijit<DijitWidget>, DijitData<DijitWidget>>
  */
 const createDijit: DijitFactory = createRenderMixin
 	.mixin({
+		className: 'Dijit',
 		mixin: <DijitMixin<DijitWidget>> {
 			render(this: Dijit<DijitWidget>): VNode {
 				const afterCreate = dijitDataWeakMap.get(this).afterCreate;
@@ -248,6 +249,7 @@ const createDijit: DijitFactory = createRenderMixin
 		}
 	})
 	.mixin({
+		className: 'Dijit',
 		mixin: createEvented,
 		initialize(instance: Dijit<DijitWidget>) {
 			instance.own(instance.on('statechange', (event) => {
@@ -267,6 +269,7 @@ const createDijit: DijitFactory = createRenderMixin
 		}
 	})
 	.mixin({
+		className: 'Dijit',
 		mixin: createDestroyable,
 		initialize(instance: Dijit<DijitWidget>) {
 			instance.own({

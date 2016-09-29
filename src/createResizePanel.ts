@@ -141,6 +141,7 @@ const createResizePanel: ResizePanelFactory = createWidget
 	.mixin(createRenderableChildrenMixin)
 	.mixin(createStatefulChildrenMixin)
 	.mixin({
+		className: 'ResizePanel',
 		mixin: <ResizePanelMixin> {
 			nodeAttributes: [
 				function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
@@ -176,6 +177,7 @@ const createResizePanel: ResizePanelFactory = createWidget
 		tagName: 'dojo-panel-resize'
 	})
 	.mixin({
+		className: 'ResizePanel',
 		mixin: createDestroyable,
 		initialize(instance) {
 			resizeNodePropertiesMap.set(instance, {});
