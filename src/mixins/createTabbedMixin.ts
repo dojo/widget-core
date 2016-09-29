@@ -236,10 +236,18 @@ const createTabbedMixin: TabbedMixinFactory = createRenderMixin
 
 			children.forEach(([ , tab ], idx) => {
 				const isActiveTab = tab === activeTab;
-				if (isActiveTab || (childrenNodes[idx] && childrenNodes[idx].properties.classes['visible'])) {
+				const node = childrenNodes[idx];
+				const isVisibleNode = node &&
+					node.properties &&
+					node.properties.classes &&
+					node.properties.classes['visible'];
+
+				if (isActiveTab || isVisibleNode) {
 					tab.invalidate();
 					const tabVNode = tab.render();
-					tabVNode.properties.classes['visible'] = isActiveTab;
+					if (tabVNode.properties && tabVNode.properties.classes) {
+						tabVNode.properties.classes['visible'] = isActiveTab;
+					}
 					childrenNodes[idx] = tabVNode;
 				}
 				/* else, this tab isn't active and hasn't been previously rendered */
