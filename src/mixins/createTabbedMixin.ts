@@ -94,7 +94,7 @@ function getActiveTab(tabbed: TabbedMixin<TabbedChild>): TabbedChild {
 		if (!tab) {
 			return false;
 		}
-		return tab.state.active;
+		return tab.state.active === true;
 	});
 	/* TODO: when a tab closes, instead of going back to the previous active tab, it will always
 	 * revert to the first tab, maybe it would be better to keep track of a stack of tabs? */
