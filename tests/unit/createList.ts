@@ -15,11 +15,11 @@ registerSuite({
 			{ id: 5, label: 'qux' }
 		];
 		list.setState({ items });
-		assert.strictEqual(list.state.items.length, 5);
+		assert.strictEqual(list.state.items!.length, 5);
 		items.pop();
-		assert.strictEqual(list.state.items.length, 5);
+		assert.strictEqual(list.state.items!.length, 5);
 		list.setState({ items });
-		assert.strictEqual(list.state.items.length, 4);
+		assert.strictEqual(list.state.items!.length, 4);
 	},
 
 	render() {
