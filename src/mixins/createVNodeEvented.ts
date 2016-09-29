@@ -137,10 +137,12 @@ function handlesArraytoHandle(handles: Handle[]): Handle {
 	};
 }
 
+const UNINITIALIZED_LISTENERS = Object.freeze({});
+
 const createVNodeEvented: VNodeEventedFactory = createEvented
 	.mixin({
 		mixin: {
-			listeners: <VNodeListeners> null,
+			listeners: UNINITIALIZED_LISTENERS,
 
 			nodeAttributes: [
 				function (this: VNodeEvented): VNodeProperties {
@@ -159,7 +161,7 @@ const createVNodeEvented: VNodeEventedFactory = createEvented
 							* determine if the value is unitialized here, ensuring that this.listeners is
 							* always valid.
 							*/
-							if (this.listeners === null) {
+							if (this.listeners === UNINITIALIZED_LISTENERS) {
 								this.listeners = {};
 							}
 							let type: string;
