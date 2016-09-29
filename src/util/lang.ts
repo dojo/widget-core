@@ -133,7 +133,7 @@ export function getRemoveHandle<C extends Child>(parent: Parent, child: C | C[] 
 				}
 				destroyed = true;
 				if (c.parent === parent) {
-					c.parent = undefined;
+					c.parent = null;
 				}
 			}
 		});
