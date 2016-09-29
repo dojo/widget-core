@@ -206,7 +206,10 @@ const createTabbedMixin: TabbedMixinFactory = createRenderMixin
 
 			function getTabChildVNode(tab: TabbedChild): (VNode | string)[] {
 				const tabListeners = getTabListeners(tabbed, tab);
-				const nodes = [ h('div.tab-label', { onclick: tabListeners.onclickTabListener }, [ tab.state.label ]) ];
+				const nodes: VNode[] = [];
+				if (tab.state.label) {
+					nodes.push(h('div.tab-label', { onclick: tabListeners.onclickTabListener }, [ tab.state.label ]));
+				}
 				if (tab.state.closeable) {
 					nodes.push(h('div.tab-close', { onclick: tabListeners.onclickTabCloseListener }, [ 'X' ]));
 				}
