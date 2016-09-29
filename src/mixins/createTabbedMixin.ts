@@ -204,7 +204,7 @@ const createTabbedMixin: TabbedMixinFactory = createRenderMixin
 			const tabbed = this;
 			const activeTab = getActiveTab(tabbed);
 
-			function getTabChildVNode(tab: TabbedChild): (VNode | string)[] {
+			function getTabChildVNode(tab: TabbedChild): VNode[] {
 				const tabListeners = getTabListeners(tabbed, tab);
 				const nodes: VNode[] = [];
 				if (tab.state.label) {
