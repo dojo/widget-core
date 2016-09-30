@@ -92,7 +92,7 @@ registerSuite({
 				children: { foo, bar }
 			});
 			const [ tabBar ] = tabbed.render().children;
-			tabBar.children[0].children[0].properties.onclick(<any> {
+			tabBar.children[0].children[0].properties.onclick!(<any> {
 				preventDefault() { count++; }
 			});
 			assert.strictEqual(tabbed.activeChild, foo);
