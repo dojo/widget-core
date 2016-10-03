@@ -224,7 +224,7 @@ const createRenderMixin = createStateful
 						widgetClassesMap.set(this, this.classes);
 					}
 
-					return Object.assign(baseIdProp, { key: this, classes, styles });
+					return assign(baseIdProp, { key: this, classes, styles });
 				}
 			],
 
