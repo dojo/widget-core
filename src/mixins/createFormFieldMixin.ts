@@ -116,9 +116,8 @@ const createFormMixin: FormMixinFactory = compose({
 				if (this.state && this.state.name) {
 					props.name = this.state.name;
 				}
-				if (this.state.disabled) {
-					props.disabled = true;
-				}
+
+				props.disabled = Boolean(this.state.disabled);
 
 				return props;
 			}

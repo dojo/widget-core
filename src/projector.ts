@@ -24,6 +24,12 @@ export interface ProjectorOptions extends ParentListMixinOptions<Child>, Evented
 	 * provided (see `AttachOptions`). The attach type determines how the projector is attached.
 	 */
 	autoAttach?: boolean | AttachType;
+
+	/**
+	 * If `true`, will configure the projector to support css transitions using `cssTransitions` global object.
+	 * The projector will fail create if the options is true but the global object cannot be found.
+	 */
+	cssTransitions?: boolean;
 }
 
 export interface AttachOptions {
@@ -268,8 +274,17 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 	.mixin({
 		className: 'Projector',
 		mixin: createParentListMixin,
-		initialize(instance: Projector, { autoAttach = false, root = document.body }: ProjectorOptions = {}) {
-			const projector = createMaquetteProjector({});
+		initialize(instance: Projector, { cssTransitions = false, autoAttach = false, root = document.body }: ProjectorOptions = {}) {
+			const options: { transitions?: any } = {};
+			if (cssTransitions) {
+				if (global.cssTransitions) {
+					options.transitions = global.cssTransitions;
+				}
+				else {
+					throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
+				}
+			}
+			const projector = createMaquetteProjector(options);
 			projectorDataMap.set(instance, {
 				projector,
 				root,
