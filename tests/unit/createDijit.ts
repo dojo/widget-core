@@ -2,6 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createDijit from '../../src/createDijit';
 import * as Dijit from '../support/dijit/Dijit';
+import { hasConfigurableName } from '../support/util';
 
 registerSuite({
 	name: 'createDijit',
@@ -217,5 +218,12 @@ registerSuite({
 					}));
 			}, 50);
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const dijit = createDijit();
+		assert.strictEqual((<any> dijit).toString(), '[object Dijit]');
 	}
 });

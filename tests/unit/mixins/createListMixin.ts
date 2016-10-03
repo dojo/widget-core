@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createListMixin from '../../../src/mixins/createListMixin';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createListMixin',
@@ -44,5 +45,12 @@ registerSuite({
 				throw Error('vnode is string');
 			}
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createListMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object ListMixin]');
 	}
 });

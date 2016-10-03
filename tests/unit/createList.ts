@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createList from '../../src/createList';
+import { hasConfigurableName } from '../support/util';
 
 registerSuite({
 	name: 'createList',
@@ -43,5 +44,12 @@ registerSuite({
 		list.setState({ items });
 		vnode = list.render();
 		assert.strictEqual(vnode.children[0].children.length, 4);
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const list = createList();
+		assert.strictEqual((<any> list).toString(), '[object List]');
 	}
 });

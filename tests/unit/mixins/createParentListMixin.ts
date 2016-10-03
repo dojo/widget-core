@@ -3,6 +3,7 @@ import * as assert from 'intern/chai!assert';
 import createParentListMixin from '../../../src/mixins/createParentListMixin';
 import createRenderMixin from '../../../src/mixins/createRenderMixin';
 import { List } from 'immutable';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createParentMixin',
@@ -26,5 +27,12 @@ registerSuite({
 
 			parent.append(child);
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createParentListMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object ParentListMixin]');
 	}
 });

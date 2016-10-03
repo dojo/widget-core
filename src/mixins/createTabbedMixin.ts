@@ -186,7 +186,7 @@ const createTabbedMixin: TabbedMixinFactory = createRenderMixin
 	})
 	.mixin(createParentMapMixin)
 	.mixin(createDestroyable)
-	.extend({
+	.extend('TabbedMixin', {
 		tagName: 'dojo-panel-mixin',
 
 		getChildrenNodes(this: TabbedMixin<TabbedChild>): (VNode | string)[] {

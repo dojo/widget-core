@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createWidget from '../../src/createWidget';
+import { hasConfigurableName } from '../support/util';
 
 registerSuite({
 	name: 'createWidget',
@@ -48,5 +49,12 @@ registerSuite({
 		assert.strictEqual(Object.keys(nodeAttributes3).length, 6, 'should have six keys only');
 		assert.strictEqual(nodeAttributes3.id, 'foo');
 		assert.isFunction(nodeAttributes3.onclick, 'onclick is a function');
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const widget = createWidget();
+		assert.strictEqual((<any> widget).toString(), '[object Widget]');
 	}
 });

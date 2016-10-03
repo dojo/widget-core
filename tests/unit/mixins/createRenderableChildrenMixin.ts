@@ -5,6 +5,7 @@ import createRenderMixin from '../../../src/mixins/createRenderMixin';
 import { Child } from '../../../src/mixins/interfaces';
 import { List, Map } from 'immutable';
 import { VNode } from 'maquette';
+import { hasConfigurableName } from '../../support/util';
 
 type WithListChildren = RenderableChildrenMixin & { children?: List<Child>; };
 type WithMapChildren = RenderableChildrenMixin & { children?: Map<string, Child>; };
@@ -104,5 +105,12 @@ registerSuite({
 			const vnodes = parent.getChildrenNodes();
 			assert.strictEqual(vnodes.length, 0);
 		}
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createRenderableChildrenMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object RenderableChildrenMixin]');
 	}
 });

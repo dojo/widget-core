@@ -15,7 +15,7 @@ export interface TabbedPanelFactory extends ComposeFactory<TabbedPanel, TabbedPa
 const createTabbedPanel: TabbedPanelFactory = createWidget
 	.mixin(createTabbedMixin)
 	.mixin(createStatefulChildrenMixin)
-	.extend({
+	.extend('TabbedPanel', {
 		tagName: 'dojo-panel-tabbed'
 	});
 

@@ -8,6 +8,7 @@ import createDestroyable from 'dojo-compose/mixins/createDestroyable';
 import { ComposeFactory } from 'dojo-compose/compose';
 import global from 'dojo-core/global';
 import { Child } from '../../src/mixins/interfaces';
+import { hasConfigurableName } from '../support/util';
 
 const createRenderableChild = createDestroyable
 	.mixin(createRenderMixin) as ComposeFactory<Child, any>;
@@ -181,5 +182,11 @@ registerSuite({
 				attachHandle.destroy();
 			}), 300);
 		}).catch(dfd.reject);
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		assert.strictEqual((<any> projector).toString(), '[object Projector]');
 	}
 });

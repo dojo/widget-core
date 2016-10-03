@@ -21,7 +21,7 @@ const createPanel: PanelFactory = createWidget
 	.mixin(createParentListMixin)
 	.mixin(createRenderableChildrenMixin)
 	.mixin(createStatefulChildrenMixin)
-	.extend({
+	.extend('Panel', {
 		tagName: 'dojo-panel'
 	});
 

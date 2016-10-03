@@ -3,6 +3,7 @@ import * as assert from 'intern/chai!assert';
 import createRenderMixin from '../../../src/mixins/createRenderMixin';
 import { before } from 'dojo-core/aspect';
 import { createProjector } from '../../../src/projector';
+import { hasConfigurableName } from '../../support/util';
 
 registerSuite({
 	name: 'mixins/createRenderMixin',
@@ -128,5 +129,12 @@ registerSuite({
 		cachedRender.render();
 		cachedRender.invalidate();
 		assert.strictEqual(count, 1);
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createRenderMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object RenderMixin]');
 	}
 });

@@ -19,6 +19,7 @@ export interface TextInputFactory extends ComposeFactory<TextInput, TextInputOpt
 const createTextInput: TextInputFactory = createRenderMixin
 	.mixin(createFormFieldMixin)
 	.mixin({
+		className: 'TextInput',
 		mixin: createVNodeEvented,
 		initialize(instance) {
 			instance.own(instance.on('input', (event: TypedTargetEvent<HTMLInputElement>) => {
@@ -26,7 +27,7 @@ const createTextInput: TextInputFactory = createRenderMixin
 			}));
 		}
 	})
-	.extend({
+	.extend('TextInput', {
 		type: 'text',
 		tagName: 'input'
 	});

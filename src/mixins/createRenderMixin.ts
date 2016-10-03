@@ -159,6 +159,7 @@ const widgetClassesMap = new WeakMap<RenderMixin<RenderMixinState>, string[]>();
 
 const createRenderMixin = createStateful
 	.mixin<Render, RenderMixinOptions<RenderMixinState>>({
+		className: 'RenderMixin',
 		mixin: {
 			get classes(this: RenderMixin<RenderMixinState>): string[] {
 				return (this.state && this.state.classes) || shadowClasses.get(this);

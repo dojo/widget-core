@@ -30,6 +30,7 @@ export interface CloseableMixinFactory extends ComposeFactory<CloseableMixin<Clo
 
 const createCloseableMixin: CloseableMixinFactory = createStateful
 	.mixin({
+		className: 'CloseableMixin',
 		mixin: {
 			close(this: CloseableMixin<CloseableState>): Promise<boolean> {
 				if (this.state.closeable) {

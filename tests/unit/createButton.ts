@@ -1,6 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createButton, { ButtonState } from '../../src/createButton';
+import { hasConfigurableName } from '../support/util';
 
 registerSuite({
 	name: 'createButton',
@@ -29,7 +30,7 @@ registerSuite({
 		assert.strictEqual(vnode.text, 'bar');
 		assert.strictEqual(vnode.properties['data-widget-id'], 'foo');
 		assert.strictEqual(vnode.properties.name, 'baz');
-		assert.strictEqual(vnode.properties['type'], 'button');
+		assert.strictEqual(vnode.properties.type, 'button');
 		assert.isUndefined(vnode.children);
 	},
 	disable() {
@@ -46,6 +47,13 @@ registerSuite({
 			disabled: true
 		});
 		vnode = button.render();
-		assert.isTrue(vnode.properties['disabled']);
+		assert.isTrue(vnode.properties.disabled);
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const button = createButton();
+		assert.strictEqual((<any> button).toString(), '[object Button]');
 	}
 });

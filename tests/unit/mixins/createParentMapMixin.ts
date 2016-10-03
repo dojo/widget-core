@@ -5,6 +5,7 @@ import createRenderMixin from '../../../src/mixins/createRenderMixin';
 import { Child } from '../../../src/mixins/interfaces';
 import { Map } from 'immutable';
 import { from as arrayFrom } from 'dojo-shim/array';
+import { hasConfigurableName } from '../../support/util';
 
 type ParentMapWithInvalidate = ParentMap<Child> & { invalidate?(): void; };
 
@@ -125,5 +126,12 @@ registerSuite({
 		assert.strictEqual(called, 2);
 		parent.clear();
 		assert.strictEqual(called, 3);
+	},
+	'toString()'(this: any) {
+		if (!hasConfigurableName()) {
+			this.skip('Environment does not allow renaming of functions');
+		}
+		const closeable = createParentMapMixin();
+		assert.strictEqual((<any> closeable).toString(), '[object ParentMapMixin]');
 	}
 });

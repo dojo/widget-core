@@ -27,7 +27,7 @@ export interface RenderableChildrenMixin {
 
 export interface RenderableChildrenFactory extends ComposeFactory<RenderableChildrenMixin, RenderableChildrenOptions> {}
 
-const createRenderableChildrenMixin: RenderableChildrenFactory = compose<RenderableChildrenMixin, RenderableChildrenOptions>({
+const createRenderableChildrenMixin: RenderableChildrenFactory = compose<RenderableChildrenMixin, RenderableChildrenOptions>('RenderableChildrenMixin', {
 	/* When this gets mixed in, if we had the children as part of the interface, we would end up overwritting what is
 	 * likely a get accessor for the children, so to protect ourselves, we won't have it part of the interface */
 	getChildrenNodes(this: RenderableChildrenMixin & { children: List<Child>; }): (VNode | string)[] {

@@ -30,7 +30,7 @@
     "dojo-shim": ">=2.0.0-alpha.4",
     "dojo-stores": ">=2.0.0-alpha.1",
     "immutable": "^3.8.1",
-    "maquette": "^2.3.5"
+    "maquette": "~2.3.7"
   },
   "devDependencies": {
     "@types/chai": "3.4.*",
@@ -57,6 +57,6 @@
     "jsdom": "^9.5.0",
     "remap-istanbul": "^0.6.4",
     "tslint": "^3.11.0",
-    "typescript": "^2.0.3"
+    "typescript": "~2.0.3"
   }
 }

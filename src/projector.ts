@@ -272,14 +272,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		}
 	})
 	.mixin({
-		mixin: createVNodeEvented,
-		initialize(instance) {
-			/* We have to stub out listeners for Maquette, otherwise it won't allow us to change them down the road */
-			instance.on('touchend', function () {});
-			instance.on('touchmove', function () {});
-		}
-	})
-	.mixin({
+		className: 'Projector',
 		mixin: createParentListMixin,
 		initialize(instance: Projector, { cssTransitions = false, autoAttach = false, root = document.body }: ProjectorOptions = {}) {
 			const options: { transitions?: any } = {};
@@ -310,6 +303,15 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 					this.invalidate();
 				}
 			}
+		}
+	})
+	.mixin({
+		className: 'Projector',
+		mixin: createVNodeEvented,
+		initialize(instance) {
+			/* We have to stub out listeners for Maquette, otherwise it won't allow us to change them down the road */
+			instance.on('touchend', function () {});
+			instance.on('touchmove', function () {});
 		}
 	});
 
