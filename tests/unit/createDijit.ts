@@ -75,7 +75,7 @@ registerSuite({
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
 			setTimeout(dfd.callback(() => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
@@ -94,7 +94,7 @@ registerSuite({
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 			setTimeout(dfd.callback(() => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
@@ -113,7 +113,7 @@ registerSuite({
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 			setTimeout(dfd.callback(() => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
@@ -135,7 +135,7 @@ registerSuite({
 
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
 		},
 		'afterCreate w/ bad mid'(this: any) {
 			const dfd = this.async();
@@ -152,7 +152,7 @@ registerSuite({
 
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 		},
 		'afterCreate w/ Ctor throws'(this: any) {
 			const dfd = this.async(100);
@@ -170,7 +170,7 @@ registerSuite({
 
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 		},
 		'afterCreate - default empty params'(this: any) {
 			const dfd = this.async();
@@ -181,7 +181,7 @@ registerSuite({
 
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
-			vnode.properties.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties, vnode.children);
+			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 
 			setTimeout(dfd.callback(() => {
 				assert.deepEqual(dijit.dijit.spiedParams, {});
@@ -196,12 +196,12 @@ registerSuite({
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
 			document.body.appendChild(domNode);
-			const afterCreate = vnode.properties.afterCreate;
+			const afterCreate = vnode.properties!.afterCreate;
 			afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
 			setTimeout(dfd.callback(() => {
 				assert(dijit.dijit);
 				const newVNode = dijit.render();
-				assert.strictEqual(newVNode.properties.afterCreate, afterCreate, 'should not change listeners');
+				assert.strictEqual(newVNode.properties!.afterCreate, afterCreate, 'should not change listeners');
 				document.body.removeChild(domNode);
 				const newDomNode = document.createElement(vnode.vnodeSelector);
 				document.body.appendChild(newDomNode);
@@ -229,7 +229,7 @@ registerSuite({
 
 			const vnode = dijit.render();
 			const domNode = document.createElement(vnode.vnodeSelector);
-			const afterCreate = vnode.properties.afterCreate;
+			const afterCreate = vnode.properties!.afterCreate;
 			afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
 			setTimeout(() => {
 				const dijitWidget = dijit.dijit;

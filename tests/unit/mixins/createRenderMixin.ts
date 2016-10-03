@@ -64,7 +64,7 @@ registerSuite({
 		assert.deepEqual(result1, result3);
 		assert.deepEqual(result2, result4);
 		assert.strictEqual(result1.vnodeSelector, 'div');
-		assert.strictEqual(result1.properties['data-widget-id'], 'foo');
+		assert.strictEqual(result1.properties!['data-widget-id'], 'foo');
 		assert.strictEqual(result1.text, 'foo');
 	},
 	'id': {
