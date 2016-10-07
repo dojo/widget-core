@@ -73,7 +73,7 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	function onmousemoveListener(evt: MouseEvent): boolean {
 		const original = resizingMap.get(resizePanel);
 		if (!original) {
-			return;
+			return false;
 		}
 
 		evt.preventDefault();
@@ -104,8 +104,8 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	}
 
 	function ontouchendListener(evt: TouchEvent): boolean {
-		const originalWidth = resizingMap.get(resizePanel);
-		if (originalWidth) {
+		const original = resizingMap.get(resizePanel);
+		if (original) {
 			evt.preventDefault();
 			resizingMap.delete(resizePanel);
 			ontouchendHandle.destroy();
@@ -169,6 +169,7 @@ const createResizePanel: ResizePanelFactory = createWidget
 				function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
 					const styles = assign({}, attributes.styles);
 					styles['width'] = this.width;
+					styles['height'] = this.height;
 					return { styles };
 				}
 			],
@@ -185,6 +186,7 @@ const createResizePanel: ResizePanelFactory = createWidget
 				const resizePanel: ResizePanel = this;
 				resizePanel.setState({ width: value });
 			},
+
 			get height(this: ResizePanel): string {
 				return this.state && this.state.height ? this.state.height : '100px';
 			},

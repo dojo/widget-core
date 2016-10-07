@@ -5,13 +5,8 @@
 /node_modules
 /typings
 .baseDir.ts
-<<<<<<< 816e8f38002df6a4ac8c8d4b26cc23af4c371b09
 .tscache
 coverage-unmapped.json
+coverage-final.json
+coverage-final.lcov
 npm-debug.log
-=======
-html-report
-*.lcov
-src/themes/structural/_generated/*.css
-src/themes/structural/modules/*.ts
->>>>>>> Address PR feedback

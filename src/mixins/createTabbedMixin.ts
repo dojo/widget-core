@@ -240,14 +240,13 @@ const createTabbedMixin: TabbedMixinFactory = createRenderMixin
 				const node = childrenNodes[idx];
 				const isVisibleNode = node &&
 					node.properties &&
-					node.properties.classes &&
 					node.properties['data-visible'];
 
 				if (isActiveTab || isVisibleNode) {
 					tab.invalidate();
 					const tabVNode = tab.render();
-					if (tabVNode.properties && tabVNode.properties.classes) {
-						tabVNode.properties['data-visible'] = String(isActiveTab);
+					if (tabVNode.properties) {
+						(tabVNode as any).properties['data-visible'] = String(isActiveTab);
 					}
 					childrenNodes[idx] = tabVNode;
 				}

@@ -5,7 +5,7 @@ import createTabbedPanel from '../createTabbedPanel';
 import createButton from '../createButton';
 import createResizePanel from '../createResizePanel';
 import { Child, RegistryProvider } from '../mixins/interfaces';
-import projector from '../projector';
+import { createProjector } from '../projector';
 import Promise from 'dojo-shim/Promise';
 import { ComposeFactory } from 'dojo-compose/compose';
 
