@@ -38,17 +38,11 @@ export interface NodeAttributeFunction {
 
 export interface Render {
 	/**
-	 * An array of strings that represent classes to be set on the widget.  If classes are present in the state, getting and
-	 * setting classes is done on the state, otherwise they are shadowed on the instance.
-	 */
-	classes: string[];
-
-	/**
 	 * An array of strings that represent widget classes to be applied to all widget instances. Typically classes that
 	 * represent the internal widget structure. Widget classes for all mixed in factories will be merged into a final
 	 * array that is used by `getSelectorAndWidgetClasses` to return the readonly classes during the render.
 	 */
-	readonly widgetClasses: string[];
+	readonly classes: string[];
 
 	/**
 	 * Returns the node attribute properties to be used by a render function
@@ -95,12 +89,6 @@ export interface Render {
 	render(): VNode;
 
 	/**
-	 * A has of styles that should be applied to root VNode of the widget.  If styles are present in the state, getting and
-	 * setting classes is done on the state, otherwiser they are shadowed on the instance.
-	 */
-	styles: StylesHash;
-
-	/**
 	 * The tag name to be used
 	 */
 	tagName: string;
@@ -142,16 +130,6 @@ const dirtyMap = new Map<RenderMixin<RenderMixinState>, boolean>();
 const renderCache = new WeakMap<RenderMixin<RenderMixinState>, VNode>();
 
 /**
- * A weak map to shadow the classes for the widget
- */
-const shadowClasses = new WeakMap<RenderMixin<RenderMixinState>, string[]>();
-
-/**
- * A weak map to shadow the styles for the widget
- */
-const shadowStyles = new WeakMap<RenderMixin<RenderMixinState>, StylesHash>();
-
-/**
  * The counter for generating a unique ID
  */
 let cachedRenderCount = 0;
@@ -173,20 +151,6 @@ const widgetClassesMap = new WeakMap<RenderMixin<RenderMixinState>, string[]>();
 const createRenderMixin = createStateful
 	.mixin<Render, RenderMixinOptions<RenderMixinState>>({
 		mixin: {
-			get classes(this: RenderMixin<RenderMixinState>): string[] {
-				return (this.state && this.state.classes) || shadowClasses.get(this);
-			},
-
-			set classes(this: RenderMixin<RenderMixinState>, value: string[]) {
-				if (this.state.classes) {
-					this.setState({ classes: value });
-				}
-				else {
-					shadowClasses.set(this, value);
-					this.invalidate();
-				}
-			},
-
 			getNodeAttributes(this: RenderMixin<RenderMixinState>, overrides?: VNodeProperties): VNodeProperties {
 				const props: VNodeProperties = {};
 
@@ -204,7 +168,7 @@ const createRenderMixin = createStateful
 			},
 
 			getSelectorAndWidgetClasses(this: RenderMixin<RenderMixinState>): string {
-				const selectorAndClasses = [this.tagName, ...this.widgetClasses];
+				const selectorAndClasses = [this.tagName, ...this.classes];
 				return selectorAndClasses.join('.');
 			},
 
@@ -231,15 +195,15 @@ const createRenderMixin = createStateful
 			nodeAttributes: [
 				function (this: RenderMixin<RenderMixinState>): VNodeProperties {
 					const baseIdProp = this.state && this.state.id ? { 'data-widget-id': this.state.id } : {};
-					const styles = this.styles || {};
+					const { styles = {} } = this.state;
 					const classes: { [index: string]: boolean; } = {};
 					const widgetClasses = widgetClassesMap.get(this);
 
 					widgetClasses.forEach((c) => classes[c] = false);
 
-					if (this.classes) {
-						this.classes.forEach((c) => classes[c] = true);
-						widgetClassesMap.set(this, this.classes);
+					if (this.state && this.state.classes) {
+						this.state.classes.forEach((c) => classes[c] = true);
+						widgetClassesMap.set(this, this.state.classes);
 					}
 
 					return assign(baseIdProp, { key: this, classes, styles });
@@ -262,21 +226,7 @@ const createRenderMixin = createStateful
 				}
 			},
 
-			get styles(this: RenderMixin<RenderMixinState>): StylesHash {
-				return (this.state && this.state.styles) || shadowStyles.get(this);
-			},
-
-			set styles(this: RenderMixin<RenderMixinState>, value: StylesHash) {
-				if (this.state.styles) {
-					this.setState({ styles: value });
-				}
-				else {
-					shadowStyles.set(this, value);
-					this.invalidate();
-				}
-			},
-
-			widgetClasses: [],
+			classes: [],
 
 			tagName: 'div'
 		},
@@ -293,7 +243,6 @@ const createRenderMixin = createStateful
 
 			instance.own(instance.on('statechange', () => instance.invalidate()));
 
-			shadowClasses.set(instance, []);
 			widgetClassesMap.set(instance, []);
 		}
 	})

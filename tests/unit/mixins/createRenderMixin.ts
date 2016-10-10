@@ -16,31 +16,31 @@ registerSuite({
 	'getSelectorAndWidgetClasses': {
 		'Applies widget class to selector'() {
 			const createWidgetClassesWidget = createRenderMixin.extend({
-				widgetClasses: [ 'widget-class' ]
+				classes: [ 'widget-class' ]
 			});
 
 			const widget = createWidgetClassesWidget();
-			assert.deepEqual(widget.widgetClasses, [ 'widget-class' ]);
+			assert.deepEqual(widget.classes, [ 'widget-class' ]);
 			const selectorAndWidgetClasses = widget.getSelectorAndWidgetClasses();
 			assert.deepEqual(selectorAndWidgetClasses, 'div.widget-class');
 		},
 		'Applies multiple widget class to selector'() {
 			const createWidgetClassesWidget = createRenderMixin
 			.extend({
-				widgetClasses: [ 'widget-class' ]
+				classes: [ 'widget-class' ]
 			})
 			.extend({
-				widgetClasses: [ 'widget-class-2' ]
+				classes: [ 'widget-class-2' ]
 			});
 
 			const widget = createWidgetClassesWidget();
-			assert.deepEqual(widget.widgetClasses, [ 'widget-class', 'widget-class-2' ]);
+			assert.deepEqual(widget.classes, [ 'widget-class', 'widget-class-2' ]);
 			const selectorAndWidgetClasses = widget.getSelectorAndWidgetClasses();
 			assert.deepEqual(selectorAndWidgetClasses, 'div.widget-class.widget-class-2');
 		},
 		'Returns just the selector when no widget classes exist'() {
 			const widget = createRenderMixin();
-			assert.deepEqual(widget.widgetClasses, []);
+			assert.deepEqual(widget.classes, []);
 			const selectorAndWidgetClasses = widget.getSelectorAndWidgetClasses();
 			assert.deepEqual(selectorAndWidgetClasses, 'div');
 		}

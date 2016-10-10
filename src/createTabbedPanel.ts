@@ -18,7 +18,7 @@ const createTabbedPanel: TabbedPanelFactory = createWidget
 	.mixin(createStatefulChildrenMixin)
 	.extend({
 		tagName: 'dojo-panel-tabbed',
-		widgetClasses: [ css.tabs ]
+		classes: [ css.tabs ]
 	});
 
 export default createTabbedPanel;
