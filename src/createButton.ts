@@ -18,7 +18,7 @@ const createButton: ButtonFactory = createRenderMixin
 	.extend({
 		tagName: 'button',
 		type: 'button',
-		classes: [css.button]
+		widgetClasses: [ css.button ]
 	});
 
 export default createButton;

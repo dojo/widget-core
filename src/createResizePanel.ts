@@ -206,7 +206,7 @@ const createResizePanel: ResizePanelFactory = createWidget
 	})
 	.extend({
 		tagName: 'dojo-panel-resize',
-		classes: [ css.panel ]
+		widgetClasses: [ css.panel ]
 	})
 	.mixin({
 		mixin: createDestroyable,

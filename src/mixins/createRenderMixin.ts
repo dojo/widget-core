@@ -44,11 +44,24 @@ export interface Render {
 	classes: string[];
 
 	/**
+	 * An array of strings that represent widget classes to be applied to all widget instances. Typically classes that
+	 * represent the internal widget structure. Widget classes for all mixed in factories will be merged into a final
+	 * array that is used by `getSelectorAndWidgetClasses` to return the readonly classes during the render.
+	 */
+	readonly widgetClasses: string[];
+
+	/**
 	 * Returns the node attribute properties to be used by a render function
 	 *
 	 * @param overrides Any optional overrides of properties
 	 */
 	getNodeAttributes(overrides?: VNodeProperties): VNodeProperties;
+
+	/**
+	 * Returns the widgets' selector and all `widgetClasses` defined, these are configured by adding classes to the
+	 * `widgetClasses` array when extending widgets.
+	 */
+	getSelectorAndWidgetClasses(): string;
 
 	/**
 	 * Returns any children VNodes that are part of the widget
@@ -190,6 +203,11 @@ const createRenderMixin = createStateful
 				return props;
 			},
 
+			getSelectorAndWidgetClasses(this: RenderMixin<RenderMixinState>): string {
+				const selectorAndClasses = [this.tagName, ...this.widgetClasses];
+				return selectorAndClasses.join('.');
+			},
+
 			getChildrenNodes(this: RenderMixin<RenderMixinState>): (VNode | string)[] {
 				return this.state.label ? [ this.state.label ] : [];
 			},
@@ -237,7 +255,7 @@ const createRenderMixin = createStateful
 					return cached;
 				}
 				else {
-					cached = h(cachedRender.tagName, cachedRender.getNodeAttributes(), cachedRender.getChildrenNodes());
+					cached = h(cachedRender.getSelectorAndWidgetClasses() , cachedRender.getNodeAttributes(), cachedRender.getChildrenNodes());
 					renderCache.set(cachedRender, cached);
 					dirtyMap.set(cachedRender, false);
 					return cached;
@@ -257,6 +275,8 @@ const createRenderMixin = createStateful
 					this.invalidate();
 				}
 			},
+
+			widgetClasses: [],
 
 			tagName: 'div'
 		},
