@@ -34,7 +34,13 @@ const widgetRegistry = {
 	stack: <(string | symbol)[]> [],
 	get(id: string | symbol): Promise<RenderMixin<RenderMixinState>> {
 		widgetRegistry.stack.push(id);
-		return Promise.resolve(widgetMap.get(id));
+		const widget = widgetMap.get(id);
+		if (widget) {
+			return Promise.resolve(widgetMap.get(id));
+		}
+		else {
+			return Promise.reject(new Error(`Cannot find widget with id ${id}`));
+		}
 	},
 	identify(value: RenderMixin<RenderMixinState>): string | symbol {
 		const id = widgetIdMap.get(value);
