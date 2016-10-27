@@ -121,7 +121,7 @@ registerSuite({
 				registryProvider
 			});
 
-			parent.emit({
+			parent.emit(<any> {
 				type: 'childlist',
 				target: parent,
 				children: List([ widget1, widget3 ])
@@ -129,7 +129,7 @@ registerSuite({
 
 			setTimeout(() => {
 				assert.deepEqual(parent.state.children, [ 'widget1', 'widget3' ]);
-				parent.emit({
+				parent.emit(<any> {
 					type: 'childlist',
 					target: parent,
 					children: List([ widget2, widget3 ])
@@ -196,7 +196,7 @@ registerSuite({
 				registryProvider
 			});
 
-			parent.emit({
+			parent.emit(<any> {
 				type: 'childlist',
 				target: parent,
 				children: Map({ widget1, widget3 })
@@ -204,7 +204,7 @@ registerSuite({
 
 			setTimeout(() => {
 				assert.deepEqual(parent.state.children, [ 'widget1', 'widget3' ]);
-				parent.emit({
+				parent.emit(<any> {
 					type: 'childlist',
 					target: parent,
 					children: Map({ widget2, widget3 })
@@ -252,7 +252,7 @@ registerSuite({
 			return setState.call(parent, state);
 		};
 
-		parent.emit({
+		parent.emit(<any> {
 			type: 'childlist',
 			target: parent,
 			children: List([ widget1 ])
@@ -261,7 +261,7 @@ registerSuite({
 		return delay().then(() => {
 			assert.equal(setCount, 1);
 
-			parent.emit({
+			parent.emit(<any> {
 				type: 'childlist',
 				target: parent,
 				children: List([ widget1 ])

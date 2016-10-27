@@ -1,8 +1,8 @@
 import { h, createProjector as createMaquetteProjector, Projector as MaquetteProjector, VNode, VNodeProperties } from 'maquette';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { EventedListener, EventedOptions, TargettedEventObject } from 'dojo-compose/mixins/createEvented';
 import global from 'dojo-core/global';
-import { Handle } from 'dojo-core/interfaces';
+import { EventTargettedObject, Handle } from 'dojo-interfaces/core';
+import { EventedListener, EventedOptions } from 'dojo-interfaces/bases';
 import { assign } from 'dojo-core/lang';
 import { queueTask } from 'dojo-core/queue';
 import Promise from 'dojo-shim/Promise';
@@ -115,9 +115,9 @@ export interface ProjectorOverrides {
 	/**
 	 * Event emitted after the projector has been attached to the DOM.
 	 */
-	on(type: 'attach', listener: EventedListener<TargettedEventObject>): Handle;
+	on(type: 'attach', listener: EventedListener<this, EventTargettedObject<this>>): Handle;
 
-	on(type: string, listener: EventedListener<TargettedEventObject>): Handle;
+	on(type: string, listener: EventedListener<this, EventTargettedObject<this>>): Handle;
 }
 
 export type Projector = VNodeEvented & ParentListMixin<Child> & ProjectorMixin;
@@ -258,7 +258,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		invalidate(this: Projector): void {
 			const projectorData = projectorDataMap.get(this);
 			if (projectorData.state === ProjectorState.Attached) {
-				this.emit({
+				this.emit(<any> {
 					type: 'schedulerender',
 					target: this
 				});
