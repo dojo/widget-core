@@ -1,5 +1,6 @@
 import { ComposeFactory } from 'dojo-compose/compose';
-import createStateful, { State, Stateful, StatefulOptions } from 'dojo-compose/mixins/createStateful';
+import createStateful from 'dojo-compose/bases/createStateful';
+import { State, Stateful, StatefulOptions } from 'dojo-interfaces/bases';
 import { assign } from 'dojo-core/lang';
 import Map from 'dojo-shim/Map';
 import WeakMap from 'dojo-shim/WeakMap';

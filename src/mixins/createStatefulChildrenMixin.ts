@@ -1,5 +1,6 @@
 import { ComposeFactory } from 'dojo-compose/compose';
-import createStateful, { Stateful, StatefulOptions, StateChangeEvent, State } from 'dojo-compose/mixins/createStateful';
+import createStateful from 'dojo-compose/bases/createStateful';
+import { Stateful, StatefulOptions, StateChangeEvent, State } from 'dojo-interfaces/bases';
 import Map from 'dojo-shim/Map';
 import Promise from 'dojo-shim/Promise';
 import WeakMap from 'dojo-shim/WeakMap';
@@ -220,7 +221,7 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 				parent.children = isList(parent.children) ? List(childrenList) : ImmutableMap<string, Child>(childrenMap);
 			}, (error) => {
 				/* A promise got rejected for some reason */
-				parent.emit({
+				parent.emit(<any> {
 					type: 'error',
 					target: parent,
 					error: error
