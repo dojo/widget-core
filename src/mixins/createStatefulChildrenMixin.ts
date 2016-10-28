@@ -366,6 +366,7 @@ const createStatefulChildrenMixin: StatefulChildrenMixinFactory = createStateful
 					id
 				});
 
+				instance.own(instance.on('state:initialized', manageChildren));
 				instance.own(instance.on('state:changed', manageChildren));
 				instance.own(instance.on('childlist', manageChildrenState));
 
