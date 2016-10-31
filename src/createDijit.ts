@@ -130,7 +130,7 @@ function afterCreate(this: Dijit<DijitWidget>, element: HTMLElement) {
 			.then((dijitWidget) => {
 				dijitData.dijitWidget = dijitWidget;
 			}, (error) => {
-				this.emit(<any> {
+				this.emit({
 					type: 'error',
 					error,
 					target: this

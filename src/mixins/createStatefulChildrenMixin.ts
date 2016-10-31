@@ -221,7 +221,7 @@ function manageChildren(evt: StateChangeEvent<StatefulChildrenState>): void {
 				parent.children = isList(parent.children) ? List(childrenList) : ImmutableMap<string, Child>(childrenMap);
 			}, (error) => {
 				/* A promise got rejected for some reason */
-				parent.emit(<any> {
+				parent.emit({
 					type: 'error',
 					target: parent,
 					error: error

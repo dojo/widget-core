@@ -258,7 +258,7 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin, Project
 		invalidate(this: Projector): void {
 			const projectorData = projectorDataMap.get(this);
 			if (projectorData.state === ProjectorState.Attached) {
-				this.emit(<any> {
+				this.emit({
 					type: 'schedulerender',
 					target: this
 				});

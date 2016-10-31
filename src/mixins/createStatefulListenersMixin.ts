@@ -131,7 +131,7 @@ const managementMap = new WeakMap<StatefulListeners<StatefulListenersState>, Man
  * Internal statechange listener which replaces the listeners on the instance.
  */
 function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
-	const widget: StatefulListeners<StatefulListenersState> = <any> evt.target;
+	const widget: StatefulListeners<StatefulListenersState> = evt.target;
 
 	// Assume this function cannot be called without the widget being in the management map.
 	const internalState = managementMap.get(widget);
@@ -181,7 +181,7 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 		promise
 			.then(replaceListeners)
 			.catch((error) => {
-				widget.emit(<any> {
+				widget.emit({
 					type: 'error',
 					target: widget,
 					error

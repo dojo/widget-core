@@ -71,7 +71,7 @@ const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, Par
 					}
 				});
 				childrenMap.set(this, value);
-				this.emit(<any> {
+				this.emit({
 					type: 'childlist',
 					target: this,
 					children: value
