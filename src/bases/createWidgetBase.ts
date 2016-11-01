@@ -11,7 +11,7 @@ import { WidgetMixin, Widget, WidgetState, WidgetOptions } from 'dojo-interfaces
 export interface WidgetFactory extends ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>> {}
 
 interface WidgetInternalState {
-	id?: string;
+	readonly id?: string;
 	dirty: boolean;
 	widgetClasses: string[];
 	cachedWidget?: VNode;
@@ -54,12 +54,12 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			invalidate(this: Widget<WidgetState>): void {
-				let { dirty } = widgetInternalStateMap.get(this);
-				if (dirty) {
+				const internalState = widgetInternalStateMap.get(this);
+				if (internalState.dirty) {
 					return;
 				}
 				const parent = (<any> this).parent;
-				dirty = true;
+				internalState.dirty = true;
 				if (parent && parent.invalidate) {
 					parent.invalidate();
 				}
@@ -77,13 +77,13 @@ const createWidget: WidgetFactory = createStateful
 					const { styles = {} } = this.state;
 					const classes: { [index: string]: boolean; } = {};
 
-					let { widgetClasses } = widgetInternalStateMap.get(this);
+					const internalState = widgetInternalStateMap.get(this);
 
-					widgetClasses.forEach((c) => classes[c] = false);
+					internalState.widgetClasses.forEach((c) => classes[c] = false);
 
 					if (this.state && this.state.classes) {
 						this.state.classes.forEach((c) => classes[c] = true);
-						widgetClasses =  this.state.classes;
+						internalState.widgetClasses =  this.state.classes;
 					}
 
 					return assign(baseIdProp, { key: this, classes, styles });
@@ -96,13 +96,13 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			render(this: Widget<WidgetState>): VNode {
-				let { cachedWidget, dirty } = widgetInternalStateMap.get(this);
-				if (dirty || !cachedWidget) {
+				const internalState = widgetInternalStateMap.get(this);
+				if (internalState.dirty || !internalState.cachedWidget) {
 					const widget = h(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
-					cachedWidget = widget;
-					dirty = false;
+					internalState.cachedWidget = widget;
+					internalState.dirty = false;
 				}
-				return cachedWidget;
+				return internalState.cachedWidget;
 			},
 
 			tagName: 'div'
