@@ -1,12 +1,19 @@
-import { Handle, EventTargettedObject } from 'dojo-interfaces/core';
-import { EventedListener } from 'dojo-interfaces/bases';
 import { ComposeFactory } from 'dojo-compose/compose';
 import createStateful from 'dojo-compose/bases/createStateful';
-import { h, VNode, VNodeProperties } from 'maquette';
+import {
+	VWrapper,
+	DWrapper,
+	WWrapper,
+	Widget,
+	WidgetMixin,
+	WidgetState,
+	WidgetOptions
+} from 'dojo-interfaces/widgetBases';
+import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
+import { Factory } from 'dojo-interfaces/core';
 import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
-
-import { WidgetMixin, Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases';
+import d from './../util/d';
 
 export interface WidgetFactory extends ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>> {}
 
@@ -15,9 +22,15 @@ interface WidgetInternalState {
 	dirty: boolean;
 	widgetClasses: string[];
 	cachedWidget?: VNode;
+	historicChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
+	currentChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
 };
 
 const widgetInternalStateMap = new WeakMap<Widget<WidgetState>, WidgetInternalState>();
+
+function isWWrapper(child: VWrapper | WWrapper): child is WWrapper {
+	return child && (<WWrapper> child).factory !== undefined;
+}
 
 const createWidget: WidgetFactory = createStateful
 	.mixin<WidgetMixin, WidgetOptions<WidgetState>>({
@@ -26,15 +39,60 @@ const createWidget: WidgetFactory = createStateful
 
 			classes: [],
 
-			getChildrenNodes(this: Widget<WidgetState>): (VNode | string)[] {
-				let childrenNodes: (VNode | string)[] = [];
+			getVNode(this: Widget<WidgetState>, dWrapper: DWrapper): VNode {
+				const internalState = widgetInternalStateMap.get(this);
+				let child: VWrapper | Widget<WidgetState>;
+				if (isWWrapper(dWrapper)) {
+					const { factory, options: { id, state } } = dWrapper;
+					const cachedChild = internalState.historicChildrenMap.get(id || factory);
+					if (cachedChild) {
+						child = cachedChild;
+						if (state) {
+							child.setState(state);
+						}
+					} else {
+						child = factory(dWrapper.options);
+						internalState.historicChildrenMap.set(id || factory, child);
+						this.own(child);
+					}
+					if (!id && internalState.currentChildrenMap.has(factory)) {
+						console.error('must provide unique keys when using the same widget factory multiple times');
+					}
+					internalState.currentChildrenMap.set(id || factory, child);
+				}
+				else {
+					child = dWrapper;
+					if (child.children) {
+						child.children = child.children.map((child: DWrapper) => {
+							return this.getVNode(child);
+						});
+					}
+				}
+				return child.render();
+			},
+
+			pruneChildren(this: Widget<WidgetState>): void {
+				const internalState = widgetInternalStateMap.get(this);
+
+				internalState.historicChildrenMap.forEach((child, key) => {
+					if (!internalState.currentChildrenMap.has(key)) {
+						internalState.historicChildrenMap.delete(key);
+						console.log(`destory widget ${child.id}`);
+						child.destroy();
+					}
+				});
+				internalState.currentChildrenMap.clear();
+			},
+
+			getChildrenNodes(this: Widget<WidgetState>): DWrapper[] {
+				let childrenWrappers: DWrapper[] = [];
 
 				this.childNodeRenderers.forEach((fn) => {
-					const nodes = fn.call(childrenNodes);
-					childrenNodes = childrenNodes.concat(nodes);
+					const wrappers = fn.call(this);
+					childrenWrappers = childrenWrappers.concat(wrappers);
 				});
 
-				return childrenNodes;
+				return childrenWrappers.filter((child) => child);
 			},
 
 			getNodeAttributes(this: Widget<WidgetState>, overrides?: VNodeProperties): VNodeProperties {
@@ -91,14 +149,11 @@ const createWidget: WidgetFactory = createStateful
 
 			],
 
-			on(type: 'invalidated', listener: EventedListener<Widget<WidgetState>, EventTargettedObject<Widget<WidgetState>>>): Handle {
-				return {} as Handle;
-			},
-
 			render(this: Widget<WidgetState>): VNode {
 				const internalState = widgetInternalStateMap.get(this);
 				if (internalState.dirty || !internalState.cachedWidget) {
-					const widget = h(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
+					const dWrapper = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
+					const widget = this.getVNode(dWrapper);
 					internalState.cachedWidget = widget;
 					internalState.dirty = false;
 				}
@@ -118,11 +173,13 @@ const createWidget: WidgetFactory = createStateful
 			widgetInternalStateMap.set(instance, {
 				id,
 				dirty: true,
-				widgetClasses: []
+				widgetClasses: [],
+				historicChildrenMap: new Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>(),
+				currentChildrenMap: new Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>()
 			});
 
-			instance.own(instance.on('state:initialized', () => instance.invalidate()));
-			instance.own(instance.on('state:changed', () => instance.invalidate()));
+			instance.own(instance.on('state:initialized', instance.invalidate));
+			instance.own(instance.on('state:changed', instance.invalidate));
 		}
 	});
 

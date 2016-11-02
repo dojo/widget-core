@@ -7,9 +7,9 @@ export type TagNameOrFactory = string | ComposeFactory<Widget<WidgetState>, Widg
 
 export type DOptions = VNodeProperties | WidgetOptions<WidgetState>;
 
-function d(tagName: string, options?: VNodeProperties, children?: VNode[]): VWrapper;
+function d(tagName: string, options?: VNodeProperties, children?: (DWrapper | VNode)[]): VWrapper;
 function d(factory: ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>>, options: WidgetOptions<WidgetState>): WWrapper;
-function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?: VNode[]): DWrapper {
+function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?: (DWrapper | VNode)[]): DWrapper {
 	children = children ? children : [];
 
 	if (typeof tagNameOrFactory === 'string') {
