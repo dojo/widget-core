@@ -154,6 +154,7 @@ const createWidget: WidgetFactory = createStateful
 				if (internalState.dirty || !internalState.cachedWidget) {
 					const dWrapper = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
 					const widget = this.getVNode(dWrapper);
+					this.pruneChildren();
 					internalState.cachedWidget = widget;
 					internalState.dirty = false;
 				}
