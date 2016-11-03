@@ -1,5 +1,12 @@
-import { DWrapper, VWrapper, WWrapper, Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import { ComposeFactory } from 'dojo-compose/compose';
+import {
+	DNode,
+	HNode,
+	WNode,
+	Widget,
+	WidgetState,
+	WidgetOptions
+} from 'dojo-interfaces/widgetBases';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { h } from 'maquette';
 
@@ -7,9 +14,9 @@ export type TagNameOrFactory = string | ComposeFactory<Widget<WidgetState>, Widg
 
 export type DOptions = VNodeProperties | WidgetOptions<WidgetState>;
 
-function d(tagName: string, options?: VNodeProperties, children?: (DWrapper | VNode)[]): VWrapper;
-function d(factory: ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>>, options: WidgetOptions<WidgetState>): WWrapper;
-function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?: (DWrapper | VNode)[]): DWrapper {
+function d(tagName: string, options?: VNodeProperties, children?: (DNode | VNode)[]): HNode;
+function d(factory: ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>>, options: WidgetOptions<WidgetState>): WNode;
+function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?: (DNode | VNode)[]): DNode {
 	children = children ? children : [];
 
 	if (typeof tagNameOrFactory === 'string') {
@@ -27,7 +34,7 @@ function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?
 		};
 	}
 	else {
-		throw new Error();
+		throw new Error('Unsupported tagName or factory type');
 	}
 }
 

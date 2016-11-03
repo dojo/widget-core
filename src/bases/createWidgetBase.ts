@@ -1,9 +1,9 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createStateful from 'dojo-compose/bases/createStateful';
 import {
-	VWrapper,
-	DWrapper,
-	WWrapper,
+	HNode,
+	DNode,
+	WNode,
 	Widget,
 	WidgetMixin,
 	WidgetState,
@@ -28,8 +28,53 @@ interface WidgetInternalState {
 
 const widgetInternalStateMap = new WeakMap<Widget<WidgetState>, WidgetInternalState>();
 
-function isWWrapper(child: VWrapper | WWrapper): child is WWrapper {
-	return child && (<WWrapper> child).factory !== undefined;
+function isWNode(child: DNode): child is WNode {
+	return child && (<WNode> child).factory !== undefined;
+}
+
+function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
+	const internalState = widgetInternalStateMap.get(instance);
+	let child: HNode | Widget<WidgetState>;
+	if (isWNode(dNode)) {
+		const { factory, options: { id, state } } = dNode;
+		const cachedChild = internalState.historicChildrenMap.get(id || factory);
+		if (cachedChild) {
+			child = cachedChild;
+			if (state) {
+				child.setState(state);
+				child.invalidate();
+			}
+		} else {
+			child = factory(dNode.options);
+			internalState.historicChildrenMap.set(id || factory, child);
+			instance.own(child);
+		}
+		if (!id && internalState.currentChildrenMap.has(factory)) {
+			console.error('must provide unique keys when using the same widget factory multiple times');
+		}
+		internalState.currentChildrenMap.set(id || factory, child);
+	}
+	else {
+		child = dNode;
+		if (child.children) {
+			child.children = child.children.map((child: DNode) => {
+				return realizeDNode(instance, child);
+			});
+		}
+	}
+	return child.render();
+}
+
+function manageDetachedChildren(instance: Widget<WidgetState>) {
+	const internalState = widgetInternalStateMap.get(instance);
+
+	internalState.historicChildrenMap.forEach((child, key) => {
+		if (!internalState.currentChildrenMap.has(key)) {
+			internalState.historicChildrenMap.delete(key);
+			child.destroy();
+		}
+	});
+	internalState.currentChildrenMap.clear();
 }
 
 const createWidget: WidgetFactory = createStateful
@@ -39,53 +84,8 @@ const createWidget: WidgetFactory = createStateful
 
 			classes: [],
 
-			getVNode(this: Widget<WidgetState>, dWrapper: DWrapper): VNode {
-				const internalState = widgetInternalStateMap.get(this);
-				let child: VWrapper | Widget<WidgetState>;
-				if (isWWrapper(dWrapper)) {
-					const { factory, options: { id, state } } = dWrapper;
-					const cachedChild = internalState.historicChildrenMap.get(id || factory);
-					if (cachedChild) {
-						child = cachedChild;
-						if (state) {
-							child.setState(state);
-						}
-					} else {
-						child = factory(dWrapper.options);
-						internalState.historicChildrenMap.set(id || factory, child);
-						this.own(child);
-					}
-					if (!id && internalState.currentChildrenMap.has(factory)) {
-						console.error('must provide unique keys when using the same widget factory multiple times');
-					}
-					internalState.currentChildrenMap.set(id || factory, child);
-				}
-				else {
-					child = dWrapper;
-					if (child.children) {
-						child.children = child.children.map((child: DWrapper) => {
-							return this.getVNode(child);
-						});
-					}
-				}
-				return child.render();
-			},
-
-			pruneChildren(this: Widget<WidgetState>): void {
-				const internalState = widgetInternalStateMap.get(this);
-
-				internalState.historicChildrenMap.forEach((child, key) => {
-					if (!internalState.currentChildrenMap.has(key)) {
-						internalState.historicChildrenMap.delete(key);
-						console.log(`destory widget ${child.id}`);
-						child.destroy();
-					}
-				});
-				internalState.currentChildrenMap.clear();
-			},
-
-			getChildrenNodes(this: Widget<WidgetState>): DWrapper[] {
-				let childrenWrappers: DWrapper[] = [];
+			getChildrenNodes(this: Widget<WidgetState>): DNode[] {
+				let childrenWrappers: DNode[] = [];
 
 				this.childNodeRenderers.forEach((fn) => {
 					const wrappers = fn.call(this);
@@ -152,9 +152,9 @@ const createWidget: WidgetFactory = createStateful
 			render(this: Widget<WidgetState>): VNode {
 				const internalState = widgetInternalStateMap.get(this);
 				if (internalState.dirty || !internalState.cachedWidget) {
-					const dWrapper = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
-					const widget = this.getVNode(dWrapper);
-					this.pruneChildren();
+					const dNode = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
+					const widget = realizeDNode(this, dNode);
+					manageDetachedChildren(this);
 					internalState.cachedWidget = widget;
 					internalState.dirty = false;
 				}
