@@ -13,6 +13,7 @@ import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { Factory } from 'dojo-interfaces/core';
 import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
+import Map from 'dojo-shim/Map';
 import d from './../util/d';
 
 export interface WidgetFactory extends ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>> {}
