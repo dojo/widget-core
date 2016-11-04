@@ -95,7 +95,7 @@ const createWidget: WidgetFactory = createStateful
 					childrenWrappers = childrenWrappers.concat(wrappers);
 				});
 
-				return childrenWrappers.filter((child) => child);
+				return childrenWrappers;
 			},
 
 			getNodeAttributes(this: Widget<WidgetState>, overrides?: VNodeProperties): VNodeProperties {

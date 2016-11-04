@@ -20,6 +20,8 @@ function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?
 	children = children ? children : [];
 
 	if (typeof tagNameOrFactory === 'string') {
+		children = children.filter((child) => child);
+
 		return {
 			children: children,
 			render(this: { children: VNode[] }) {
