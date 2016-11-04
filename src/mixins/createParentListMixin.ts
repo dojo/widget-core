@@ -39,8 +39,8 @@ export interface ParentListOverloads<C extends Child> {
 	/**
 	 * Listen for events emitted from a parent when its children are mutated
 	 */
-	on?(type: 'childlist', listener: EventedListener<this, ChildListEvent<this, C>>): Handle;
-	on?(type: string, listener: EventedListener<this, EventTargettedObject<this>>): Handle;
+	on(type: 'childlist', listener: EventedListener<this, ChildListEvent<this, C>>): Handle;
+	on(type: string, listener: EventedListener<this, EventTargettedObject<this>>): Handle;
 }
 
 export type ParentListMixin<C extends Child> = ParentList<C> & Evented & ParentListOverloads<C>;

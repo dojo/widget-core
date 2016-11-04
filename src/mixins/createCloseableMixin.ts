@@ -21,7 +21,7 @@ export interface Closeable {
 	close(): Promise<boolean>;
 
 	on(type: 'close', listener: EventedListener<CloseableMixin<CloseableState>, CloseEvent>): Handle;
-	on(type: string, listener: EventedListener<any, EventTargettedObject<any>>): Handle;
+	on(type: string, listener: EventedListener<CloseableState, EventTargettedObject<CloseableState>>): Handle;
 }
 
 export type CloseableMixin<S extends CloseableState> = Stateful<S> & Closeable;
