@@ -119,7 +119,7 @@ registerSuite({
 			});
 
 			const id = cachedRender.id;
-			assert.isTrue(called, 'statechange should have been called');
+			assert.isTrue(called, 'state:changed should have been called');
 
 			assert.include(id, createRenderMixin.idBase, 'should include static idBase');
 			assert.notStrictEqual(cachedRender.id, createRenderMixin.idBase, 'but shouldn\'t match exactly');
