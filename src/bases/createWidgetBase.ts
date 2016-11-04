@@ -38,7 +38,8 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 	let child: HNode | Widget<WidgetState>;
 	if (isWNode(dNode)) {
 		const { factory, options: { id, state } } = dNode;
-		const cachedChild = internalState.historicChildrenMap.get(id || factory);
+		const childrenMapKey = id || factory;
+		const cachedChild = internalState.historicChildrenMap.get(childrenMapKey);
 		if (cachedChild) {
 			child = cachedChild;
 			if (state) {
@@ -49,13 +50,13 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 			child.own(child.on('invalidate', () => {
 				instance.invalidate();
 			}));
-			internalState.historicChildrenMap.set(id || factory, child);
+			internalState.historicChildrenMap.set(childrenMapKey, child);
 			instance.own(child);
 		}
 		if (!id && internalState.currentChildrenMap.has(factory)) {
 			console.error('must provide unique keys when using the same widget factory multiple times');
 		}
-		internalState.currentChildrenMap.set(id || factory, child);
+		internalState.currentChildrenMap.set(childrenMapKey, child);
 	}
 	else {
 		child = dNode;
