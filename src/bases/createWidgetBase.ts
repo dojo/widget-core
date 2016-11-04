@@ -42,7 +42,9 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 			child = cachedChild;
 			if (state) {
 				child.setState(state);
-				child.invalidate();
+				child.on('invalidate', () => {
+					instance.invalidate();
+				});
 			}
 		} else {
 			child = factory(dNode.options);
@@ -116,11 +118,10 @@ const createWidget: WidgetFactory = createStateful
 				if (internalState.dirty) {
 					return;
 				}
-				const parent = (<any> this).parent;
 				internalState.dirty = true;
-				if (parent && parent.invalidate) {
-					parent.invalidate();
-				}
+				this.emit({
+					type: 'invalidate'
+				});
 			},
 
 			get id(this: Widget<WidgetState>): string {
@@ -164,12 +165,8 @@ const createWidget: WidgetFactory = createStateful
 			tagName: 'div'
 		},
 		initialize(instance: Widget<WidgetState>, options: WidgetOptions<WidgetState> = {}) {
-			const { id, tagName, parent } = options;
+			const { id, tagName } = options;
 			instance.tagName = tagName || instance.tagName;
-
-			if (parent) {
-				parent.append(instance);
-			}
 
 			widgetInternalStateMap.set(instance, {
 				id,
@@ -179,8 +176,9 @@ const createWidget: WidgetFactory = createStateful
 				currentChildrenMap: new Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>()
 			});
 
-			instance.own(instance.on('state:initialized', instance.invalidate));
-			instance.own(instance.on('state:changed', instance.invalidate));
+			instance.own(instance.on('state:changed', () => {
+				instance.invalidate();
+			}));
 		}
 	});
 

@@ -150,7 +150,6 @@ registerSuite({
 
 			widgetBase.setState({ 'classes': ['test-class'] });
 			widgetBase.invalidate();
-
 			const thirdRenderResult = widgetBase.render();
 			assert.strictEqual(countWidgetCreated, 1);
 			assert.strictEqual(countWidgetDestroyed, 0);
@@ -263,23 +262,20 @@ registerSuite({
 		});
 		projector.attach();
 		const widgetBase = createWidgetBase();
-		(<any> widgetBase).parent = projector;
-		widgetBase.invalidate();
-		assert.strictEqual(count, 0);
-		widgetBase.render();
+		projector.append(widgetBase);
 		widgetBase.invalidate();
 		assert.strictEqual(count, 1);
+		widgetBase.render();
+		widgetBase.invalidate();
+		assert.strictEqual(count, 2);
 	},
-	'invalidate invalidates parent widget'() {
+	'invalidate emits invalidate event'() {
+		const widgetBase = createWidgetBase();
 		let count = 0;
-		const createParent = createWidgetBase.before('invalidate', () => {
+		widgetBase.on('invalidate', function() {
+			console.log('invalid');
 			count++;
 		});
-		const parent = createParent();
-		const widgetBase = createWidgetBase();
-		(<any> widgetBase).parent = <any> parent; /* trick typescript, becuase this isn't a real parent */
-		widgetBase.invalidate();
-		assert.strictEqual(count, 0);
 		widgetBase.render();
 		widgetBase.invalidate();
 		assert.strictEqual(count, 1);

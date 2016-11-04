@@ -21,7 +21,7 @@ function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?
 
 	if (typeof tagNameOrFactory === 'string') {
 		return {
-			children: children.filter((child: any) => child),
+			children: children,
 			render(this: { children: VNode[] }) {
 				return h(<string> tagNameOrFactory, <VNodeProperties> options, this.children);
 			}
