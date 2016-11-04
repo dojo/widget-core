@@ -43,12 +43,12 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 			child = cachedChild;
 			if (state) {
 				child.setState(state);
-				child.on('invalidate', () => {
-					instance.invalidate();
-				});
 			}
 		} else {
 			child = factory(dNode.options);
+			child.own(child.on('invalidate', () => {
+				instance.invalidate();
+			}));
 			internalState.historicChildrenMap.set(id || factory, child);
 			instance.own(child);
 		}
