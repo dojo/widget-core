@@ -130,8 +130,8 @@ const managementMap = new WeakMap<StatefulListeners<StatefulListenersState>, Man
 /**
  * Internal statechange listener which replaces the listeners on the instance.
  */
-function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
-	const widget: StatefulListeners<StatefulListenersState> = evt.target;
+function manageListeners(evt: StateChangeEvent<StatefulListenersState, StatefulListeners<StatefulListenersState>>): void {
+	const widget = evt.target;
 
 	// Assume this function cannot be called without the widget being in the management map.
 	const internalState = managementMap.get(widget);
@@ -194,7 +194,7 @@ function manageListeners(evt: StateChangeEvent<StatefulListenersState>): void {
 
 const createStatefulListenersMixin: StatefulListenersMixinFactory = createStateful
 	.mixin({
-		initialize(instance: StatefulListeners<any>, { registryProvider, state }: StatefulListenersOptions<any> = {}) {
+		initialize(instance: StatefulListeners<StatefulListenersState>, { registryProvider, state }: StatefulListenersOptions<StatefulListenersState> = {}) {
 			if (registryProvider) {
 				const registry = registryProvider.get('actions');
 				managementMap.set(instance, { registry });
