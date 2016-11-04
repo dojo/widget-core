@@ -242,7 +242,7 @@ const createRenderMixin = createStateful
 
 			dirtyMap.set(instance, true);
 
-			instance.own(instance.on('statechange', () => instance.invalidate()));
+			instance.own(instance.on('state:changed', () => instance.invalidate()));
 
 			widgetClassesMap.set(instance, []);
 		}

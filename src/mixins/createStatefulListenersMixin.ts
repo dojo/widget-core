@@ -199,7 +199,7 @@ const createStatefulListenersMixin: StatefulListenersMixinFactory = createStatef
 				const registry = registryProvider.get('actions');
 				managementMap.set(instance, { registry });
 
-				instance.own(instance.on('statechange', manageListeners));
+				instance.own(instance.on('state:changed', manageListeners));
 
 				/* Stateful will have already fired the statechange event at this point */
 				if (state) {

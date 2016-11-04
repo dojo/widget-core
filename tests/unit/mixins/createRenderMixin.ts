@@ -113,7 +113,7 @@ registerSuite({
 			let called = false;
 			const cachedRender = createRenderMixin();
 
-			cachedRender.on('statechange', () => {
+			cachedRender.on('state:changed', () => {
 				assert.strictEqual(cachedRender.id, cachedRender.state.id, 'state should match');
 				called = true;
 			});
