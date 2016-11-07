@@ -27,7 +27,21 @@ interface WidgetInternalState {
 	currentChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
 };
 
+/**
+ * Internal state map for widget instances
+ */
 const widgetInternalStateMap = new WeakMap<Widget<WidgetState>, WidgetInternalState>();
+
+/**
+ * The counter for generating a unique ID
+ */
+let widgetCount = 0;
+
+function generateID(instance: Widget<WidgetState>): string {
+	const id = `widget-${++widgetCount}`;
+	instance.setState({ id });
+	return id;
+}
 
 function isWNode(child: DNode): child is WNode {
 	return child && (<WNode> child).factory !== undefined;
@@ -129,7 +143,7 @@ const createWidget: WidgetFactory = createStateful
 			get id(this: Widget<WidgetState>): string {
 				const { id } = widgetInternalStateMap.get(this);
 
-				return id || (this.state && this.state.id) || '';
+				return id || (this.state && this.state.id) || generateID(this);
 			},
 
 			nodeAttributes: [
