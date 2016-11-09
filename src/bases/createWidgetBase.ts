@@ -22,7 +22,7 @@ interface WidgetInternalState {
 	readonly id?: string;
 	dirty: boolean;
 	widgetClasses: string[];
-	cachedWidget?: VNode;
+	cachedVNode?: VNode;
 	historicChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
 	currentChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
 };
@@ -59,7 +59,8 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 			if (state) {
 				child.setState(state);
 			}
-		} else {
+		}
+		else {
 			child = factory(dNode.options);
 			child.own(child.on('invalidate', () => {
 				instance.invalidate();
@@ -68,22 +69,22 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 			instance.own(child);
 		}
 		if (!id && internalState.currentChildrenMap.has(factory)) {
-			console.error('must provide unique keys when using the same widget factory multiple times');
+			const errorMsg = 'must provide unique keys when using the same widget factory multiple times';
+			console.error(errorMsg);
+			instance.emit({ type: 'error', target: instance, errorMsg });
 		}
 		internalState.currentChildrenMap.set(childrenMapKey, child);
 	}
 	else {
 		child = dNode;
 		if (child.children) {
-			child.children = child.children.map((child: DNode) => {
-				return realizeDNode(instance, child);
-			});
+			child.children = child.children.map((child: DNode) => realizeDNode(instance, child));
 		}
 	}
 	return child.render();
 }
 
-function manageDetachedChildren(instance: Widget<WidgetState>) {
+function manageDetachedChildren(instance: Widget<WidgetState>): void {
 	const internalState = widgetInternalStateMap.get(instance);
 
 	internalState.historicChildrenMap.forEach((child, key) => {
@@ -117,26 +118,21 @@ const createWidget: WidgetFactory = createStateful
 				const props: VNodeProperties = {};
 
 				this.nodeAttributes.forEach((fn) => {
-					const newProps: VNodeProperties = fn.call(this, assign({}, props));
+					const newProps: VNodeProperties = fn.call(this);
 					if (newProps) {
 						assign(props, newProps);
 					}
 				});
 
-				if (overrides) {
-					assign(props, overrides);
-				}
 				return props;
 			},
 
 			invalidate(this: Widget<WidgetState>): void {
 				const internalState = widgetInternalStateMap.get(this);
-				if (internalState.dirty) {
-					return;
-				}
 				internalState.dirty = true;
 				this.emit({
-					type: 'invalidate'
+					type: 'invalidate',
+					target: this
 				});
 			},
 
@@ -168,14 +164,14 @@ const createWidget: WidgetFactory = createStateful
 
 			render(this: Widget<WidgetState>): VNode {
 				const internalState = widgetInternalStateMap.get(this);
-				if (internalState.dirty || !internalState.cachedWidget) {
+				if (internalState.dirty || !internalState.cachedVNode) {
 					const dNode = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
 					const widget = realizeDNode(this, dNode);
 					manageDetachedChildren(this);
-					internalState.cachedWidget = widget;
+					internalState.cachedVNode = widget;
 					internalState.dirty = false;
 				}
-				return internalState.cachedWidget;
+				return internalState.cachedVNode;
 			},
 
 			tagName: 'div'

@@ -264,10 +264,10 @@ registerSuite({
 		const widgetBase = createWidgetBase();
 		projector.append(widgetBase);
 		widgetBase.invalidate();
-		assert.strictEqual(count, 1);
+		assert.strictEqual(count, 2);
 		widgetBase.render();
 		widgetBase.invalidate();
-		assert.strictEqual(count, 2);
+		assert.strictEqual(count, 3);
 	},
 	'invalidate emits invalidate event'() {
 		const widgetBase = createWidgetBase();

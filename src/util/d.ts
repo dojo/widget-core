@@ -16,8 +16,7 @@ export type DOptions = VNodeProperties | WidgetOptions<WidgetState>;
 
 function d(tagName: string, options?: VNodeProperties, children?: (DNode | VNode)[]): HNode;
 function d(factory: ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>>, options: WidgetOptions<WidgetState>): WNode;
-function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?: (DNode | VNode)[]): DNode {
-	children = children ? children : [];
+function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children: (DNode | VNode)[] = []): DNode {
 
 	if (typeof tagNameOrFactory === 'string') {
 		children = children.filter((child) => child);
@@ -29,15 +28,15 @@ function d(tagNameOrFactory: TagNameOrFactory, options: DOptions = {}, children?
 			}
 		};
 	}
-	else if (typeof tagNameOrFactory === 'function') {
+
+	if (typeof tagNameOrFactory === 'function') {
 		return {
 			factory: tagNameOrFactory,
 			options: <WidgetOptions<WidgetState>> options
 		};
 	}
-	else {
-		throw new Error('Unsupported tagName or factory type');
-	}
+
+	throw new Error('Unsupported tagName or factory type');
 }
 
 export default d;
