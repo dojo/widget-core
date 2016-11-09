@@ -47,7 +47,7 @@ function isWNode(child: DNode): child is WNode {
 	return child && (<WNode> child).factory !== undefined;
 }
 
-function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
+function dNodeToVNode(instance: Widget<WidgetState>, dNode: DNode): VNode {
 	const internalState = widgetInternalStateMap.get(instance);
 	let child: HNode | Widget<WidgetState>;
 	if (isWNode(dNode)) {
@@ -71,14 +71,14 @@ function realizeDNode(instance: Widget<WidgetState>, dNode: DNode) {
 		if (!id && internalState.currentChildrenMap.has(factory)) {
 			const errorMsg = 'must provide unique keys when using the same widget factory multiple times';
 			console.error(errorMsg);
-			instance.emit({ type: 'error', target: instance, errorMsg });
+			instance.emit({ type: 'error', target: instance, error: new Error(errorMsg) });
 		}
 		internalState.currentChildrenMap.set(childrenMapKey, child);
 	}
 	else {
 		child = dNode;
 		if (child.children) {
-			child.children = child.children.map((child: DNode) => realizeDNode(instance, child));
+			child.children = child.children.map((child: DNode) => dNodeToVNode(instance, child));
 		}
 	}
 	return child.render();
@@ -166,7 +166,7 @@ const createWidget: WidgetFactory = createStateful
 				const internalState = widgetInternalStateMap.get(this);
 				if (internalState.dirty || !internalState.cachedVNode) {
 					const dNode = d(this.tagName, this.getNodeAttributes(), this.getChildrenNodes());
-					const widget = realizeDNode(this, dNode);
+					const widget = dNodeToVNode(this, dNode);
 					manageDetachedChildren(this);
 					internalState.cachedVNode = widget;
 					internalState.dirty = false;
