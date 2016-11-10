@@ -11,6 +11,30 @@ class ParamsSpy extends Dijit {
 	spiedParams: any;
 }
 
+function watchForAsyncResult(test: () => boolean, callback: () => void, timeout = 5000) {
+	let shouldCancel = false;
+	function cancel() {
+		shouldCancel = true;
+	}
+
+	const timeStep = 50;
+	const timeoutTime = new Date();
+	timeoutTime.setMilliseconds(timeoutTime.getMilliseconds() + timeout);
+
+	function checkForSolution() {
+		if (test()) {
+			return callback();
+		}
+		else if (shouldCancel || Date.now() > timeoutTime.getTime()) {
+			return;
+		} else {
+			setTimeout(checkForSolution, timeStep);
+		}
+	}
+
+	checkForSolution();
+}
+
 registerSuite({
 	name: 'createDijit',
 	creation: {
@@ -76,13 +100,17 @@ registerSuite({
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
 			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
-			setTimeout(dfd.callback(() => {
+
+			watchForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined' && typeof dijit.dijit.domNode !== 'undefined'
+			}, () => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
 				assert.deepEqual(dijit.dijit.params, { foo: 'bar' });
 				assert.deepEqual(dijit.dijit._startupCalled, 1);
 				assert.deepEqual(dijit.dijit._destroyCalled, 0);
-			}), 50);
+				dfd.resolve();
+			});
 		},
 		'afterCreate w/ mid'(this: any) {
 			const dfd = this.async();
