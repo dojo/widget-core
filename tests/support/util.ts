@@ -26,7 +26,7 @@ export function waitForAsyncResult(test: () => boolean, callback: () => void, ti
 		if (test()) {
 			return callback();
 		}
-		else if (shouldCancel || Date.now() > timeoutTime.getTime()) {
+		else if (Date.now() > timeoutTime.getTime()) {
 			return;
 		} else {
 			setTimeout(checkForSolution, timeStep);
