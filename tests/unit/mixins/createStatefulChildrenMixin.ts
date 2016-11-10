@@ -9,6 +9,7 @@ import compose from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/bases/createDestroyable';
 import { h } from 'maquette';
 import widgetRegistry, { widgetMap } from '../../support/mockRegistryProvider';
+import { waitForAsyncResult } from '../../support/util';
 
 let widget1: Child;
 let widget2: Child;
@@ -59,10 +60,12 @@ registerSuite({
 				}
 			});
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return widgetRegistry.stack.length > 0;
+			}, dfd.callback(() => {
 				assert.deepEqual(widgetRegistry.stack, [ 'widget1' ]);
 				assert.isTrue(List<Child>([ widget1 ]).equals(parent.children));
-			}), 50);
+			}));
 		},
 		setState(this: any) {
 			const dfd = this.async();
@@ -72,10 +75,12 @@ registerSuite({
 
 			parent.setState({ children: [ 'widget2' ] });
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return widgetRegistry.stack.length > 0;
+			}, dfd.callback(() => {
 				assert.deepEqual(widgetRegistry.stack, [ 'widget2' ]);
 				assert.isTrue(List<Child>([ widget2 ]).equals(parent.children));
-			}), 50);
+			}));
 		},
 		'caching widgets'(this: any) {
 			const dfd = this.async();
@@ -85,17 +90,21 @@ registerSuite({
 
 			parent.setState({ children: [ 'widget1' ]});
 
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+				return parent.children.count() === 1;
+			}, () => {
 				widgetRegistry.stack = [];
 				parent.setState({ children: [ 'widget1', 'widget2' ] });
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, dfd.callback(() => {
 					assert.deepEqual(widgetRegistry.stack, [ 'widget2' ], 'should not have called the widget registry');
 					assert.isTrue(List<Child>([ widget1, widget2 ]).equals(parent.children));
 
 					parent.setState({ children: [ 'widget2', 'widget1' ] });
 					assert.isTrue(List<Child>([ widget2, widget1 ]).equals(parent.children), 'should synchronously update children when cached');
-				}), 100);
-			}, 100);
+				}));
+			});
 		},
 		'cached widgets should be removed on destroy'(this: any) {
 			const dfd = this.async();
@@ -105,14 +114,18 @@ registerSuite({
 
 			parent.setState({ children: [ 'widget1', 'widget2' ] });
 
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, () => {
 				widget2.destroy();
 				parent.setState({ children: [ 'widget2', 'widget1' ] });
 
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return parent.children.count() === 1;
+				}, dfd.callback(() => {
 					assert.isTrue(List<Child>([ widget1 ]).equals(parent.children), 'Should not');
-				}), 100);
-			}, 100);
+				}));
+			});
 		},
 		'childList'(this: any) {
 			const dfd = this.async();
@@ -127,17 +140,21 @@ registerSuite({
 				children: List([ widget1, widget3 ])
 			});
 
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, () => {
 				assert.deepEqual(parent.state.children, [ 'widget1', 'widget3' ]);
 				parent.emit({
 					type: 'childlist',
 					target: parent,
 					children: List([ widget2, widget3 ])
 				});
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, dfd.callback(() => {
 					assert.deepEqual(parent.state.children, [ 'widget2', 'widget3' ]);
-				}), 50);
-			}, 50);
+				}));
+			});
 		}
 	},
 
@@ -151,10 +168,12 @@ registerSuite({
 				}
 			});
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 1;
+				}, dfd.callback(() => {
 				assert.deepEqual(widgetRegistry.stack, [ 'widget1' ]);
 				assert.isTrue(Map<string, Child>({ widget1 }).equals(parent.children));
-			}), 50);
+			}));
 		},
 		setState(this: any) {
 			const dfd = this.async();
@@ -164,10 +183,12 @@ registerSuite({
 
 			parent.setState({ children: [ 'widget2' ] });
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 1;
+				}, dfd.callback(() => {
 				assert.deepEqual(widgetRegistry.stack, [ 'widget2' ]);
 				assert.isTrue(Map<Child>({ widget2 }).equals(parent.children));
-			}), 50);
+			}));
 		},
 		'caching widgets'(this: any) {
 			const dfd = this.async();
@@ -177,17 +198,21 @@ registerSuite({
 
 			parent.setState({ children: [ 'widget1' ]});
 
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 1;
+				}, () => {
 				widgetRegistry.stack = [];
 				parent.setState({ children: [ 'widget1', 'widget2' ] });
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, dfd.callback(() => {
 					assert.deepEqual(widgetRegistry.stack, [ 'widget2' ], 'should not have called the widget registry');
 					assert.isTrue(Map<Child>({ widget1, widget2 }).equals(parent.children));
 
 					parent.setState({ children: [ 'widget2', 'widget1' ] });
 					assert.isTrue(Map<Child>({ widget2, widget1 }).equals(parent.children), 'should synchronously update children when cached');
-				}), 100);
-			}, 100);
+				}));
+			});
 		},
 		'childList'(this: any) {
 			const dfd = this.async();
@@ -202,17 +227,21 @@ registerSuite({
 				children: Map({ widget1, widget3 })
 			});
 
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, () => {
 				assert.deepEqual(parent.state.children, [ 'widget1', 'widget3' ]);
 				parent.emit({
 					type: 'childlist',
 					target: parent,
 					children: Map({ widget2, widget3 })
 				});
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, dfd.callback(() => {
 					assert.deepEqual(parent.state.children, [ 'widget2', 'widget3' ]);
-				}), 50);
-			}, 50);
+				}));
+			});
 		}
 	},
 

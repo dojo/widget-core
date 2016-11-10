@@ -16,3 +16,22 @@ export function isEventuallyRejected<T>(promise: Thenable<T>): Thenable<boolean>
 export function throwImmediatly() {
 	throw new Error('unexpected code path');
 }
+
+export function waitForAsyncResult(test: () => boolean, callback: () => void, timeout = 5000) {
+	const timeStep = 10;
+	const timeoutTime = new Date();
+	timeoutTime.setMilliseconds(timeoutTime.getMilliseconds() + timeout);
+
+	function checkForSolution() {
+		if (test()) {
+			return callback();
+		}
+		else if (Date.now() > timeoutTime.getTime()) {
+			return;
+		} else {
+			setTimeout(checkForSolution, timeStep);
+		}
+	}
+
+	checkForSolution();
+}
