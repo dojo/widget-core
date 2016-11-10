@@ -1,8 +1,8 @@
-import { h, VNode } from 'maquette';
 import { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/bases/createDestroyable';
 import createEvented from 'dojo-compose/bases/createEvented';
 import { State } from 'dojo-interfaces/bases';
+import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import Map from 'dojo-shim/Map';
 import Promise from 'dojo-shim/Promise';
@@ -222,10 +222,6 @@ const dijitDataWeakMap = new WeakMap<Dijit<DijitWidget>, DijitData<DijitWidget>>
 const createDijit: DijitFactory = createWidgetBase
 	.mixin({
 		mixin: <DijitMixin<DijitWidget>> {
-			render(this: Dijit<DijitWidget>): VNode {
-				const afterCreate = dijitDataWeakMap.get(this).afterCreate;
-				return h(this.tagName, { afterCreate });
-			},
 			get dijit(this: Dijit<DijitWidget>): DijitWidget | undefined {
 				return dijitDataWeakMap.get(this).dijitWidget;
 			},
@@ -283,6 +279,14 @@ const createDijit: DijitFactory = createWidgetBase
 				}
 			});
 		}
+	})
+	.extend({
+		nodeAttributes: [
+			function(this: Dijit<DijitWidget>): VNodeProperties {
+				const afterCreate = dijitDataWeakMap.get(this).afterCreate;
+				return { afterCreate };
+			}
+		]
 	});
 
 export default createDijit;
