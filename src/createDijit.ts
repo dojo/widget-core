@@ -3,10 +3,11 @@ import { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/bases/createDestroyable';
 import createEvented from 'dojo-compose/bases/createEvented';
 import { State } from 'dojo-interfaces/bases';
+import { Widget, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import Map from 'dojo-shim/Map';
 import Promise from 'dojo-shim/Promise';
 import WeakMap from 'dojo-shim/WeakMap';
-import createRenderMixin, { RenderMixin, RenderMixinOptions } from './mixins/createRenderMixin';
+import createWidgetBase from './bases/createWidgetBase';
 
 /**
  * The minimal API that is needed for Dojo 2 widgets to manage Dojo 1 Dijits
@@ -50,7 +51,7 @@ export interface DijitWidgetConstructor<D extends DijitWidget> {
 	new (params: DijitWidgetParams, srcNodeRef: string | Node): D;
 }
 
-export interface DijitOptions<D extends DijitWidget> extends RenderMixinOptions<DijitState<D>> {
+export interface DijitOptions<D extends DijitWidget> extends WidgetOptions<DijitState<D>> {
 	/**
 	 * An object of parameters to pass to the wrapped Dijit constructor
 	 */
@@ -90,7 +91,7 @@ export interface DijitMixin<D extends DijitWidget> {
 	params: DijitWidgetParams;
 }
 
-export type Dijit<D extends DijitWidget> = RenderMixin<DijitState<D>> & DijitMixin<D>;
+export type Dijit<D extends DijitWidget> = Widget<DijitState<D>> & DijitMixin<D>;
 
 export interface DijitFactory extends ComposeFactory<Dijit<DijitWidget>, DijitOptions<DijitWidget>> {
 	/**
@@ -218,7 +219,7 @@ const dijitDataWeakMap = new WeakMap<Dijit<DijitWidget>, DijitData<DijitWidget>>
  * Create a new instance of a Dijit "wrapper" which can integrate a Dijit into the Dojo 2
  * widgeting system.
  */
-const createDijit: DijitFactory = createRenderMixin
+const createDijit: DijitFactory = createWidgetBase
 	.mixin({
 		mixin: <DijitMixin<DijitWidget>> {
 			render(this: Dijit<DijitWidget>): VNode {

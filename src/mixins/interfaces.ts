@@ -7,11 +7,6 @@ import { VNode } from 'maquette';
 
 export interface Child extends Renderable, Destroyable {
 	readonly id: string;
-
-	/**
-	 * A reference to the widget's parent
-	 */
-	parent?: Parent | null;
 }
 
 /**

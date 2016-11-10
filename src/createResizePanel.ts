@@ -1,12 +1,14 @@
-import { VNode, h, VNodeProperties } from 'maquette';
+import { VNodeProperties } from 'dojo-interfaces/vdom';
+import { DNode } from 'dojo-interfaces/widgetBases';
+import d from './util/d';
 import { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/bases/createDestroyable';
 import { Handle } from 'dojo-interfaces/core';
 import { Destroyable } from 'dojo-interfaces/bases';
+import { Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import { on } from 'dojo-core/aspect';
-import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
-import createWidget, { Widget, WidgetState, WidgetOptions } from './createWidget';
+import createWidgetBase from './bases/createWidgetBase';
 import createParentListMixin, { ParentListMixin, ParentListMixinOptions } from './mixins/createParentListMixin';
 import createRenderableChildrenMixin from './mixins/createRenderableChildrenMixin';
 import createStatefulChildrenMixin, { StatefulChildrenState, StatefulChildrenOptions } from './mixins/createStatefulChildrenMixin';
@@ -160,7 +162,7 @@ function setResizeListeners(resizePanel: ResizePanel): Handle {
 	};
 }
 
-const createResizePanel: ResizePanelFactory = createWidget
+const createResizePanel: ResizePanelFactory = createWidgetBase
 	.mixin(createParentListMixin)
 	.mixin(createRenderableChildrenMixin)
 	.mixin(createStatefulChildrenMixin)
@@ -168,9 +170,11 @@ const createResizePanel: ResizePanelFactory = createWidget
 		mixin: <ResizePanelMixin> {
 			nodeAttributes: [
 				function (this: ResizePanel, attributes: VNodeProperties): VNodeProperties {
-					const styles = assign({}, attributes.styles);
-					styles['width'] = this.width;
-					styles['height'] = this.height;
+					const { width, height } = this;
+					const styles = {
+						width,
+						height
+					};
 					return { styles };
 				}
 			],
@@ -198,8 +202,8 @@ const createResizePanel: ResizePanelFactory = createWidget
 		},
 		aspectAdvice: {
 			after: {
-				getChildrenNodes(this: ResizePanel, result: (VNode | string)[]): (VNode | string)[] {
-					result.push(h(this.tagNames.handle, resizeNodePropertiesMap.get(this)));
+				getChildrenNodes(this: ResizePanel, result: DNode[]): DNode[] {
+					result.push(d(this.tagNames.handle, resizeNodePropertiesMap.get(this)));
 					return result;
 				}
 			}
