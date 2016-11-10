@@ -89,6 +89,7 @@ const createParentMapMixin: ParentMapMixinFactory = compose<ParentMap<Child>, Pa
 								this.invalidate();
 							}
 						});
+						getRemoveHandle(this, widget);
 					}
 				});
 				childrenMap.set(this, value);

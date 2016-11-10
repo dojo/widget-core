@@ -68,6 +68,7 @@ const createParentMixin: ParentListMixinFactory = compose<ParentList<Child>, Par
 								this.invalidate();
 							}
 						});
+						getRemoveHandle(this, widget);
 					}
 				});
 				childrenMap.set(this, value);
