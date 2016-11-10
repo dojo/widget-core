@@ -1,6 +1,5 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from './bases/createWidgetBase';
-import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetOptions, WidgetState } from 'dojo-interfaces/widgetBases';
 import createCloseableMixin, { Closeable, CloseableState } from './mixins/createCloseableMixin';
 import createParentListMixin, { ParentListMixin, ParentListMixinOptions } from './mixins/createParentListMixin';
