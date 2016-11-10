@@ -1,4 +1,4 @@
-import { VNodeProperties } from 'maquette';
+import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { ComposeFactory } from 'dojo-compose/compose';
 import createStateful from 'dojo-compose/bases/createStateful';
 import createCancelableEvent from 'dojo-compose/bases/createCancelableEvent';

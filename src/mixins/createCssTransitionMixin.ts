@@ -1,4 +1,4 @@
-import { VNodeProperties } from 'maquette';
+import { VNodeProperties } from 'dojo-interfaces/vdom';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { NodeAttributeFunction } from 'dojo-interfaces/widgetBases';
 import createStateful from 'dojo-compose/bases/createStateful';
