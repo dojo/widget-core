@@ -24,12 +24,7 @@ const createPanel: PanelFactory = createWidgetBase
 	.mixin(createRenderableChildrenMixin)
 	.mixin(createStatefulChildrenMixin)
 	.extend({
-		tagName: 'dojo-panel',
-		nodeAttributes: [
-			function(this: Panel): VNodeProperties {
-				return { innerHTML: this.state.label };
-			}
-		]
+		tagName: 'dojo-panel'
 	});
 
 export default createPanel;
