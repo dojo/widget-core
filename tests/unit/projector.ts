@@ -8,6 +8,7 @@ import createDestroyable from 'dojo-compose/mixins/createDestroyable';
 import { ComposeFactory } from 'dojo-compose/compose';
 import global from 'dojo-core/global';
 import { Child } from '../../src/mixins/interfaces';
+import { waitForAsyncResult } from '../support/util';
 
 const createRenderableChild = createDestroyable
 	.mixin(createRenderMixin) as ComposeFactory<Child, any>;
@@ -33,16 +34,20 @@ registerSuite({
 			assert.strictEqual((<HTMLElement> document.body.lastChild).tagName.toLowerCase(), 'h2');
 			nodeText = 'bar';
 			projector.invalidate();
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+				return (<HTMLElement> document.body.lastChild).innerHTML === nodeText;
+			}, () => {
 				assert.strictEqual((<HTMLElement> document.body.lastChild).innerHTML, nodeText);
 				renderable.destroy().then(() => {
 					projector.invalidate();
-					setTimeout(dfd.callback(() => {
+					waitForAsyncResult(() => {
+						return document.body.childNodes.length === childNodeLength;
+					}, dfd.callback(() => {
 						assert.strictEqual(document.body.childNodes.length, childNodeLength, 'child should have been removed');
 						attachHandle.destroy();
-					}), 300);
+					}));
 				});
-			}, 300);
+			});
 		}).catch(dfd.reject);
 	},
 	'lifecycle'(this: any) {
@@ -65,15 +70,19 @@ registerSuite({
 			assert.strictEqual((<HTMLElement> div.firstChild).innerHTML, nodeText);
 			nodeText = 'foo';
 			projector1.invalidate();
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+				return (<HTMLElement> div.firstChild).innerHTML === nodeText;
+			}, () => {
 				assert.strictEqual((<HTMLElement> div.firstChild).innerHTML, nodeText);
 				addHandle.destroy();
 				projector1.invalidate();
-				setTimeout(dfd.callback(() => {
+				waitForAsyncResult(() => {
+					return div.childNodes.length === 0;
+				}, dfd.callback(() => {
 					assert.strictEqual(div.childNodes.length, 0, 'the node should be removed');
 					projector1.destroy();
-				}), 300);
-			}, 300);
+				}));
+			});
 		}).catch(dfd.reject);
 	},
 	'construct projector with css transitions'() {

@@ -2,6 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import createDijit from '../../src/createDijit';
 import * as Dijit from '../support/dijit/Dijit';
+import { waitForAsyncResult } from '../support/util';
 
 class ParamsSpy extends Dijit {
 	constructor(params: any, srcNodeRef: any) {
@@ -9,30 +10,6 @@ class ParamsSpy extends Dijit {
 		this.spiedParams = params;
 	}
 	spiedParams: any;
-}
-
-function watchForAsyncResult(test: () => boolean, callback: () => void, timeout = 5000) {
-	let shouldCancel = false;
-	function cancel() {
-		shouldCancel = true;
-	}
-
-	const timeStep = 50;
-	const timeoutTime = new Date();
-	timeoutTime.setMilliseconds(timeoutTime.getMilliseconds() + timeout);
-
-	function checkForSolution() {
-		if (test()) {
-			return callback();
-		}
-		else if (shouldCancel || Date.now() > timeoutTime.getTime()) {
-			return;
-		} else {
-			setTimeout(checkForSolution, timeStep);
-		}
-	}
-
-	checkForSolution();
 }
 
 registerSuite({
@@ -75,10 +52,12 @@ registerSuite({
 				params: { foo: 'bar' }
 			});
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.Ctor !== 'undefined';
+			}, dfd.callback(() => {
 				assert.strictEqual(dijit.Ctor, 'tests/support/dijit/Dijit');
 				assert.deepEqual(dijit.params, { foo: 'bar' });
-			}), 50);
+			}));
 		}
 	},
 	'render()': {
@@ -101,8 +80,8 @@ registerSuite({
 			assert.isUndefined(dijit.dijit);
 			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
 
-			watchForAsyncResult(() => {
-				return typeof dijit.dijit !== 'undefined' && typeof dijit.dijit.domNode !== 'undefined'
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined' && typeof dijit.dijit.domNode !== 'undefined';
 			}, () => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
@@ -123,13 +102,15 @@ registerSuite({
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
 			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined' && typeof dijit.dijit.domNode !== 'undefined';
+			}, dfd.callback(() => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
 				assert.deepEqual(dijit.dijit.params, { foo: 'bar' });
 				assert.deepEqual(dijit.dijit._startupCalled, 1);
 				assert.deepEqual(dijit.dijit._destroyCalled, 0);
-			}), 50);
+			}));
 		},
 		'afterCreate w/ load from cache'(this: any) {
 			const dfd = this.async();
@@ -142,13 +123,15 @@ registerSuite({
 			const domNode = document.createElement(vnode.vnodeSelector);
 			assert.isUndefined(dijit.dijit);
 			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined' && typeof dijit.dijit.domNode !== 'undefined';
+			}, dfd.callback(() => {
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.srcNodeRef, domNode);
 				assert.deepEqual(dijit.dijit.params, { foo: 'bar' });
 				assert.deepEqual(dijit.dijit._startupCalled, 1);
 				assert.deepEqual(dijit.dijit._destroyCalled, 0);
-			}), 50);
+			}));
 		},
 		'afterCreate w/ no Ctor'(this: any) {
 			const dfd = this.async(100);
@@ -211,9 +194,11 @@ registerSuite({
 			const domNode = document.createElement(vnode.vnodeSelector);
 			vnode.properties!.afterCreate!(domNode, {}, vnode.vnodeSelector, vnode.properties!, vnode.children!);
 
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined';
+			}, dfd.callback(() => {
 				assert.deepEqual(dijit.dijit.spiedParams, {});
-			}), 50);
+			}));
 		},
 		'afterCreate - new dom node'(this: any) {
 			const dfd = this.async();
@@ -226,7 +211,9 @@ registerSuite({
 			document.body.appendChild(domNode);
 			const afterCreate = vnode.properties!.afterCreate;
 			afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
-			setTimeout(dfd.callback(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined';
+			}, dfd.callback(() => {
 				assert(dijit.dijit);
 				const newVNode = dijit.render();
 				assert.strictEqual(newVNode.properties!.afterCreate, afterCreate, 'should not change listeners');
@@ -237,7 +224,7 @@ registerSuite({
 				afterCreate!(newDomNode, {}, vnode.vnodeSelector, {}, []);
 				assert.strictEqual(dijit.dijit.domNode, domNode);
 				assert.strictEqual(dijit.dijit.domNode.parentNode, document.body);
-			}), 50);
+			}));
 		}
 	},
 	'destroy()': {
@@ -259,14 +246,16 @@ registerSuite({
 			const domNode = document.createElement(vnode.vnodeSelector);
 			const afterCreate = vnode.properties!.afterCreate;
 			afterCreate!(domNode, {}, vnode.vnodeSelector, {}, []);
-			setTimeout(() => {
+			waitForAsyncResult(() => {
+				return typeof dijit.dijit !== 'undefined';
+			}, () => {
 				const dijitWidget = dijit.dijit;
 				assert.strictEqual(dijitWidget._destroyCalled, 0);
 				dijit.destroy()
 					.then(dfd.callback(() => {
 						assert.strictEqual(dijitWidget._destroyCalled, 1);
 					}));
-			}, 50);
+			});
 		}
 	}
 });
