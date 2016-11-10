@@ -92,7 +92,7 @@ registerSuite({
 
 			waitForAsyncResult(() => {
 				return parent.children.count() === 1;
-			},() => {
+			}, () => {
 				widgetRegistry.stack = [];
 				parent.setState({ children: [ 'widget1', 'widget2' ] });
 				waitForAsyncResult(() => {
