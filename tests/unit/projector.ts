@@ -165,11 +165,12 @@ registerSuite({
 			assert.strictEqual((<HTMLElement> div.lastChild).innerHTML, 'bar');
 			handle.destroy();
 			projector.invalidate();
-			setTimeout(dfd.callback(() => {
-				handle.destroy();
+			waitForAsyncResult(() => {
+				return div.childNodes.length === 0;
+			}, dfd.callback(() => {
 				assert.strictEqual(div.childNodes.length, 0);
 				attachHandle.destroy();
-			}), 300);
+			}));
 		}).catch(dfd.reject);
 	},
 	'insert()'(this: any) {
@@ -184,11 +185,12 @@ registerSuite({
 			assert.strictEqual((<HTMLElement> div.firstChild).innerHTML, 'foo');
 			handle.destroy();
 			projector.invalidate();
-			setTimeout(dfd.callback(() => {
-				handle.destroy();
+			waitForAsyncResult(() => {
+				return div.childNodes.length === 0;
+			}, dfd.callback(() => {
 				assert.strictEqual(div.childNodes.length, 0);
 				attachHandle.destroy();
-			}), 300);
+			}));
 		}).catch(dfd.reject);
 	}
 });
