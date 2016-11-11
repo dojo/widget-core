@@ -245,7 +245,7 @@ const createTabbedMixin: TabbedMixinFactory = createWidgetBase
 					if (tabVNode.properties) {
 						(tabVNode as any).properties['data-visible'] = String(isActiveTab);
 					}
-					const childNode = {
+					const childNode: HNode & { properties: any }  = {
 						properties: tabVNode.properties,
 						children: [],
 						render(): VNode {
