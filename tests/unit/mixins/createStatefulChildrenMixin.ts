@@ -149,11 +149,9 @@ registerSuite({
 					target: parent,
 					children: List([ widget2, widget3 ])
 				});
-				waitForAsyncResult(() => {
-					return parent.children.count() === 2;
-				}, dfd.callback(() => {
+				setTimeout(dfd.callback(() => {
 					assert.deepEqual(parent.state.children, [ 'widget2', 'widget3' ]);
-				}));
+				}), 100);
 			});
 		}
 	},
@@ -169,7 +167,7 @@ registerSuite({
 			});
 
 			waitForAsyncResult(() => {
-					return parent.children.count() === 1;
+					return widgetRegistry.stack.length === 1;
 				}, dfd.callback(() => {
 				assert.deepEqual(widgetRegistry.stack, [ 'widget1' ]);
 				assert.isTrue(Map<string, Child>({ widget1 }).equals(parent.children));
@@ -260,12 +258,16 @@ registerSuite({
 		});
 
 		parent.setState({ children: [ 'widget1' ]});
-		return delay().then(() => {
+		waitForAsyncResult(() => {
+			return setCount === 1;
+		}, () => {
 			assert.equal(setCount, 1);
 			parent.setState({ children: [ 'widget1' ]});
-			return delay();
-		}).then(() => {
-			assert.equal(setCount, 1);
+			waitForAsyncResult(() => {
+			return setCount === 1;
+			}, () => {
+				assert.equal(setCount, 1);
+			});
 		});
 	},
 
@@ -287,7 +289,9 @@ registerSuite({
 			children: List([ widget1 ])
 		});
 
-		return delay().then(() => {
+		waitForAsyncResult(() => {
+			return setCount === 1;
+		}, () => {
 			assert.equal(setCount, 1);
 
 			parent.emit({
@@ -296,16 +300,17 @@ registerSuite({
 				children: List([ widget1 ])
 			});
 
-			return delay();
-		}).then(() => {
-			assert.equal(setCount, 1);
+			waitForAsyncResult(() => {
+			return setCount === 1;
+			}, () => {
+				assert.equal(setCount, 1);
+			});
 		});
 	},
 	destroy() {
 		const parent = createStatefulChildrenList({
 			registryProvider
 		});
-
 		return delay().then(() => {
 			assert.doesNotThrow(() => {
 				parent.destroy();
