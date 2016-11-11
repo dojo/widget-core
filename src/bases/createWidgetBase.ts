@@ -98,7 +98,7 @@ function manageDetachedChildren(instance: Widget<WidgetState>): void {
 
 function formatTagNameAndClasses(tagName: string, classes: string[]) {
 	if (classes.length) {
-		return `${tagName}.${classes.join(',')}`;
+		return `${tagName}.${classes.join('.')}`;
 	}
 	return tagName;
 }
