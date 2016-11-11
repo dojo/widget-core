@@ -35,10 +35,6 @@ const createStatefulChildrenMap = createStatefulChildrenMixin
 		children: Map<string, Child>()
 	});
 
-function delay() {
-	return new Promise((resolve) => setTimeout(resolve, 50));
-}
-
 registerSuite({
 	name: 'mixins/createStatefulChildrenMixin',
 
@@ -48,6 +44,10 @@ registerSuite({
 		widget2 = <Child> widgetMap.get('widget2');
 		widget3 = <Child> widgetMap.get('widget3');
 		widget4 = <Child> widgetMap.get('widget4');
+	},
+
+	afterEach() {
+		widgetRegistry.reset();
 	},
 
 	'List children': {
@@ -106,27 +106,6 @@ registerSuite({
 				}));
 			});
 		},
-		'cached widgets should be removed on destroy'(this: any) {
-			const dfd = this.async();
-			const parent = createStatefulChildrenList({
-				registryProvider
-			});
-
-			parent.setState({ children: [ 'widget1', 'widget2' ] });
-
-			waitForAsyncResult(() => {
-					return parent.children.count() === 2;
-				}, () => {
-				widget2.destroy();
-				parent.setState({ children: [ 'widget2', 'widget1' ] });
-
-				waitForAsyncResult(() => {
-					return parent.children.count() === 1;
-				}, dfd.callback(() => {
-					assert.isTrue(List<Child>([ widget1 ]).equals(parent.children), 'Should not');
-				}));
-			});
-		},
 		'childList'(this: any) {
 			const dfd = this.async();
 
@@ -149,9 +128,35 @@ registerSuite({
 					target: parent,
 					children: List([ widget2, widget3 ])
 				});
-				setTimeout(dfd.callback(() => {
+				const timeout = new Date();
+				timeout.setMilliseconds(timeout.getMilliseconds() + 50);
+
+				waitForAsyncResult(() => {
+					return typeof parent.state.children !== 'undefined' && parent.state.children[0] === 'widget2';
+				}, dfd.callback(() => {
 					assert.deepEqual(parent.state.children, [ 'widget2', 'widget3' ]);
-				}), 100);
+				}));
+			});
+		},
+		'cached widgets should be removed on destroy'(this: any) {
+			const dfd = this.async();
+			const parent = createStatefulChildrenList({
+				registryProvider
+			});
+
+			parent.setState({ children: [ 'widget1', 'widget2' ] });
+
+			waitForAsyncResult(() => {
+					return parent.children.count() === 2;
+				}, () => {
+				widget2.destroy();
+				parent.setState({ children: [ 'widget2', 'widget1' ] });
+
+				waitForAsyncResult(() => {
+					return parent.children.count() === 1;
+				}, dfd.callback(() => {
+					assert.isTrue(List<Child>([ widget1 ]).equals(parent.children), 'Should not');
+				}));
 			});
 		}
 	},
@@ -311,10 +316,8 @@ registerSuite({
 		const parent = createStatefulChildrenList({
 			registryProvider
 		});
-		return delay().then(() => {
-			assert.doesNotThrow(() => {
-				parent.destroy();
-			});
+		assert.doesNotThrow(() => {
+			parent.destroy();
 		});
 	},
 
@@ -345,7 +348,8 @@ registerSuite({
 		}));
 	},
 
-	'latest state determines the children'() {
+	'latest state determines the children'(this: any) {
+		const dfd = this.async();
 		const { has } = widgetRegistry;
 		let registry = Object.create(widgetRegistry);
 
@@ -366,7 +370,9 @@ registerSuite({
 
 		let resolveFirst: () => void;
 		let resolveSecond: () => void;
-		return delay().then(() => {
+		waitForAsyncResult(() => {
+			return parent.children.count() === 1;
+		}, () => {
 			registry.has = (id: string) => {
 				return new Promise((resolve) => {
 					const first = has.call(registry, id);
@@ -379,7 +385,7 @@ registerSuite({
 			});
 
 			assert.ok(resolveFirst);
-		}).then(() => {
+
 			registry.has = (id: string) => {
 				return new Promise((resolve) => {
 					const second = has.call(registry, id);
@@ -394,19 +400,24 @@ registerSuite({
 			assert.ok(resolveSecond);
 			resolveSecond();
 
-			return delay();
-		}).then(() => {
-			assert.isTrue(List<Child>([ widget3 ]).equals(parent.children));
+			waitForAsyncResult(() => {
+				return List<Child>([ widget3 ]).equals(parent.children);
+			}, () => {
+				assert.isTrue(List<Child>([ widget3 ]).equals(parent.children));
 
-			resolveFirst();
-			return delay();
-		}).then(() => {
-			assert.isTrue(List<Child>([ widget3 ]).equals(parent.children));
+				resolveFirst();
+				waitForAsyncResult(() => {
+					return List<Child>([ widget3 ]).equals(parent.children);
+				}, dfd.callback(() => {
+					assert.isTrue(List<Child>([ widget3 ]).equals(parent.children));
+				}));
+			});
 		});
 	},
 
-	'only changed later state takes precedence over previous updates'() {
+	'only changed later state takes precedence over previous updates'(this: any) {
 		const { has } = widgetRegistry;
+		const dfd = this.async();
 		let registry = Object.create(widgetRegistry);
 
 		const parent = createStatefulChildrenList({
@@ -426,7 +437,9 @@ registerSuite({
 
 		let resolveFirst: () => void;
 		let resolveSecond: () => void;
-		return delay().then(() => {
+		return waitForAsyncResult(() => {
+			return List<Child>([ widget1 ]).equals(parent.children);
+		}, () => {
 			registry.has = (id: string) => {
 				return new Promise((resolve) => {
 					const first = has.call(registry, id);
@@ -439,7 +452,7 @@ registerSuite({
 			});
 
 			assert.ok(resolveFirst);
-		}).then(() => {
+
 			registry.has = (id: string) => {
 				return new Promise((resolve) => {
 					const second = has.call(registry, id);
@@ -454,11 +467,11 @@ registerSuite({
 			assert.notOk(resolveSecond);
 
 			resolveFirst();
-			return delay();
-		}).then(() => {
-			assert.isTrue(List<Child>([ widget2 ]).equals(parent.children));
-
-			return delay();
+			waitForAsyncResult(() => {
+				return List<Child>([ widget2 ]).equals(parent.children);
+			}, dfd.callback(() => {
+				assert.isTrue(List<Child>([ widget2 ]).equals(parent.children));
+			}));
 		});
 	},
 
