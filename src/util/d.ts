@@ -16,7 +16,9 @@ export type DOptions<S extends WidgetState, O extends WidgetOptions<S>> = VNodeP
 
 export type Children = (DNode | VNode | null)[];
 
-function d(tagName: string, optionsOrChildren?: VNodeProperties | Children, children?: Children): HNode;
+function d(tagName: string, options: VNodeProperties, children: Children): HNode;
+function d(tagName: string, children: Children): HNode;
+function d(tagName: string): HNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O): WNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
 	tagNameOrFactory: TagNameOrFactory<S, W, O>,
