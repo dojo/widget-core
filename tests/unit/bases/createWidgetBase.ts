@@ -102,6 +102,34 @@ registerSuite({
 			assert.lengthOf((<HNode> childrenNodes[0]).children, 0);
 			assert.isOk((<HNode> childrenNodes[1]).children);
 			assert.lengthOf((<HNode> childrenNodes[1]).children, 1);
+		},
+		'getChildren nodes passes stateFrom when provided'() {
+			const expectedStateFrom = {
+				observe() {
+					return {
+						subscribe() {}
+					};
+				}
+			};
+
+			const widgetBase = createWidgetBase
+			.mixin({
+				mixin: {
+					childNodeRenderers: [
+						function(this: any, stateFrom: any): DNode[] {
+							assert.strictEqual(stateFrom, expectedStateFrom);
+							return [ d('header') ];
+						}
+					]
+				}
+			})({
+				id: 'my-id',
+				stateFrom: <any> expectedStateFrom
+			});
+
+			const result = widgetBase.render();
+			assert.lengthOf(result.children, 1);
+			assert.strictEqual(result.children![0].vnodeSelector, 'header');
 		}
 	},
 	render: {

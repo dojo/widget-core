@@ -10,6 +10,7 @@ import {
 	WidgetOptions
 } from 'dojo-interfaces/widgetBases';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
+import { StoreObservablePatchable } from 'dojo-interfaces/abilities';
 import { Factory } from 'dojo-interfaces/core';
 import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
@@ -22,6 +23,7 @@ interface WidgetInternalState {
 	readonly id?: string;
 	dirty: boolean;
 	widgetClasses: string[];
+	stateFrom?: StoreObservablePatchable<WidgetState>;
 	cachedVNode?: VNode;
 	historicChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
 	currentChildrenMap: Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>;
@@ -111,10 +113,11 @@ const createWidget: WidgetFactory = createStateful
 			classes: [],
 
 			getChildrenNodes(this: Widget<WidgetState>): DNode[] {
+				const { stateFrom } = widgetInternalStateMap.get(this);
 				let childrenWrappers: DNode[] = [];
 
 				this.childNodeRenderers.forEach((fn) => {
-					const wrappers = fn.call(this);
+					const wrappers = fn.call(this, stateFrom);
 					childrenWrappers = childrenWrappers.concat(wrappers);
 				});
 
@@ -187,13 +190,14 @@ const createWidget: WidgetFactory = createStateful
 			tagName: 'div'
 		},
 		initialize(instance: Widget<WidgetState>, options: WidgetOptions<WidgetState> = {}) {
-			const { id, tagName } = options;
+			const { id, tagName, stateFrom } = options;
 			instance.tagName = tagName || instance.tagName;
 
 			widgetInternalStateMap.set(instance, {
 				id,
 				dirty: true,
 				widgetClasses: [],
+				stateFrom,
 				historicChildrenMap: new Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>(),
 				currentChildrenMap: new Map<string | Factory<Widget<WidgetState>, WidgetOptions<WidgetState>>, Widget<WidgetState>>()
 			});
