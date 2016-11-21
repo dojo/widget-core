@@ -14,14 +14,15 @@ export type TagNameOrFactory<S extends WidgetState, W extends Widget<S>, O exten
 
 export type DOptions<S extends WidgetState, O extends WidgetOptions<S>> = VNodeProperties | O;
 
-type Children = (DNode | VNode | null)[];
+export type Children = (DNode | VNode | null)[];
 
 function d(tagName: string, optionsOrChildren?: VNodeProperties | Children, children?: Children): HNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O): WNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
 	tagNameOrFactory: TagNameOrFactory<S, W, O>,
 	optionsOrChildren: DOptions<S, O> = {},
-	children: Children = []): DNode {
+	children: Children = []
+): DNode {
 
 	if (typeof tagNameOrFactory === 'string') {
 		if (Array.isArray(optionsOrChildren)) {
