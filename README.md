@@ -90,7 +90,7 @@ const widgetStore = createObservableStore({
 		{ 
 			id: 'my-widget', 
 			classes: [ 'class-a', 'class-b' ], 
-			styles: [ 'width:200px' ]
+			styles: [ 'width:20px' ]
 		}
 	]
 });
