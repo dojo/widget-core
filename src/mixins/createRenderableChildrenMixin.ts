@@ -1,5 +1,5 @@
 import { DNode } from 'dojo-interfaces/widgetBases';
-import { List } from 'immutable';
+import List from 'dojo-core/List';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { from as arrayFrom } from 'dojo-shim/array';
 import { Child, ChildEntry } from './interfaces';

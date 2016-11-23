@@ -4,9 +4,9 @@ import { HNode } from 'dojo-interfaces/widgetBases';
 import createRenderableChildrenMixin, { RenderableChildrenMixin } from '../../../src/mixins/createRenderableChildrenMixin';
 import createWidgetBase from '../../../src/bases/createWidgetBase';
 import { Child } from '../../../src/mixins/interfaces';
-import { List, Map } from 'immutable';
+import Map from 'dojo-shim/Map';
 
-type WithListChildren = RenderableChildrenMixin & { children?: List<Child>; };
+type WithListChildren = RenderableChildrenMixin & { children?: Child[]; };
 type WithMapChildren = RenderableChildrenMixin & { children?: Map<string, Child>; };
 
 registerSuite({
@@ -19,11 +19,11 @@ registerSuite({
 	'getChildrenNodes()': {
 		'List children'() {
 			const parent: WithListChildren = createRenderableChildrenMixin();
-			parent.children = List([
+			parent.children = [
 				createWidgetBase({ tagName: 'foo' }),
 				createWidgetBase({ tagName: 'bar' }),
 				createWidgetBase({ tagName: 'baz' })
-			]);
+			];
 			const dnodes = parent.getChildrenNodes();
 			assert.strictEqual(dnodes.length, 3);
 			assert.strictEqual((<HNode> dnodes[0]).render().vnodeSelector, 'foo');
@@ -32,7 +32,7 @@ registerSuite({
 		},
 		'Map children'() {
 			const parent: WithMapChildren = createRenderableChildrenMixin();
-			parent.children = Map<string, Child>([
+			parent.children = new Map<string, Child>([
 				[ 'foo', createWidgetBase({ tagName: 'foo' }) ],
 				[ 'bar', createWidgetBase({ tagName: 'bar' }) ],
 				[ 'baz', createWidgetBase({ tagName: 'baz' }) ]
@@ -52,10 +52,10 @@ registerSuite({
 	sort: {
 		'with list children'() {
 			const parent: WithListChildren = createRenderableChildrenMixin();
-			parent.children = List([
+			parent.children = [
 				createWidgetBase({ tagName: 'foo' }),
 				createWidgetBase({ tagName: 'bar' })
-			]);
+			];
 			parent.sort = function (valueA: [ number, Child ], valueB: [ number, Child ]): number {
 				const [ , childA ] = valueA;
 				const [ , childB ] = valueB;
@@ -67,7 +67,7 @@ registerSuite({
 		},
 		'with map children'() {
 			const parent: WithMapChildren = createRenderableChildrenMixin();
-			parent.children = Map<string, Child>()
+			parent.children = new Map<string, Child>()
 				.set('foo', createWidgetBase({ tagName: 'foo' }))
 				.set('bar', createWidgetBase({ tagName: 'bar' }));
 			parent.sort = function (valueA: [ string, Child ], valueB: [ string, Child ]): number {
@@ -89,7 +89,7 @@ registerSuite({
 					return keyA < keyB ? -1 : 1;
 				}
 			});
-			parent.children = Map<string, Child>()
+			parent.children = new Map<string, Child>()
 				.set('foo', createWidgetBase({ tagName: 'foo' }))
 				.set('bar', createWidgetBase({ tagName: 'bar' }));
 			const dnodes = parent.getChildrenNodes();

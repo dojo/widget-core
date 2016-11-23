@@ -1,4 +1,4 @@
-import { Map } from 'immutable';
+import Map from 'dojo-shim/Map';
 import { VNode } from 'dojo-interfaces/vdom';
 import { DNode, HNode } from 'dojo-interfaces/widgetBases';
 import d from '../util/d';
@@ -91,9 +91,10 @@ function setActiveTab(tabbed: TabbedMixin<TabbedChild>, activeTab: TabbedChild) 
  * @param tabbed The tabbed mixin to return the active child for
  */
 function getActiveTab(tabbed: TabbedMixin<TabbedChild>): TabbedChild {
-	let activeTab = tabbed.children.find((tab: any) => {
-		return tab && tab.state && tab.state.active;
+	let activeTab = arrayFrom(tabbed.children.values()).find((tab) => {
+		return Boolean(tab && tab.state && tab.state.active);
 	});
+
 	/* TODO: when a tab closes, instead of going back to the previous active tab, it will always
 	 * revert to the first tab, maybe it would be better to keep track of a stack of tabs? */
 	if (!activeTab) {
