@@ -64,7 +64,7 @@ To customise the widget an optional `options` argument can be provided with the 
 |getChildrenNodes|Function|Function that returns an array of children DNodes|
 |nodeAttributes|Function[]|An array of functions that return VNodeProperties to be applied to the VNode|
 
-By default the base widget class apply an `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
+By default the base widget class applies an `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
 
 ```ts
 const myBasicWidget = createWidgetBase({
