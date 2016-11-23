@@ -1,35 +1,21 @@
-import { DNode } from 'dojo-interfaces/widgetBases';
+import { DNode, WidgetOptions, WidgetState } from 'dojo-interfaces/widgetBases';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { Child, ChildEntry } from './interfaces';
-
-export interface RenderableChildrenOptions {
-	/**
-	 * An optional method which can be used to sort the children
-	 */
-	sort?: <C extends Child>(valueA: ChildEntry<C>, valueB: ChildEntry<C>) => number;
-}
+import { Child } from './interfaces';
 
 export interface RenderableChildrenMixin {
 	/**
 	 * Return an array of VNodes/strings the represent the rendered results of the children of this instance
 	 */
 	getChildrenNodes(): DNode[];
-
-	/**
-	 * An optional method which can be used to sort the children when they are rendered
-	 * @param valueA The first entry to be compared
-	 * @param valueB The second entry to be compared
-	 */
-	sort?<C extends Child>(valueA: ChildEntry<C>, valueB: ChildEntry<C>): number;
 }
 
-export interface RenderableChildrenFactory extends ComposeFactory<RenderableChildrenMixin, RenderableChildrenOptions> {}
+export interface RenderableChildrenFactory extends ComposeFactory<RenderableChildrenMixin, WidgetOptions<WidgetState>> {}
 
-const createRenderableChildrenMixin: RenderableChildrenFactory = compose<RenderableChildrenMixin, RenderableChildrenOptions>({
+const createRenderableChildrenMixin: RenderableChildrenFactory = compose<RenderableChildrenMixin, WidgetOptions<WidgetState>>({
 	/* When this gets mixed in, if we had the children as part of the interface, we would end up overwritting what is
 	 * likely a get accessor for the children, so to protect ourselves, we won't have it part of the interface */
 	getChildrenNodes(this: RenderableChildrenMixin & { children: Child[]; }): DNode[] {
-		const { children, sort } = this;
+		const { children } = this;
 		/* children is not guarunteed to be set, therefore need to guard against it */
 		if (children) {
 			const results: DNode[] = [];
@@ -41,10 +27,6 @@ const createRenderableChildrenMixin: RenderableChildrenFactory = compose<Rendera
 		else {
 			return [];
 		}
-	}
-}, (instance, options) => {
-	if (options) {
-		instance.sort = options.sort;
 	}
 });
 
