@@ -266,7 +266,7 @@ registerSuite({
 		'not in options or state'() {
 			const widgetBase = createWidgetBase();
 
-			assert.strictEqual(widgetBase.id, 'widget-7');
+			assert.strictEqual(widgetBase.id, 'widget-1');
 		},
 		'is read only'() {
 			const widgetBase = createWidgetBase();
