@@ -145,7 +145,7 @@ export interface ProjectorOverrides<C extends Child> {
 	on(type: string, listener: EventedListener<this, EventTargettedObject<this>>): Handle;
 }
 
-export type Projector<C extends Child> = VNodeEvented & ProjectorMixin<Child>;
+export type Projector<C extends Child> = VNodeEvented & Evented & ProjectorMixin<Child>;
 
 export interface ProjectorFactory extends ComposeFactory<Projector<Child>, ProjectorOptions<Child>> { }
 
