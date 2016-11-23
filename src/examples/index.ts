@@ -1,16 +1,8 @@
-import createWidget from '../createWidget';
 import createButton from '../createButton';
 import { Child } from '../mixins/interfaces';
 import { createProjector } from '../projector';
 
 const buttonWidgets: Child[] = [];
-
-buttonWidgets.push(createWidget({
-	state: {
-		label: 'Buttons'
-	},
-	tagName: 'h1'
-}));
 
 buttonWidgets.push(createButton({
 	state: {
@@ -61,12 +53,3 @@ document.body.appendChild(buttonDiv);
 const buttonProjector = createProjector({ root: buttonDiv });
 buttonProjector.append(buttonWidgets);
 buttonProjector.attach();
-
-const panelWidgets: Child[] = [];
-
-panelWidgets.push(createWidget({
-	state: {
-		label: 'Resize Panel'
-	},
-	tagName: 'h1'
-}));

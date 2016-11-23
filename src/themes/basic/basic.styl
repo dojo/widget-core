@@ -17,64 +17,6 @@ $dojoBlack = #5A5A5A;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 14px;
 
-	dojo-panel-tabbed {
-		color: $dojoBlack;
-		box-sizing: border-box;
-
-		* {
-			box-sizing: border-box;
-		}
-
-		> ul {
-			> li {
-				border-top: 1px solid $dojoLightGray;
-				border-bottom: 1px solid $dojoBaseGray;
-				border-left: 1px solid $dojoLightGray;
-				background-color: $dojoOffWhite;
-				font-size: 16px;
-				font-weight: 700;
-				padding-top: 3px;
-
-				&:last-child {
-					border-right: 1px solid $dojoLightGray;
-				}
-
-				> div:nth-child(1) {
-					padding: 20px 10px;
-				}
-
-				&[data-active="true"] {
-					border-top: 4px solid $dojoBlue;
-					border-right: 1px solid $dojoBaseGray;
-					border-bottom-color: transparent;
-					border-left: 1px solid $dojoBaseGray;
-					background-color: #FFF;
-					padding-top: 0;
-
-					& + li {
-						border-left: 0;
-					}
-				}
-
-				> div:nth-child(2) {
-					padding: 20px 20px 20px 5px;
-
-					&:after {
-						content: '✖';
-						display: block;
-					}
-				}
-			}
-		}
-
-		> div:nth-child(2) {
-			border-right: 1px solid $dojoBaseGray;
-			border-bottom: 1px solid $dojoBaseGray;
-			border-left: 1px solid $dojoBaseGray;
-			padding: 20px 10px;
-		}
-	}
-
 	button {
 		background-color: $dojoBlue;
 		font-weight: 700;
@@ -123,17 +65,6 @@ $dojoBlack = #5A5A5A;
 			&:active {
 				box-shadow: 0 0 15px 2px darken($dojoRed, 35%) inset;
 			}
-		}
-	}
-
-	dojo-panel-resize {
-		border: 1px solid $dojoBaseGray;
-		padding: 10px;
-
-		dojo-resize-handle {
-			font-size: 20px;
-			padding: 3px 3px 0 3px;
-			color: $dojoBlack;
 		}
 	}
 }
