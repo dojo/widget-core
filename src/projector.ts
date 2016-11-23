@@ -359,11 +359,38 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin<Child>, 
 			if (children) {
 				this.children = [];
 			}
+			this.invalidate();
 		},
 
 		insert(this: Projector<Child>, child: Child, position: Position, reference?: Child): Handle {
 			this.children = insertInArray(childrenMap.get(this), child, position, reference);
 			return getRemoveHandle(this, child);
+		}
+	},
+	function initialize(instance: Projector<Child>, { cssTransitions = false, autoAttach = false, root = document.body }: ProjectorOptions<Child> = {}) {
+		const options: { transitions?: any } = {};
+		if (cssTransitions) {
+			if (global.cssTransitions) {
+				options.transitions = global.cssTransitions;
+			}
+			else {
+				throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
+			}
+		}
+		const projector = createMaquetteProjector(options);
+		projectorDataMap.set(instance, {
+			attachHandle: noopHandle,
+			boundRender: noopVNode,
+			projector,
+			root,
+			state: ProjectorState.Detached,
+			tagName: 'div'
+		});
+		if (autoAttach === true) {
+			instance.attach({ type: 'merge' });
+		}
+		else if (typeof autoAttach === 'string') {
+			instance.attach({ type: autoAttach });
 		}
 	})
 	.mixin({
@@ -393,41 +420,6 @@ export const createProjector: ProjectorFactory = compose<ProjectorMixin<Child>, 
 					});
 				}
 			});
-		}
-	})
-	.mixin({
-		initialize(instance: Projector<Child>, { cssTransitions = false, autoAttach = false, root = document.body }: ProjectorOptions<Child> = {}) {
-			const options: { transitions?: any } = {};
-			if (cssTransitions) {
-				if (global.cssTransitions) {
-					options.transitions = global.cssTransitions;
-				}
-				else {
-					throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
-				}
-			}
-			const projector = createMaquetteProjector(options);
-			projectorDataMap.set(instance, {
-				attachHandle: noopHandle,
-				boundRender: noopVNode,
-				projector,
-				root,
-				state: ProjectorState.Detached,
-				tagName: 'div'
-			});
-			if (autoAttach === true) {
-				instance.attach({ type: 'merge' });
-			}
-			else if (typeof autoAttach === 'string') {
-				instance.attach({ type: autoAttach });
-			}
-		},
-		aspectAdvice: {
-			after: {
-				clear(this: Projector<Child>): void {
-					this.invalidate();
-				}
-			}
 		}
 	});
 
