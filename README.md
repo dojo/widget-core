@@ -25,10 +25,10 @@ The API for using hyperscript provides multiple signitures for convienience, **t
 d(tagName: string): HNode[];
 ```
 ```ts
-d(tagName: string, children: (DNode | VNode | null)[]): WNode[];
+d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
 ```
 ```ts
-d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): WNode[];
+d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
 ```
 The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
 
