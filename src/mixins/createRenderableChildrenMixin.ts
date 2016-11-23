@@ -1,5 +1,4 @@
 import { DNode } from 'dojo-interfaces/widgetBases';
-import List from 'dojo-core/List';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { from as arrayFrom } from 'dojo-shim/array';
 import { Child, ChildEntry } from './interfaces';
@@ -30,7 +29,7 @@ export interface RenderableChildrenFactory extends ComposeFactory<RenderableChil
 const createRenderableChildrenMixin: RenderableChildrenFactory = compose<RenderableChildrenMixin, RenderableChildrenOptions>({
 	/* When this gets mixed in, if we had the children as part of the interface, we would end up overwritting what is
 	 * likely a get accessor for the children, so to protect ourselves, we won't have it part of the interface */
-	getChildrenNodes(this: RenderableChildrenMixin & { children: List<Child>; }): DNode[] {
+	getChildrenNodes(this: RenderableChildrenMixin & { children: Child[]; }): DNode[] {
 		const { children, sort } = this;
 		/* children is not guarunteed to be set, therefore need to guard against it */
 		if (children) {
