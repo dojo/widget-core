@@ -136,7 +136,7 @@ const myBasicListWidget = createWidgetBase({
 Creates the following DOM structure
 
 ```html
-<ul>
+<ul data-widget-id="my-list-widget">
 	<li>name-1</li>
 	<li>name-2</li>
 	<li>name-3</li>
@@ -156,13 +156,13 @@ import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
 
 interface LabelState extends WidgetState {
 	label?: string;
-};
+}
 
-interface LabelOptions extends WidgetOptions<LabelState> { };
+interface LabelOptions extends WidgetOptions<LabelState> { }
 
 type Label = Widget<LabelState>;
 
-interface LabelFactory extends ComposeFactory<Label, LabelOptions> { };
+interface LabelFactory extends ComposeFactory<Label, LabelOptions> { }
 
 const createLabelWidget: LabelFactory = createWidgetBase.mixin(
 	mixin: {
@@ -216,14 +216,14 @@ function listItem(item: ListItem, itemNumber: number): DNode {
 	return d('li', { innerHTML: item.name, classes });
 }
 
-const createListWidget: ListFactory = createWidgetBase.extend({
-	childNodeRenderer: [
-		function (this: List): DNode[] {
+const createListWidget: ListFactory = createWidgetBase.mixin({
+	mixin: {
+		getChildrenNodes: function (this: List): DNode[] {
 			const listItems = this.state.items.map(listItem);
 
 			return [ d('ul', {}, listItems) ];
 		}
-	]
+	}
 });
 
 export default createListWidget;
