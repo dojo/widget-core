@@ -6,7 +6,7 @@ import { ComposeFactory } from 'dojo-compose/compose';
 import createDestroyable from 'dojo-compose/bases/createDestroyable';
 import { Handle } from 'dojo-interfaces/core';
 import { Destroyable, StatefulOptions } from 'dojo-interfaces/bases';
-import { from as arrayFrom } from 'dojo-shim/array';
+import { from as arrayFrom, find } from 'dojo-shim/array';
 import WeakMap from 'dojo-shim/WeakMap';
 import createWidgetBase from './../bases/createWidgetBase';
 import { Widget, WidgetState } from 'dojo-interfaces/widgetBases';
@@ -91,7 +91,7 @@ function setActiveTab(tabbed: TabbedMixin<TabbedChild>, activeTab: TabbedChild) 
  * @param tabbed The tabbed mixin to return the active child for
  */
 function getActiveTab(tabbed: TabbedMixin<TabbedChild>): TabbedChild {
-	let activeTab = arrayFrom(tabbed.children.values()).find((tab) => {
+	let activeTab = find(arrayFrom(tabbed.children.values()), (tab) => {
 		return Boolean(tab && tab.state && tab.state.active);
 	});
 

@@ -1,6 +1,5 @@
 import { DNode } from 'dojo-interfaces/widgetBases';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { from as arrayFrom } from 'dojo-shim/array';
 import { Child, ChildEntry } from './interfaces';
 
 export interface RenderableChildrenOptions {
@@ -34,19 +33,9 @@ const createRenderableChildrenMixin: RenderableChildrenFactory = compose<Rendera
 		/* children is not guarunteed to be set, therefore need to guard against it */
 		if (children) {
 			const results: DNode[] = [];
-			if (sort) {
-				arrayFrom(<ChildEntry<Child>[]> <any> children.entries()).sort(sort)
-					.forEach(([ , child ]) => results.push({ children: [], render: child.render.bind(child) }));
-			}
-			else {
 				children.forEach((child) => {
-					// Workaround for https://github.com/facebook/immutable-js/pull/919
-					// istanbul ignore else
-					if (child) {
-						results.push({ children: [], render: child.render.bind(child) });
-					}
+					results.push({ children: [], render: child.render.bind(child) });
 				});
-			}
 			return results;
 		}
 		else {
