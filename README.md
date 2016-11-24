@@ -10,31 +10,46 @@ A core widget library for Dojo 2.
 
 For more background on Widgets for Dojo 2, there is a document describing the [widgeting system](https://github.com/dojo/meta/blob/master/documents/Widget-System.md).
 
+- [Usage](#usage)
+- [Features](#features)
+    - [Base Widget](#base-widget)
+    - [Extending Base Widget](#extending-base-widget)
+    - [Projector](#projector)
+    - [Dojo Widget Components](#dojo-widget-components)
+- [How do I contribute?](#how-do-i-contribute)
+    - [Installation](#installation)
+    - [Testing](#testing)
+- [Licensing information](#licensing-information)
+
+## Usage
+
+To use dojo-widgets in a project install the package along with the required peer dependencies.
+
+```shell
+npm install dojo-widgets
+
+# peer dependencies
+npm install dojo-has
+npm install dojo-shim
+npm install dojo-core
+npm install dojo-compose
+npm install dojo-store
+```
+
+and then import the required modules into the project such as, for more details see [features](#features) below.
+
+```ts
+import createButton from 'dojo-widgets/components/createButton';
+```
+
+Alternatively use the [dojo cli](https://github.com/dojo/cli-create-app) to create a complete Dojo 2 skeleton application.
+
 ## Features
 
 Dojo 2 Widgets are based on a virtual DOM implementation named [Maquette](http://maquettejs.org/) as well as some foundational classes
 provided in [dojo-compose](https://github.com/dojo/compose).
 
-### `d`
-
-`d` is a function that is used within Dojo 2 to express widget hierarchical struture using both Dojo 2 widget factories or hyperscript.
-
-The API for using hyperscript provides multiple signitures for convienience, **tagName** is the only mandatory argument, **options** is defaulted to `{}` when not provided and **children** is completetely optional
-
-```ts
-d(tagName: string): HNode[];
-```
-```ts
-d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
-```
-```ts
-d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
-```
-The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
-
-```ts
-d(factory: ComposeFactory<W, O>, options: O): WNode[];
-```
+The examples below are provided in TypeScript syntax. The package does work under JavaScript, but for clarity, the examples will only include one syntax.
 
 ### Base Widget
 
@@ -143,6 +158,36 @@ Creates the following DOM structure
 	<li>name-4</li>
 </ul>
 ``` 
+### `d`
+
+`d` is a function that is used within Dojo 2 to express widget hierarchical struture using both Dojo 2 widget factories or hyperscript, it is imported via
+
+```ts
+import d from 'dojo-widgets/util/d';
+```
+
+and the param and return interfaces are available in the `dojo-interfaces` package.
+
+```ts
+import { DNode, HNode, WNode } from 'dojo-interfaces/widgetBases';
+```
+
+The API for using hyperscript provides multiple signitures for convienience, **tagName** is the only mandatory argument, **options** is defaulted to `{}` when not provided and **children** is completetely optional
+
+```ts
+d(tagName: string): HNode[];
+```
+```ts
+d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
+```
+```ts
+d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
+```
+The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
+
+```ts
+d(factory: ComposeFactory<W, O>, options: O): WNode[];
+```
 
 ### Extending Base Widget
 
@@ -232,5 +277,46 @@ export default createListWidget;
 ### Projector
 
 To be completed.
+
+### Dojo Widget Components
+
+A selection of core reusable widgets are provided along with the 
+
+To be completed.
+
+## How do I contribute?
+
+We appreciate your interest!  Please see the [Dojo 2 Meta Repository](https://github.com/dojo/meta#readme) for the
+Contributing Guidelines and Style Guide.
+
+### Intallation
+
+To start working with this package, clone the repository and run `npm install`.
+
+In order to build the project run `grunt dev` or `grunt dist`.
+
+### Testing
+
+Test cases MUST be written using [Intern](https://theintern.github.io) using the Object test interface and Assert assertion interface.
+
+90% branch coverage MUST be provided for all code submitted to this repository, as reported by istanbul’s combined coverage results for all supported platforms.
+
+To test locally in node run:
+
+`grunt test`
+
+To test against browsers with a local selenium server run:
+
+`grunt test:local`
+
+To test against BrowserStack or Sauce Labs run:
+
+`grunt test:browserstack`
+
+or
+
+`grunt test:saucelabs`
+
+## Licensing information
 
 © 2016 Dojo Foundation & contributors. [New BSD](http://opensource.org/licenses/BSD-3-Clause) license.
