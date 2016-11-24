@@ -1,1 +1,2 @@
+import './createContainerWidgetBase';
 import './createWidgetBase';
