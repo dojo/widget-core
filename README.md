@@ -276,13 +276,15 @@ export default createListWidget;
 
 ### Projector
 
-To be completed.
+In order to render widgets they need to be appended to a `projector`. It is possible to create multiple projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
+
+More to follow.
 
 ### Dojo Widget Components
 
-A selection of core reusable widgets are provided along with the 
+A selection of core reusable widgets are provided for convience that are fully accessible and internationalizable.
 
-To be completed.
+To be completed, list core components here.
 
 ## How do I contribute?
 
