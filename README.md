@@ -85,13 +85,13 @@ d(factory: ComposeFactory<W, O>, options: O): WNode[];
 
 ### Base Widget
 
-A class `createWidgetBase` provides all the base Dojo 2 widget functionality, caching and widget lifecycle management, that can be used directly or extended to create custom widgets.
+The class `createWidgetBase` provides all base Dojo 2 widget functionality including caching and widget lifecycle management. It can be used directly or extended to create custom widgets.
 
 ```ts
 const myBasicWidget = createWidgetBase();
 ```
 
-Create the following DOM element:
+Creates the following DOM element:
 
 ```html
 <div></div>
@@ -111,7 +111,7 @@ To customise the widget an optional `options` argument can be provided with the 
 |getChildrenNodes|Function|Function that returns an array of children DNodes|
 |nodeAttributes|Function[]|An array of functions that return VNodeProperties to be applied to the VNode|
 
-By default the base widget class applies an `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
+By default the base widget class applies `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
 
 ```ts
 const myBasicWidget = createWidgetBase({
@@ -128,15 +128,14 @@ Creates the following DOM element:
 ```html
 <div data-widget-id="my-widget" class="class-a class-b" styles="width:20px"></div>
 ```
-
-Alternatively state can be derived directly from an observable store provided as the `stateFrom`, to create the same DOM element.
+Alternatively state can be derived directly from an observable store passed via `stateFrom`. The following code will create the same DOM element as the above example.
 
 ```ts
 const widgetStore = createObservableStore({
     data: [
-        { 
-            id: 'my-widget', 
-            classes: [ 'class-a', 'class-b' ], 
+        {
+            id: 'my-widget',
+            classes: [ 'class-a', 'class-b' ],
             styles: [ 'width:20px' ]
         }
     ]
@@ -153,8 +152,8 @@ Children are nested within a widget by providing a `getChildrenNodes` function t
 ```ts
 const widgetStore = createObservableStore({
     data: [
-        { 
-            id: 'my-list-widget', 
+        {
+            id: 'my-list-widget',
             items: [
                 { id: '1', name: 'name-1' },
                 { id: '2', name: 'name-2' },
@@ -280,7 +279,7 @@ export default createListWidget;
 
 ### Projector
 
-To render widgets they need to be appended to a `projector`. It is possible to create many projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
+To render widgets they must be appended to a `projector`. It is possible to create many projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
 
 ### Dojo Widget Components
 
