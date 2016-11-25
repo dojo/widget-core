@@ -6,6 +6,7 @@ import WeakMap from 'dojo-shim/WeakMap';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import createWidgetBase from './bases/createWidgetBase';
 import global from 'dojo-core/global';
+import Promise from 'dojo-shim/Promise';
 
 /**
  * Represents the state of the projector
