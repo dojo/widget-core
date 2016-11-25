@@ -12,8 +12,10 @@ For more background on Widgets for Dojo 2, there is a document describing the [w
 
 - [Usage](#usage)
 - [Features](#features)
-    - [d](#d)
     - [Base Widget](#base-widget)
+    	- [Simple Widgets](#simple-widgets)
+    	- [d](#d)
+    	- [Widgets with Children](#widgets-with-children)
     - [Extending Base Widget](#extending-base-widget)
     - [Projector](#projector)
     - [Dojo Widget Components](#dojo-widget-components)
@@ -52,50 +54,9 @@ provided in [dojo-compose](https://github.com/dojo/compose).
 
 The examples below are provided in TypeScript syntax. The package does work under JavaScript, but for clarity, the examples will only include one syntax.
 
-### `d`
-
-`d` is a function that is used within Dojo 2 to express widget hierarchical structure using both Dojo 2 widget factories or Hyperscript, it is imported via
-
-```ts
-import d from 'dojo-widgets/util/d';
-```
-
-and the param and return interfaces are available in the `dojo-interfaces` package.
-
-```ts
-import { DNode, HNode, WNode } from 'dojo-interfaces/widgetBases';
-```
-
-The API for using Hyperscript provides multiple signatures for convenience, **tagName** is the only mandatory argument, **options** is defaulted to `{}` when not provided and **children** is completely optional
-
-```ts
-d(tagName: string): HNode[];
-```
-```ts
-d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
-```
-```ts
-d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
-```
-The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
-
-```ts
-d(factory: ComposeFactory<W, O>, options: O): WNode[];
-```
-
 ### Base Widget
 
 The class `createWidgetBase` provides all base Dojo 2 widget functionality including caching and widget lifecycle management. It can be used directly or extended to create custom widgets.
-
-```ts
-const myBasicWidget = createWidgetBase();
-```
-
-Creates the following DOM element:
-
-```html
-<div></div>
-```
 
 To customise the widget an optional `options` argument can be provided with the following interface.
 
@@ -113,7 +74,25 @@ To customise the widget an optional `options` argument can be provided with the 
 
 By default the base widget class applies `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
 
+#### Simple Widgets
+To create a basic widget `createWidgetBase` can be used directly by importing the class.
+
 ```ts
+import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
+
+const myBasicWidget = createWidgetBase();
+```
+
+Creates the following DOM element:
+
+```html
+<div></div>
+```
+The following example demonstrates how `id`, `classes` and `styles` are applied to the generated DOM.
+
+```ts
+import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
+
 const myBasicWidget = createWidgetBase({
     state: {
         id: 'my-widget',
@@ -146,6 +125,39 @@ const myBasicWidget = createWidgetBase({
     stateFrom: widgetStore
 });
 ```
+
+#### `d`
+
+`d` is a function that is used within Dojo 2 to express widget hierarchical structure using both Dojo 2 widget factories or Hyperscript, it is imported via
+
+```ts
+import d from 'dojo-widgets/util/d';
+```
+
+and the param and return interfaces are available in the `dojo-interfaces` package.
+
+```ts
+import { DNode, HNode, WNode } from 'dojo-interfaces/widgetBases';
+```
+
+The API for using Hyperscript provides multiple signatures for convenience, **tagName** is the only mandatory argument, **options** is defaulted to `{}` when not provided and **children** is completely optional
+
+```ts
+d(tagName: string): HNode[];
+```
+```ts
+d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
+```
+```ts
+d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
+```
+The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
+
+```ts
+d(factory: ComposeFactory<W, O>, options: O): WNode[];
+```
+
+#### Widgets with Children
 
 Children are nested within a widget by providing a `getChildrenNodes` function to the options.
 
