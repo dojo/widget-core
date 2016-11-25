@@ -1,5 +1,5 @@
 import { ComposeFactory } from 'dojo-compose/compose';
-import { Handle } from 'dojo-interfaces/core';
+import { EventTargettedObject, Handle } from 'dojo-interfaces/core';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import WeakMap from 'dojo-shim/WeakMap';
@@ -53,7 +53,7 @@ export interface ProjectorMixin {
 	/**
 	 * The status of the projector
 	 */
-	readonly state: ProjectorState;
+	readonly projectorState: ProjectorState;
 }
 
 /**
@@ -76,6 +76,21 @@ export interface ProjectorFactory extends ComposeFactory<Projector, ProjectorOpt
  * Private state map keyed by instance.
  */
 const projectorDataMap = new WeakMap<Projector, ProjectorData>();
+
+/**
+ * Schedules a render.
+ */
+function scheduleRender(event: EventTargettedObject<Projector>) {
+	const { target: projector } = event;
+	const projectorData = projectorDataMap.get(projector);
+	if (projectorData.state === ProjectorState.Attached) {
+		projector.emit({
+			type: 'render:scheduled',
+			target: projector
+		});
+		projectorData.projector.scheduleRender();
+	}
+}
 
 /**
  * Projector Factory
@@ -105,7 +120,10 @@ const createProjector: ProjectorFactory = createWidgetBase
 
 				projectorData.attachPromise = new Promise((resolve, reject) => {
 					projectorData.afterCreate = () => {
-						this.emit({ type: 'attach' });
+						this.emit({
+							type: 'projector:attached',
+							target: this
+						});
 						resolve(projectorData.attachHandle);
 					};
 				});
@@ -132,7 +150,7 @@ const createProjector: ProjectorFactory = createWidgetBase
 				return projectorDataMap.get(this).projector;
 			},
 
-			get state(this: Projector): ProjectorState {
+			get projectorState(this: Projector): ProjectorState {
 				const projectorData = projectorDataMap.get(this);
 				return projectorData && projectorData.state;
 			}
@@ -149,6 +167,8 @@ const createProjector: ProjectorFactory = createWidgetBase
 					throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
 				}
 			}
+
+			instance.own(instance.on('invalidated', scheduleRender));
 
 			const projector = createMaquetteProjector(maquetteProjectorOptions);
 
@@ -167,20 +187,6 @@ const createProjector: ProjectorFactory = createWidgetBase
 					return { afterCreate };
 				}
 			]
-		},
-		aspectAdvice: {
-			after: {
-				invalidate(this: Projector): void {
-					const projectorData = projectorDataMap.get(this);
-					if (projectorData.state === ProjectorState.Attached) {
-						this.emit({
-							type: 'schedulerender',
-							target: this
-						});
-						projectorData.projector.scheduleRender();
-					}
-				}
-			}
 		}
 	});
 

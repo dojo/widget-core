@@ -1,7 +1,7 @@
 import 'dojo/has!host-node?../support/loadJsdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import createProjector from '../../src/createProjector';
+import createProjector, { ProjectorState } from '../../src/createProjector';
 import d from '../../src/util/d';
 import global from 'dojo-core/global';
 import { spy } from 'sinon';
@@ -54,7 +54,7 @@ registerSuite({
 		});
 		assert.strictEqual(root.childNodes.length, 0, 'there should be no children');
 		let eventFired = false;
-		projector.on('attach', () => {
+		projector.on('projector:attached', () => {
 			eventFired = true;
 			assert.strictEqual(root.childNodes.length, 1, 'a child should be added');
 			assert.strictEqual((<HTMLElement> root.firstChild).tagName.toLowerCase(), 'h2');
@@ -70,6 +70,17 @@ registerSuite({
 		assert.equal(projector.root, document.body);
 		projector.root = root;
 		assert.equal(projector.root, root);
+	},
+	'get projector state'() {
+		const projector = createProjector();
+
+		assert.equal(projector.projectorState, ProjectorState.Detached);
+		return projector.attach().then(() => {
+			assert.equal(projector.projectorState, ProjectorState.Attached);
+			projector.destroy();
+			assert.equal(projector.projectorState, ProjectorState.Detached);
+		});
+
 	},
 	'destroy'() {
 		const projector = createProjector();
@@ -94,7 +105,7 @@ registerSuite({
 		const maquetteProjectorSpy = spy(projector.projector, 'scheduleRender');
 		let called = false;
 
-		projector.on('schedulerender', () => {
+		projector.on('render:scheduled', () => {
 			called = true;
 		});
 
@@ -108,7 +119,7 @@ registerSuite({
 		const maquetteProjectorSpy = spy(projector.projector, 'scheduleRender');
 		let called = false;
 
-		projector.on('schedulerender', () => {
+		projector.on('render:scheduled', () => {
 			called = true;
 		});
 
