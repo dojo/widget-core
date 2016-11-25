@@ -10,7 +10,6 @@ registerSuite({
 	name: 'projector',
 	basic(this: any) {
 		const childNodeLength = document.body.childNodes.length;
-		const nodeText = 'foo';
 		const projector = createProjector({
 			getChildrenNodes: function() {
 				return [ d('h2', [ 'foo' ] ) ];
@@ -19,8 +18,10 @@ registerSuite({
 
 		return projector.attach().then((attachHandle) => {
 			assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
-			assert.strictEqual((<HTMLElement> document.body.lastChild).innerHTML, nodeText);
-			assert.strictEqual((<HTMLElement> document.body.lastChild).tagName.toLowerCase(), 'h2');
+			const child = <HTMLElement> document.body.lastChild;
+			assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
+			assert.strictEqual(child.tagName.toLowerCase(), 'div');
+			assert.strictEqual(( <HTMLElement> child.firstChild).tagName.toLowerCase(), 'h2');
 		});
 	},
 	'construct projector with css transitions'() {
@@ -57,8 +58,8 @@ registerSuite({
 		projector.on('projector:attached', () => {
 			eventFired = true;
 			assert.strictEqual(root.childNodes.length, 1, 'a child should be added');
-			assert.strictEqual((<HTMLElement> root.firstChild).tagName.toLowerCase(), 'h2');
-			assert.strictEqual((<HTMLElement> root.firstChild).innerHTML, 'foo');
+			assert.strictEqual((<HTMLElement> root.firstChild).tagName.toLowerCase(), 'div');
+			assert.strictEqual((<HTMLElement> root.firstChild).innerHTML, '<h2>foo</h2>');
 		});
 		return projector.attach().then(() => {
 			assert.isTrue(eventFired);

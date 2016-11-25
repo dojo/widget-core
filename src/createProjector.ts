@@ -128,7 +128,7 @@ const createProjector: ProjectorFactory = createWidgetBase
 					};
 				});
 
-				projectorData.projector.merge(projectorData.root, render);
+				projectorData.projector.append(projectorData.root, render);
 
 				return projectorData.attachPromise;
 			},
