@@ -5,6 +5,7 @@ import { Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases'
 import WeakMap from 'dojo-shim/WeakMap';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import cretateWidgetBase from './bases/createWidgetBase';
+import global from 'dojo-core/global';
 
 /**
  * Represents the state of the projector
@@ -23,6 +24,12 @@ export interface ProjectorOptions extends WidgetOptions<WidgetState> {
 	 * An optional root of the projector
 	 */
 	root?: Element;
+
+	/**
+	 * If `true`, will configure the projector to support css transitions using `cssTransitions` global object.
+	 * The projector will fail create if the options is true but the global object cannot be found.
+	 */
+	cssTransitions?: boolean;
 }
 
 export interface ProjectorMixin {
@@ -45,7 +52,7 @@ export interface ProjectorMixin {
 	/**
 	 * The status of the projector
 	 */
-	state: ProjectorState;
+	readonly state: ProjectorState;
 }
 
 /**
@@ -97,12 +104,8 @@ const createProjector: ProjectorFactory = cretateWidgetBase
 
 			projectorData.attachPromise = new Promise((resolve, reject) => {
 				projectorData.afterCreate = () => {
-					try {
-						this.emit({ type: 'attach' });
-						resolve(projectorData.attachHandle);
-					} catch (err) {
-						reject(err);
-					}
+					this.emit({ type: 'attach' });
+					resolve(projectorData.attachHandle);
 				};
 			});
 
@@ -127,14 +130,26 @@ const createProjector: ProjectorFactory = cretateWidgetBase
 		get projector(this: Projector): MaquetteProjector {
 			return projectorDataMap.get(this).projector;
 		},
+
 		get state(this: Projector): ProjectorState {
 			const projectorData = projectorDataMap.get(this);
 			return projectorData && projectorData.state;
 		}
 	},
-	initialize(instance: Projector, options: ProjectorOptions) {
-		const { root = document.body } = options;
-		const projector = createMaquetteProjector(options);
+	initialize(instance: Projector, options: ProjectorOptions = {}) {
+		const { root = document.body, cssTransitions = false } = options;
+		const maquetteProjectorOptions: { transitions?: any } = {};
+
+		if (cssTransitions) {
+			if (global.cssTransitions) {
+				maquetteProjectorOptions.transitions = global.cssTransitions;
+			}
+			else {
+				throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
+			}
+		}
+
+		const projector = createMaquetteProjector(maquetteProjectorOptions);
 
 		projectorDataMap.set(instance, {
 			projector,
