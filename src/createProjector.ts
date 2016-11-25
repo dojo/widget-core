@@ -4,7 +4,7 @@ import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetState, WidgetOptions } from 'dojo-interfaces/widgetBases';
 import WeakMap from 'dojo-shim/WeakMap';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
-import cretateWidgetBase from './bases/createWidgetBase';
+import createWidgetBase from './bases/createWidgetBase';
 import global from 'dojo-core/global';
 
 /**
@@ -79,108 +79,108 @@ const projectorDataMap = new WeakMap<Projector, ProjectorData>();
 /**
  * Projector Factory
  */
-const createProjector: ProjectorFactory = cretateWidgetBase
-.mixin({
-	mixin: {
-		attach(this: Projector) {
-			const projectorData = projectorDataMap.get(this);
-			const render = this.render.bind(this);
+const createProjector: ProjectorFactory = createWidgetBase
+	.mixin({
+		mixin: {
+			attach(this: Projector) {
+				const projectorData = projectorDataMap.get(this);
+				const render = this.render.bind(this);
 
-			if (projectorData.state === ProjectorState.Attached) {
-				return projectorData.attachPromise || Promise.resolve({});
-			}
-			projectorData.state = ProjectorState.Attached;
-
-			projectorData.attachHandle = this.own({
-				destroy() {
-					if (projectorData.state === ProjectorState.Attached) {
-						projectorData.projector.stop();
-						projectorData.projector.detach(render);
-						projectorData.state = ProjectorState.Detached;
-					}
-					projectorData.attachHandle = { destroy() {} };
+				if (projectorData.state === ProjectorState.Attached) {
+					return projectorData.attachPromise || Promise.resolve({});
 				}
-			});
+				projectorData.state = ProjectorState.Attached;
 
-			projectorData.attachPromise = new Promise((resolve, reject) => {
-				projectorData.afterCreate = () => {
-					this.emit({ type: 'attach' });
-					resolve(projectorData.attachHandle);
-				};
-			});
+				projectorData.attachHandle = this.own({
+					destroy() {
+						if (projectorData.state === ProjectorState.Attached) {
+							projectorData.projector.stop();
+							projectorData.projector.detach(render);
+							projectorData.state = ProjectorState.Detached;
+						}
+						projectorData.attachHandle = { destroy() {} };
+					}
+				});
 
-			projectorData.projector.merge(projectorData.root, render);
+				projectorData.attachPromise = new Promise((resolve, reject) => {
+					projectorData.afterCreate = () => {
+						this.emit({ type: 'attach' });
+						resolve(projectorData.attachHandle);
+					};
+				});
 
-			return projectorData.attachPromise;
-		},
+				projectorData.projector.merge(projectorData.root, render);
 
-		set root(this: Projector, root: Element) {
-			const projectorData = projectorDataMap.get(this);
-			if (projectorData.state === ProjectorState.Attached) {
-				throw new Error('Projector already attached, cannot change root element');
-			}
-			projectorData.root = root;
-		},
+				return projectorData.attachPromise;
+			},
 
-		get root(this: Projector): Element {
-			const projectorData = projectorDataMap.get(this);
-			return projectorData && projectorData.root;
-		},
-
-		get projector(this: Projector): MaquetteProjector {
-			return projectorDataMap.get(this).projector;
-		},
-
-		get state(this: Projector): ProjectorState {
-			const projectorData = projectorDataMap.get(this);
-			return projectorData && projectorData.state;
-		}
-	},
-	initialize(instance: Projector, options: ProjectorOptions = {}) {
-		const { root = document.body, cssTransitions = false } = options;
-		const maquetteProjectorOptions: { transitions?: any } = {};
-
-		if (cssTransitions) {
-			if (global.cssTransitions) {
-				maquetteProjectorOptions.transitions = global.cssTransitions;
-			}
-			else {
-				throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
-			}
-		}
-
-		const projector = createMaquetteProjector(maquetteProjectorOptions);
-
-		projectorDataMap.set(instance, {
-			projector,
-			root,
-			state: ProjectorState.Detached
-		});
-	}
-})
-.mixin({
-	mixin: {
-		nodeAttributes: [
-			function(this: Projector): VNodeProperties {
-				const { afterCreate } = projectorDataMap.get(this);
-				return { afterCreate };
-			}
-		]
-	},
-	aspectAdvice: {
-		after: {
-			invalidate(this: Projector): void {
+			set root(this: Projector, root: Element) {
 				const projectorData = projectorDataMap.get(this);
 				if (projectorData.state === ProjectorState.Attached) {
-					this.emit({
-						type: 'schedulerender',
-						target: this
-					});
-					projectorData.projector.scheduleRender();
+					throw new Error('Projector already attached, cannot change root element');
+				}
+				projectorData.root = root;
+			},
+
+			get root(this: Projector): Element {
+				const projectorData = projectorDataMap.get(this);
+				return projectorData && projectorData.root;
+			},
+
+			get projector(this: Projector): MaquetteProjector {
+				return projectorDataMap.get(this).projector;
+			},
+
+			get state(this: Projector): ProjectorState {
+				const projectorData = projectorDataMap.get(this);
+				return projectorData && projectorData.state;
+			}
+		},
+		initialize(instance: Projector, options: ProjectorOptions = {}) {
+			const { root = document.body, cssTransitions = false } = options;
+			const maquetteProjectorOptions: { transitions?: any } = {};
+
+			if (cssTransitions) {
+				if (global.cssTransitions) {
+					maquetteProjectorOptions.transitions = global.cssTransitions;
+				}
+				else {
+					throw new Error('Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
+				}
+			}
+
+			const projector = createMaquetteProjector(maquetteProjectorOptions);
+
+			projectorDataMap.set(instance, {
+				projector,
+				root,
+				state: ProjectorState.Detached
+			});
+		}
+	})
+	.mixin({
+		mixin: {
+			nodeAttributes: [
+				function(this: Projector): VNodeProperties {
+					const { afterCreate } = projectorDataMap.get(this);
+					return { afterCreate };
+				}
+			]
+		},
+		aspectAdvice: {
+			after: {
+				invalidate(this: Projector): void {
+					const projectorData = projectorDataMap.get(this);
+					if (projectorData.state === ProjectorState.Attached) {
+						this.emit({
+							type: 'schedulerender',
+							target: this
+						});
+						projectorData.projector.scheduleRender();
+					}
 				}
 			}
 		}
-	}
-});
+	});
 
 export default createProjector;
