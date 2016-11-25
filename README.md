@@ -4,11 +4,11 @@
 [![codecov](https://codecov.io/gh/dojo/widgets/branch/master/graph/badge.svg)](https://codecov.io/gh/dojo/widgets)
 [![npm version](https://badge.fury.io/js/dojo-widgets.svg)](http://badge.fury.io/js/dojo-widgets)
 
-A core widget library for Dojo 2.
+A core widget library for Dojo.
 
 **WARNING** This is *alpha* software. It is not yet production ready, so you should use at your own risk.
 
-For more background on Widgets for Dojo 2, there is a document describing the [widgeting system](https://github.com/dojo/meta/blob/master/documents/Widget-System.md).
+For more background on dojo-widgets, there is a document describing the [widgeting system](https://github.com/dojo/meta/blob/master/documents/Widget-System.md).
 
 - [Usage](#usage)
 - [Features](#features)
@@ -19,10 +19,10 @@ For more background on Widgets for Dojo 2, there is a document describing the [w
     - [Extending Base Widget](#extending-base-widget)
     - [Projector](#projector)
     - [Dojo Widget Components](#dojo-widget-components)
-- [How do I contribute?](#how-do-i-contribute)
+- [How Do I Contribute?](#how-do-i-contribute)
     - [Installation](#installation)
     - [Testing](#testing)
-- [Licensing information](#licensing-information)
+- [Licensing Information](#licensing-information)
 
 ## Usage
 
@@ -39,24 +39,22 @@ npm install dojo-compose
 npm install dojo-store
 ```
 
-To use `dojo-widgets` import the module in the project. For more details see [features](#features) below.
+To use dojo-widgets import the module in the project. For more details see [features](#features) below.
 
 ```ts
 import createButton from 'dojo-widgets/components/createButton';
 ```
 
-or use the [dojo cli](https://github.com/dojo/cli-create-app) to create a complete Dojo 2 skeleton application.
+or use the [dojo cli](https://github.com/dojo/cli-create-app) to create a complete Dojo skeleton application.
 
 ## Features
 
-Dojo 2 Widgets are based on a virtual DOM implementation named [Maquette](http://maquettejs.org/) as well as some foundational classes
+dojo-widgets are based on a virtual DOM implementation named [Maquette](http://maquettejs.org/) as well as some foundational classes
 provided in [dojo-compose](https://github.com/dojo/compose).
-
-The examples below are provided in TypeScript syntax. The package does work under JavaScript, but for clarity, the examples will only include one syntax.
 
 ### Base Widget
 
-The class `createWidgetBase` provides all base Dojo 2 widget functionality including caching and widget lifecycle management. It can be used directly or extended to create custom widgets.
+The class `createWidgetBase` provides all base dojo-widgets functionality including caching and widget lifecycle management. It can be used directly or extended to create custom widgets.
 
 To customise the widget an optional `options` argument can be provided with the following interface.
 
@@ -68,11 +66,11 @@ To customise the widget an optional `options` argument can be provided with the 
 |state|WidgetState|Initial state of the widget|
 |stateFrom|StoreObservablePatchable|Observable that provides state for the widget|
 |listeners|EventedListenersMap|Map of listeners for to attach to the widget|
-|tagName|string|Override the widgets     tagname|
+|tagName|string|Override the widgets tagname|
 |getChildrenNodes|Function|Function that returns an array of children DNodes|
 |nodeAttributes|Function[]|An array of functions that return VNodeProperties to be applied to the VNode|
 
-By default the base widget class applies `id`, `classes` and `styles` from the widgets specified `state` (either by direct state injection or via an observable store).
+By default the base widget class applies `id`, `classes` and `styles` from the widget's specified `state` (either by direct state injection or via an observable store).
 
 #### Simple Widgets
 To create a basic widget `createWidgetBase` can be used directly by importing the class.
@@ -83,7 +81,7 @@ import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
 const myBasicWidget = createWidgetBase();
 ```
 
-Creates the following DOM element:
+The widget creates the following DOM element:
 
 ```html
 <div></div>
@@ -102,7 +100,7 @@ const myBasicWidget = createWidgetBase({
 });
 ```
 
-Creates the following DOM element:
+The widget creates the following DOM element:
 
 ```html
 <div data-widget-id="my-widget" class="class-a class-b" styles="width:20px"></div>
@@ -128,19 +126,19 @@ const myBasicWidget = createWidgetBase({
 
 #### `d`
 
-`d` is a function that is used within Dojo 2 to express widget hierarchical structure using both Dojo 2 widget factories or Hyperscript, it is imported via
+`d` is a function that is used within Dojo to express widget hierarchical structure using both Dojo widget factories or Hyperscript, it is imported via
 
 ```ts
 import d from 'dojo-widgets/util/d';
 ```
 
-and the param and return interfaces are available in the `dojo-interfaces` package.
+The argument and return types are available from the `dojo-interfaces` package as they are shared across Dojo packages.
 
 ```ts
 import { DNode, HNode, WNode } from 'dojo-interfaces/widgetBases';
 ```
 
-The API for using Hyperscript provides multiple signatures for convenience, **tagName** is the only mandatory argument, **options** is defaulted to `{}` when not provided and **children** is completely optional
+The API for using Hyperscript provides multiple signatures for convenience, **tagName** is the only mandatory argument, **options** defaults to `{}` when not provided and **children** is completely optional
 
 ```ts
 d(tagName: string): HNode[];
@@ -151,7 +149,7 @@ d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
 ```ts
 d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
 ```
-The is a single API when using Dojo 2 widget factories, with **options** being defaulted to `{}` if not supplied.
+There is a single API when using dojo-widget factories, with **options** being defaulted to `{}` if not supplied.
 
 ```ts
 d(factory: ComposeFactory<W, O>, options: O): WNode[];
@@ -191,7 +189,7 @@ const myBasicListWidget = createWidgetBase({
     getChildrenNodes
 });
 ```
-Creates the following DOM structure
+The widget creates the following DOM element:
 
 ```html
 <ul data-widget-id="my-list-widget">
@@ -204,7 +202,7 @@ Creates the following DOM structure
 
 ### Extending Base Widget
 
-To create custom reusable you can extend `createWidgetBase`. 
+To create custom reusable widgets you can extend `createWidgetBase`. 
 
 A simple widget with no children such as a `label` widget can be created like this:
 
@@ -297,11 +295,11 @@ To render widgets they must be appended to a `projector`. It is possible to crea
 
 A selection of core reusable widgets are provided for convenience that are fully accessible and internationalizable.
 
-To be completed, list core components here.
+// TODO - list core components here.
 
-## How do I contribute?
+## How Do I Contribute?
 
-We appreciate your interest!  Please see the [Dojo 2 Meta Repository](https://github.com/dojo/meta#readme) for the
+We appreciate your interest!  Please see the [Dojo Meta Repository](https://github.com/dojo/meta#readme) for the
 Contributing Guidelines and Style Guide.
 
 ### Installation
@@ -332,6 +330,6 @@ or
 
 `grunt test:saucelabs`
 
-## Licensing information
+## Licensing Information
 
-© 2016 Dojo Foundation & contributors. [New BSD](http://opensource.org/licenses/BSD-3-Clause) license.
+© 2016 [JS Foundation](https://js.foundation/). [New BSD](http://opensource.org/licenses/BSD-3-Clause) license.
