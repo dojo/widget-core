@@ -1,6 +1,7 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createStateful from 'dojo-compose/bases/createStateful';
 import {
+	ChildNodeFunction,
 	HNode,
 	DNode,
 	WNode,
@@ -181,6 +182,18 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			tagName: 'div'
+		},
+		aspectAdvice: {
+			around: {
+				getChildrenNodes(origFn): ChildNodeFunction {
+					return function(this: Widget<WidgetState>): DNode[] {
+						if (this.stateFrom && Object.keys(this.state).length === 0) {
+							return [];
+						}
+						return origFn.call(this);
+					};
+				}
+			}
 		},
 		initialize(instance: Widget<WidgetState>, options: WidgetOptions<WidgetState> = {}) {
 			const { id, tagName, getChildrenNodes } = options;
