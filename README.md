@@ -16,7 +16,7 @@ For more background on dojo-widgets, there is a document describing the [widgeti
     	- [Simple Widgets](#simple-widgets)
     	- [d](#d)
     	- [Widgets with Children](#widgets-with-children)
-    - [Extending Base Widget](#extending-base-widget)
+    - [Authoring Custom Widgets](#authoring-custom-widgets)
     - [Projector](#projector)
     - [Dojo Widget Components](#dojo-widget-components)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -42,7 +42,7 @@ npm install dojo-store
 To use dojo-widgets import the module in the project. For more details see [features](#features) below.
 
 ```ts
-import createButton from 'dojo-widgets/components/createButton';
+import createButton from 'dojo-widgets/components/button/createButton';
 ```
 
 or use the [dojo cli](https://github.com/dojo/cli-create-app) to create a complete Dojo skeleton application.
@@ -76,7 +76,7 @@ By default the base widget class applies `id`, `classes` and `styles` from the w
 To create a basic widget `createWidgetBase` can be used directly by importing the class.
 
 ```ts
-import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
+import createWidgetBase from 'dojo-widgets/createWidgetBase';
 
 const myBasicWidget = createWidgetBase();
 ```
@@ -89,7 +89,7 @@ The widget creates the following DOM element:
 The following example demonstrates how `id`, `classes` and `styles` are applied to the generated DOM.
 
 ```ts
-import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
+import createWidgetBase from 'dojo-widgets/createWidgetBase';
 
 const myBasicWidget = createWidgetBase({
     state: {
@@ -129,7 +129,7 @@ const myBasicWidget = createWidgetBase({
 `d` is a function that is used within Dojo to express widget hierarchical structure using both Dojo widget factories or Hyperscript, it is imported via
 
 ```ts
-import d from 'dojo-widgets/util/d';
+import d from 'dojo-widgets/d';
 ```
 
 The argument and return types are available from the `dojo-interfaces` package as they are shared across Dojo packages.
@@ -140,12 +140,19 @@ import { DNode, HNode, WNode } from 'dojo-interfaces/widgetBases';
 
 The API for using Hyperscript provides multiple signatures for convenience, **tagName** is the only mandatory argument, **options** defaults to `{}` when not provided and **children** is completely optional
 
+Creates an element with the `tagName`
+
 ```ts
 d(tagName: string): HNode[];
 ```
+
+Creates an element with the `tagName` with the children specified by the array of `DNode`, `VNode` or `null`.
+
 ```ts
 d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
 ```
+Creates an element with the `tagName` with the `VNodeProperties` options and optional children specified by the array of `DNode`, `VNode` or `null`.
+
 ```ts
 d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
 ```
@@ -189,7 +196,7 @@ const myBasicListWidget = createWidgetBase({
     getChildrenNodes
 });
 ```
-The widget creates the following DOM element:
+The widget creates the following DOM structure:
 
 ```html
 <ul data-widget-id="my-list-widget">
@@ -200,7 +207,7 @@ The widget creates the following DOM element:
 </ul>
 ``` 
 
-### Extending Base Widget
+### Authoring Custom Widgets
 
 To create custom reusable widgets you can extend `createWidgetBase`. 
 
@@ -210,7 +217,7 @@ A simple widget with no children such as a `label` widget can be created like th
 import { ComposeFactory } from 'dojo-compose/compose';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetOptions, WidgetState } from 'dojo-interfaces/widgetBases';
-import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
+import createWidgetBase from 'dojo-widgets/createWidgetBase';
 
 interface LabelState extends WidgetState {
     label?: string;
@@ -248,8 +255,8 @@ To create structured widgets override the `getChildrenNodes` function.
 ```ts
 import { ComposeFactory } from 'dojo-compose/compose';
 import { DNode, Widget, WidgetOptions, WidgetState } from 'dojo-interfaces/widgetBases';
-import createWidgetBase from 'dojo-widgets/bases/createWidgetBase';
-import d from 'dojo-widgets/util/d';
+import createWidgetBase from 'dojo-widgets/createWidgetBase';
+import d from 'dojo-widgets/d';
 
 interface ListItem {
     name: string;
@@ -290,6 +297,77 @@ export default createListWidget;
 ### Projector
 
 To render widgets they must be appended to a `projector`. It is possible to create many projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
+
+The projector works in the same way as any widget by providing a function `getChildrenNodes` as part of the `options` or use the `createProjector` class as the base for a custom widget (usually the root of the application).
+
+In addition to the standard `WidgetOptions` `createProjector` adds two additional optional properties `root` and `cssTransitions`.
+
+ * `root` - The `Element` that the projector attaches to. The default value is `document.body`
+ * `cssTransitions` - Set to `true` to support css transitions and animations. The default value is `false`.
+
+**Note**: If `cssTransitions` is set to `true` then the projector expects Maquette's `css-transitions.js` to be loaded. 
+
+In order to attach the `createProjector` to the page call `.attach` which returns a promise that resolves once successfully attached.
+
+Instantiating `createProjector` directly:
+
+```ts
+import { DNode } from 'dojo-interfaces/widgetBases';
+import d from 'dojo-widgets/d';
+import createProjector, { Projector } from 'dojo-widgets/createProjector';
+import createButton from 'dojo-widgets/components/button/createButton';
+import createTextInput from 'dojo-widgets/components/textinput/createTextInput';
+
+const projector = createProjector({
+	getChildrenNodes: function(this: Projector): DNode[] {
+		return [
+			d(createTextInput, { id: 'textinput' } }),
+			d(createButton, { id: 'button', state: { label: 'Button' } })
+		];
+	}
+});
+
+projector.attach().then(() => {
+	console.log('projector is attached');
+});
+```
+
+Using the `createProjector` as a base for a root widget:
+
+```ts
+import { DNode } from 'dojo-interfaces/widgetBases';
+import createProjector, { Projector } from 'dojo-widgets/createProjector';
+import d from 'dojo-widgets/d';
+import createButton from 'dojo-widgets/components/button/createButton';
+import createTextInput from 'dojo-widgets/components/textinput/createTextInput';
+
+
+const createApp = createProjector.mixin({
+	mixin: {
+		getChildrenNodes: function(this: Projector): DNode[] {
+			return [
+				d(createTextInput, { id: 'textinput' } }),
+				d(createButton, { id: 'button', state: { label: 'Button' } })
+			];
+		},
+		classes: [ 'main-app' ],
+		tagName: 'main'
+	}
+});
+
+export default createApp;
+```
+Using the custom widget assuming a class called `createApp.ts` reletive to it's usages:
+
+```ts
+import createApp from './createApp';
+
+const app = createApp();
+
+app.attach().then(() => {
+	console.log('projector is attached');
+});
+```
 
 ### Dojo Widget Components
 
