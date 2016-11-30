@@ -167,6 +167,10 @@ d(factory: ComposeFactory<W, O>, options: O): WNode[];
 Children are nested within a widget by providing a `getChildrenNodes` function to the options.
 
 ```ts
+import { Widget, WidgetState } from 'dojo-interfaces/widgetBases';
+import createWidgetBase from 'dojo-widges/createWidgetBase';
+import d from 'dojo-widgets/d';
+
 const widgetStore = createObservableStore({
     data: [
         {
@@ -229,7 +233,7 @@ type Label = Widget<LabelState>;
 
 interface LabelFactory extends ComposeFactory<Label, LabelOptions> { }
 
-const createLabelWidget: LabelFactory = createWidgetBase.mixin(
+const createLabelWidget: LabelFactory = createWidgetBase.mixin({
     mixin: {
         tagName: 'label',
         nodeAttributes: [
@@ -282,13 +286,14 @@ function listItem(item: ListItem, itemNumber: number): DNode {
 }
 
 const createListWidget: ListFactory = createWidgetBase.mixin({
-    mixin: {
-        getChildrenNodes: function (this: List): DNode[] {
-            const listItems = this.state.items.map(listItem);
+	mixin: {
+		getChildrenNodes: function (this: List): DNode[] {
+			const { items = [] } = this.state;
+			const listItems = items.map(listItem);
 
-            return [ d('ul', {}, listItems) ];
-        }
-    }
+			return [ d('ul', {}, listItems) ];
+		}
+	}
 });
 
 export default createListWidget;
@@ -321,7 +326,7 @@ import createTextInput from 'dojo-widgets/components/textinput/createTextInput';
 const projector = createProjector({
 	getChildrenNodes: function(this: Projector): DNode[] {
 		return [
-			d(createTextInput, { id: 'textinput' } }),
+			d(createTextInput, { id: 'textinput' }),
 			d(createButton, { id: 'button', state: { label: 'Button' } })
 		];
 	}
@@ -336,17 +341,16 @@ Using the `createProjector` as a base for a root widget:
 
 ```ts
 import { DNode } from 'dojo-interfaces/widgetBases';
-import createProjector, { Projector } from 'dojo-widgets/createProjector';
 import d from 'dojo-widgets/d';
+import createProjector, { Projector } from 'dojo-widgets/createProjector';
 import createButton from 'dojo-widgets/components/button/createButton';
 import createTextInput from 'dojo-widgets/components/textinput/createTextInput';
-
 
 const createApp = createProjector.mixin({
 	mixin: {
 		getChildrenNodes: function(this: Projector): DNode[] {
 			return [
-				d(createTextInput, { id: 'textinput' } }),
+				d(createTextInput, { id: 'textinput' }),
 				d(createButton, { id: 'button', state: { label: 'Button' } })
 			];
 		},
