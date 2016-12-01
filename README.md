@@ -181,51 +181,6 @@ Creates a dojo-widget using the `factory` and `options` and the `children`
 d(factory: ComposeFactory<W, O>, options: O, children: DNode[]): WNode[];
 ```
 
-#### Widgets with Children
-
-Children can be added to a widget by setting `children` with an array `DNode`s.
-
-```ts
-import { Widget, WidgetState } from 'dojo-widgets/interfaces';
-import createWidgetBase from 'dojo-widges/createWidgetBase';
-import d from 'dojo-widgets/d';
-
-const widgetStore = createObservableStore({
-    data: [
-        {
-            id: 'my-list-widget',
-            items: [
-                { id: '1', name: 'name-1' },
-                { id: '2', name: 'name-2' },
-                { id: '3', name: 'name-3' },
-                { id: '4', name: 'name-4' }
-            ]
-        }
-    ]
-});
-
-const myBasicListWidget = createWidgetBase({
-    id: 'my-list-widget',
-    stateFrom: widgetStore,
-    tagName: 'ul'
-});
-
-myBasicListWidget.children = this.state.items.map((item) => {
-	return d('li', { innnerHTML: item.name });
-});
-
-```
-The widget creates the following DOM structure:
-
-```html
-<ul data-widget-id="my-list-widget">
-    <li>name-1</li>
-    <li>name-2</li>
-    <li>name-3</li>
-    <li>name-4</li>
-</ul>
-``` 
-
 ### Authoring Custom Widgets
 
 To create custom reusable widgets you can extend `createWidgetBase`. 
@@ -318,9 +273,11 @@ export default createListWidget;
 
 To render widgets they must be appended to a `projector`. It is possible to create many projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
 
-The projector works in the same way as any widget by setting the children with an array of `DNode`s or overridding `getChildrenNodes` when `createProjector` class is used as the base for a custom widget (usually the root of the application).
+The projector works in the same way as any widget overridding `getChildrenNodes` when `createProjector` class is used as the base for a custom widget (usually the root of the application).
 
-In addition to the standard `WidgetOptions` `createProjector` adds two additional optional properties `root` and `cssTransitions`.
+In addition when working with a `projector` you can also set the `children` directly.
+
+The standard `WidgetOptions` are available and also `createProjector` adds two additional optional properties `root` and `cssTransitions`.
 
  * `root` - The `Element` that the projector attaches to. The default value is `document.body`
  * `cssTransitions` - Set to `true` to support css transitions and animations. The default value is `false`.
