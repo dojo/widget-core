@@ -56,7 +56,7 @@ The smallest `dojo-widgets` example looks like this:
 
 ```ts
 const projector = createProjector();
-projector.children = d('h1', 'Hello, Dojo!');
+projector.children = [ d('h1', [ 'Hello, Dojo!' ]) ];
 projector.append();
 ```
 
