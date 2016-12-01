@@ -116,9 +116,8 @@ const createWidget: WidgetFactory = createStateful
 			classes: [],
 
 			getNode(): DNode {
-				return d(formatTagNameAndClasses(this.tagName, this.classes),
-							this.getNodeAttributes(),
-							this.getChildrenNodes());
+				const tag = formatTagNameAndClasses(this.tagName, this.classes);
+				return d(tag, this.getNodeAttributes(), this.getChildrenNodes());
 			},
 
 			getChildrenNodes(this: Widget<WidgetState>): DNode[] {
