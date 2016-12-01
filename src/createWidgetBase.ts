@@ -133,8 +133,7 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			getChildrenNodes(this: Widget<WidgetState>): DNode[] {
-				const internalState = widgetInternalStateMap.get(this);
-				return internalState.children;
+				return this.children;
 			},
 
 			getNodeAttributes(this: Widget<WidgetState>, overrides?: VNodeProperties): VNodeProperties {
