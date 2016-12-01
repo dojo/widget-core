@@ -8,22 +8,6 @@ import { spy } from 'sinon';
 
 registerSuite({
 	name: 'projector',
-	basic(this: any) {
-		const childNodeLength = document.body.childNodes.length;
-		const projector = createProjector({
-			getChildrenNodes: function() {
-				return [ d('h2', [ 'foo' ] ) ];
-			}
-		});
-
-		return projector.attach().then((attachHandle) => {
-			assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
-			const child = <HTMLElement> document.body.lastChild;
-			assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
-			assert.strictEqual(child.tagName.toLowerCase(), 'div');
-			assert.strictEqual(( <HTMLElement> child.firstChild).tagName.toLowerCase(), 'h2');
-		});
-	},
 	'construct projector with css transitions'() {
 		global.cssTransitions = {};
 		try {
@@ -57,6 +41,70 @@ registerSuite({
 		catch (error) {
 			assert.isTrue(error instanceof Error);
 			assert.equal(error.message, 'Must provide a VNode at the root of a projector');
+		}
+	},
+	'attach type': {
+		'default attach type'() {
+			const childNodeLength = document.body.childNodes.length;
+			const projector = createProjector({
+				getChildrenNodes: function() {
+					return [ d('h2', [ 'foo' ] ) ];
+				}
+			});
+
+			return projector.attach().then((attachHandle) => {
+				assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
+				const child = <HTMLElement> document.body.lastChild;
+				assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
+				assert.strictEqual(child.tagName.toLowerCase(), 'div');
+				assert.strictEqual(( <HTMLElement> child.firstChild).tagName.toLowerCase(), 'h2');
+			});
+		},
+		'append attach type'() {
+			const childNodeLength = document.body.childNodes.length;
+			const projector = createProjector({
+				getChildrenNodes: function() {
+					return [ d('h2', [ 'foo' ] ) ];
+				}
+			});
+
+			return projector.attach({ type: 'append' }).then((attachHandle) => {
+				assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
+				const child = <HTMLElement> document.body.lastChild;
+				assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
+				assert.strictEqual(child.tagName.toLowerCase(), 'div');
+				assert.strictEqual(( <HTMLElement> child.firstChild).tagName.toLowerCase(), 'h2');
+			});
+		},
+		'replace attach type'() {
+			const projector = createProjector({
+				tagName: 'body',
+				getChildrenNodes: function() {
+					return [ d('h2', [ 'foo' ] ) ];
+				}
+			});
+
+			return projector.attach({ type: 'replace' }).then((attachHandle) => {
+				assert.strictEqual(document.body.childNodes.length, 1, 'child should have been added');
+				const child = <HTMLElement> document.body.lastChild;
+				assert.strictEqual(child.innerHTML, 'foo');
+				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
+			});
+		},
+		'merge attach type'() {
+			const childNodeLength = document.body.childNodes.length;
+			const projector = createProjector({
+				getChildrenNodes: function() {
+					return [ d('h2', [ 'foo' ] ) ];
+				}
+			});
+
+			return projector.attach({ type: 'merge' }).then((attachHandle) => {
+				assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
+				const child = <HTMLElement> document.body.lastChild;
+				assert.strictEqual(child.innerHTML, 'foo');
+				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
+			});
 		}
 	},
 	'attach event'() {

@@ -16,6 +16,17 @@ export enum ProjectorState {
 	Detached
 };
 
+export type AttachType = 'append' | 'merge' | 'replace';
+
+export interface AttachOptions {
+
+	/**
+	 * If `'append'` it will append to the root. If `'merge'` it will merge with the root. If `'replace'` it will
+	 * replace the root.
+	 */
+	type?: AttachType;
+}
+
 /**
  * Projector interface
  */
@@ -37,8 +48,10 @@ export interface ProjectorMixin {
 
 	/**
 	 * Attach the projector to the an element provided as the root.
+	 *
+	 * `AttachOptions#type` defaults to `append`
 	 */
-	attach(): Promise<Handle>;
+	attach(options?: AttachOptions): Promise<Handle>;
 
 	/**
 	 * Root element to attach the projector
@@ -98,7 +111,7 @@ function scheduleRender(event: EventTargettedObject<Projector>) {
 const createProjector: ProjectorFactory = createWidgetBase
 	.mixin({
 		mixin: {
-			attach(this: Projector) {
+			attach(this: Projector, { type = 'append' }: AttachOptions = {}) {
 				const projectorData = projectorDataMap.get(this);
 				const render = this.render.bind(this);
 
@@ -128,7 +141,19 @@ const createProjector: ProjectorFactory = createWidgetBase
 					};
 				});
 
-				projectorData.projector.append(projectorData.root, render);
+				switch (type) {
+					case 'append':
+						projectorData.projector.append(projectorData.root, render);
+						break;
+					case 'merge':
+						projectorData.projector.merge(projectorData.root, render);
+						break;
+					case 'replace':
+						projectorData.projector.replace(projectorData.root, render);
+						break;
+					default:
+						throw new Error('Unsupported projector attach type.');
+				}
 
 				return projectorData.attachPromise;
 			},
