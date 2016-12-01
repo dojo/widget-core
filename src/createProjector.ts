@@ -3,7 +3,7 @@ import { EventTargettedObject, Handle } from 'dojo-interfaces/core';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetState, WidgetOptions } from './interfaces';
 import WeakMap from 'dojo-shim/WeakMap';
-import { h, createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
+import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import createWidgetBase from './createWidgetBase';
 import global from 'dojo-core/global';
 import Promise from 'dojo-shim/Promise';
@@ -159,7 +159,7 @@ const createProjector: ProjectorFactory = createWidgetBase
 			after: {
 				render(this: Projector, result: VNode | string) {
 					if (typeof result === 'string') {
-						return h(this.tagName, result);
+						throw new Error('Must provide a VNode at the root of a projector');
 					}
 					return result;
 				}
