@@ -1,6 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { WidgetState, WidgetOptions } from './../../src/interfaces';
+import { WidgetState, WidgetOptions } from '../../src/interfaces';
 import createWidgetBase from '../../src/createWidgetBase';
 import d from '../../src/d';
 
@@ -47,7 +47,10 @@ registerSuite({
 		assert.isFunction(hNode.render);
 		assert.lengthOf(hNode.children, 2);
 	},
-	'throws an error if tagName/Factory is not a string or a Function'() {
+	'throws an error if selector/Factory is not a string or a Function'() {
 		assert.throws(() => { d(<any> 1); }, Error);
+	},
+	'throws an error if empty selector'() {
+		assert.throws(() => { d(''); }, Error);
 	}
 });
