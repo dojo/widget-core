@@ -39,7 +39,7 @@ npm install dojo-compose
 npm install dojo-store
 ```
 
-To use dojo-widgets import the module in the project. For more details see [features](#features) below.
+To use dojo-widgets, import the module in the project. For more details see [features](#features) below.
 
 ```ts
 import createButton from 'dojo-widgets/components/button/createButton';
@@ -60,13 +60,13 @@ projector.children = [ d('h1', [ 'Hello, Dojo!' ]) ];
 projector.append();
 ```
 
-It renders a header saying "Hello World" on the page, see the following sections for more details.
+It renders a h1 element saying "Hello Dojo!" on the page. See the following sections for more details.
 
 ### Base Widget
 
 The class `createWidgetBase` provides all base dojo-widgets functionality including caching and widget lifecycle management. It can be used directly or extended to create custom widgets.
 
-To customise the widget an optional `options` argument can be provided with the following interface.
+To customise the widget, an optional `options` argument can be provided with the following interface:
 
 **Type**: `WidgetOptions<WidgetState>` - All properties are optional.
 
@@ -151,18 +151,37 @@ import { DNode, HNode, WNode } from 'dojo-widgets/interfaces';
 
 ##### Hyperscript
 
-Creates an element with the `tagName`
+Creates an element with the specified `tagName`.
 
 ```ts
 d(tagName: string): HNode[];
 ```
 
-Creates an element with the `tagName` with the children specified by the array of `DNode`, `VNode` or `null`.
+where `tagName` is in the form: element.className(s)#id, e.g.
+
+h2
+h2.foo
+h2.foo.bar
+h2.foo.bar#baz
+h2#baz
+
+Where `classNames` must be period (.) delimited if more than 1 class is specified.
+Please note, both the `classes` and `id` portions of the `tagName`, are optional.
+
+The results of the invocations above are:
+
+h2                  (<h2></h2>)
+h2.foo              (<h2 class="foo"></h2>)
+h2.foo.bar          (<h2 class="foo bar"></h2>)
+h2.foo.bar#baz      (<h2 class="foo bar" id="baz"></h2>)
+h2#baz              (<h2 id="baz"></h2>)
+
+Creates an element with `tagName`, with the children specified by the array of `DNode`, `VNode` or `null`.
 
 ```ts
 d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
 ```
-Creates an element with the `tagName` with the `VNodeProperties` options and optional children specified by the array of `DNode`, `VNode` or `null`.
+Creates an element with `tagName`, with `VNodeProperties` options and *optional* children specified by the array of `DNode`, `VNode` or `null`.
 
 ```ts
 d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];

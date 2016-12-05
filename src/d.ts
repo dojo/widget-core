@@ -28,6 +28,10 @@ function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S
 ): DNode {
 
 	if (typeof tagNameOrFactory === 'string') {
+		if (tagNameOrFactory.length === 0) {
+			throw new Error('Invalid tagName: cannot be empty string.');
+		}
+
 		if (Array.isArray(optionsOrChildren)) {
 			children = optionsOrChildren;
 			optionsOrChildren = {};
