@@ -151,13 +151,13 @@ import { DNode, HNode, WNode } from 'dojo-widgets/interfaces';
 
 ##### Hyperscript
 
-Creates an element with the specified css `selector`
+Creates an element with the specified tagName.
 
 ```ts
-d(selector: string): HNode[];
+d(tagName: string): HNode[];
 ```
 
-where 'selector' is in the form: element.className(s)#id, e.g.
+where 'tagName' is in the form: element.className(s)#id, e.g.
 
 h2
 h2.foo
@@ -166,7 +166,7 @@ h2.foo.bar#baz
 h2#baz
 
 Where 'classNames' must be period (.) delimited if more than 1 class is specified.
-Please note, both the 'classes' and 'id' portions of the 'selector', are optional.
+Please note, both the 'classes' and 'id' portions of the 'tagName', are optional.
 
 The results of the invocations above are:
 
@@ -176,15 +176,15 @@ h2.foo.bar          (<h2 class="foo bar"></h2>)
 h2.foo.bar#baz      (<h2 class="foo bar" id="baz"></h2>)
 h2#baz              (<h2 id="baz"></h2>)
 
-Creates an element with `selector`, with the children specified by the array of `DNode`, `VNode` or `null`.
+Creates an element with `tagName`, with the children specified by the array of `DNode`, `VNode` or `null`.
 
 ```ts
-d(selector: string, children: (DNode | VNode | null)[]): HNode[];
+d(tagName: string, children: (DNode | VNode | null)[]): HNode[];
 ```
-Creates an element with `selector`, with `VNodeProperties` options and *optional* children specified by the array of `DNode`, `VNode` or `null`.
+Creates an element with `tagName`, with `VNodeProperties` options and *optional* children specified by the array of `DNode`, `VNode` or `null`.
 
 ```ts
-d(selector: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
+d(tagName: string, options: VNodeProperties, children?: (DNode | VNode | null)[]): HNode[];
 ```
 ##### Dojo Widget
 
