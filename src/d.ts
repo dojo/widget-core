@@ -22,13 +22,13 @@ function d(tagName: string): HNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O): WNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O, children: DNode[]): WNode;
 function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
-	TagNameOrFactory: TagNameOrFactory<S, W, O>,
+	tagNameOrFactory: TagNameOrFactory<S, W, O>,
 	optionsOrChildren: DOptions<S, O> = {},
 	children: Children = []
 ): DNode {
 
-	if (typeof TagNameOrFactory === 'string') {
-		if (TagNameOrFactory.length === 0) {
+	if (typeof tagNameOrFactory === 'string') {
+		if (tagNameOrFactory.length === 0) {
 			throw new Error('Invalid tagName: cannot be empty string.');
 		}
 
@@ -42,15 +42,15 @@ function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S
 		return {
 			children: children,
 			render(this: { children: VNode[] }) {
-				return h(<string> TagNameOrFactory, <VNodeProperties> optionsOrChildren, this.children);
+				return h(<string> tagNameOrFactory, <VNodeProperties> optionsOrChildren, this.children);
 			}
 		};
 	}
 
-	if (typeof TagNameOrFactory === 'function') {
+	if (typeof tagNameOrFactory === 'function') {
 		return {
 			children: <DNode[]> children,
-			factory: TagNameOrFactory,
+			factory: tagNameOrFactory,
 			options: <WidgetOptions<WidgetState>> optionsOrChildren
 		};
 	}
