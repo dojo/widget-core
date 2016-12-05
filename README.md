@@ -151,13 +151,13 @@ import { DNode, HNode, WNode } from 'dojo-widgets/interfaces';
 
 ##### Hyperscript
 
-Creates an element with the specified tagName.
+Creates an element with the specified `tagName`.
 
 ```ts
 d(tagName: string): HNode[];
 ```
 
-where 'tagName' is in the form: element.className(s)#id, e.g.
+where `tagName` is in the form: element.className(s)#id, e.g.
 
 h2
 h2.foo
@@ -165,8 +165,8 @@ h2.foo.bar
 h2.foo.bar#baz
 h2#baz
 
-Where 'classNames' must be period (.) delimited if more than 1 class is specified.
-Please note, both the 'classes' and 'id' portions of the 'tagName', are optional.
+Where `classNames` must be period (.) delimited if more than 1 class is specified.
+Please note, both the `classes` and `id` portions of the `tagName`, are optional.
 
 The results of the invocations above are:
 
