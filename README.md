@@ -163,6 +163,7 @@ h2
 h2.foo
 h2.foo.bar
 h2.foo.bar#baz
+h2#baz
 
 Where 'classNames' must be period (.) delimited if more than 1 class is specified.
 Please note, both the 'classes' and 'id' portions of the 'selector', are optional.
@@ -173,6 +174,7 @@ h2                  (<h2></h2>)
 h2.foo              (<h2 class="foo"></h2>)
 h2.foo.bar          (<h2 class="foo bar"></h2>)
 h2.foo.bar#baz      (<h2 class="foo bar" id="baz"></h2>)
+h2#baz              (<h2 id="baz"></h2>)
 
 Creates an element with `selector`, with the children specified by the array of `DNode`, `VNode` or `null`.
 
