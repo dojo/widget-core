@@ -60,7 +60,7 @@ projector.children = [ d('h1', [ 'Hello, Dojo!' ]) ];
 projector.append();
 ```
 
-It renders a h1 element saying "Hello World", on the page. See the following sections for more details.
+It renders a h1 element saying "Hello Dojo!" on the page. See the following sections for more details.
 
 ### Base Widget
 
