@@ -1,7 +1,7 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import { DNode, Children, WNode, Widget, WidgetOptions, WidgetState } from './interfaces';
 
-const fakeFactoryRegistry = new Map<string, ComposeFactory<any, any>>();
+export const fakeFactoryRegistry = new Map<string, ComposeFactory<any, any>>();
 
 function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
 	factory: ComposeFactory<W, O> | string,
