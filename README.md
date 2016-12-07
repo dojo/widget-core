@@ -36,7 +36,7 @@ npm install dojo-has
 npm install dojo-shim
 npm install dojo-core
 npm install dojo-compose
-npm install dojo-store
+npm install dojo-stores
 ```
 
 To use dojo-widgets import the module in the project. For more details see [features](#features) below.
