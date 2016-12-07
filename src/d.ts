@@ -1,41 +1,56 @@
 import { ComposeFactory } from 'dojo-compose/compose';
+import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
+import { h } from 'maquette';
 import {
-	Children,
 	DNode,
 	HNode,
 	WNode,
+	Children,
 	Widget,
 	WidgetOptions,
 	WidgetState
 } from './interfaces';
-import w from './w';
-import v from './v';
-import { VNodeProperties } from 'dojo-interfaces/vdom';
 
-export type TagNameOrFactory<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>> = string | ComposeFactory<W, O>;
-
-export type DOptions<S extends WidgetState, O extends WidgetOptions<S>> = VNodeProperties | O;
-
-function d(tagName: string, options: VNodeProperties, children?: Children): HNode;
-function d(tagName: string, children: Children): HNode;
-function d(tagName: string): HNode;
-function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O): WNode;
-function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(factory: ComposeFactory<W, O>, options: O, children: Children): WNode;
-function d<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
-	tagNameOrFactory: TagNameOrFactory<S, W, O>,
-	optionsOrChildren: DOptions<S, O> = {},
+export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+	factory: ComposeFactory<W, O>,
+	options: O
+): WNode;
+export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+	factory: ComposeFactory<W, O>,
+	options: O,
+	children?: Children
+): WNode;
+export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+	factory: ComposeFactory<W, O>,
+	options: O,
 	children: Children = []
-): DNode {
+): WNode {
 
-	if (typeof tagNameOrFactory === 'string') {
-		return v(tagNameOrFactory, <VNodeProperties> optionsOrChildren, children);
-	}
+	const filteredChildren = <(DNode)[]> children.filter((child) => child);
 
-	if (typeof tagNameOrFactory === 'function') {
-		return w(tagNameOrFactory, <WidgetOptions<WidgetState>> optionsOrChildren, children);
-	}
-
-	throw new Error('Unsupported tagName or factory type');
+	return {
+		children: filteredChildren,
+		factory,
+		options
+	};
 }
 
-export default d;
+export function v(tag: string, options: VNodeProperties, children?: Children): HNode;
+export function v(tag: string, children: Children): HNode;
+export function v(tag: string): HNode;
+export function v(tag: string, optionsOrChildren: VNodeProperties = {}, children: Children = []): HNode {
+
+		if (Array.isArray(optionsOrChildren)) {
+			children = optionsOrChildren;
+			optionsOrChildren = {};
+		}
+
+		const filteredChildren = <DNode[]> children.filter((child) => child);
+
+		return {
+			children: filteredChildren,
+			render(this: { children: VNode[] }) {
+				return h(tag, optionsOrChildren, this.children);
+			}
+		};
+}

@@ -13,7 +13,7 @@ import { Factory } from 'dojo-interfaces/core';
 import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
 import Map from 'dojo-shim/Map';
-import v from './v';
+import { v } from './d';
 import createVNodeEvented from './mixins/createVNodeEvented';
 
 export interface WidgetFactory extends ComposeFactory<Widget<WidgetState>, WidgetOptions<WidgetState>> {}
