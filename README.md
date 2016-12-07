@@ -82,6 +82,7 @@ To customise the widget an optional `options` argument can be provided with the 
 By default the base widget class applies `id`, `classes` and `styles` from the widget's specified `state` (either by direct state injection or via an observable store).
 
 #### Simple Widgets
+
 To create a basic widget `createWidgetBase` can be used directly by importing the class.
 
 ```ts
@@ -135,7 +136,9 @@ const myBasicWidget = createWidgetBase({
 
 #### `d`
 
-`d` is the canonical utility for `dojo-widgets` to express a widget hierarchical structure using either the `w` or `v` functions.
+`d` is the module used to express hierarchical widget structures within Dojo 2. This structure constructed of `DNode`s (`DNode` is the intersection type of `HNode` and `WNode`).
+
+When creating custom widgets, you use the `v` and `w` functions from the `d` module.
 
 It is imported by:
 
@@ -150,6 +153,8 @@ import { DNode, HNode, WNode } from 'dojo-widgets/interfaces';
 ```
 
 ##### `v`
+
+`v` is an abstraction of Hyperscript that allows dojo 2 to manage caching and lazy creation.
 
 Creates an element with the `tag`
 
@@ -168,6 +173,8 @@ Creates an element with the `tagName` with the `VNodeProperties` options and opt
 v(tag: string, options: VNodeProperties, children?: (DNode | null)[]): HNode[];
 ```
 ##### `w`
+
+`w` is an abstraction layer for dojo-widgets that allows dojo 2 managements, caching and lazy instantiation.
 
 Creates a dojo-widget using the `factory` and `options`.
 
