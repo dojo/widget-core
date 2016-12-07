@@ -174,7 +174,7 @@ v(tag: string, options: VNodeProperties, children?: (DNode | null)[]): HNode[];
 ```
 ##### `w`
 
-`w` is an abstraction layer for dojo-widgets that allows dojo 2 managements, caching and lazy instantiation.
+`w` is an abstraction layer for dojo-widgets that enables dojo 2's lazy instantiation, instance management and caching.
 
 Creates a dojo-widget using the `factory` and `options`.
 
