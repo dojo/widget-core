@@ -1,6 +1,8 @@
 import { isComposeFactory } from 'dojo-compose/compose';
 import Promise from 'dojo-shim/Promise';
+import Map from 'dojo-shim/Map';
 import {
+	WidgetFactory,
 	FactoryRegistryInterface,
 	FactoryRegistryItem,
 	WidgetFactoryFunction
@@ -24,9 +26,9 @@ export default class FactoryRegistry implements FactoryRegistryInterface {
 		this.registry.set(factoryLabel, registryItem);
 	}
 
-	get(factoryLabel: string): any {
+	get(factoryLabel: string): WidgetFactory | Promise<WidgetFactory> | null {
 		if (!this.has(factoryLabel)) {
-			throw new Error(`No factory has been registered for '${factoryLabel}'`);
+			return null;
 		}
 
 		const item = this.registry.get(factoryLabel);
@@ -38,7 +40,7 @@ export default class FactoryRegistry implements FactoryRegistryInterface {
 		const promise = (<WidgetFactoryFunction> item)();
 		this.registry.set(factoryLabel, promise);
 
-		return (<WidgetFactoryFunction> item)().then((factory) => {
+		return promise.then((factory) => {
 			this.registry.set(factoryLabel, factory);
 			return factory;
 		}, (error) => {

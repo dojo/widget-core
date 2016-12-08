@@ -246,7 +246,7 @@ export interface FactoryRegistryInterface {
 	/**
 	 * Return the registered FactoryRegistryItem for the label.
 	 */
-	get(factoryLabel: string): WidgetFactory | Promise<WidgetFactory>;
+	get(factoryLabel: string): WidgetFactory | Promise<WidgetFactory> | null;
 
 	/**
 	 * Check if the factory label has already been used to define a FactoryRegistryItem.

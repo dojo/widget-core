@@ -1,5 +1,6 @@
 import FactoryRegistry from './../../src/FactoryRegistry';
 import createWidgetBase from './../../src/createWidgetBase';
+import Promise from 'dojo-shim/Promise';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 
@@ -51,14 +52,8 @@ registerSuite({
 		},
 		'throws an error if factory has not been registered.'() {
 			const factoryRegistry = new FactoryRegistry();
-			try {
-				factoryRegistry.get('my-widget');
-				assert.fail();
-			}
-			catch (error) {
-				assert.isTrue(error instanceof Error);
-				assert.equal(error.message, 'No factory has been registered for \'my-widget\'');
-			}
+			const item = factoryRegistry.get('my-widget');
+			assert.isNull(item);
 		},
 		'replaces promise with result on resolution'() {
 			let resolveFunction: any;
@@ -71,11 +66,10 @@ registerSuite({
 			};
 			const factoryRegistry = new FactoryRegistry();
 			factoryRegistry.define('my-widget', lazyFactory);
-			let factory = factoryRegistry.get('my-widget');
-			assert.deepEqual(factory, promise);
+			factoryRegistry.get('my-widget');
 			resolveFunction(createWidgetBase);
 			return promise.then(() => {
-				factory = factoryRegistry.get('my-widget');
+				const factory = factoryRegistry.get('my-widget');
 				assert.strictEqual(factory, createWidgetBase);
 			});
 		},
