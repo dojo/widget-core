@@ -3,7 +3,7 @@ import * as assert from 'intern/chai!assert';
 import createWidgetBase from '../../src/createWidgetBase';
 import { DNode, HNode, WidgetState, WidgetOptions } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
-import { v, w } from '../../src/d';
+import { v, w, defaultFactoryRegistry } from '../../src/d';
 import { stub } from 'sinon';
 
 registerSuite({
@@ -112,6 +112,44 @@ registerSuite({
 			const result = <VNode> widgetBase.render();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children && result.children[0].vnodeSelector, 'header');
+		},
+		'render with async factory'() {
+			let resolveFunction: any;
+			const loadFunction = () => {
+				return new Promise((resolve) => {
+					resolveFunction = resolve;
+				});
+			};
+			defaultFactoryRegistry.define('my-header', loadFunction);
+
+			const createMyWidget = createWidgetBase
+				.mixin({
+					mixin: {
+						getChildrenNodes: function(): DNode[] {
+							return [ w('my-header', {}) ];
+						}
+					}
+				});
+
+			const createHeader = createWidgetBase
+				.override({
+					tagName: 'header'
+				});
+
+			const myWidget = createMyWidget();
+
+			let result = <VNode> myWidget.render();
+			assert.lengthOf(result.children, 0);
+
+			resolveFunction(createHeader);
+			return new Promise((resolve) => {
+				myWidget.on('invalidated', () => {
+					result = <VNode> myWidget.render();
+					assert.lengthOf(result.children, 1);
+					assert.strictEqual(result.children![0].vnodeSelector, 'header');
+					resolve();
+				});
+			});
 		},
 		'render with nested children'() {
 			const widgetBase = createWidgetBase
