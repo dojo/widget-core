@@ -1,4 +1,5 @@
 import { ComposeFactory } from 'dojo-compose/compose';
+import Promise from 'dojo-shim/Promise';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { h } from 'maquette';
 import {

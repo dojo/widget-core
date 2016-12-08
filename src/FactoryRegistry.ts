@@ -1,4 +1,5 @@
 import { isComposeFactory } from 'dojo-compose/compose';
+import Promise from 'dojo-shim/Promise';
 import {
 	FactoryRegistryInterface,
 	FactoryRegistryItem,
