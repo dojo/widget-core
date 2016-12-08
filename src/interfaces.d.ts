@@ -270,7 +270,7 @@ export interface WNode {
 	/**
 	 * Factory to create a widget
 	 */
-	factory: WidgetFactory | Promise<WidgetFactory>;
+	factory: WidgetFactory | string;
 
 	/**
 	 * Options used to create factory a widget
@@ -377,7 +377,7 @@ export interface WidgetMixin {
 	/**
 	 * The specific Factory Registry passed to the widget via the `WidgetOptions`
 	 */
-	readonly factoryRegistry: FactoryRegistryInterface | undefined;
+	readonly registry: FactoryRegistryInterface;
 }
 
 export interface WidgetOptions<S extends WidgetState> extends StatefulOptions<S>, VNodeEventedOptions {
@@ -400,11 +400,6 @@ export interface WidgetOptions<S extends WidgetState> extends StatefulOptions<S>
 	 * Override the tag name for this widget instance
 	 */
 	tagName?: string;
-
-	/**
-	 * The specific Factory Registry to be used to look up factories during render,
-	 */
-	factoryRegistry?: FactoryRegistryInterface;
 }
 
 export interface WidgetState extends State {

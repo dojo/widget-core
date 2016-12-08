@@ -8,14 +8,15 @@ import {
 	WidgetState,
 	WidgetOptions,
 	WidgetFactory,
-	FactoryRegistryInterface
+	FactoryRegistryItem
 } from './interfaces';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
 import Promise from 'dojo-shim/Promise';
 import Map from 'dojo-shim/Map';
-import { v } from './d';
+import { v, globalFactoryRegistry } from './d';
+import FactoryRegistry from './FactoryRegistry';
 import createVNodeEvented from './mixins/createVNodeEvented';
 
 interface WidgetInternalState {
@@ -24,7 +25,8 @@ interface WidgetInternalState {
 	dirty: boolean;
 	widgetClasses: string[];
 	cachedVNode?: VNode | string;
-	factoryRegistry?: FactoryRegistryInterface;
+	factoryRegistry: FactoryRegistry;
+	initializedFactoryMap: Map<string, Promise<WidgetFactory>>;
 	historicChildrenMap: Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState>>;
 	currentChildrenMap: Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState>>;
 };
@@ -49,6 +51,14 @@ function isWNode(child: DNode): child is WNode {
 	return Boolean(child && (<WNode> child).factory !== undefined);
 }
 
+function getFromRegistry(instance: Widget<WidgetState>, factoryLabel: string): FactoryRegistryItem | null {
+	if (instance.registry.has(factoryLabel)) {
+		return instance.registry.get(factoryLabel);
+	}
+
+	return globalFactoryRegistry.get(factoryLabel);
+}
+
 function dNodeToVNode(instance: Widget<WidgetState>, dNode: DNode): VNode | string | null {
 	const internalState = widgetInternalStateMap.get(instance);
 
@@ -57,20 +67,31 @@ function dNodeToVNode(instance: Widget<WidgetState>, dNode: DNode): VNode | stri
 	}
 
 	if (isWNode(dNode)) {
-		const { children, factory, options: { id, state } } = dNode;
-		const childrenMapKey = id || factory;
-		const cachedChild = internalState.historicChildrenMap.get(childrenMapKey);
+		const { children, options: { id, state } } = dNode;
 
+		let { factory } = dNode;
 		let child: Widget<WidgetState>;
 
-		if (!isComposeFactory(factory)) {
-			if (!cachedChild) {
-				(<Promise<WidgetFactory>> factory).then(() => {
-					instance.invalidate();
-				});
+		if (typeof factory === 'string') {
+			const item = getFromRegistry(instance, factory);
+
+			if (isComposeFactory(item)) {
+				factory = <WidgetFactory> item;
 			}
-			return null;
+			else {
+				if (item && !internalState.initializedFactoryMap.has(factory)) {
+					const promise = (<Promise<WidgetFactory>> item).then((factory) => {
+						instance.invalidate();
+						return factory;
+					});
+					internalState.initializedFactoryMap.set(factory, promise);
+				}
+				return null;
+			}
 		}
+
+		const childrenMapKey = id || factory;
+		const cachedChild = internalState.historicChildrenMap.get(childrenMapKey);
 
 		if (cachedChild) {
 			child = cachedChild;
@@ -98,9 +119,11 @@ function dNodeToVNode(instance: Widget<WidgetState>, dNode: DNode): VNode | stri
 		return child.render();
 	}
 
-	dNode.children = dNode.children.filter((child) => child).map((child: DNode) => {
-		return dNodeToVNode(instance, child);
-	});
+	dNode.children = dNode.children
+		.filter((child) => child !== null)
+		.map((child: DNode) => {
+			return dNodeToVNode(instance, child);
+		});
 
 	return dNode.render();
 }
@@ -214,21 +237,22 @@ const createWidget: WidgetFactory = createStateful
 				return internalState.cachedVNode;
 			},
 
-			get factoryRegistry(this: Widget<WidgetState>): FactoryRegistryInterface | undefined {
+			get registry(this: Widget<WidgetState>): FactoryRegistry {
 				return widgetInternalStateMap.get(this).factoryRegistry;
 			},
 
 			tagName: 'div'
 		},
 		initialize(instance: Widget<WidgetState>, options: WidgetOptions<WidgetState> = {}) {
-			const { id, tagName, factoryRegistry } = options;
+			const { id, tagName } = options;
 			instance.tagName = tagName || instance.tagName;
 
 			widgetInternalStateMap.set(instance, {
 				id,
 				dirty: true,
 				widgetClasses: [],
-				factoryRegistry,
+				factoryRegistry: new FactoryRegistry(),
+				initializedFactoryMap: new Map<string, Promise<WidgetFactory>>(),
 				historicChildrenMap: new Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState>>(),
 				currentChildrenMap: new Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState>>(),
 				children: []

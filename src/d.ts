@@ -1,5 +1,4 @@
 import { ComposeFactory } from 'dojo-compose/compose';
-import Promise from 'dojo-shim/Promise';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { h } from 'maquette';
 import {
@@ -8,16 +7,11 @@ import {
 	WNode,
 	Widget,
 	WidgetOptions,
-	WidgetState,
-	WidgetFactory
+	WidgetState
 } from './interfaces';
 import FactoryRegistry from './FactoryRegistry';
 
-export let defaultFactoryRegistry = new FactoryRegistry();
-
-export function setDefaultFactoryRegistry(factoryRegistry: FactoryRegistry) {
-	defaultFactoryRegistry = factoryRegistry;
-}
+export const globalFactoryRegistry = new FactoryRegistry();
 
 export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
 	factory: ComposeFactory<W, O> | string,
@@ -34,19 +28,9 @@ export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOp
 	children: DNode[] = []
 ): WNode {
 
-	let widgetFactory: WidgetFactory | Promise<WidgetFactory>;
-
-	if (typeof factory === 'string') {
-		const registry = options.factoryRegistry || defaultFactoryRegistry;
-		widgetFactory = registry.get(factory);
-	}
-	else {
-		widgetFactory = factory;
-	}
-
 	return {
 		children,
-		factory: widgetFactory,
+		factory,
 		options
 	};
 }

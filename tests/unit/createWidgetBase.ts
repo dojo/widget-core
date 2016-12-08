@@ -3,7 +3,7 @@ import * as assert from 'intern/chai!assert';
 import createWidgetBase from '../../src/createWidgetBase';
 import { DNode, HNode, WidgetState, WidgetOptions } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
-import { v, w, defaultFactoryRegistry } from '../../src/d';
+import { v, w, globalFactoryRegistry } from '../../src/d';
 import { stub } from 'sinon';
 
 registerSuite({
@@ -120,7 +120,7 @@ registerSuite({
 					resolveFunction = resolve;
 				});
 			};
-			defaultFactoryRegistry.define('my-header', loadFunction);
+			globalFactoryRegistry.define('my-header', loadFunction);
 
 			const createMyWidget = createWidgetBase
 				.mixin({
