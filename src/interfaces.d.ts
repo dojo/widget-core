@@ -263,7 +263,7 @@ export interface HNode {
 	/**
 	 * render function that wraps returns VNode
 	 */
-	render(): VNode;
+	render<T>(options?: { bind: T }): VNode;
 }
 
 export interface WNode {
