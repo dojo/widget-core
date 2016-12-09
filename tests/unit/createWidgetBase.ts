@@ -4,7 +4,7 @@ import Promise from 'dojo-shim/Promise';
 import createWidgetBase from '../../src/createWidgetBase';
 import { DNode, HNode, WidgetState, WidgetOptions } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
-import { v, w, globalFactoryRegistry } from '../../src/d';
+import { v, w, registry } from '../../src/d';
 import { stub } from 'sinon';
 
 registerSuite({
@@ -121,7 +121,7 @@ registerSuite({
 					resolveFunction = resolve;
 				});
 			};
-			globalFactoryRegistry.define('my-header', loadFunction);
+			registry.define('my-header', loadFunction);
 
 			const createMyWidget = createWidgetBase
 				.mixin({
@@ -169,7 +169,7 @@ registerSuite({
 					resolveFunction = resolve;
 				});
 			};
-			globalFactoryRegistry.define('my-header1', loadFunction);
+			registry.define('my-header1', loadFunction);
 
 			const createMyWidget = createWidgetBase
 				.mixin({

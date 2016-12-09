@@ -36,10 +36,9 @@ npm install dojo-has
 npm install dojo-shim
 npm install dojo-core
 npm install dojo-compose
-npm install dojo-store
 ```
 
-To use dojo-widgets import the module in the project. For more details see [features](#features) below.
+To use dojo-widgets, import the module in the project. For more details see [features](#features) below.
 
 ```ts
 import createButton from 'dojo-widgets/components/button/createButton';
@@ -60,7 +59,7 @@ projector.children = [ v('h1', [ 'Hello, Dojo!' ]) ];
 projector.append();
 ```
 
-It renders a header saying "Hello World" on the page, see the following sections for more details.
+It renders a `h1` element saying "Hello, Dojo!" on the page. See the following sections for more details.
 
 ### Base Widget
 
@@ -156,26 +155,47 @@ import { DNode, HNode, WNode } from 'dojo-widgets/interfaces';
 
 `v` is an abstraction of Hyperscript that allows dojo 2 to manage caching and lazy creation.
 
-Creates an element with the `tag`
+Creates an element with the specified `tag`
 
 ```ts
 v(tag: string): HNode[];
 ```
 
-Creates an element with the `tag` with the children specified by the array of `DNode`, `VNode` or `null`.
+where `tag` is in the form: element.className(s)#id, e.g.
+
+h2
+h2.foo
+h2.foo.bar
+h2.foo.bar#baz
+h2#baz
+
+`classNames` must be period (.) delimited if more than 1 class is specified.
+Please note, both the `classes` and `id` portions of the `tag` are optional.
+
+The results of the invocations above are:
+
+```
+h2                  (<h2></h2>)
+h2.foo              (<h2 class="foo"></h2>)
+h2.foo.bar          (<h2 class="foo bar"></h2>)
+h2.foo.bar#baz      (<h2 class="foo bar" id="baz"></h2>)
+h2#baz              (<h2 id="baz"></h2>)
+```
+
+Creates an element with the `tag` with the children specified by the array of `DNode`, `VNode`, `string` or `null` items.
 
 ```ts
 v(tag: string, children: (DNode | null)[]): HNode[];
 ```
-Creates an element with the `tagName` with the `VNodeProperties` options and optional children specified by the array of `DNode`, `VNode` or `null`.
+Creates an element with the `tagName` with `VNodeProperties` options and optional children specified by the array of `DNode`, `VNode`, `string` or `null` items.
 
 ```ts
 v(tag: string, options: VNodeProperties, children?: (DNode | null)[]): HNode[];
 ```
 
-##### `globalFactoryRegistry`
+##### `registry`
 
-The d module exports a `globalFactoryRegistry` to be used to define a factory label against a `WidgetFactory`, `Promise<WidgetFactory>` or `() => Promise<WidgetFactory`.
+The d module exports a global `registry` to be used to define a factory label against a `WidgetFactory`, `Promise<WidgetFactory>` or `() => Promise<WidgetFactory`.
 
 This enables consumers to specify a `string` label when authoring widgets using the `w` function (see below) and allows the factory to resolve asyncronously (for example if the module had not been loaded).
 

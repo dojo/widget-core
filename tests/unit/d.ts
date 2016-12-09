@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { WidgetState, WidgetOptions } from './../../src/interfaces';
 import createWidgetBase from '../../src/createWidgetBase';
-import { v, w, globalFactoryRegistry } from '../../src/d';
+import { v, w, registry } from '../../src/d';
 import FactoryRegistry from './../../src/FactoryRegistry';
 
 class TestFactoryRegistry extends FactoryRegistry {
@@ -14,7 +14,7 @@ class TestFactoryRegistry extends FactoryRegistry {
 registerSuite({
 	name: 'd',
 	'provides default factory registry'() {
-		assert.isObject(globalFactoryRegistry);
+		assert.isObject(registry);
 	},
 	w: {
 		'create WNode wrapper'() {
@@ -24,7 +24,7 @@ registerSuite({
 			assert.deepEqual(dNode.options, options);
 		},
 		'create WNode wrapper using a factory label'() {
-			globalFactoryRegistry.define('my-widget', createWidgetBase);
+			registry.define('my-widget', createWidgetBase);
 			const options: WidgetOptions<WidgetState> = { tagName: 'header', state: { hello: 'world' } };
 			const dNode = w('my-widget', options);
 			assert.deepEqual(dNode.factory, 'my-widget');

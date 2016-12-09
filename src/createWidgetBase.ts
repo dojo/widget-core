@@ -15,7 +15,7 @@ import { assign } from 'dojo-core/lang';
 import WeakMap from 'dojo-shim/WeakMap';
 import Promise from 'dojo-shim/Promise';
 import Map from 'dojo-shim/Map';
-import { v, globalFactoryRegistry } from './d';
+import { v, registry } from './d';
 import FactoryRegistry from './FactoryRegistry';
 import createVNodeEvented from './mixins/createVNodeEvented';
 
@@ -56,7 +56,7 @@ function getFromRegistry(instance: Widget<WidgetState>, factoryLabel: string): F
 		return instance.registry.get(factoryLabel);
 	}
 
-	return globalFactoryRegistry.get(factoryLabel);
+	return registry.get(factoryLabel);
 }
 
 function dNodeToVNode(instance: Widget<WidgetState>, dNode: DNode): VNode | string | null {

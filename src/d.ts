@@ -11,7 +11,7 @@ import {
 } from './interfaces';
 import FactoryRegistry from './FactoryRegistry';
 
-export const globalFactoryRegistry = new FactoryRegistry();
+export const registry = new FactoryRegistry();
 
 export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
 	factory: ComposeFactory<W, O> | string,
