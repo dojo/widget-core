@@ -49,7 +49,6 @@ export function v(tag: string, optionsOrChildren: VNodeProperties = {}, children
 		return {
 			children,
 			render<T>(this: { children: VNode[] }, options: { bind?: T } = { }) {
-
 				return h(tag, assign(options, optionsOrChildren), this.children);
 			}
 		};
