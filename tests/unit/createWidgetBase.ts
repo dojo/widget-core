@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import Promise from 'dojo-shim/Promise';
 import createWidgetBase from '../../src/createWidgetBase';
-import { DNode, HNode, WidgetState, WidgetOptions } from './../../src/interfaces';
+import { DNode, HNode, WidgetProperties } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
 import { v, w, registry } from '../../src/d';
 import { stub } from 'sinon';
@@ -56,7 +56,7 @@ registerSuite({
 		};
 
 		const widgetBase = createWidgetBase({
-			state: { id: 'foo', classes: [ 'bar' ] },
+			properties: { id: 'foo', classes: [ 'bar' ] },
 			listeners: {
 				click: expectedClickFunction
 			}
@@ -71,7 +71,7 @@ registerSuite({
 		nodeAttributes.onclick!();
 		assert.isTrue(clickCalled);
 
-		widgetBase.setState({ 'id': 'foo', classes: ['foo'] });
+		widgetBase.state = { 'id': 'foo', classes: ['foo'] };
 
 		nodeAttributes = widgetBase.getNodeAttributes();
 
@@ -332,9 +332,10 @@ registerSuite({
 				.mixin({
 					mixin: {
 						getChildrenNodes: function(this: any): (DNode | null)[] {
-							const state = this.state.classes ? { classes: this.state.classes } : {};
+							const properties: WidgetProperties = this.state.classes ? { classes: this.state.classes } : {};
+							properties.tagName = 'footer';
 							return [
-								this.state.hide ? null : w(testChildWidget, <WidgetOptions<WidgetState>> { tagName: 'footer', state })
+								this.state.hide ? null : w(testChildWidget, properties)
 							];
 						}
 					}
@@ -356,7 +357,7 @@ registerSuite({
 			const secondRenderChild: any = secondRenderResult.children && secondRenderResult.children[0];
 			assert.strictEqual(secondRenderChild.vnodeSelector, 'footer');
 
-			widgetBase.setState({ 'classes': ['test-class'] });
+			widgetBase.state = { 'classes': ['test-class'] };
 			widgetBase.invalidate();
 			const thirdRenderResult = <VNode> widgetBase.__render__();
 			assert.strictEqual(countWidgetCreated, 1);
@@ -366,7 +367,7 @@ registerSuite({
 			assert.strictEqual(thirdRenderChild.vnodeSelector, 'footer');
 			assert.isTrue(thirdRenderChild.properties.classes['test-class']);
 
-			widgetBase.setState({ hide: true });
+			widgetBase.state = <any> { hide: true };
 			widgetBase.invalidate();
 
 			const forthRenderResult = <VNode> widgetBase.__render__();
@@ -374,7 +375,7 @@ registerSuite({
 			assert.strictEqual(countWidgetDestroyed, 1);
 			assert.lengthOf(forthRenderResult.children, 0);
 
-			widgetBase.setState({ hide: false });
+			widgetBase.state = <any> { hide: false };
 			widgetBase.invalidate();
 
 			const lastRenderResult = <VNode> widgetBase.__render__();
@@ -404,13 +405,13 @@ registerSuite({
 		},
 		'__render__() and invalidate()'() {
 			const widgetBase = createWidgetBase({
-				state: { id: 'foo', label: 'foo' }
+				properties: { id: 'foo', label: 'foo' }
 			});
 			const result1 = <VNode> widgetBase.__render__();
 			const result2 = <VNode> widgetBase.__render__();
 			widgetBase.invalidate();
 			widgetBase.invalidate();
-			widgetBase.setState({});
+			widgetBase.state = {};
 			const result3 = widgetBase.__render__();
 			const result4 = widgetBase.__render__();
 			assert.strictEqual(result1, result2);
@@ -433,27 +434,27 @@ registerSuite({
 		},
 		'in state'() {
 			const widgetBase = createWidgetBase({
-				state: {
+				properties: {
 					id: 'foo'
 				}
 			});
 
 			assert.strictEqual(widgetBase.id, 'foo');
 		},
-		'in options and state'() {
+		'in options and properties'() {
 			const widgetBase = createWidgetBase({
 				id: 'foo',
-				state: {
+				properties: {
 					id: 'bar'
 				}
 			});
 
-			assert.strictEqual(widgetBase.id, 'foo');
+			assert.strictEqual(widgetBase.id, 'bar');
 		},
-		'not in options or state'() {
+		'not in options or properties'() {
 			const widgetBase = createWidgetBase();
 
-			assert.strictEqual(widgetBase.id, 'widget-1');
+			assert.include(widgetBase.id, 'widget-');
 		},
 		'is read only'() {
 			const widgetBase = createWidgetBase();
