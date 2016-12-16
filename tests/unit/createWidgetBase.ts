@@ -77,6 +77,30 @@ registerSuite({
 
 		assert.deepEqual(nodeAttributes.classes, { foo: true, bar: false });
 	},
+	diffProperties: {
+		'no updated properties'() {
+			const widgetBase = createWidgetBase({ properties: { id: 'id', foo: 'bar' }});
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 0);
+		},
+		'updated properties'() {
+			const widgetBase = createWidgetBase({ properties: { id: 'id', foo: 'bar' }});
+			widgetBase.properties = { id: 'id', foo: 'baz' };
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 1);
+		},
+		'new properties'() {
+			const widgetBase = createWidgetBase({ properties: { id: 'id', foo: 'bar' }});
+			widgetBase.properties = { id: 'id', foo: 'bar', bar: 'baz' };
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 1);
+		}
+	},
+	processPropertiesChange() {
+		const widgetBase = createWidgetBase();
+		widgetBase.processPropertiesChange({}, { foo: 'bar' });
+		assert.equal((<any> widgetBase.state).foo, 'bar');
+	},
 	getChildrenNodes: {
 		'getChildrenNodes with no ChildNodeRenderers'() {
 			const widgetBase = createWidgetBase();
@@ -402,6 +426,48 @@ registerSuite({
 			widgetBase.__render__();
 			assert.isTrue(consoleStub.calledWith('must provide unique keys when using the same widget factory multiple times'));
 			consoleStub.restore();
+		},
+		'render with updated properties'() {
+			let renderCount = 0;
+			const createMyWidget = createWidgetBase.mixin({
+				mixin: {
+					nodeAttributes: [
+						function(this: any): any {
+							const { state: { foo, bar } } = this;
+
+							return { foo, bar };
+						}
+					]
+				}
+			});
+			const widgetBase = createWidgetBase
+				.mixin({
+					mixin: {
+						getChildrenNodes: function(): DNode[] {
+							let properties: (WidgetProperties & { foo: string, bar?: string }) | undefined = { foo: 'bar' };
+
+							if (renderCount === 1) {
+								properties.bar = 'baz';
+								properties.foo = 'baz';
+							}
+
+							renderCount++;
+
+							return [
+								w(createMyWidget, properties)
+							];
+						}
+					}
+				})();
+
+			let result = <VNode> widgetBase.__render__();
+			assert.isUndefined(result!.children![0].properties!['bar']);
+			assert.equal(result!.children![0].properties!['foo'], 'bar');
+
+			widgetBase.invalidate();
+			result = <VNode> widgetBase.__render__();
+			assert.equal(result!.children![0].properties!['foo'], 'baz');
+			assert.equal(result!.children![0].properties!['bar'], 'baz');
 		},
 		'__render__() and invalidate()'() {
 			const widgetBase = createWidgetBase({
