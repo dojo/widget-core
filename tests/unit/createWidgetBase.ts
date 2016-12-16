@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import Promise from 'dojo-shim/Promise';
 import createWidgetBase from '../../src/createWidgetBase';
-import { DNode, HNode, WidgetState, WidgetOptions } from './../../src/interfaces';
+import { DNode, HNode, WidgetProps } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
 import { v, w, registry } from '../../src/d';
 import { stub } from 'sinon';
@@ -56,7 +56,7 @@ registerSuite({
 		};
 
 		const widgetBase = createWidgetBase({
-			state: { id: 'foo', classes: [ 'bar' ] },
+			props: { id: 'foo', classes: [ 'bar' ] },
 			listeners: {
 				click: expectedClickFunction
 			}
@@ -71,11 +71,35 @@ registerSuite({
 		nodeAttributes.onclick!();
 		assert.isTrue(clickCalled);
 
-		widgetBase.setState({ 'id': 'foo', classes: ['foo'] });
+		widgetBase.state = { 'id': 'foo', classes: ['foo'] };
 
 		nodeAttributes = widgetBase.getNodeAttributes();
 
 		assert.deepEqual(nodeAttributes.classes, { foo: true, bar: false });
+	},
+	diffProps: {
+		'no updated props'() {
+			const widgetBase = createWidgetBase({ props: { id: 'id', foo: 'bar' }});
+			const updatedKeys = widgetBase.diffProps({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 0);
+		},
+		'updated props'() {
+			const widgetBase = createWidgetBase({ props: { id: 'id', foo: 'bar' }});
+			widgetBase.props = { id: 'id', foo: 'baz' };
+			const updatedKeys = widgetBase.diffProps({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 1);
+		},
+		'new props'() {
+			const widgetBase = createWidgetBase({ props: { id: 'id', foo: 'bar' }});
+			widgetBase.props = { id: 'id', foo: 'bar', bar: 'baz' };
+			const updatedKeys = widgetBase.diffProps({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 1);
+		}
+	},
+	processPropsChange() {
+		const widgetBase = createWidgetBase();
+		widgetBase.processPropsChange({}, { foo: 'bar' });
+		assert.equal((<any> widgetBase.state).foo, 'bar');
 	},
 	getChildrenNodes: {
 		'getChildrenNodes with no ChildNodeRenderers'() {
@@ -332,9 +356,10 @@ registerSuite({
 				.mixin({
 					mixin: {
 						getChildrenNodes: function(this: any): (DNode | null)[] {
-							const state = this.state.classes ? { classes: this.state.classes } : {};
+							const props: WidgetProps = this.state.classes ? { classes: this.state.classes } : {};
+							props.tagName = 'footer';
 							return [
-								this.state.hide ? null : w(testChildWidget, <WidgetOptions<WidgetState>> { tagName: 'footer', state })
+								this.state.hide ? null : w(testChildWidget, props)
 							];
 						}
 					}
@@ -356,7 +381,7 @@ registerSuite({
 			const secondRenderChild: any = secondRenderResult.children && secondRenderResult.children[0];
 			assert.strictEqual(secondRenderChild.vnodeSelector, 'footer');
 
-			widgetBase.setState({ 'classes': ['test-class'] });
+			widgetBase.state = { 'classes': ['test-class'] };
 			widgetBase.invalidate();
 			const thirdRenderResult = <VNode> widgetBase.__render__();
 			assert.strictEqual(countWidgetCreated, 1);
@@ -364,9 +389,9 @@ registerSuite({
 			assert.lengthOf(thirdRenderResult.children, 1);
 			const thirdRenderChild: any = thirdRenderResult.children && thirdRenderResult.children[0];
 			assert.strictEqual(thirdRenderChild.vnodeSelector, 'footer');
-			assert.isTrue(thirdRenderChild.properties.classes['test-class']);
+			assert.isTrue(thirdRenderChild.props.classes['test-class']);
 
-			widgetBase.setState({ hide: true });
+			widgetBase.state = <any> { hide: true };
 			widgetBase.invalidate();
 
 			const forthRenderResult = <VNode> widgetBase.__render__();
@@ -374,7 +399,7 @@ registerSuite({
 			assert.strictEqual(countWidgetDestroyed, 1);
 			assert.lengthOf(forthRenderResult.children, 0);
 
-			widgetBase.setState({ hide: false });
+			widgetBase.state = <any> { hide: false };
 			widgetBase.invalidate();
 
 			const lastRenderResult = <VNode> widgetBase.__render__();
@@ -402,15 +427,57 @@ registerSuite({
 			assert.isTrue(consoleStub.calledWith('must provide unique keys when using the same widget factory multiple times'));
 			consoleStub.restore();
 		},
+		'render with updated props'() {
+			let renderCount = 0;
+			const createMyWidget = createWidgetBase.mixin({
+				mixin: {
+					nodeAttributes: [
+						function(this: any): any {
+							const { state: { foo, bar } } = this;
+
+							return { foo, bar };
+						}
+					]
+				}
+			});
+			const widgetBase = createWidgetBase
+				.mixin({
+					mixin: {
+						getChildrenNodes: function(): DNode[] {
+							let props: (WidgetProps & { foo: string, bar?: string }) | undefined = { foo: 'bar' };
+
+							if (renderCount === 1) {
+								props.bar = 'baz';
+								props.foo = 'baz';
+							}
+
+							renderCount++;
+
+							return [
+								w(createMyWidget, props)
+							];
+						}
+					}
+				})();
+
+			let result = <VNode> widgetBase.__render__();
+			assert.isUndefined(result!.children![0].properties!['bar']);
+			assert.equal(result!.children![0].properties!['foo'], 'bar');
+
+			widgetBase.invalidate();
+			result = <VNode> widgetBase.__render__();
+			assert.equal(result!.children![0].properties!['foo'], 'baz');
+			assert.equal(result!.children![0].properties!['bar'], 'baz');
+		},
 		'__render__() and invalidate()'() {
 			const widgetBase = createWidgetBase({
-				state: { id: 'foo', label: 'foo' }
+				props: { id: 'foo', label: 'foo' }
 			});
 			const result1 = <VNode> widgetBase.__render__();
 			const result2 = <VNode> widgetBase.__render__();
 			widgetBase.invalidate();
 			widgetBase.invalidate();
-			widgetBase.setState({});
+			widgetBase.state = {};
 			const result3 = widgetBase.__render__();
 			const result4 = widgetBase.__render__();
 			assert.strictEqual(result1, result2);
@@ -433,27 +500,27 @@ registerSuite({
 		},
 		'in state'() {
 			const widgetBase = createWidgetBase({
-				state: {
+				props: {
 					id: 'foo'
 				}
 			});
 
 			assert.strictEqual(widgetBase.id, 'foo');
 		},
-		'in options and state'() {
+		'in options and props'() {
 			const widgetBase = createWidgetBase({
 				id: 'foo',
-				state: {
+				props: {
 					id: 'bar'
 				}
 			});
 
-			assert.strictEqual(widgetBase.id, 'foo');
+			assert.strictEqual(widgetBase.id, 'bar');
 		},
-		'not in options or state'() {
+		'not in options or props'() {
 			const widgetBase = createWidgetBase();
 
-			assert.strictEqual(widgetBase.id, 'widget-1');
+			assert.include(widgetBase.id, 'widget-');
 		},
 		'is read only'() {
 			const widgetBase = createWidgetBase();

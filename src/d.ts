@@ -8,26 +8,39 @@ import {
 	WNode,
 	Widget,
 	WidgetOptions,
-	WidgetState
+	WidgetState,
+	WidgetProps
 } from './interfaces';
 import FactoryRegistry from './FactoryRegistry';
 
 export const registry = new FactoryRegistry();
 
-export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	options: O
+	props: P
 ): WNode;
-export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	options: O,
+	props: P,
 	children?: DNode[]
 ): WNode;
-export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOptions<S>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	options: O,
+	props: P,
 	children: DNode[] = []
 ): WNode {
+
+	const options = <O> {
+		props
+	};
+
+	if (props.id) {
+		options.id = props.id;
+	}
+
+	if (props.tagName) {
+		options.tagName = props.tagName;
+	}
 
 	return {
 		children,
@@ -36,20 +49,20 @@ export function w<S extends WidgetState, W extends Widget<S>, O extends WidgetOp
 	};
 }
 
-export function v(tag: string, options: VNodeProperties, children?: DNode[]): HNode;
+export function v(tag: string, props: VNodeProperties, children?: DNode[]): HNode;
 export function v(tag: string, children: DNode[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, optionsOrChildren: VNodeProperties = {}, children: DNode[] = []): HNode {
+export function v(tag: string, propsOrChildren: VNodeProperties = {}, children: DNode[] = []): HNode {
 
-		if (Array.isArray(optionsOrChildren)) {
-			children = optionsOrChildren;
-			optionsOrChildren = {};
+		if (Array.isArray(propsOrChildren)) {
+			children = propsOrChildren;
+			propsOrChildren = {};
 		}
 
 		return {
 			children,
 			render<T>(this: { children: VNode[] }, options: { bind?: T } = { }) {
-				return h(tag, assign(options, optionsOrChildren), this.children);
+				return h(tag, assign(options, propsOrChildren), this.children);
 			}
 		};
 }
