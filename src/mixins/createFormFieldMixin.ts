@@ -17,6 +17,16 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 	 * The value of the form field
 	 */
 	value?: V;
+
+	/**
+	 * Label settings
+	 * TODO: should this be required?
+	 */
+	label?: string | {
+		content: string,
+		position: string,
+		hidden: boolean
+	};
 }
 
 export interface FormFieldMixinState<V> {
@@ -68,6 +78,15 @@ export interface FormField<V> {
 	 * The string value of this form widget, which is read from the widget state
 	 */
 	value?: string;
+
+	/**
+	 * Label settings
+	 */
+	label: {
+		content: string,
+		position: string,
+		hidden: boolean
+	};
 }
 
 export interface FormFieldOverride<V> {
@@ -168,7 +187,7 @@ const createFormMixin: FormMixinFactory = createStateful
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
+			{ value, type, label = '' }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
 		) {
 			if (value) {
 				instance.setState({ value });
@@ -176,6 +195,19 @@ const createFormMixin: FormMixinFactory = createStateful
 			if (type) {
 				instance.type = type;
 			}
+
+			// add label
+			const labelDefaults = {
+				content: '',
+				position: 'below',
+				hidden: false
+			};
+
+			if (typeof label === 'string') {
+				label = Object.assign(labelDefaults, { content: label });
+			}
+
+			instance.label = Object.assign(labelDefaults, label);
 		}
 	});
 
