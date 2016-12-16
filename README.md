@@ -258,6 +258,8 @@ registry.define('my-widget', () => {
 
 Creates a dojo-widget using the `factory` and `properties`.
 
+**Note:** properties for `id` and `tagName` are automatically copied from the widget properties object and added to the widget options object used when instatiating the widget internally.
+
 ```ts
 w(factory: string | ComposeFactory<W, O>, properties: O): WNode[];
 ```
