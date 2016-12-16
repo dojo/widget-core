@@ -7,7 +7,7 @@ registerSuite({
 	name: 'createButton',
 	construction() {
 		const button = createButton({
-			properties: {
+			props: {
 				id: 'foo',
 				label: 'bar',
 				name: 'baz'
@@ -19,7 +19,7 @@ registerSuite({
 	},
 	render() {
 		const button = createButton({
-			properties: {
+			props: {
 				id: 'foo',
 				label: 'bar',
 				name: 'baz'
@@ -35,7 +35,7 @@ registerSuite({
 	},
 	disable() {
 		const button = createButton({
-			properties: {
+			props: {
 				id: 'foo',
 				label: 'bar',
 				name: 'baz'

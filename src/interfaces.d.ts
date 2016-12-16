@@ -15,19 +15,19 @@ import { VNodeEvented, VNodeEventedOptions } from './mixins/createVNodeEvented';
  * A function that is called to return top level node
  */
 export interface NodeFunction {
-	(this: Widget<WidgetState, WidgetProperties>): DNode;
+	(this: Widget<WidgetState, WidgetProps>): DNode;
 }
 
 /**
  * A function that is called when collecting the children nodes on render.
  */
 export interface ChildNodeFunction {
-	(this: Widget<WidgetState, WidgetProperties>): DNode[];
+	(this: Widget<WidgetState, WidgetProps>): DNode[];
 }
 
 /**
  * A function that is called when collecting the node attributes on render, accepting the current map of
- * attributes and returning a set of VNode properties that should mixed into the current attributes.
+ * attributes and returning a set of VNode props that should mixed into the current attributes.
  */
 export interface NodeAttributeFunction {
 	/**
@@ -35,7 +35,7 @@ export interface NodeAttributeFunction {
 	 *
 	 * @param attributes The current VNodeProperties that will be part of the render
 	 */
-	(this: Widget<WidgetState, WidgetProperties>, attributes: VNodeProperties): VNodeProperties;
+	(this: Widget<WidgetState, WidgetProps>, attributes: VNodeProperties): VNodeProperties;
 }
 
 export type WidgetFactoryFunction = () => Promise<WidgetFactory>
@@ -84,7 +84,7 @@ export interface WNode {
 	/**
 	 * Options used to create factory a widget
 	 */
-	options: WidgetOptions<WidgetState, WidgetProperties>;
+	options: WidgetOptions<WidgetState, WidgetProps>;
 
 	/**
 	 * DNode children
@@ -94,9 +94,9 @@ export interface WNode {
 
 export type DNode = HNode | WNode | string | null;
 
-export type Widget<S extends WidgetState, P extends WidgetProperties> = Stateful<S> & WidgetMixin<P> & WidgetOverloads & VNodeEvented;
+export type Widget<S extends WidgetState, P extends WidgetProps> = Stateful<S> & WidgetMixin<P> & WidgetOverloads & VNodeEvented;
 
-export interface WidgetFactory extends ComposeFactory<Widget<WidgetState, WidgetProperties>, WidgetOptions<WidgetState, WidgetProperties>> {}
+export interface WidgetFactory extends ComposeFactory<Widget<WidgetState, WidgetProps>, WidgetOptions<WidgetState, WidgetProps>> {}
 
 export interface WidgetOverloads {
 	/**
@@ -105,10 +105,10 @@ export interface WidgetOverloads {
 	 * @param type The event type to listen for
 	 * @param listener The listener to call when the event is emitted
 	 */
-	on(type: 'invalidated', listener: EventedListener<Widget<WidgetState, WidgetProperties>, EventTargettedObject<Widget<WidgetState, WidgetProperties>>>): Handle;
+	on(type: 'invalidated', listener: EventedListener<Widget<WidgetState, WidgetProps>, EventTargettedObject<Widget<WidgetState, WidgetProps>>>): Handle;
 }
 
-export interface WidgetMixin<P extends WidgetProperties> {
+export interface WidgetMixin<P extends WidgetProps> {
 	/**
 	 * Classes which are applied upon render.
 	 *
@@ -141,19 +141,19 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	getNodeAttributes(): VNodeProperties;
 
 	/**
-	 * Properties passed to affect state
+	 * Props passed to affect state
 	 */
-	properties: Partial<P>;
+	props: Partial<P>;
 
 	/**
 	 * Determine changed or new property keys on render.
 	 */
-	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P): string[];
+	diffProps(this: Widget<WidgetState, WidgetProps>, previousProps: P): string[];
 
 	/**
-	 * Process change in properties
+	 * Process change in props
 	 */
-	processPropertiesChange(previousProperties: Partial<P>, currentProperties: Partial<P>): void;
+	processPropsChange(previousProps: Partial<P>, currentProps: Partial<P>): void;
 
 	/**
 	 * The ID of the widget, which gets automatically rendered in the VNode property `data-widget-id` when
@@ -171,7 +171,7 @@ export interface WidgetMixin<P extends WidgetProperties> {
 
 	/**
 	 * An array of functions that return a map of VNodeProperties which should be mixed into the final
-	 * properties used when rendering this widget.  These are intended to be "static" and bund to the class,
+	 * props used when rendering this widget.  These are intended to be "static" and bund to the class,
 	 * making it easy for mixins to alter the behaviour of the render process without needing to override or aspect
 	 * the `getNodeAttributes` method.
 	 */
@@ -204,19 +204,19 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	readonly registry: FactoryRegistryInterface;
 }
 
-export interface WidgetOptions<S extends WidgetState, P extends WidgetProperties> extends StatefulOptions<S>, VNodeEventedOptions {
+export interface WidgetOptions<S extends WidgetState, P extends WidgetProps> extends StatefulOptions<S>, VNodeEventedOptions {
 	/**
-	 * Properties used to affect internal widget state
+	 * Props used to affect internal widget state
 	 */
-	properties?: P;
+	props?: P;
 
 	/**
-	 * Properties used to affect internal widget state
+	 * Props used to affect internal widget state
 	 */
 	tagName?: string;
 }
 
-export interface WidgetProperties {
+export interface WidgetProps {
 
 	[key: string]: any;
 

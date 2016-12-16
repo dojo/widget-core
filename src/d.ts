@@ -9,37 +9,37 @@ import {
 	Widget,
 	WidgetOptions,
 	WidgetState,
-	WidgetProperties
+	WidgetProps
 } from './interfaces';
 import FactoryRegistry from './FactoryRegistry';
 
 export const registry = new FactoryRegistry();
 
-export function w<P extends WidgetProperties, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	properties: P
+	props: P
 ): WNode;
-export function w<P extends WidgetProperties, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	properties: P,
+	props: P,
 	children?: DNode[]
 ): WNode;
-export function w<P extends WidgetProperties, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
+export function w<P extends WidgetProps, S extends WidgetState, W extends Widget<S, P>, O extends WidgetOptions<S, P>>(
 	factory: ComposeFactory<W, O> | string,
-	properties: P,
+	props: P,
 	children: DNode[] = []
 ): WNode {
 
 	const options = <O> {
-		properties
+		props
 	};
 
-	if (properties.id) {
-		options.id = properties.id;
+	if (props.id) {
+		options.id = props.id;
 	}
 
-	if (properties.tagName) {
-		options.tagName = properties.tagName;
+	if (props.tagName) {
+		options.tagName = props.tagName;
 	}
 
 	return {
@@ -49,20 +49,20 @@ export function w<P extends WidgetProperties, S extends WidgetState, W extends W
 	};
 }
 
-export function v(tag: string, properties: VNodeProperties, children?: DNode[]): HNode;
+export function v(tag: string, props: VNodeProperties, children?: DNode[]): HNode;
 export function v(tag: string, children: DNode[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, propertiesOrChildren: VNodeProperties = {}, children: DNode[] = []): HNode {
+export function v(tag: string, propsOrChildren: VNodeProperties = {}, children: DNode[] = []): HNode {
 
-		if (Array.isArray(propertiesOrChildren)) {
-			children = propertiesOrChildren;
-			propertiesOrChildren = {};
+		if (Array.isArray(propsOrChildren)) {
+			children = propsOrChildren;
+			propsOrChildren = {};
 		}
 
 		return {
 			children,
 			render<T>(this: { children: VNode[] }, options: { bind?: T } = { }) {
-				return h(tag, assign(options, propertiesOrChildren), this.children);
+				return h(tag, assign(options, propsOrChildren), this.children);
 			}
 		};
 }
