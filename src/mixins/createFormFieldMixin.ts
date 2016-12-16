@@ -183,7 +183,13 @@ const createFormMixin: FormMixinFactory = createStateful
 
 					return { type, value, name, disabled: Boolean(disabled) };
 				}
-			]
+			],
+
+			label: {
+				content: '',
+				position: 'below',
+				hidden: false
+			}
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
@@ -196,18 +202,13 @@ const createFormMixin: FormMixinFactory = createStateful
 				instance.type = type;
 			}
 
-			// add label
-			const labelDefaults = {
-				content: '',
-				position: 'below',
-				hidden: false
-			};
-
+			// set label
 			if (typeof label === 'string') {
-				label = Object.assign(labelDefaults, { content: label });
+				instance.label = Object.assign(instance.label, { content: label });
 			}
-
-			instance.label = Object.assign(labelDefaults, label);
+			else {
+				instance.label = Object.assign(instance.label, label);
+			}
 		}
 	});
 
