@@ -155,8 +155,8 @@ function generateProperties(instance: Widget<WidgetState, WidgetProperties>, pre
 	};
 
 	changedPropertyKeys.forEach((key) => {
-		if (instance.properties[key]) {
 			changedProperties.currentProperties[key] = instance.properties[key];
+		if (previousProperties[key]) {
 			changedProperties.previousProperties[key] = previousProperties[key];
 		}
 	});
