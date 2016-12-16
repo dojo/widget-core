@@ -69,6 +69,7 @@ These are some of the **important** principles to keep in mind when developing w
 1. the widget *render* function should **never** be overridden
 2. with the exception of the top level projector you should **never** have to deal with widget instances.
 3. hyperscript should **always** be written using the dojo-widgets `v` helper function.
+4. `state` should **never** be set outside of the widget instance.
 
 ### Base Widget
 
