@@ -394,7 +394,7 @@ const projector = createProjector();
 
 projector.children = [
 	w(createTextInput, { id: 'textinput' }),
-	w(createButton, { id: 'button', label: 'Button' })
+	w(createButton, { id: 'button', properties: { label: 'Button' } })
 ];
 
 projector.append().then(() => {
@@ -416,7 +416,7 @@ const createApp = createProjector.mixin({
 		getChildrenNodes: function(this: Projector): DNode[] {
 			return [
 				w(createTextInput, { id: 'textinput' }),
-				w(createButton, { id: 'button', label: 'Button' })
+				w(createButton, { id: 'button', properties: { label: 'Button' } })
 			];
 		},
 		classes: [ 'main-app' ],
