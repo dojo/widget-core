@@ -83,9 +83,9 @@ A subset of the `Widget` API are intended to be overridden in scenarios where th
 |---|---|---|
 |getNode|Returns the top level node of a widget|Returns a `DNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
 |getChildrenNodes|Returns the child node structure of a widget|Returns the widgets children `DNode` array|
-|nodeAttributes|An of function that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `state` (`id`, `classes`, `styles`) at the time of render|
-|diffProperties|Diffs the current properties against the previous properties and returns the updated/new keys in an array|Performs a shallow comparison using `===` of previous and current properties and returns an array of the keys. Function are ignored. |
-|applyChangedProperties|Gets called to process updated/new properties|If there are updared properties they are directly set onto the widgets `state`, `widget.setState(updatedProperties)`|
+|nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `state` (`id`, `classes`, `styles`) at the time of render|
+|diffProperties|Diffs the current properties against the previous properties and returns the updated/new keys in an array|Performs a shallow comparison using `===` of previous and current properties and returns an array of the keys.|
+|applyChangedProperties|Gets called to apply updated/new properties|If there are updated properties they are directly set onto the widgets `state` using `setState`.|
 
 To customise the widget an optional `options` argument can be provided with the following interface.
 
@@ -100,8 +100,7 @@ To customise the widget an optional `options` argument can be provided with the 
 |properties|WidgetProperties|Props to be passed to the widget. These can be used to determine state internally|
 |nodeAttributes|Function[]|An array of functions that return VNodeProperties to be applied to the VNode|
 
-A widgets' `state` should **never** be directly set outside of the instance. In order to manipulate widget `state`, `properties` should be updated such as `widget.properties = { 'foo': 'bar' }` and then during the next render the new or updated properties are passed to `instance#processPropertiesChange`.
-
+A widgets' `state` should **never** be directly set outside of the instance. In order to manipulate widget `state`, `properties` should be updated such as `widget.properties = { 'foo': 'bar' }` and then during the next render the new or updated properties are passed to `instance#applyChangedProperties`.
 
 As a convenience, all event handlers are automatically bound to the widget instance, so state and other items on the instance can be easily accessed.
 

@@ -214,8 +214,9 @@ export interface WidgetOptions<S extends WidgetState, P extends WidgetProperties
 }
 
 export interface WidgetProperties {
-
 	[key: string]: any;
+
+	id?: string;
 }
 
 export interface WidgetState {

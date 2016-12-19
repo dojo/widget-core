@@ -155,7 +155,7 @@ function generateProperties(instance: Widget<WidgetState, WidgetProperties>, pre
 	};
 
 	changedPropertyKeys.forEach((key) => {
-			changedProperties.currentProperties[key] = instance.properties[key];
+		changedProperties.currentProperties[key] = instance.properties[key];
 		if (previousProperties[key]) {
 			changedProperties.previousProperties[key] = previousProperties[key];
 		}
@@ -222,8 +222,9 @@ const createWidget: WidgetFactory = createStateful
 				return id;
 			},
 
-			applyChangedProperties: function(this: Widget<WidgetState, WidgetProperties>, previousProperties: Partial<WidgetProperties>, currentProperties: Partial<WidgetProperties>): void {
+			applyChangedProperties: function(this: Widget<WidgetState, WidgetProperties>, previousProperties: WidgetProperties, currentProperties: WidgetProperties): void {
 				if (Object.keys(currentProperties).length) {
+					currentProperties.id = this.id;
 					this.setState(currentProperties);
 				}
 			},
@@ -290,10 +291,6 @@ const createWidget: WidgetFactory = createStateful
 		initialize(instance: Widget<WidgetState, WidgetProperties>, options: WidgetOptions<WidgetState, { id?: string }> = {}) {
 			const { tagName, properties = {} } = options;
 			const id = properties.id || options.id || generateID(instance);
-
-			if (!properties.id) {
-				properties.id = id;
-			}
 
 			instance.properties = properties;
 			instance.tagName = tagName || instance.tagName;
