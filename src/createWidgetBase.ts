@@ -224,7 +224,7 @@ const createWidget: WidgetFactory = createStateful
 
 			applyChangedProperties: function(this: Widget<WidgetState, WidgetProperties>, previousProperties: WidgetProperties, currentProperties: WidgetProperties): void {
 				if (Object.keys(currentProperties).length) {
-					currentProperties.id = this.id;
+					currentProperties['id'] = this.id;
 					this.setState(currentProperties);
 				}
 			},

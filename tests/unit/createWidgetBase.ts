@@ -96,10 +96,11 @@ registerSuite({
 			assert.lengthOf(updatedKeys, 1);
 		}
 	},
-	processPropertiesChange() {
-		const widgetBase = createWidgetBase();
-		widgetBase.processPropertiesChange({}, { foo: 'bar' });
+	applyChangedProperties() {
+		const widgetBase = createWidgetBase({ id: 'id' });
+		widgetBase.applyChangedProperties({}, { foo: 'bar' });
 		assert.equal((<any> widgetBase.state).foo, 'bar');
+		assert.equal(widgetBase.state.id, 'id');
 	},
 	getChildrenNodes: {
 		'getChildrenNodes with no ChildNodeRenderers'() {
