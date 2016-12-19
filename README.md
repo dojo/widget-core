@@ -255,15 +255,13 @@ registry.define('my-widget', () => {
 
 `w` is an abstraction layer for dojo-widgets that enables dojo 2's lazy instantiation, instance management and caching.
 
-Creates a dojo-widget using the `factory` and `properties`.
-
-**Note:** properties for `id` and `tagName` are automatically copied from the widget properties object and added to the widget options object used when instatiating the widget internally.
+Creates a dojo-widget using the `factory` and `options`.
 
 ```ts
 w(factory: string | ComposeFactory<W, O>, options: O): WNode[];
 ```
 
-Creates a dojo-widget using the `factory` and `properties` and the `children`
+Creates a dojo-widget using the `factory`, `options` and `children`
 
 ```ts
 w(factory: string | ComposeFactory<W, O>, options: O, children: (DNode | null)[]): WNode[];
