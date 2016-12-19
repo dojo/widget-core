@@ -28,7 +28,7 @@ interface WidgetInternalState {
 	cachedVNode?: VNode | string;
 	factoryRegistry: FactoryRegistry;
 	initializedFactoryMap: Map<string, Promise<WidgetFactory>>;
-	previousProperties: any;
+	previousProperties: WidgetProperties;
 	historicChildrenMap: Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState, WidgetProperties>>;
 	currentChildrenMap: Map<string | Promise<WidgetFactory> | WidgetFactory, Widget<WidgetState, WidgetProperties>>;
 };
