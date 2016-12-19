@@ -294,7 +294,6 @@ const createWidget: WidgetFactory = createStateful
 
 			instance.properties = properties;
 			instance.tagName = tagName || instance.tagName;
-			instance.applyChangedProperties({}, properties);
 
 			widgetInternalStateMap.set(instance, {
 				id,
@@ -308,6 +307,7 @@ const createWidget: WidgetFactory = createStateful
 				children: []
 			});
 
+			instance.applyChangedProperties({}, properties);
 			instance.own(instance.on('state:changed', () => {
 				instance.invalidate();
 			}));
