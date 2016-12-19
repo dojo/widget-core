@@ -222,7 +222,7 @@ const createWidget: WidgetFactory = createStateful
 				return id;
 			},
 
-			processPropertiesChange: function(this: Widget<WidgetState, WidgetProperties>, previousProperties: any, currentProperties): void {
+			applyChangedProperties: function(this: Widget<WidgetState, WidgetProperties>, previousProperties: Partial<WidgetProperties>, currentProperties: Partial<WidgetProperties>): void {
 				if (Object.keys(currentProperties).length) {
 					this.setState(currentProperties);
 				}
@@ -266,7 +266,7 @@ const createWidget: WidgetFactory = createStateful
 			__render__(this: Widget<WidgetState, WidgetProperties>): VNode | string | null {
 				const internalState = widgetInternalStateMap.get(this);
 				const updatedProperties = generateProperties(this, internalState.previousProperties);
-				this.processPropertiesChange(updatedProperties.previousProperties, updatedProperties.currentProperties);
+				this.applyChangedProperties(updatedProperties.previousProperties, updatedProperties.currentProperties);
 
 				if (internalState.dirty || !internalState.cachedVNode) {
 					const widget = dNodeToVNode(this, this.getNode());
@@ -297,7 +297,7 @@ const createWidget: WidgetFactory = createStateful
 
 			instance.properties = properties;
 			instance.tagName = tagName || instance.tagName;
-			instance.processPropertiesChange({}, properties);
+			instance.applyChangedProperties({}, properties);
 
 			widgetInternalStateMap.set(instance, {
 				id,
