@@ -1,7 +1,7 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
+import createFormFieldMixin, { FormFieldMixin, sortFormFieldState } from '../../mixins/createFormFieldMixin';
 import { DNode } from '../../interfaces';
 import { v } from '../../d';
 
@@ -36,13 +36,15 @@ const createTextInput: TextInputFactory = createWidgetBase
 			],
 			getChildrenNodes: function(this: TextInput): DNode[] {
 				const { placeholder } = this.properties;
+				const { type, value } = this;
 				const { content, hidden, position } = this.label;
+				const inputProperties = sortFormFieldState(this.properties);
 
 				const children = [
-					v('input', {
-						type: this.type || 'text',
-						placeholder
-					}),
+					v('input', Object.assign(inputProperties.input, {
+						type: type || 'text',
+						value: value
+					})),
 					v('span', {
 						innerHTML: content,
 						classes: { 'visually-hidden': hidden }

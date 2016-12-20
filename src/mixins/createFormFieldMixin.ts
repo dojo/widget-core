@@ -20,7 +20,6 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 
 	/**
 	 * Label settings
-	 * TODO: should this be required?
 	 */
 	label?: string | {
 		content: string,
@@ -153,6 +152,27 @@ export function stringToValue(str: string): any {
 	}
 }
 
+/**
+ * Internal function to identify properties that should pass to child input element
+ * on basic form widgets that have a root label element
+ * @param state: state object passed into the widget
+ */
+export function sortFormFieldState(state: any): {parent: any, input: any} {
+	const parentPropKeys = ['id', 'classes', 'for', 'dir', 'draggable', 'lang', 'slot', 'translate'];
+	const parent: any = {}, input: any = {};
+
+	for (const key in state) {
+		if (parentPropKeys.indexOf(key) > -1) {
+			parent[key] = state[key];
+		}
+		else {
+			input[key] = state[key];
+		}
+	}
+
+	return {parent, input};
+}
+
 const createFormMixin: FormMixinFactory = createStateful
 	.mixin({
 		mixin: <FormField<any>> {
@@ -178,10 +198,9 @@ const createFormMixin: FormMixinFactory = createStateful
 
 			nodeAttributes: [
 				function (this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
-					const { type, value, state } = this;
-					const { disabled, name } = state;
+					const parentNodeAttributes = sortFormFieldState(this.state);
 
-					return { type, value, name, disabled: Boolean(disabled) };
+					return parentNodeAttributes.parent;
 				}
 			],
 
