@@ -3,6 +3,8 @@ import * as assert from 'intern/chai!assert';
 import Promise from 'dojo-shim/Promise';
 import createWidgetBase from '../../src/createWidgetBase';
 import { DNode, HNode, WidgetState, WidgetOptions, WidgetProperties } from './../../src/interfaces';
+import shallowPropertyComparisonMixin from './../../src/mixins/shallowPropertyComparisonMixin';
+import { deepAssign } from 'dojo-core/lang';
 import { VNode } from 'dojo-interfaces/vdom';
 import { v, w, registry } from '../../src/d';
 import { stub } from 'sinon';
@@ -101,6 +103,22 @@ registerSuite({
 			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
 			assert.lengthOf(updatedKeys, 4);
 			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
+		},
+		'test compatibility with shallowPropertyComparisonMixin'() {
+			const properties = {
+				id: 'id',
+				items: [
+					{ foo: 'bar' }
+				]
+			};
+			const updatedProperties = deepAssign({}, properties);
+			updatedProperties.items[0].foo = 'foo';
+
+			const widgetBase = createWidgetBase.mixin(shallowPropertyComparisonMixin)({ properties });
+			widgetBase.properties = updatedProperties;
+			const updatedKeys = widgetBase.diffProperties(properties);
+			assert.lengthOf(updatedKeys, 1);
+			assert.deepEqual(updatedKeys, [ 'items' ]);
 		}
 	},
 	applyChangedProperties() {
