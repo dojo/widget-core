@@ -476,6 +476,41 @@ registerSuite({
 			assert.equal(result!.children![0].properties!['foo'], 'baz');
 			assert.equal(result!.children![0].properties!['bar'], 'baz');
 		},
+		'__render__ with updated array properties'() {
+			const properties = {
+				items: [
+					'a', 'b'
+				]
+			};
+
+			const myWidget = createWidgetBase({ properties });
+			myWidget.__render__();
+			assert.deepEqual((<any> myWidget.state).items, [ 'a', 'b' ]);
+			properties.items.push('c');
+			myWidget.properties = properties;
+			myWidget.invalidate();
+			myWidget.__render__();
+			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c' ]);
+			properties.items.push('d');
+			myWidget.properties = properties;
+			myWidget.invalidate();
+			myWidget.__render__();
+			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c', 'd' ]);
+		},
+		'__render__ with internally updated array state'() {
+			const properties = {
+				items: [
+					'a', 'b'
+				]
+			};
+
+			const myWidget = createWidgetBase({ properties });
+			myWidget.__render__();
+			assert.deepEqual((<any> myWidget.state).items, [ 'a', 'b' ]);
+			myWidget.setState(<any> { items: [ 'a', 'b', 'c'] });
+			myWidget.__render__();
+			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b' ]);
+		},
 		'__render__() and invalidate()'() {
 			const widgetBase = createWidgetBase({
 				properties: { id: 'foo', label: 'foo' }
