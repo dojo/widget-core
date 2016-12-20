@@ -94,6 +94,13 @@ registerSuite({
 			widgetBase.properties = { id: 'id', foo: 'bar', bar: 'baz' };
 			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
 			assert.lengthOf(updatedKeys, 1);
+		},
+		'updated / new properties with falsy values'() {
+			const widgetBase = createWidgetBase({ properties: { id: 'id', foo: 'bar' }});
+			widgetBase.properties = { id: 'id', foo: '', bar: null, baz: 0, qux: false };
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' });
+			assert.lengthOf(updatedKeys, 4);
+			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		}
 	},
 	applyChangedProperties() {

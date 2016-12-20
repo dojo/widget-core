@@ -232,7 +232,7 @@ const createWidget: WidgetFactory = createStateful
 			diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: any): string[] {
 				const changedPropertyKeys: string[] = [];
 				Object.keys(this.properties).forEach((key) => {
-					if (previousProperties[key]) {
+					if (previousProperties.hasOwnProperty(key)) {
 						if (previousProperties[key] !== this.properties[key]) {
 							changedPropertyKeys.push(key);
 						}
