@@ -2,6 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { deepAssign } from 'dojo-core/lang';
 import shallowPropertyComparisonMixin from '../../../src/mixins/shallowPropertyComparisonMixin';
+import createWidgetBase from './../../../src/createWidgetBase';
 
 registerSuite({
 	name: 'mixins/shallowPropertyComparisonMixin',
@@ -131,5 +132,22 @@ registerSuite({
 			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
 			assert.lengthOf(updatedKeys, 0);
+		},
+		'test compatibility with shallowPropertyComparisonMixin'() {
+			const properties = {
+				id: 'id',
+				items: [
+					{ foo: 'bar' }
+				]
+			};
+			const updatedProperties = deepAssign({}, properties);
+			updatedProperties.items[0].foo = 'foo';
+
+			const widgetBase = createWidgetBase.mixin(shallowPropertyComparisonMixin)({ properties });
+			widgetBase.properties = updatedProperties;
+			const updatedKeys = widgetBase.diffProperties(properties);
+			assert.lengthOf(updatedKeys, 1);
+			assert.deepEqual(updatedKeys, [ 'items' ]);
 		}
+
 });
