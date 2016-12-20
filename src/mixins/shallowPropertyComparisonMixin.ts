@@ -1,4 +1,4 @@
-import { entries } from 'dojo-shim/Object';
+import { entries } from 'dojo-shim/object';
 import { WidgetProperties } from './../interfaces';
 
 /**
