@@ -1,11 +1,13 @@
-import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { ComposeFactory } from '@dojo/compose/compose';
-import createStateful from '@dojo/compose/bases/createStateful';
-import createCancelableEvent from '@dojo/compose/bases/createCancelableEvent';
-import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo/interfaces/core';
-import { EventedListener, Stateful, StatefulOptions } from '@dojo/interfaces/bases';
-import { assign } from '@dojo/core/lang';
-import { NodeAttributeFunction } from './../interfaces';
+
+import { VNodeProperties } from '@dojo-interfaces/vdom';
+import { ComposeFactory } from '@dojo-compose/compose';
+import createStateful from '@dojo-compose/bases/createStateful';
+import createCancelableEvent from '@dojo-compose/bases/createCancelableEvent';
+import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo-interfaces/core';
+import { EventedListener, Stateful, StatefulOptions } from '@dojo-interfaces/bases';
+import { assign } from '@dojo-core/lang';
+import { NodeAttributeFunction, DNode, Widget } from './../interfaces';
+import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
 	/**
@@ -69,6 +71,11 @@ export interface FormField<V> {
 	nodeAttributes: NodeAttributeFunction<this>[];
 
 	/**
+	 * Override the default getNode function on createWidgetBase to return child input
+	 */
+	getNode(): DNode;
+
+	/**
 	 * The HTML type for this widget
 	 */
 	type?: string;
@@ -81,7 +88,7 @@ export interface FormField<V> {
 	/**
 	 * Label settings
 	 */
-	label: {
+	label?: {
 		content: string,
 		position: string,
 		hidden: boolean
@@ -173,6 +180,36 @@ export function sortFormFieldState(state: any): {parent: any, input: any} {
 	return {parent, input};
 }
 
+function generateWrappedChildren(
+	this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>>,
+	label: { content: string, position: string, hidden: boolean}
+): DNode[] {
+	const inputAttributes = sortFormFieldState(this.state);
+	const children = [
+		v(this.tagName,
+			inputAttributes.input,
+			this.getChildrenNodes()
+		)
+	];
+
+	if (label) {
+		// add label text
+		if (label.content.length > 0) {
+			children.push(v('span', {
+				innerHTML: label.content,
+				classes: { 'visually-hidden': label.hidden }
+			}));
+		}
+
+		// set correct order
+		if (label.position === 'above') {
+			children.reverse();
+		}
+	}
+
+	return children;
+}
+
 const createFormMixin: FormMixinFactory = createStateful
 	.mixin({
 		mixin: <FormField<any>> {
@@ -196,23 +233,28 @@ const createFormMixin: FormMixinFactory = createStateful
 				}
 			},
 
+			getNode(this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>>): DNode {
+				const { label } = this.properties;
+				let tag = label ? 'label' : 'div';
+
+				if (this.classes.length) {
+					tag = `${this.tagName}.${this.classes.join('.')}`;
+				}
+
+				return v(tag, this.getNodeAttributes(), generateWrappedChildren.call(this, label));
+			},
+
 			nodeAttributes: [
 				function (this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
 					const parentNodeAttributes = sortFormFieldState(this.state);
 
 					return parentNodeAttributes.parent;
 				}
-			],
-
-			label: {
-				content: '',
-				position: 'below',
-				hidden: false
-			}
+			]
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type, label = '' }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
+			{ value, type, label }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
 		) {
 			if (value) {
 				instance.setState({ value });
@@ -220,13 +262,20 @@ const createFormMixin: FormMixinFactory = createStateful
 			if (type) {
 				instance.type = type;
 			}
+			if (label) {
+				const labelDefaults = {
+					content: '',
+					position: 'below',
+					hidden: false
+				};
 
-			// set label
-			if (typeof label === 'string') {
-				instance.label = Object.assign(instance.label, { content: label });
-			}
-			else {
-				instance.label = Object.assign(instance.label, label);
+				// convert string label to object
+				if (typeof label === 'string') {
+					instance.label = Object.assign(labelDefaults, { content: label });
+				}
+				else {
+					instance.label = Object.assign(labelDefaults, label);
+				}
 			}
 		}
 	});

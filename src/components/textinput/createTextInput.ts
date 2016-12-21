@@ -1,7 +1,7 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, sortFormFieldState } from '../../mixins/createFormFieldMixin';
+import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
 import { DNode } from '../../interfaces';
 import { v } from '../../d';
 
@@ -25,7 +25,6 @@ const createTextInput: TextInputFactory = createWidgetBase
 	.mixin(createFormFieldMixin)
 	.mixin({
 		mixin: {
-			tagName: 'label',
 			onInput(this: TextInput, event: TypedTargetEvent<HTMLInputElement>) {
 				this.value = event.target.value;
 			},
@@ -56,7 +55,9 @@ const createTextInput: TextInputFactory = createWidgetBase
 				}
 
 				return children;
-			}
+			},
+			tagName: 'input',
+			type: 'text'
 		}
 	});
 
