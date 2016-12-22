@@ -1,4 +1,3 @@
-
 import { VNodeProperties } from '@dojo-interfaces/vdom';
 import { ComposeFactory } from '@dojo-compose/compose';
 import createStateful from '@dojo-compose/bases/createStateful';
@@ -6,7 +5,7 @@ import createCancelableEvent from '@dojo-compose/bases/createCancelableEvent';
 import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo-interfaces/core';
 import { EventedListener, Stateful, StatefulOptions } from '@dojo-interfaces/bases';
 import { assign } from '@dojo-core/lang';
-import { NodeAttributeFunction, DNode, Widget } from './../interfaces';
+import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties } from './../interfaces';
 import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
@@ -20,14 +19,6 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 	 */
 	value?: V;
 
-	/**
-	 * Label settings
-	 */
-	label?: string | {
-		content: string,
-		position: string,
-		hidden: boolean
-	};
 }
 
 export interface FormFieldMixinState<V> {
@@ -181,7 +172,7 @@ export function sortFormFieldState(state: any): {parent: any, input: any} {
 }
 
 function generateWrappedChildren(
-	this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>> & FormField<any>,
+	this: Widget<WidgetState, WidgetProperties> & FormField<any>,
 	label: { content: string, position: string, hidden: boolean}
 ): DNode[] {
 	const { type, value } = this;
@@ -234,8 +225,8 @@ const createFormMixin: FormMixinFactory = createStateful
 				}
 			},
 
-			getNode(this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>>): DNode {
-				const { label } = this.properties;
+			getNode(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode {
+				const { label } = this;
 				let tag = label ? 'label' : 'div';
 
 				if (this.classes.length) {
@@ -255,7 +246,7 @@ const createFormMixin: FormMixinFactory = createStateful
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type, label }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
+			{ value, type, properties }: FormFieldMixinOptions<any, FormFieldMixinState<any>> & WidgetOptions<WidgetState, WidgetProperties> = {}
 		) {
 			if (value) {
 				instance.setState({ value });
@@ -263,7 +254,7 @@ const createFormMixin: FormMixinFactory = createStateful
 			if (type) {
 				instance.type = type;
 			}
-			if (label) {
+			if (properties && properties.hasOwnProperty('label')) {
 				const labelDefaults = {
 					content: '',
 					position: 'below',
@@ -271,11 +262,11 @@ const createFormMixin: FormMixinFactory = createStateful
 				};
 
 				// convert string label to object
-				if (typeof label === 'string') {
-					instance.label = Object.assign(labelDefaults, { content: label });
+				if (typeof properties['label'] === 'string') {
+					instance.label = Object.assign(labelDefaults, { content: properties['label'] });
 				}
 				else {
-					instance.label = Object.assign(labelDefaults, label);
+					instance.label = Object.assign(labelDefaults, properties['label']);
 				}
 			}
 		}
