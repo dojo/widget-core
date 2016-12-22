@@ -51,8 +51,8 @@ const createSelectInput: SelectInputFactory = createWidgetBase
 		initialize(instance, { options }: SelectInputOptions) {
 			instance.options = options;
 
-			// select first option
-			instance.value = Object.keys(options)[0];
+			// select first option by default
+			instance.value = instance.value || Object.keys(options)[0];
 
 			instance.own(instance.on('input', (event: TypedTargetEvent<HTMLInputElement>) => {
 				instance.value = event.target.value;
