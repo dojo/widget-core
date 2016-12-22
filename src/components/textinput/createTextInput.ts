@@ -33,29 +33,6 @@ const createTextInput: TextInputFactory = createWidgetBase
 					return { oninput: this.onInput };
 				}
 			],
-			getChildrenNodes: function(this: TextInput): DNode[] {
-				const { placeholder } = this.properties;
-				const { type, value } = this;
-				const { content, hidden, position } = this.label;
-				const inputProperties = sortFormFieldState(this.properties);
-
-				const children = [
-					v('input', Object.assign(inputProperties.input, {
-						type: type || 'text',
-						value: value
-					})),
-					v('span', {
-						innerHTML: content,
-						classes: { 'visually-hidden': hidden }
-					})
-				];
-
-				if (position === 'above') {
-					children.reverse();
-				}
-
-				return children;
-			},
 			tagName: 'input',
 			type: 'text'
 		}

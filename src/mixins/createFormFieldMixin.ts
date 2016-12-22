@@ -181,10 +181,11 @@ export function sortFormFieldState(state: any): {parent: any, input: any} {
 }
 
 function generateWrappedChildren(
-	this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>>,
+	this: Widget<FormFieldMixinState<any>, FormFieldMixinOptions<any, FormFieldMixinState<any>>> & FormField<any>,
 	label: { content: string, position: string, hidden: boolean}
 ): DNode[] {
-	const inputAttributes = sortFormFieldState(this.state);
+	const { type, value } = this;
+	const inputAttributes = sortFormFieldState(Object.assign(this.state, { type, value }));
 	const children = [
 		v(this.tagName,
 			inputAttributes.input,
