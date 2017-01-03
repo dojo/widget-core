@@ -14,18 +14,25 @@ type Root = Widget<RootState, WidgetProperties> & ProjectorMixin;
 const createApp = createProjector.mixin({
 	mixin: {
 		getChildrenNodes: function(this: Root): DNode[] {
-			console.log('a', this.state.dialogOpen);
-			const self: Root = this;
 			return [
 				w(createDialog, {
 					id: 'dialog',
 					properties: {
 						title: 'Dialog',
 						open: this.state.dialogOpen,
-						onclose: () => {
-							console.log('b', this.state.dialogOpen);
-							self.setState({ dialogOpen: false });
-							console.log('c', this.state.dialogOpen);
+						onRequestClose: () => {
+							this.setState({ dialogOpen: false });
+						}
+					}
+				}),
+				w(createDialog, {
+					id: 'modal-dialog',
+					properties: {
+						title: 'Modal Dialog',
+						modal: true,
+						open: this.state.modalDialogOpen,
+						onRequestClose: () => {
+							this.setState({ modalDialogOpen: false });
 						}
 					}
 				}),
@@ -35,6 +42,15 @@ const createApp = createProjector.mixin({
 					listeners: {
 						click: () => {
 							this.setState({ dialogOpen: true });
+						}
+					}
+				}),
+				w(createButton, {
+					id: 'modal-button',
+					properties: { label: 'open modal dialog' },
+					listeners: {
+						click: () => {
+							this.setState({ modalDialogOpen: true });
 						}
 					}
 				})

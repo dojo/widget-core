@@ -8,41 +8,41 @@ export interface DialogState extends WidgetState {
 	title?: string;
 	open?: boolean;
 	modal?: boolean;
-}
+};
 
 export interface DialogProperties extends WidgetProperties {
 	title?: string;
 	open?: boolean;
 	modal?: boolean;
-	onopen?(): void;
-	onclose?(): void;
-}
+	onRequestClose?(): void;
+	onOpen?(): void;
+};
 
-export interface DialogOptions extends WidgetOptions<DialogState, DialogProperties> { }
+export interface DialogOptions extends WidgetOptions<DialogState, DialogProperties> { };
 
-export type Dialog = Widget<DialogState, DialogProperties>;
+export type Dialog = Widget<DialogState, DialogProperties> & {
+	onCloseClick?(): void;
+	onContentClick?(): void;
+	onUnderlayClick?(): void;
+};
 
-export interface DialogFactory extends ComposeFactory<Dialog, DialogOptions> { };
-
-function onCloseClick(this: Dialog) {
-	this.setState({ open: false });
-}
-
-function onContentClick(this: Dialog, event: MouseEvent) {
-	event.stopPropagation();
-}
-
-function onUnderlayClick(this: Dialog, event: MouseEvent) {
-	if (this.state.modal) {
-		return;
-	}
-
-	this.setState({ open: false });
-}
+export interface DialogFactory extends ComposeFactory<Dialog, DialogOptions> { }
 
 const createDialogWidget: DialogFactory = createWidgetBase
 	.mixin({
 		mixin: {
+			onCloseClick: function (this: Dialog) {
+				this.properties.onRequestClose && this.properties.onRequestClose.call(this);
+			},
+
+			onContentClick: function (this: Dialog, event: MouseEvent) {
+				event.stopPropagation();
+			},
+
+			onUnderlayClick: function (this: Dialog) {
+				!this.state.modal && this.onCloseClick && this.onCloseClick();
+			},
+
 			getChildrenNodes: function (this: Dialog): DNode[] {
 				const children: DNode[] = [
 					// TODO: CSS modules
@@ -50,28 +50,26 @@ const createDialogWidget: DialogFactory = createWidgetBase
 					// TODO: CSS modules
 					v('div.close', {
 						innerHTML: '✖',
-						onclick: onCloseClick
+						onclick: this.onCloseClick
 					}),
 					// TODO: CSS modules
 					v('div.content', this.children)
 				];
 				// TODO: CSS modules
-				const content: DNode = v('div.content', { onclick: onContentClick }, children);
+				const content: DNode = v('div.content', { onclick: this.onContentClick }, children);
 				return [ content ];
 			},
 
 			nodeAttributes: [
 				function(this: Dialog): VNodeProperties {
-					this.state.open && this.properties.onopen && this.properties.onopen();
-					!this.state.open && this.properties.onclose && this.properties.onclose();
-					return { 'data-open': this.state.open ? 'true' : 'false' };
-				},
-				function(this: Dialog): VNodeProperties {
-					return { 'data-modal': this.state.modal ? 'true' : 'false' };
+					this.state.open && this.properties.onOpen && this.properties.onOpen.call(this);
+					return {
+						onclick: this.onUnderlayClick,
+						'data-open': this.state.open ? 'true' : 'false',
+						'data-modal': this.state.modal ? 'true' : 'false'
+					};
 				}
 			],
-
-			listeners: { onclick: onUnderlayClick },
 
 			// TODO: CSS modules
 			classes: [ 'dialog' ]
