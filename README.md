@@ -18,6 +18,7 @@ For more background on dojo-widgets, there is a document describing the [widgeti
     	- [d](#d)
     	- [Widgets with Children](#widgets-with-children)
     - [Authoring Custom Widgets](#authoring-custom-widgets)
+    - [Event Handlers](#event-handlers)
     - [Projector](#projector)
     - [Internationalization](#internationalization)
     - [Dojo Widget Components](#dojo-widget-components)
@@ -274,7 +275,7 @@ w(createFactory, options, children);
 w('my-factory', options, children);
 ```
 
-### Authoring Custom Widgets
+### Authoring Widgets
 
 To create custom reusable widgets you can extend `createWidgetBase`.
 
@@ -360,6 +361,16 @@ const createListWidget: ListFactory = createWidgetBase.mixin({
 });
 
 export default createListWidget;
+```
+
+### Using Event Handlers
+
+For more complex widgets that require event handlers 
+
+When autEvent handlers are **required** 
+
+```ts
+
 ```
 
 ### Projector
