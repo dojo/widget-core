@@ -1,15 +1,24 @@
 import { DNode, Widget, WidgetState, WidgetProperties } from '../interfaces';
-import { w } from '../d';
+import { w, v } from '../d';
 import createProjector, { ProjectorMixin } from '../createProjector';
 import createButton from '../components/button/createButton';
 import createDialog from '../components/dialog/createDialog';
 
 interface RootState extends WidgetState {
-	dialogOpen?: boolean;
-	modalDialogOpen?: boolean;
+	open?: boolean;
+	modal?: boolean;
+	underlay?: boolean;
 }
 
 type Root = Widget<RootState, WidgetProperties> & ProjectorMixin;
+
+function toggleModal(this: Root, event: Event) {
+	this.setState({ modal: (<HTMLInputElement> event.target).checked });
+}
+
+function toggleUnderlay(this: Root, event: Event) {
+	this.setState({ underlay: (<HTMLInputElement> event.target).checked });
+}
 
 const createApp = createProjector.mixin({
 	mixin: {
@@ -19,20 +28,11 @@ const createApp = createProjector.mixin({
 					id: 'dialog',
 					properties: {
 						title: 'Dialog',
-						open: this.state.dialogOpen,
+						open: this.state.open,
+						modal: this.state.modal,
+						underlay: this.state.underlay,
 						onRequestClose: () => {
-							this.setState({ dialogOpen: false });
-						}
-					}
-				}),
-				w(createDialog, {
-					id: 'modal-dialog',
-					properties: {
-						title: 'Modal Dialog',
-						modal: true,
-						open: this.state.modalDialogOpen,
-						onRequestClose: () => {
-							this.setState({ modalDialogOpen: false });
+							this.setState({ open: false });
 						}
 					}
 				}),
@@ -41,18 +41,27 @@ const createApp = createProjector.mixin({
 					properties: { label: 'open dialog' },
 					listeners: {
 						click: () => {
-							this.setState({ dialogOpen: true });
+							this.setState({ open: true });
 						}
 					}
 				}),
-				w(createButton, {
-					id: 'modal-button',
-					properties: { label: 'open modal dialog' },
-					listeners: {
-						click: () => {
-							this.setState({ modalDialogOpen: true });
-						}
-					}
+				v('label', {
+					for: 'modal',
+					innerHTML: 'modal'
+				}),
+				v('input', {
+					type: 'checkbox',
+					id: 'modal',
+					onchange: toggleModal
+				}),
+				v('label', {
+					for: 'underlay',
+					innerHTML: 'underlay'
+				}),
+				v('input', {
+					type: 'checkbox',
+					id: 'underlay',
+					onchange: toggleUnderlay
 				})
 			];
 		},

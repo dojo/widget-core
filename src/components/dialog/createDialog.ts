@@ -8,14 +8,16 @@ export interface DialogState extends WidgetState {
 	title?: string;
 	open?: boolean;
 	modal?: boolean;
+	underlay?: boolean;
 };
 
 export interface DialogProperties extends WidgetProperties {
-	title?: string;
-	open?: boolean;
 	modal?: boolean;
-	onRequestClose?(): void;
+	open?: boolean;
+	title?: string;
+	underlay?: boolean;
 	onOpen?(): void;
+	onRequestClose?(): void;
 };
 
 export interface DialogOptions extends WidgetOptions<DialogState, DialogProperties> { };
@@ -45,17 +47,13 @@ const createDialogWidget: DialogFactory = createWidgetBase
 
 			getChildrenNodes: function (this: Dialog): DNode[] {
 				const children: DNode[] = [
-					// TODO: CSS modules
 					v('div.title', { innerHTML: this.state.title }),
-					// TODO: CSS modules
 					v('div.close', {
 						innerHTML: '✖',
 						onclick: this.onCloseClick
 					}),
-					// TODO: CSS modules
 					v('div.content', this.children)
 				];
-				// TODO: CSS modules
 				const content: DNode = v('div.content', { onclick: this.onContentClick }, children);
 				return [ content ];
 			},
@@ -66,12 +64,11 @@ const createDialogWidget: DialogFactory = createWidgetBase
 					return {
 						onclick: this.onUnderlayClick,
 						'data-open': this.state.open ? 'true' : 'false',
-						'data-modal': this.state.modal ? 'true' : 'false'
+						'data-underlay': this.state.underlay ? 'true' : 'false'
 					};
 				}
 			],
 
-			// TODO: CSS modules
 			classes: [ 'dialog' ]
 		}
 	});
