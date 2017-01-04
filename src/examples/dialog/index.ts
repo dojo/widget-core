@@ -1,8 +1,8 @@
-import { DNode, Widget, WidgetState, WidgetProperties } from '../interfaces';
-import { w, v } from '../d';
-import createProjector, { ProjectorMixin } from '../createProjector';
-import createButton from '../components/button/createButton';
-import createDialog from '../components/dialog/createDialog';
+import { DNode, Widget, WidgetState, WidgetProperties } from '../../interfaces';
+import { w, v } from '../../d';
+import createProjector, { ProjectorMixin } from '../../createProjector';
+import createButton from '../../components/button/createButton';
+import createDialog from '../../components/dialog/createDialog';
 
 interface RootState extends WidgetState {
 	open?: boolean;

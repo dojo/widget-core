@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>dojo-widget Examples</title>
+	<title>Dialog Examples</title>
 </head>
 <body>
-	<script src="../../../node_modules/dojo-loader/loader.min.js"></script>
+	<script src="../../../../node_modules/dojo-loader/loader.min.js"></script>
 	<style>
 		.dialog {
 			width: 100%;
@@ -33,7 +33,7 @@
 	</style>
 	<script>
 		require.config({
-			baseUrl: '../../..',
+			baseUrl: '../../../..',
 			packages: [
 				{ name: 'src', location: '_build/src' },
 				{ name: 'dojo-actions', location: 'node_modules/dojo-actions' },
@@ -49,7 +49,7 @@
 		});
 
 		/* Requiring in the main module */
-		require([ 'src/examples/boot' ], function () {});
+		require([ 'src/examples/dialog/index' ], function () {});
 	</script>
 </body>
 </html>
