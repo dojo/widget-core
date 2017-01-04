@@ -6,6 +6,16 @@ export interface ButtonProperties extends WidgetProperties {
 	content?: string;
 	name?: string;
 	onClick?(event: MouseEvent): void;
+	type?: string;
+
+	/**
+	 * Accessibility attributes
+	 */
+	descriptionID?: string;
+	disabled?: boolean;
+	role?: string;
+	pressed?: boolean;
+	hasPopup?: boolean;
 }
 
 export type Button = Widget<ButtonProperties> & {
@@ -25,7 +35,13 @@ const createButton: ButtonFactory = createWidgetBase
 					return {
 						innerHTML: this.properties['content'],
 						type: this.properties['type'],
-						onclick: this.onClick
+						onclick: this.onClick,
+						name: this.properties['name'],
+						role: this.properties['role'],
+						disabled: this.properties.disabled,
+						'aria-pressed': this.properties.pressed,
+						'aria-describedby': this.properties['descriptionID'],
+						'aria-haspopup': this.properties['hasPopup']
 					};
 				}
 			],

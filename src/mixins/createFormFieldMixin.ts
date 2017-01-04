@@ -23,11 +23,6 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 
 export interface FormFieldMixinState<V> {
 	/**
-	 * Whether the field is currently disabled or not
-	 */
-	disabled?: boolean;
-
-	/**
 	 * The form widget's name
 	 */
 	name?: string;
@@ -36,6 +31,20 @@ export interface FormFieldMixinState<V> {
 	 * The current value
 	 */
 	value?: V;
+
+	/**
+	 * Accessibility attributes
+	 */
+	descriptionID?: string;
+	disabled?: boolean;
+	inputmode?: string;
+	maxlength?: number | string;
+	minlength?: number | string;
+	multiple?: boolean;
+	placeholder?: string;
+	readonly?: boolean;
+	required?: boolean;
+	invalid?: boolean;
 }
 
 export interface ValueChangeEvent<V> extends EventCancelableObject<'valuechange', FormFieldMixin<V, FormFieldMixinState<V>>> {
@@ -150,36 +159,39 @@ export function stringToValue(str: string): any {
 	}
 }
 
-/**
- * Internal function to identify properties that should pass to child input element
- * on basic form widgets that have a root label element
- * @param state: state object passed into the widget
- */
-export function sortFormFieldState(state: any): {parent: any, input: any} {
-	const parentPropKeys = ['id', 'classes', 'for', 'dir', 'draggable', 'lang', 'slot', 'translate'];
-	const parent: any = {}, input: any = {};
+export function getFormFieldNodeAttributes(state: any): VNodeProperties {
+	const allowedAttributes = ['name', 'descriptionID', 'disabled', 'inputmode', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'invalid'];
+	const nodeAttributes: any = {};
 
 	for (const key in state) {
-		if (parentPropKeys.indexOf(key) > -1) {
-			parent[key] = state[key];
+		if (allowedAttributes.indexOf(key) === -1) {
+			continue;
+		}
+
+		// handle cases that aren't 1-to-1
+		if (key === 'readonly' && state.readonly) {
+			nodeAttributes['readonly'] = 'readonly';
+			nodeAttributes['aria-readonly'] = true;
+		}
+		else if (key === 'invalid') {
+			nodeAttributes['aria-invalid'] = state.invalid;
+		}
+		else if (key === 'descriptionID') {
+			nodeAttributes['aria-describedby'] = state.descriptionID;
 		}
 		else {
-			input[key] = state[key];
+			nodeAttributes[key] = state[key];
 		}
 	}
-
-	return {parent, input};
+	return nodeAttributes;
 }
 
-function generateWrappedChildren(
-	this: Widget<WidgetState, WidgetProperties> & FormField<any>,
-	label: { content: string, position: string, hidden: boolean}
-): DNode[] {
-	const { type, value } = this;
-	const inputAttributes = sortFormFieldState(Object.assign(this.state, { type, value }));
+function generateWrappedChildren(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode[] {
+	const { type, value, label, state } = this;
+	const inputAttributes = getFormFieldNodeAttributes(Object.assign(state, { type, value }));
 	const children = [
 		v(this.tagName,
-			inputAttributes.input,
+			inputAttributes,
 			this.getChildrenNodes()
 		)
 	];
@@ -233,16 +245,8 @@ const createFormMixin: FormMixinFactory = createStateful
 					tag = `${this.tagName}.${this.classes.join('.')}`;
 				}
 
-				return v(tag, this.getNodeAttributes(), generateWrappedChildren.call(this, label));
-			},
-
-			nodeAttributes: [
-				function (this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
-					const parentNodeAttributes = sortFormFieldState(this.state);
-
-					return parentNodeAttributes.parent;
-				}
-			]
+				return v(tag, this.getNodeAttributes(), generateWrappedChildren.call(this));
+			}
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
