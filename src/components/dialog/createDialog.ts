@@ -5,6 +5,7 @@ import createWidgetBase from '../../createWidgetBase';
 import { v } from '../../d';
 
 export interface DialogState extends WidgetState {
+	closeable?: boolean;
 	modal?: boolean;
 	open?: boolean;
 	title?: string;
@@ -12,6 +13,7 @@ export interface DialogState extends WidgetState {
 };
 
 export interface DialogProperties extends WidgetProperties {
+	closeable?: boolean;
 	modal?: boolean;
 	open?: boolean;
 	title?: string;
@@ -34,7 +36,8 @@ const createDialogWidget: DialogFactory = createWidgetBase
 	.mixin({
 		mixin: {
 			onCloseClick: function (this: Dialog) {
-				this.properties.onRequestClose && this.properties.onRequestClose.call(this);
+				const closeable = this.state.closeable || typeof this.state.closeable === 'undefined';
+				closeable && this.properties.onRequestClose && this.properties.onRequestClose.call(this);
 			},
 
 			onContentClick: function (event: MouseEvent) {
@@ -46,14 +49,15 @@ const createDialogWidget: DialogFactory = createWidgetBase
 			},
 
 			getChildrenNodes: function (this: Dialog): DNode[] {
-				const children: DNode[] = [
-					v('div.title', { innerHTML: this.state.title }),
-					v('div.close', {
+				const children: DNode[] = [ v('div.title', { innerHTML: this.state.title }) ];
+				// TODO: Properly default closeable property to `true`
+				if (this.state.closeable || typeof this.state.closeable === 'undefined') {
+					children.push(v('div.close', {
 						innerHTML: '✖',
 						onclick: this.onCloseClick
-					}),
-					v('div.content', this.children)
-				];
+					}));
+				}
+				children.push(v('div.content', this.children));
 				const content: DNode = v('div.content', { onclick: this.onContentClick }, children);
 				return [ content ];
 			},

@@ -8,9 +8,17 @@ interface RootState extends WidgetState {
 	open?: boolean;
 	modal?: boolean;
 	underlay?: boolean;
+	closeable?: boolean;
 }
 
-type Root = Widget<RootState, WidgetProperties> & ProjectorMixin;
+interface RootProperties extends WidgetProperties {
+	open?: boolean;
+	modal?: boolean;
+	underlay?: boolean;
+	closeable?: boolean;
+};
+
+type Root = Widget<RootState, RootProperties> & ProjectorMixin;
 
 function toggleModal(this: Root, event: Event) {
 	this.setState({ modal: (<HTMLInputElement> event.target).checked });
@@ -18,6 +26,10 @@ function toggleModal(this: Root, event: Event) {
 
 function toggleUnderlay(this: Root, event: Event) {
 	this.setState({ underlay: (<HTMLInputElement> event.target).checked });
+}
+
+function toggleCloseable(this: Root, event: Event) {
+	this.setState({ closeable: (<HTMLInputElement> event.target).checked });
 }
 
 const createApp = createProjector.mixin({
@@ -31,6 +43,7 @@ const createApp = createProjector.mixin({
 						open: this.state.open,
 						modal: this.state.modal,
 						underlay: this.state.underlay,
+						closeable: this.state.closeable,
 						onRequestClose: () => {
 							this.setState({ open: false });
 						}
@@ -45,24 +58,40 @@ const createApp = createProjector.mixin({
 						}
 					}
 				}),
-				v('label', {
-					for: 'modal',
-					innerHTML: 'modal'
-				}),
-				v('input', {
-					type: 'checkbox',
-					id: 'modal',
-					onchange: toggleModal
-				}),
-				v('label', {
-					for: 'underlay',
-					innerHTML: 'underlay'
-				}),
-				v('input', {
-					type: 'checkbox',
-					id: 'underlay',
-					onchange: toggleUnderlay
-				})
+				v('div', { classes: { option: true }}, [
+					v('input', {
+						type: 'checkbox',
+						id: 'modal',
+						onchange: toggleModal
+					}),
+					v('label', {
+						for: 'modal',
+						innerHTML: 'modal'
+					})
+				]),
+				v('div', { classes: { option: true }}, [
+					v('input', {
+						type: 'checkbox',
+						id: 'underlay',
+						onchange: toggleUnderlay
+					}),
+					v('label', {
+						for: 'underlay',
+						innerHTML: 'underlay'
+					})
+				]),
+				v('div', { classes: { option: true }}, [
+					v('input', {
+						type: 'checkbox',
+						id: 'closeable',
+						onchange: toggleCloseable,
+						checked: true
+					}),
+					v('label', {
+						for: 'closeable',
+						innerHTML: 'closeable'
+					})
+				])
 			];
 		},
 		classes: [ 'main-app' ],
@@ -70,7 +99,11 @@ const createApp = createProjector.mixin({
 	}
 });
 
-const app = createApp();
+const app = createApp({
+	properties: {
+		closeable: true
+	}
+});
 
 app.append().then(() => {
 	console.log('projector is attached');

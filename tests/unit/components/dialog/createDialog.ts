@@ -15,7 +15,8 @@ registerSuite({
 				modal: true,
 				open: false,
 				title: 'dialog',
-				underlay: true
+				underlay: true,
+				closeable: true
 			}
 		});
 		assert.strictEqual(dialog.state.id, 'foo');
@@ -23,6 +24,7 @@ registerSuite({
 		assert.isFalse(dialog.state.open);
 		assert.strictEqual(dialog.state.title, 'dialog');
 		assert.isTrue(dialog.state.underlay);
+		assert.isTrue(dialog.state.closeable);
 	},
 
 	render() {
@@ -41,7 +43,7 @@ registerSuite({
 		assert.lengthOf(vnode.children, 1);
 	},
 
-	'onRequestClose'() {
+	onRequestClose() {
 		const dialog = createDialog({
 			properties: {
 				open: true,
@@ -55,7 +57,7 @@ registerSuite({
 		assert.isFalse(dialog.state.open);
 	},
 
-	'onOpen'(this: any) {
+	onOpen(this: any) {
 		let dfd = this.async(1000, 1);
 
 		function onOpen(): void {
@@ -75,7 +77,7 @@ registerSuite({
 		projector.append();
 	},
 
-	'modal'() {
+	modal() {
 		const dialog = createDialog({
 			properties: {
 				open: true,
@@ -88,6 +90,18 @@ registerSuite({
 
 		dialog.onContentClick && dialog.onContentClick(<MouseEvent> { stopPropagation: () => { }});
 		dialog.onUnderlayClick && dialog.onUnderlayClick();
+		assert.isTrue(dialog.state.open);
+	},
+
+	closeable() {
+		const dialog = createDialog({
+			properties: {
+				closeable: false,
+				open: true
+			}
+		});
+
+		dialog.onCloseClick && dialog.onCloseClick();
 		assert.isTrue(dialog.state.open);
 	}
 });
