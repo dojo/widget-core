@@ -5,9 +5,9 @@ import createWidgetBase from '../../createWidgetBase';
 import { v } from '../../d';
 
 export interface DialogState extends WidgetState {
-	title?: string;
-	open?: boolean;
 	modal?: boolean;
+	open?: boolean;
+	title?: string;
 	underlay?: boolean;
 };
 
@@ -24,7 +24,7 @@ export interface DialogOptions extends WidgetOptions<DialogState, DialogProperti
 
 export type Dialog = Widget<DialogState, DialogProperties> & {
 	onCloseClick?(): void;
-	onContentClick?(): void;
+	onContentClick?(event: MouseEvent): void;
 	onUnderlayClick?(): void;
 };
 
@@ -37,7 +37,7 @@ const createDialogWidget: DialogFactory = createWidgetBase
 				this.properties.onRequestClose && this.properties.onRequestClose.call(this);
 			},
 
-			onContentClick: function (this: Dialog, event: MouseEvent) {
+			onContentClick: function (event: MouseEvent) {
 				event.stopPropagation();
 			},
 
