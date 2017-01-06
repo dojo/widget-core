@@ -12,10 +12,37 @@
 			left: 50%;
 			transform: translate(-50%, -50%);
 			background: #FFF;
+			min-width: 450px;
+			min-height: 250px;
+			box-shadow: 0 0 7px 0px rgba(0, 0, 0, 0.25);
+			border-radius: 2px;
+			overflow: hidden;
+			font-family: sans-serif;
+		}
+
+		.dialog .main .title {
+			background-color: #34495e;
+			font-size: 20px;
+			color: #FFF;
+			padding: 14px 35px;
+			position: relative;
+		}
+
+		.dialog .main .title .close {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			right: 35px;
+			cursor: pointer;
+			line-height: 1;
+		}
+
+		.dialog .content {
+			padding: 14px 35px;
 		}
 
 		.show {
-			transition: opacity .5s;
+			transition: opacity .2s;
 			opacity: 0;
 		}
 
@@ -24,7 +51,7 @@
 		}
 
 		.hide {
-			transition: opacity .5s;
+			transition: opacity .2s;
 			opacity: 1;
 		}
 
@@ -41,12 +68,12 @@
 		}
 
 		.dialog[data-underlay="true"] .underlay {
-			background: rgba(0, 0, 0, 0.5);
+			background: rgba(0, 0, 0, 0.3);
 		}
 
 		.slideIn {
-			transition: top .5s;
-			top: -100px !important;
+			transition: top .2s;
+			top: -150px !important;
 		}
 
 		.slideIn-active {
@@ -54,12 +81,12 @@
 		}
 
 		.slideOut {
-			transition: top .5s;
+			transition: top .2s;
 			top: 50% !important;
 		}
 
 		.slideOut-active {
-			top: -100px !important;
+			top: -150px !important;
 		}
 
 		button {

@@ -49,11 +49,11 @@ const createApp = createProjector.mixin({
 		cssTransitions: true,
 		getChildrenNodes: function(this: Root): DNode[] {
 			return [
-				this.state.open ? w(createDialog, {
+				w(createDialog, {
 					id: 'dialog',
 					properties: {
 						title: 'Dialog',
-						open: true,
+						open: this.state.open,
 						modal: this.state.modal,
 						underlay: this.state.underlay,
 						closeable: this.state.closeable,
@@ -63,7 +63,9 @@ const createApp = createProjector.mixin({
 							this.setState({ open: false });
 						}
 					}
-				}) : null,
+				}, [
+					'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+				]),
 				w(createButton, {
 					id: 'button',
 					properties: { label: 'open dialog' },

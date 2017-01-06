@@ -57,16 +57,15 @@ const createDialogWidget: DialogFactory = createWidgetBase
 					exitAnimation = 'hide'
 				} = this.properties;
 
-				const dialogChildren: DNode[] = [
-					v('div.title', { innerHTML: this.state.title }),
-					v('div.content', this.children)
-				];
-
-				closeable && dialogChildren.push(v('div.close', { innerHTML: '✖', onclick: this.onCloseClick }));
-
 				const children: DNode[] = [
 					v('div.underlay', { enterAnimation: 'show', exitAnimation: 'hide', onclick: this.onUnderlayClick }),
-					v('div.main', { enterAnimation: enterAnimation, exitAnimation: exitAnimation }, dialogChildren)
+					v('div.main', { enterAnimation: enterAnimation, exitAnimation: exitAnimation }, [
+						v('div.title', [
+							this.state.title,
+							closeable ? v('div.close', { innerHTML: '✕', onclick: this.onCloseClick }) : null
+						]),
+						v('div.content', this.children)
+					])
 				];
 
 				return this.state.open ? children : [];
