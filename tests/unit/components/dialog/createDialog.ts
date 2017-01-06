@@ -92,7 +92,6 @@ registerSuite({
 			}
 		});
 
-		dialog.onContentClick && dialog.onContentClick(<MouseEvent> { stopPropagation: () => { }});
 		dialog.onUnderlayClick && dialog.onUnderlayClick();
 		assert.isTrue(dialog.state.open);
 	},

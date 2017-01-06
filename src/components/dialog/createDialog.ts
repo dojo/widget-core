@@ -28,11 +28,10 @@ export interface DialogOptions extends WidgetOptions<DialogState, DialogProperti
 
 export type Dialog = Widget<DialogState, DialogProperties> & {
 	onCloseClick?(): void;
-	onContentClick?(event: MouseEvent): void;
 	onUnderlayClick?(): void;
 };
 
-export interface DialogFactory extends ComposeFactory<Dialog, DialogOptions> { }
+export interface DialogFactory extends ComposeFactory<Dialog, DialogOptions> { };
 
 const createDialogWidget: DialogFactory = createWidgetBase
 	.mixin({
@@ -40,10 +39,6 @@ const createDialogWidget: DialogFactory = createWidgetBase
 			onCloseClick: function (this: Dialog) {
 				const closeable = this.state.closeable || typeof this.state.closeable === 'undefined';
 				closeable && this.properties.onRequestClose && this.properties.onRequestClose.call(this);
-			},
-
-			onContentClick: function (event: MouseEvent) {
-				event.stopPropagation();
 			},
 
 			onUnderlayClick: function (this: Dialog) {
@@ -68,7 +63,7 @@ const createDialogWidget: DialogFactory = createWidgetBase
 						exitAnimation: exitAnimation
 					}, [
 						v('div.title', [
-							this.state.title,
+							this.state.title ? this.state.title : null,
 							closeable ? v('div.close', {
 								innerHTML: '✕',
 								onclick: this.onCloseClick
