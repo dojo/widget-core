@@ -9,6 +9,8 @@ interface RootState extends WidgetState {
 	modal?: boolean;
 	underlay?: boolean;
 	closeable?: boolean;
+	enterAnimation?: string;
+	exitAnimation?: string;
 }
 
 interface RootProperties extends WidgetProperties {
@@ -16,6 +18,8 @@ interface RootProperties extends WidgetProperties {
 	modal?: boolean;
 	underlay?: boolean;
 	closeable?: boolean;
+	enterAnimation?: string;
+	exitAnimation?: string;
 };
 
 type Root = Widget<RootState, RootProperties> & ProjectorMixin;
@@ -32,23 +36,34 @@ function toggleCloseable(this: Root, event: Event) {
 	this.setState({ closeable: (<HTMLInputElement> event.target).checked });
 }
 
+function toggleEnterAnimation(this: Root, event: Event) {
+	this.setState({ enterAnimation: (<HTMLInputElement> event.target).checked ? 'slideIn' : undefined });
+}
+
+function toggleExitAnimation(this: Root, event: Event) {
+	this.setState({ exitAnimation: (<HTMLInputElement> event.target).checked ? 'slideOut' : undefined });
+}
+
 const createApp = createProjector.mixin({
 	mixin: {
+		cssTransitions: true,
 		getChildrenNodes: function(this: Root): DNode[] {
 			return [
-				w(createDialog, {
+				this.state.open ? w(createDialog, {
 					id: 'dialog',
 					properties: {
 						title: 'Dialog',
-						open: this.state.open,
+						open: true,
 						modal: this.state.modal,
 						underlay: this.state.underlay,
 						closeable: this.state.closeable,
+						enterAnimation: this.state.enterAnimation,
+						exitAnimation: this.state.exitAnimation,
 						onRequestClose: () => {
 							this.setState({ open: false });
 						}
 					}
-				}),
+				}) : null,
 				w(createButton, {
 					id: 'button',
 					properties: { label: 'open dialog' },
@@ -91,6 +106,28 @@ const createApp = createProjector.mixin({
 						for: 'closeable',
 						innerHTML: 'closeable'
 					})
+				]),
+				v('div', { classes: { option: true }}, [
+					v('input', {
+						type: 'checkbox',
+						id: 'enterAnimation',
+						onchange: toggleEnterAnimation
+					}),
+					v('label', {
+						for: 'enterAnimation',
+						innerHTML: 'enterAnimation'
+					})
+				]),
+				v('div', { classes: { option: true }}, [
+					v('input', {
+						type: 'checkbox',
+						id: 'exitAnimation',
+						onchange: toggleExitAnimation
+					}),
+					v('label', {
+						for: 'exitAnimation',
+						innerHTML: 'exitAnimation'
+					})
 				])
 			];
 		},
@@ -100,6 +137,7 @@ const createApp = createProjector.mixin({
 });
 
 const app = createApp({
+	cssTransitions: true,
 	properties: {
 		closeable: true
 	}

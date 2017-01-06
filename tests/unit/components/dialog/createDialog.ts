@@ -32,7 +32,9 @@ registerSuite({
 			properties: {
 				id: 'foo',
 				open: true,
-				underlay: true
+				underlay: true,
+				enterAnimation: 'enter',
+				exitAnimation: 'exit'
 			}
 		});
 		const vnode = <VNode> dialog.__render__();
@@ -40,7 +42,9 @@ registerSuite({
 		assert.strictEqual(vnode.properties!['data-widget-id'], 'foo');
 		assert.strictEqual(vnode.properties!['data-underlay'], 'true');
 		assert.strictEqual(vnode.properties!['data-open'], 'true');
-		assert.lengthOf(vnode.children, 1);
+		vnode.children && assert.strictEqual(vnode.children[1].properties!['enterAnimation'], 'enter');
+		vnode.children && assert.strictEqual(vnode.children[1].properties!['exitAnimation'], 'exit');
+		assert.lengthOf(vnode.children, 2);
 	},
 
 	onRequestClose() {

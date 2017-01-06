@@ -14,6 +14,8 @@ export interface DialogState extends WidgetState {
 
 export interface DialogProperties extends WidgetProperties {
 	closeable?: boolean;
+	enterAnimation?: string;
+	exitAnimation?: string;
 	modal?: boolean;
 	open?: boolean;
 	title?: string;
@@ -49,26 +51,33 @@ const createDialogWidget: DialogFactory = createWidgetBase
 			},
 
 			getChildrenNodes: function (this: Dialog): DNode[] {
-				const children: DNode[] = [ v('div.title', { innerHTML: this.state.title }) ];
-				// TODO: Properly default closeable property to `true`
-				if (this.state.closeable || typeof this.state.closeable === 'undefined') {
-					children.push(v('div.close', {
-						innerHTML: '✖',
-						onclick: this.onCloseClick
-					}));
-				}
-				children.push(v('div.content', this.children));
-				const content: DNode = v('div.content', { onclick: this.onContentClick }, children);
-				return [ content ];
+				const {
+					closeable = true,
+					enterAnimation = 'show',
+					exitAnimation = 'hide'
+				} = this.properties;
+
+				const dialogChildren: DNode[] = [
+					v('div.title', { innerHTML: this.state.title }),
+					v('div.content', this.children)
+				];
+
+				closeable && dialogChildren.push(v('div.close', { innerHTML: '✖', onclick: this.onCloseClick }));
+
+				const children: DNode[] = [
+					v('div.underlay', { enterAnimation: 'show', exitAnimation: 'hide', onclick: this.onUnderlayClick }),
+					v('div.main', { enterAnimation: enterAnimation, exitAnimation: exitAnimation }, dialogChildren)
+				];
+
+				return this.state.open ? children : [];
 			},
 
 			nodeAttributes: [
 				function(this: Dialog): VNodeProperties {
 					this.state.open && this.properties.onOpen && this.properties.onOpen.call(this);
 					return {
-						onclick: this.onUnderlayClick,
-						'data-open': this.state.open ? 'true' : 'false',
-						'data-underlay': this.state.underlay ? 'true' : 'false'
+						'data-underlay': this.state.underlay ? 'true' : 'false',
+						'data-open': this.state.open ? 'true' : 'false'
 					};
 				}
 			],
