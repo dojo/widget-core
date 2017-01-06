@@ -64,7 +64,9 @@ const createApp = createProjector.mixin({
 						}
 					}
 				}, [
-					'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+					`Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+					Quisque id purus ipsum. Aenean ac purus purus.
+					Nam sollicitudin varius augue, sed lacinia felis tempor in.`
 				]),
 				w(createButton, {
 					id: 'button',
