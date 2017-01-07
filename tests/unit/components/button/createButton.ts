@@ -51,7 +51,6 @@ registerSuite({
 			}
 		});
 		let vnode = <VNode> button.__render__();
-		assert.isFalse(vnode.properties!['disabled']);
 		button.setState({
 			disabled: true
 		});

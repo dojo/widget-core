@@ -1,6 +1,11 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
+import { VNode } from 'dojo-interfaces/vdom';
+import createWidgetBase from '../../../src/createWidgetBase';
 import createFormFieldMixin, { ValueChangeEvent } from '../../../src/mixins/createFormFieldMixin';
+
+const formFieldWidget = createWidgetBase
+	.mixin(createFormFieldMixin);
 
 registerSuite({
 	name: 'mixins/createFormFieldMixin',
@@ -81,55 +86,108 @@ registerSuite({
 			assert.strictEqual(count, 1);
 		}
 	},
+	'label': {
+		'string label'() {
+			const formfield = formFieldWidget({
+				type: 'foo',
+				properties: {
+					label: 'bar'
+				}
+			});
+			const vnode = <VNode> formfield.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'label');
+			assert.lengthOf(vnode.children, 2);
+			assert.strictEqual(vnode.children![1].properties!.innerHTML, 'bar');
+		},
+		'label options'() {
+			const formfield = formFieldWidget({
+				type: 'foo',
+				properties: {
+					label: {
+						content: 'bar',
+						position: 'above',
+						hidden: true
+					}
+				}
+			});
+			const vnode = <VNode> formfield.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'label');
+			assert.lengthOf(vnode.children, 2);
+			assert.strictEqual(vnode.children![0].properties!.innerHTML, 'bar');
+			assert.isTrue(vnode.children![0].properties!.classes!['visually-hidden']);
+		},
+		'no label'() {
+			const formfield = formFieldWidget({
+				type: 'foo'
+			});
+			const vnode = <VNode> formfield.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'div');
+			assert.lengthOf(vnode.children, 1);
+		}
+	},
 	'getNodeAttributes()': {
 		'truthy value'() {
-			const formfield = createFormFieldMixin({
-				type: 'foo'
+			const formfield = formFieldWidget({
+				type: 'foo',
+				tagName: 'input'
 			});
 
 			formfield.setState({ value: 'bar', name: 'baz' });
 
-			let nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
-			assert.strictEqual(nodeAttributes['type'], 'foo');
-			assert.strictEqual(nodeAttributes['value'], 'bar');
-			assert.strictEqual(nodeAttributes['name'], 'baz');
-			assert.isFalse(nodeAttributes['disabled']);
+			let vnode = <VNode> formfield.__render__();
+			let inputfield = vnode.children![0];
+
+			assert.strictEqual(inputfield.properties!['type'], 'foo');
+			assert.strictEqual(inputfield.properties!['value'], 'bar');
+			assert.strictEqual(inputfield.properties!['name'], 'baz');
 
 			formfield.setState({ disabled: true });
+			vnode = <VNode> formfield.__render__();
+			inputfield = vnode.children![0];
 
-			nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
-			assert.strictEqual(nodeAttributes['type'], 'foo');
-			assert.strictEqual(nodeAttributes['value'], 'bar');
-			assert.strictEqual(nodeAttributes['name'], 'baz');
-			assert.isTrue(nodeAttributes['disabled']);
+			let nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
+			assert.strictEqual(inputfield.properties!['type'], 'foo');
+			assert.strictEqual(inputfield.properties!['value'], 'bar');
+			assert.strictEqual(inputfield.properties!['name'], 'baz');
+			assert.isTrue(inputfield.properties!['disabled']);
 
-			formfield.setState({ disabled: false });
+			formfield.setState({
+				readonly: true,
+				invalid: false,
+				descriptionID: 'qux'
+			});
+			vnode = <VNode> formfield.__render__();
+			inputfield = vnode.children![0];
 
-			nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
-			assert.strictEqual(nodeAttributes['type'], 'foo');
-			assert.strictEqual(nodeAttributes['value'], 'bar');
-			assert.strictEqual(nodeAttributes['name'], 'baz');
-			assert.isFalse(nodeAttributes['disabled']);
+			assert.isTrue(inputfield.properties!['aria-readonly']);
+			assert.strictEqual(inputfield.properties!['readonly'], 'readonly');
+			assert.isFalse(inputfield.properties!['aria-invalid']);
+			assert.strictEqual(inputfield.properties!['aria-describedby'], 'qux');
 		},
 		'falsey value'() {
-			const formfield = createFormFieldMixin({
+			const formfield = formFieldWidget({
 				type: 'foo'
 			});
 
 			formfield.setState({
 				value: ''
 			});
+			let vnode = <VNode> formfield.__render__();
+			let inputfield = vnode.children![0];
 
-			let nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
-			assert.strictEqual(nodeAttributes['value'], '');
+			assert.strictEqual(inputfield.properties!['value'], '');
 
 			formfield.setState({
 				value: undefined
 			});
+			vnode = <VNode> formfield.__render__();
+			inputfield = vnode.children![0];
 
-			nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
 			assert.isUndefined(formfield.state.value);
-			assert.strictEqual(nodeAttributes['value'], '');
+			assert.strictEqual(inputfield.properties!['value'], '');
 		}
 	}
 });
