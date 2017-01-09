@@ -201,7 +201,6 @@ const createWidget: WidgetFactory = createStateful
 				this.properties = this.assignProperties(internalState.previousProperties, properties, changedPropertyKeys);
 				this.applyProperties(this.properties, changedPropertyKeys);
 				internalState.previousProperties = this.properties;
-				this.invalidate();
 			},
 
 			diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties): string[] {
