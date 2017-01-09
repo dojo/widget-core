@@ -1,11 +1,13 @@
 import { entries } from 'dojo-shim/object';
 import { WidgetProperties } from './../interfaces';
+import { deepAssign } from 'dojo-core/lang';
 
 /**
  * Interface for `diffProperties`
  */
 export interface ShallowPropertyComparisonMixin {
-	diffProperties<T>(previousProperties: T): string[];
+	diffProperties<T>(previousProperties: T, newProperties: T): string[];
+	assignProperties<T>(previousProperties: T, newProperties: T, changedPropertyKeys: string[]): T;
 }
 
 /**
@@ -33,13 +35,13 @@ function shallowCompare(from: any, to: any) {
  */
 const shallowPropertyComparisonMixin: { mixin: ShallowPropertyComparisonMixin } = {
 	mixin: {
-		diffProperties<T extends WidgetProperties & { [index: string]: any }>(this: { properties: T }, previousProperties: T): string[] {
+		diffProperties<T extends WidgetProperties>(this: { properties: T }, previousProperties: T, newProperties: T): string[] {
 			const changedPropertyKeys: string[] = [];
 
-			entries(this.properties).forEach(([key, value]) => {
+			entries(newProperties).forEach(([key, value]) => {
 				let isEqual = true;
 				if (previousProperties.hasOwnProperty(key)) {
-					const previousValue = previousProperties[key];
+					const previousValue = (<any> previousProperties)[key];
 					if (!(typeof value === 'function')) {
 						if (Array.isArray(value) && Array.isArray(previousValue)) {
 							if (value.length !== previousValue.length) {
@@ -72,6 +74,9 @@ const shallowPropertyComparisonMixin: { mixin: ShallowPropertyComparisonMixin } 
 				}
 			});
 			return changedPropertyKeys;
+		},
+		assignProperties<T extends WidgetProperties>(this: { id: string, properties: T }, previousProperties: T, newProperties: T, changedPropertyKeys: string[]): T {
+			return deepAssign({}, newProperties);
 		}
 	}
 };

@@ -145,15 +145,19 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	 */
 	properties: P;
 
+	setProperties(this: Widget<WidgetState, WidgetProperties>, properties: P): void;
+
 	/**
 	 * Determine changed or new property keys on render.
 	 */
-	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P): string[];
+	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P): string[];
+
+	assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
 
 	/**
-	 * apply change in properties
+	 * apply properties
 	 */
-	applyChangedProperties(previousProperties: Partial<P>, currentProperties: Partial<P>): void;
+	applyProperties(this: Widget<WidgetState, WidgetProperties>, properties: Partial<P>, changedPropertyKeys: string[]): void;
 
 	/**
 	 * The ID of the widget, which gets automatically rendered in the VNode property `data-widget-id` when

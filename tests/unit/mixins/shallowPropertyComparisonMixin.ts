@@ -7,23 +7,23 @@ import createWidgetBase from './../../../src/createWidgetBase';
 registerSuite({
 	name: 'mixins/shallowPropertyComparisonMixin',
 		'no updated properties'() {
-			(<any> shallowPropertyComparisonMixin.mixin).properties = { id: 'id', foo: 'bar' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' });
+			const properties = { id: 'id', foo: 'bar' };
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 0);
 		},
 		'updated properties'() {
-			(<any> shallowPropertyComparisonMixin.mixin).properties = { id: 'id', foo: 'baz' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' });
+			const properties = { id: 'id', foo: 'baz' };
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'new properties'() {
-			(<any> shallowPropertyComparisonMixin.mixin).properties = { id: 'id', foo: 'bar', bar: 'baz' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' });
+			const properties = { id: 'id', foo: 'bar', bar: 'baz' };
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'updated / new properties with falsy values'() {
-			(<any> shallowPropertyComparisonMixin.mixin).properties = { id: 'id', foo: null, bar: '', baz: 0, qux: false };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' });
+			const properties = { id: 'id', foo: null, bar: '', baz: 0, qux: false };
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, <any> properties);
 			assert.lengthOf(updatedKeys, 4);
 			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		},
@@ -36,8 +36,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.items[1] = 'c';
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		},
@@ -50,8 +49,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.items = updatedProperties.items.reverse();
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		},
@@ -65,8 +63,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.items[0].foo = 'foo';
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		},
@@ -80,8 +77,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.items.pop();
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		},
@@ -95,8 +91,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.items[1] = { bar: 'foo' };
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		},
@@ -113,8 +108,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.obj.foo = 'foo';
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'obj' ]);
 		},
@@ -131,8 +125,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.obj.bar = 'foo';
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'obj' ]);
 		},
@@ -144,8 +137,7 @@ registerSuite({
 			const updatedProperties = deepAssign({}, properties);
 			updatedProperties.myFunc = () => {};
 
-			(<any> shallowPropertyComparisonMixin.mixin).properties = updatedProperties;
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 0);
 		},
 		'test compatibility with shallowPropertyComparisonMixin'() {
@@ -159,8 +151,7 @@ registerSuite({
 			updatedProperties.items[0].foo = 'foo';
 
 			const widgetBase = createWidgetBase.mixin(shallowPropertyComparisonMixin)({ properties });
-			widgetBase.properties = updatedProperties;
-			const updatedKeys = widgetBase.diffProperties(properties);
+			const updatedKeys = widgetBase.diffProperties(properties, updatedProperties);
 			assert.lengthOf(updatedKeys, 1);
 			assert.deepEqual(updatedKeys, [ 'items' ]);
 		}
