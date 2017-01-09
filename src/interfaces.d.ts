@@ -6,7 +6,7 @@
  */
 import Promise from 'dojo-shim/Promise';
 import { EventedListener, Stateful, StatefulOptions } from 'dojo-interfaces/bases';
-import { EventTargettedObject, Handle, StylesMap } from 'dojo-interfaces/core';
+import { EventTargettedObject, EventTypedObject, Handle, StylesMap } from 'dojo-interfaces/core';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { ComposeFactory } from 'dojo-compose/compose';
 import { VNodeEvented, VNodeEventedOptions } from './mixins/createVNodeEvented';
@@ -23,6 +23,12 @@ export interface NodeFunction {
  */
 export interface ChildNodeFunction {
 	(this: Widget<WidgetState, WidgetProperties>): DNode[];
+}
+
+export interface PropertiesChangeEvent<T> extends EventTypedObject<'properties:changed'> {
+	properties: WidgetProperties;
+	changedPropertyKeys: string[];
+	target: T;
 }
 
 /**

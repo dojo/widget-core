@@ -2,6 +2,7 @@ import { isComposeFactory } from 'dojo-compose/compose';
 import createStateful from 'dojo-compose/bases/createStateful';
 import {
 	DNode,
+	PropertiesChangeEvent,
 	WNode,
 	Widget,
 	WidgetMixin,
@@ -281,7 +282,7 @@ const createWidget: WidgetFactory = createStateful
 				children: []
 			});
 
-			instance.own(instance.on('properties:changed', (evt: any) => {
+			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<Widget<WidgetState, WidgetProperties>>) => {
 				instance.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
 
