@@ -76,7 +76,7 @@ const shallowPropertyComparisonMixin: { mixin: ShallowPropertyComparisonMixin } 
 			return changedPropertyKeys;
 		},
 		assignProperties<T extends WidgetProperties>(this: { id: string, properties: T }, previousProperties: T, newProperties: T, changedPropertyKeys: string[]): T {
-			return deepAssign({}, newProperties);
+			return deepAssign({}, newProperties, { id: this.id });
 		}
 	}
 };
