@@ -55,7 +55,6 @@ registerSuite({
 			clickCalled = true;
 		};
 
-		console.log('------>');
 		const widgetBase = createWidgetBase({
 			properties: { id: 'foo', classes: [ 'bar' ] },
 			listeners: {

@@ -213,8 +213,12 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			applyProperties: function(this: Widget<WidgetState, WidgetProperties>, properties: WidgetProperties, changedPropertyKeys: string[]): void {
-				if (Object.keys(properties).length) {
-					this.setState(properties);
+				if (changedPropertyKeys.length) {
+					const state = changedPropertyKeys.reduce((state, key) => {
+						(<any> state)[key] = (<any> properties)[key];
+						return state;
+					}, <WidgetProperties> {});
+					this.setState(state);
 				}
 			},
 
