@@ -24,7 +24,7 @@ const createRadio: RadioFactory = createWidgetBase
 			type: 'radio'
 		},
 		initialize(instance, options: RadioOptions) {
-			instance.own(instance.on('input', (event: TypedTargetEvent<HTMLInputElement>) => {
+			instance.own(instance.on('change', (event: TypedTargetEvent<HTMLInputElement>) => {
 				instance.value = event.target.value;
 			}));
 		}

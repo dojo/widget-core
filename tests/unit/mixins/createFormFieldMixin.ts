@@ -148,7 +148,6 @@ registerSuite({
 			vnode = <VNode> formfield.__render__();
 			inputfield = vnode.children![0];
 
-			let nodeAttributes = formfield.nodeAttributes[0].call(formfield, {});
 			assert.strictEqual(inputfield.properties!['type'], 'foo');
 			assert.strictEqual(inputfield.properties!['value'], 'bar');
 			assert.strictEqual(inputfield.properties!['name'], 'baz');

@@ -24,7 +24,7 @@ const createCheckbox: CheckboxFactory = createWidgetBase
 			type: 'checkbox'
 		},
 		initialize(instance, options: CheckboxOptions) {
-			instance.own(instance.on('input', (event: TypedTargetEvent<HTMLInputElement>) => {
+			instance.own(instance.on('change', (event: TypedTargetEvent<HTMLInputElement>) => {
 				instance.value = event.target.value;
 			}));
 		}

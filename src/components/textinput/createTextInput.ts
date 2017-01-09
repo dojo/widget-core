@@ -25,7 +25,6 @@ const createTextInput: TextInputFactory = createWidgetBase
 	.mixin(createFormFieldMixin)
 	.mixin({
 		mixin: {
-			tagName: 'label',
 			onInput(this: TextInput, event: TypedTargetEvent<HTMLInputElement>) {
 				this.value = event.target.value;
 			},
@@ -34,8 +33,10 @@ const createTextInput: TextInputFactory = createWidgetBase
 					return { oninput: this.onInput };
 				}
 			],
-			tagName: 'input',
-			type: 'text'
+			tagName: 'input'
+		},
+		initialize(instance, { properties = {} }: TextInput) {
+			instance.type = properties['type'] || 'text';
 		}
 	});
 
