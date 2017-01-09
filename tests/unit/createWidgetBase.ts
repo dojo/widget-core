@@ -1,8 +1,9 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import Promise from 'dojo-shim/Promise';
+import { assign } from 'dojo-core/lang';
 import createWidgetBase from '../../src/createWidgetBase';
-import { DNode, HNode, WidgetState, WidgetOptions, WidgetProperties } from './../../src/interfaces';
+import { DNode, HNode, WidgetProperties } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
 import { v, w, registry } from '../../src/d';
 import { stub } from 'sinon';
@@ -356,7 +357,7 @@ registerSuite({
 						getChildrenNodes: function(this: any): (DNode | null)[] {
 							const properties: WidgetProperties = this.state.classes ? { classes: this.state.classes } : {};
 							return [
-								this.state.hide ? null : w(testChildWidget, { tagName: 'footer', properties })
+								this.state.hide ? null : w(testChildWidget, assign(<WidgetProperties> {tagName: 'footer' }, properties))
 							];
 						}
 					}
@@ -441,17 +442,17 @@ registerSuite({
 				.mixin({
 					mixin: {
 						getChildrenNodes: function(): DNode[] {
-							const options: (WidgetOptions<WidgetState, (WidgetProperties & { foo: string, bar?: string })>) = { properties: { foo: 'bar' }};
+							const properties: WidgetProperties & { foo: string, bar?: string } = { foo: 'bar' };
 
 							if (renderCount === 1) {
-								options.properties!.bar = 'baz';
-								options.properties!.foo = 'baz';
+								properties!.bar = 'baz';
+								properties!.foo = 'baz';
 							}
 
 							renderCount++;
 
 							return [
-								w(createMyWidget, options)
+								w(createMyWidget, <WidgetProperties> properties)
 							];
 						}
 					}

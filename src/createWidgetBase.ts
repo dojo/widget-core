@@ -20,6 +20,7 @@ import Map from 'dojo-shim/Map';
 import { v, registry } from './d';
 import FactoryRegistry from './FactoryRegistry';
 import shallowPropertyComparisonMixin from './mixins/shallowPropertyComparisonMixin';
+import customTagNameMixin from './mixins/tagNameMixin';
 
 interface WidgetInternalState {
 	children: DNode[];
@@ -140,6 +141,7 @@ function formatTagNameAndClasses(tagName: string, classes: string[]) {
 }
 
 const createWidget: WidgetFactory = createStateful
+	.mixin(customTagNameMixin)
 	.mixin<WidgetMixin<WidgetProperties>, WidgetOptions<WidgetState, WidgetProperties>>({
 		mixin: {
 			properties: {},
@@ -267,7 +269,7 @@ const createWidget: WidgetFactory = createStateful
 
 			tagName: 'div'
 		},
-		initialize(instance: Widget<WidgetState, WidgetProperties>, options: WidgetOptions<WidgetState, { id?: string }> = {}) {
+		initialize(instance: Widget<WidgetState, WidgetProperties>, options: WidgetOptions<WidgetState, WidgetProperties> = {}) {
 			const { tagName, properties = {} } = options;
 
 			instance.tagName = tagName || instance.tagName;
