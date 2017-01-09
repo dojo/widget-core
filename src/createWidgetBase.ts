@@ -58,7 +58,7 @@ function dNodeToVNode(instance: Widget<WidgetState, WidgetProperties>, dNode: DN
 	}
 
 	if (isWNode(dNode)) {
-		const { children, options: { properties = {} } } = dNode;
+		const { children, properties } = dNode;
 		const { id } = properties;
 
 		let { factory } = dNode;
@@ -92,7 +92,7 @@ function dNodeToVNode(instance: Widget<WidgetState, WidgetProperties>, dNode: DN
 			}
 		}
 		else {
-			child = factory(dNode.options);
+			child = factory({ properties });
 			child.own(child.on('invalidated', () => {
 				instance.invalidate();
 			}));

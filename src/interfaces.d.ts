@@ -101,7 +101,7 @@ export interface WNode {
 	/**
 	 * Options used to create factory a widget
 	 */
-	options: WidgetOptions<WidgetState, WidgetProperties>;
+	properties: WidgetProperties;
 
 	/**
 	 * DNode children
