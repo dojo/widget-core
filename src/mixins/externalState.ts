@@ -119,10 +119,10 @@ const externalStateFactory: ExternalStateFactory = createEvented.mixin({
 		setState(this: ExternalState, newState: Partial<State>): void {
 			const { properties: { externalState, id } } = this;
 			externalState.patch(assign( { id }, newState))
-			.then(() => externalState.get(id))
-			.then((state: State) => {
-				replaceState(this, state);
-			});
+				.then(() => externalState.get(id))
+				.then((state: State) => {
+					replaceState(this, state);
+				});
 		}
 	},
 	aspectAdvice: {
