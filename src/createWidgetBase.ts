@@ -199,7 +199,14 @@ const createWidget: WidgetFactory = createStateful
 				const internalState = widgetInternalStateMap.get(this);
 				const changedPropertyKeys = this.diffProperties(internalState.previousProperties, properties);
 				this.properties = this.assignProperties(internalState.previousProperties, properties, changedPropertyKeys);
-				this.applyProperties(this.properties, changedPropertyKeys);
+				if (changedPropertyKeys.length) {
+					this.emit({
+						type: 'properties:changed',
+						target: this,
+						properties: this.properties,
+						changedPropertyKeys
+					});
+				}
 				internalState.previousProperties = this.properties;
 			},
 
@@ -211,14 +218,12 @@ const createWidget: WidgetFactory = createStateful
 				return assign({}, newProperties, { id: this.id });
 			},
 
-			applyProperties: function(this: Widget<WidgetState, WidgetProperties>, properties: WidgetProperties, changedPropertyKeys: string[]): void {
-				if (changedPropertyKeys.length) {
-					const state = changedPropertyKeys.reduce((state, key) => {
-						(<any> state)[key] = (<any> properties)[key];
-						return state;
-					}, <WidgetProperties> {});
-					this.setState(state);
-				}
+			onPropertiesChanged: function(this: Widget<WidgetState, WidgetProperties>, properties: WidgetProperties, changedPropertyKeys: string[]): void {
+				const state = changedPropertyKeys.reduce((state, key) => {
+					(<any> state)[key] = (<any> properties)[key];
+					return state;
+				}, <WidgetProperties> {});
+				this.setState(state);
 			},
 
 			nodeAttributes: [
@@ -276,11 +281,15 @@ const createWidget: WidgetFactory = createStateful
 				children: []
 			});
 
-			instance.setProperties(properties);
+			instance.own(instance.on('properties:changed', (evt: any) => {
+				instance.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
+			}));
 
 			instance.own(instance.on('state:changed', () => {
 				instance.invalidate();
 			}));
+
+			instance.setProperties(properties);
 		}
 	})
 	.mixin(shallowPropertyComparisonMixin);

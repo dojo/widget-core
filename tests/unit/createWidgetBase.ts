@@ -103,9 +103,9 @@ registerSuite({
 			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		}
 	},
-	applyProperties() {
+	onPropertiesChanged() {
 		const widgetBase = createWidgetBase({ id: 'id' });
-		widgetBase.applyProperties({ foo: 'bar' }, [ 'foo' ]);
+		widgetBase.onPropertiesChanged({ foo: 'bar' }, [ 'foo' ]);
 		assert.equal((<any> widgetBase.state).foo, 'bar');
 	},
 	getChildrenNodes: {

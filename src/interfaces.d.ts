@@ -155,9 +155,9 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
 
 	/**
-	 * apply properties
+	 * Called when the properties have changed
 	 */
-	applyProperties(this: Widget<WidgetState, WidgetProperties>, properties: Partial<P>, changedPropertyKeys: string[]): void;
+	onPropertiesChanged(this: Widget<WidgetState, WidgetProperties>, properties: Partial<P>, changedPropertyKeys: string[]): void;
 
 	/**
 	 * The ID of the widget, which gets automatically rendered in the VNode property `data-widget-id` when
