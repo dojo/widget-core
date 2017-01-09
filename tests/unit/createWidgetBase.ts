@@ -483,15 +483,12 @@ registerSuite({
 			};
 
 			const myWidget = createWidgetBase({ properties });
-			myWidget.__render__();
 			assert.deepEqual((<any> myWidget.state).items, [ 'a', 'b' ]);
 			properties.items.push('c');
 			myWidget.setProperties(properties);
-			myWidget.__render__();
 			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c' ]);
 			properties.items.push('d');
 			myWidget.setProperties(properties);
-			myWidget.__render__();
 			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c', 'd' ]);
 		},
 		'__render__ with internally updated array state'() {
