@@ -163,7 +163,7 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	/**
 	 * Called when the properties have changed
 	 */
-	onPropertiesChanged(this: Widget<WidgetState, WidgetProperties>, properties: Partial<P>, changedPropertyKeys: string[]): void;
+	onPropertiesChanged(this: Widget<WidgetState, WidgetProperties>, properties: P, changedPropertyKeys: string[]): void;
 
 	/**
 	 * The ID of the widget, which gets automatically rendered in the VNode property `data-widget-id` when
