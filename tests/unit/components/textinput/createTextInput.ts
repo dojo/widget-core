@@ -44,15 +44,16 @@ registerSuite({
 		textInput.onInput(<any> { target: { value: 'hello world' } });
 		assert.equal(textInput.value, 'hello world');
 	},
-	'input type'() {
-		const textInput = createTextInput({
+	'input types'() {
+		const emailInput = createTextInput({
 			properties: {
 				type: 'email'
 			}
 		});
-		const vnode = <VNode> textInput.__render__();
+		const vnode = <VNode> emailInput.__render__();
 		const inputEl = vnode.children![0];
 
+		assert.strictEqual(inputEl.vnodeSelector, 'input');
 		assert.strictEqual(inputEl.properties!.type, 'email');
 	}
 });

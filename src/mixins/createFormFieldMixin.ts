@@ -35,16 +35,17 @@ export interface FormFieldMixinState<V> {
 	/**
 	 * Accessibility attributes
 	 */
+	checked: boolean;
 	descriptionID?: string;
 	disabled?: boolean;
 	inputmode?: string;
+	invalid?: boolean;
 	maxlength?: number | string;
 	minlength?: number | string;
 	multiple?: boolean;
 	placeholder?: string;
 	readonly?: boolean;
 	required?: boolean;
-	invalid?: boolean;
 }
 
 export interface ValueChangeEvent<V> extends EventCancelableObject<'valuechange', FormFieldMixin<V, FormFieldMixinState<V>>> {
@@ -160,7 +161,7 @@ export function stringToValue(str: string): any {
 }
 
 export function getFormFieldNodeAttributes(state: any): VNodeProperties {
-	const allowedAttributes = ['value', 'type', 'descriptionID', 'disabled', 'inputmode', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'invalid'];
+	const allowedAttributes = ['value', 'type', 'checked', 'descriptionID', 'disabled', 'inputmode', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'invalid'];
 	const nodeAttributes: any = {};
 
 	for (const key in state) {
@@ -179,6 +180,9 @@ export function getFormFieldNodeAttributes(state: any): VNodeProperties {
 		else if (key === 'descriptionID') {
 			nodeAttributes['aria-describedby'] = state.descriptionID;
 		}
+		else if ((key === 'maxlength' || key === 'minlength' || key === 'checked') && typeof state[key] !== 'string') {
+			nodeAttributes[key] = '' + state[key];
+		}
 		else {
 			nodeAttributes[key] = state[key];
 		}
@@ -187,7 +191,7 @@ export function getFormFieldNodeAttributes(state: any): VNodeProperties {
 }
 
 function generateWrappedChildren(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode[] {
-	const { type, label, value, state } = this;
+	const { type, value, label, state } = this;
 	const inputAttributes = getFormFieldNodeAttributes(Object.assign({}, state, { type, value }));
 	const children = [
 		v(this.tagName,
