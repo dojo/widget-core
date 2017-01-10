@@ -216,7 +216,7 @@ const createWidget: WidgetFactory = createStateful
 			},
 
 			assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties, changedPropertyKeys: string[]): WidgetProperties {
-				return assign({}, newProperties, { id: this.id });
+				return assign({}, newProperties);
 			},
 
 			onPropertiesChanged: function(this: Widget<WidgetState, WidgetProperties>, properties: WidgetProperties, changedPropertyKeys: string[]): void {
