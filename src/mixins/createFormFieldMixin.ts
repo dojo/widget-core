@@ -192,7 +192,7 @@ export function getFormFieldNodeAttributes(state: any): VNodeProperties {
 
 function generateWrappedChildren(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode[] {
 	const { type, value, label, state } = this;
-	const inputAttributes = getFormFieldNodeAttributes(Object.assign({}, state, { type, value }));
+	const inputAttributes = getFormFieldNodeAttributes(assign({}, state, <WidgetProperties> { type, value }));
 	const children = [
 		v(this.tagName,
 			inputAttributes,
@@ -271,10 +271,10 @@ const createFormMixin: FormMixinFactory = createStateful
 
 				// convert string label to object
 				if (typeof properties['label'] === 'string') {
-					instance.label = Object.assign(labelDefaults, { content: properties['label'] });
+					instance.label = assign(labelDefaults, { content: properties['label'] });
 				}
 				else {
-					instance.label = Object.assign(labelDefaults, properties['label']);
+					instance.label = assign(labelDefaults, properties['label']);
 				}
 			}
 		}
