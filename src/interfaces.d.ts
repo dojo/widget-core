@@ -5,7 +5,7 @@
  * bases.
  */
 import Promise from 'dojo-shim/Promise';
-import { EventedListener, Stateful, StatefulOptions } from 'dojo-interfaces/bases';
+import { EventedListener, Stateful, StatefulOptions, State } from 'dojo-interfaces/bases';
 import { EventTargettedObject, EventTypedObject, Handle, StylesMap } from 'dojo-interfaces/core';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { ComposeFactory } from 'dojo-compose/compose';
@@ -179,7 +179,7 @@ export interface WidgetMixin<P extends WidgetProperties> extends PropertyCompari
 	/**
 	 * Properties passed to affect state
 	 */
-	properties: P;
+	properties: Partial<P>;
 
 	/*
 	 * set properties on the widget
@@ -254,7 +254,7 @@ export interface WidgetProperties extends TagNameMixinProperties {
 	classes?: string[];
 }
 
-export interface WidgetState {
+export interface WidgetState extends State {
 	/**
 	 * Any classes that should be mixed into the widget's VNode upon render.
 	 *
