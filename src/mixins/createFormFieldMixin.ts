@@ -35,7 +35,7 @@ export interface FormFieldMixinState<V> {
 	/**
 	 * Accessibility attributes
 	 */
-	checked: boolean;
+	checked?: boolean;
 	descriptionID?: string;
 	disabled?: boolean;
 	inputmode?: string;
