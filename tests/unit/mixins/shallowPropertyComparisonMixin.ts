@@ -7,22 +7,22 @@ registerSuite({
 	name: 'mixins/shallowPropertyComparisonMixin',
 		'no updated properties'() {
 			const properties = { id: 'id', foo: 'bar' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 0);
 		},
 		'updated properties'() {
 			const properties = { id: 'id', foo: 'baz' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'new properties'() {
 			const properties = { id: 'id', foo: 'bar', bar: 'baz' };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'updated / new properties with falsy values'() {
 			const properties = { id: 'id', foo: null, bar: '', baz: 0, qux: false };
-			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties({ id: 'id', foo: 'bar' }, <any> properties);
+			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(<any> { id: 'id', foo: 'bar' }, <any> properties);
 			assert.lengthOf(updatedKeys, 4);
 			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		},

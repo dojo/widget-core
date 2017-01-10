@@ -112,6 +112,12 @@ export interface WidgetOverloads<P extends WidgetProperties> {
 	 * @param listener The listener to call when the event is emitted
 	 */
 	on(type: 'invalidated', listener: EventedListener<Widget<WidgetState, P>, EventTargettedObject<Widget<WidgetState, P>>>): Handle;
+	/**
+	 * Attach a listener to the properties changed event, which is emitted when a difference in properties passed occurs
+	 *
+	 * @param type The event type to listen for
+	 * @param listener The listener to call when the event is emitted
+	 */
 	on(type: 'properties:changed', listener: EventedListener<Widget<WidgetState, P>, PropertiesChangeEvent<Widget<WidgetState, P>, P>>): Handle;
 }
 
@@ -119,11 +125,11 @@ export interface PropertyComparison<P extends WidgetProperties> {
 	/**
 	 * Determine changed or new property keys on setProperties
 	 */
-	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P): string[];
+	diffProperties<S>(this: S, previousProperties: P, newProperties: P): string[];
 	/**
 	 * Construct properties object for this.properties
 	 */
-	assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
+	assignProperties<S>(this: S, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
 }
 
 export interface WidgetMixin<P extends WidgetProperties> extends PropertyComparison<P> {
