@@ -25,8 +25,8 @@ export interface ChildNodeFunction {
 	(this: Widget<WidgetState, WidgetProperties>): DNode[];
 }
 
-export interface PropertiesChangeEvent<T> extends EventTypedObject<'properties:changed'> {
-	properties: WidgetProperties;
+export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends EventTypedObject<'properties:changed'> {
+	properties: P;
 	changedPropertyKeys: string[];
 	target: T;
 }
@@ -100,21 +100,33 @@ export interface WNode {
 
 export type DNode = HNode | WNode | string | null;
 
-export type Widget<S extends WidgetState, P extends WidgetProperties> = Stateful<S> & WidgetMixin<P> & WidgetOverloads & VNodeEvented;
+export type Widget<S extends WidgetState, P extends WidgetProperties> = Stateful<S> & WidgetMixin<P> & WidgetOverloads<P> & VNodeEvented;
 
 export interface WidgetFactory extends ComposeFactory<Widget<WidgetState, WidgetProperties>, WidgetOptions<WidgetState, WidgetProperties>> {}
 
-export interface WidgetOverloads {
+export interface WidgetOverloads<P extends WidgetProperties> {
 	/**
 	 * Attach a listener to the invalidated event, which is emitted when the `.invalidate()` method is called
 	 *
 	 * @param type The event type to listen for
 	 * @param listener The listener to call when the event is emitted
 	 */
-	on(type: 'invalidated', listener: EventedListener<Widget<WidgetState, WidgetProperties>, EventTargettedObject<Widget<WidgetState, WidgetProperties>>>): Handle;
+	on(type: 'invalidated', listener: EventedListener<Widget<WidgetState, P>, EventTargettedObject<Widget<WidgetState, P>>>): Handle;
+	on(type: 'properties:changed', listener: EventedListener<Widget<WidgetState, P>, PropertiesChangeEvent<Widget<WidgetState, P>, P>>): Handle;
 }
 
-export interface WidgetMixin<P extends WidgetProperties> {
+export interface PropertyComparison<P extends WidgetProperties> {
+	/**
+	 * Determine changed or new property keys on setProperties
+	 */
+	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P): string[];
+	/**
+	 * Construct properties object for this.properties
+	 */
+	assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
+}
+
+export interface WidgetMixin<P extends WidgetProperties> extends PropertyComparison<P> {
 	/**
 	 * Classes which are applied upon render.
 	 *
@@ -151,14 +163,10 @@ export interface WidgetMixin<P extends WidgetProperties> {
 	 */
 	properties: P;
 
-	setProperties(this: Widget<WidgetState, WidgetProperties>, properties: P): void;
-
-	/**
-	 * Determine changed or new property keys on render.
+	/*
+	 * set properties on the widget
 	 */
-	diffProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P): string[];
-
-	assignProperties(this: Widget<WidgetState, WidgetProperties>, previousProperties: P, newProperties: P, changedPropertyKeys: string[]): P;
+	setProperties(this: Widget<WidgetState, WidgetProperties>, properties: P): void;
 
 	/**
 	 * Called when the properties have changed

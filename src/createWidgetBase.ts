@@ -282,7 +282,7 @@ const createWidget: WidgetFactory = createStateful
 				children: []
 			});
 
-			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<Widget<WidgetState, WidgetProperties>>) => {
+			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<Widget<WidgetState, WidgetProperties>, WidgetProperties>) => {
 				instance.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
 
