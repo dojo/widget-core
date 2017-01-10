@@ -25,9 +25,21 @@ export interface ChildNodeFunction {
 	(this: Widget<WidgetState, WidgetProperties>): DNode[];
 }
 
+/**
+ * the event emitted on properties:changed
+ */
 export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends EventTypedObject<'properties:changed'> {
+	/**
+	 * the full set of properties
+	 */
 	properties: P;
+	/**
+	 * the changed properties between setProperty calls
+	 */
 	changedPropertyKeys: string[];
+	/**
+	 * the target (this)
+	 */
 	target: T;
 }
 
