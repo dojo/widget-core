@@ -105,7 +105,7 @@ registerSuite({
 		}
 	},
 	onPropertiesChanged() {
-		const widgetBase = createWidgetBase({ id: 'id' });
+		const widgetBase = createWidgetBase();
 		widgetBase.onPropertiesChanged(<any> { foo: 'bar' }, [ 'foo' ]);
 		assert.equal((<any> widgetBase.state).foo, 'bar');
 	},
