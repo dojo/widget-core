@@ -135,7 +135,32 @@ registerSuite({
 		externalStateMixin.setState({ id: '1', foo: 'baz', baz: 'qux' });
 		return promise;
 	},
-	diffProperties: {
+	'on "properties:changed" event': {
+		'initial properties'() {
+			const externalStateMixin = externalStateWithProperties();
+
+			externalStateMixin.properties = {
+				id: '1',
+				externalState: store
+			};
+
+			const promise = new Promise((resolve, reject) => {
+				externalStateMixin.on('state:changed', () => {
+					try {
+						assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'bar' });
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
+
+			externalStateMixin.emit({
+				type: 'properties:changed'
+			});
+			return promise;
+		},
+
 		'call destroy on observe handle if externalState has been updated.'() {
 			const externalStateMixin = externalStateWithProperties();
 			const newStore = createObservableStore({ data: [ { id: '1', foo: 'bar' } ]});
@@ -158,8 +183,12 @@ registerSuite({
 								id: '1'
 							};
 							externalStateMixin.properties = updatedProperties;
-							externalStateMixin.diffProperties(initialProperties, updatedProperties);
-							externalStateMixin.observe();
+							externalStateMixin.emit({
+								type: 'properties:changed',
+								target: externalStateMixin,
+								properties: updatedProperties,
+								changedPropertyKeys: [ 'externalState' ]
+							});
 						}
 						else {
 							assert.equal(target.properties.externalState, newStore);
@@ -171,7 +200,13 @@ registerSuite({
 				});
 			});
 
-			externalStateMixin.observe();
+			externalStateMixin.emit({
+				type: 'properties:changed',
+				target: externalStateMixin,
+				properties: initialProperties,
+				changedPropertyKeys: [ 'externalState', 'id' ]
+			});
+
 			return promise;
 		},
 		'call destroy on observe handle if id has been updated.'() {
@@ -195,8 +230,12 @@ registerSuite({
 								id: '2'
 							};
 							externalStateMixin.properties = updatedProperties;
-							externalStateMixin.diffProperties(initialProperties, updatedProperties);
-							externalStateMixin.observe();
+							externalStateMixin.emit({
+								type: 'properties:changed',
+								target: externalStateMixin,
+								properties: updatedProperties,
+								changedPropertyKeys: [ 'id' ]
+							});
 						}
 						else {
 							assert.equal(target.properties.id, '2');
@@ -208,32 +247,14 @@ registerSuite({
 				});
 			});
 
-			externalStateMixin.observe();
+			externalStateMixin.emit({
+				type: 'properties:changed',
+				target: externalStateMixin,
+				properties: initialProperties,
+				changedPropertyKeys: [ 'externalState', 'id' ]
+			});
+
 			return promise;
 		}
-	},
-	'on "properties:changed" event'() {
-		const externalStateMixin = externalStateWithProperties();
-
-		externalStateMixin.properties = {
-			id: '1',
-			externalState: store
-		};
-
-		const promise = new Promise((resolve, reject) => {
-			externalStateMixin.on('state:changed', () => {
-				try {
-					assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'bar' });
-					resolve();
-				} catch (err) {
-					reject(err);
-				}
-			});
-		});
-
-		externalStateMixin.emit({
-			type: 'properties:changed'
-		});
-		return promise;
 	}
 });

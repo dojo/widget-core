@@ -74,6 +74,16 @@ function replaceState(instance: ExternalState, state: State) {
 	instance.emit(eventObject);
 }
 
+function onPropertiesChanged(instance: ExternalState, properties: ExternalStateProperties, changedPropertyKeys: string[]) {
+	const internalState = internalStateMap.get(instance);
+	if (internalState) {
+		if (changedPropertyKeys.indexOf('externalState') !== -1 || changedPropertyKeys.indexOf('id') !== -1) {
+			internalState.handle.destroy();
+		}
+	}
+	instance.observe();
+}
+
 /**
  * ExternalState Factory
  */
@@ -126,24 +136,9 @@ const externalStateFactory: ExternalStateFactory = createEvented.mixin({
 				});
 		}
 	},
-	aspectAdvice: {
-		before: {
-			diffProperties(this: ExternalState, ...args: any[]): any[] {
-				const internalState = internalStateMap.get(this);
-				const [ previousProperties, newProperties ] = args;
-
-				if (internalState) {
-					if (newProperties.externalState !== previousProperties.externalState || newProperties.id !== previousProperties.id) {
-						internalState.handle.destroy();
-					}
-				}
-				return args;
-			}
-		}
-	},
-	initialize(instance: ExternalStateMixin) {
+	initialize(instance: ExternalState) {
 		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<ExternalStateMixin, ExternalStateProperties>) => {
-			instance.observe();
+			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 	}
 });
