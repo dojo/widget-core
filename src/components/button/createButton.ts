@@ -3,9 +3,21 @@ import createWidgetBase from '../../createWidgetBase';
 import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
 
 export interface ButtonProperties extends WidgetProperties {
+	/*
+	 * Text content of button
+	 */
 	content?: string;
+
+	/**
+	 * The button's name attribute
+	 */
 	name?: string;
+
 	onClick?(event: MouseEvent): void;
+
+	/*
+	 * Button type can be "submit", "reset", "button", or "menu"
+	 */
 	type?: string;
 	disabled?: boolean;
 
@@ -33,7 +45,7 @@ const createButton: ButtonFactory = createWidgetBase
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
 					return {
-						innerHTML: this.state.content,
+						innerHTML: this.properties.content,
 						type: this.properties.type,
 						onclick: this.onClick,
 						name: this.properties.name,
