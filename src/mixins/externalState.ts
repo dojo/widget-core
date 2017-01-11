@@ -2,6 +2,7 @@ import { Handle } from 'dojo-interfaces/core';
 import { ObservablePatchableStore } from 'dojo-interfaces/abilities';
 import WeakMap from 'dojo-shim/WeakMap';
 import { assign } from 'dojo-core/lang';
+import { PropertiesChangeEvent } from './../interfaces';
 import { State, StatefulMixin } from 'dojo-interfaces/bases';
 import createEvented from 'dojo-compose/bases/createEvented';
 import { ComposeFactory } from 'dojo-compose/compose';
@@ -129,21 +130,21 @@ const externalStateFactory: ExternalStateFactory = createEvented.mixin({
 		before: {
 			diffProperties(this: ExternalState, ...args: any[]): any[] {
 				const internalState = internalStateMap.get(this);
-				const { properties: { id, externalState } } = this;
-				const [ previousProperties ] = args;
+				const [ previousProperties, newProperties ] = args;
 
 				if (internalState) {
-					if (externalState !== previousProperties.externalState || id !== previousProperties.id) {
+					if (newProperties.externalState !== previousProperties.externalState || newProperties.id !== previousProperties.id) {
 						internalState.handle.destroy();
 					}
 				}
 				return args;
-			},
-			applyChangedProperties(this: ExternalStateMixin, ...args: any[]) {
-				this.observe();
-				return args;
 			}
 		}
+	},
+	initialize(instance: ExternalStateMixin) {
+		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<ExternalStateMixin, ExternalStateProperties>) => {
+			instance.observe();
+		}));
 	}
 });
 

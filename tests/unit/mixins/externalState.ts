@@ -8,7 +8,7 @@ let store: ObservableStore<{}, {}, any>;
 
 const externalStateWithProperties = compose({
 	properties: <any> {},
-	diffProperties(this: any, previousProperties: any) { },
+	diffProperties(this: any, previousProperties: any, newProperties: any) { },
 	applyChangedProperties(this: any) { }
 }).mixin(externalState);
 
@@ -148,11 +148,12 @@ registerSuite({
 						if (intialStateChange) {
 							intialStateChange = false;
 							assert.equal(target.properties.externalState, store);
-							externalStateMixin.properties = {
+							const updatedProperties = {
 								externalState: newStore,
 								id: '1'
 							};
-							externalStateMixin.diffProperties(initialProperties);
+							externalStateMixin.properties = updatedProperties;
+							externalStateMixin.diffProperties(initialProperties, updatedProperties);
 							externalStateMixin.observe();
 						}
 						else {
@@ -184,11 +185,12 @@ registerSuite({
 						if (intialStateChange) {
 							intialStateChange = false;
 							assert.equal(target.properties.id, '1');
-							externalStateMixin.properties = {
+							const updatedProperties = {
 								externalState: store,
 								id: '2'
 							};
-							externalStateMixin.diffProperties(initialProperties);
+							externalStateMixin.properties = updatedProperties;
+							externalStateMixin.diffProperties(initialProperties, updatedProperties);
 							externalStateMixin.observe();
 						}
 						else {
@@ -205,7 +207,7 @@ registerSuite({
 			return promise;
 		}
 	},
-	applyChangedPropertie() {
+	'on "properties:changed" event'() {
 		const externalStateMixin = externalStateWithProperties();
 
 		externalStateMixin.properties = {
@@ -224,7 +226,9 @@ registerSuite({
 			});
 		});
 
-		externalStateMixin.applyChangedProperties();
+		externalStateMixin.emit({
+			type: 'properties:changed'
+		});
 		return promise;
 	}
 });
