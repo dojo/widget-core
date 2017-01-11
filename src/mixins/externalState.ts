@@ -87,7 +87,7 @@ const externalStateFactory: ExternalStateFactory = createEvented.mixin({
 			const internalState = internalStateMap.get(this);
 			const { properties: { id, externalState } } = this;
 			if (!id || !externalState) {
-				throw new Error('id and stateFrom are required to observe state');
+				throw new Error('id and externalState are required to observe state');
 			}
 
 			if (internalState) {
