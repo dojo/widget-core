@@ -42,15 +42,18 @@ registerSuite({
 		},
 		observe() {
 			const externalStateMixin = externalStateWithProperties();
-
-			externalStateMixin.properties = {
+			let stateChangeCount = 0;
+			const properties = {
 				id: '1',
 				externalState: store
 			};
+			externalStateMixin.properties = properties;
 
 			const promise = new Promise((resolve, reject) => {
 				externalStateMixin.on('state:changed', ({ state }: any) => {
+					stateChangeCount++;
 					try {
+						assert.equal(stateChangeCount, 1);
 						assert.deepEqual(state, { id: '1', foo: 'bar'});
 						resolve();
 					} catch (err) {
@@ -59,6 +62,7 @@ registerSuite({
 				});
 			});
 
+			externalStateMixin.diffProperties({}, properties);
 			externalStateMixin.observe();
 			externalStateMixin.observe();
 			return promise;
