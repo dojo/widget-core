@@ -1,6 +1,7 @@
 import { Handle } from 'dojo-interfaces/core';
 import { ObservablePatchableStore } from 'dojo-interfaces/abilities';
 import WeakMap from 'dojo-shim/WeakMap';
+import { includes } from 'dojo-shim/array';
 import { assign } from 'dojo-core/lang';
 import { PropertiesChangeEvent } from './../interfaces';
 import { State, StatefulMixin } from 'dojo-interfaces/bases';
@@ -77,7 +78,7 @@ function replaceState(instance: ExternalState, state: State) {
 function onPropertiesChanged(instance: ExternalState, properties: ExternalStateProperties, changedPropertyKeys: string[]) {
 	const internalState = internalStateMap.get(instance);
 	if (internalState) {
-		if (changedPropertyKeys.indexOf('externalState') !== -1 || changedPropertyKeys.indexOf('id') !== -1) {
+		if (includes(changedPropertyKeys, 'externalState') || includes(changedPropertyKeys, 'id')) {
 			internalState.handle.destroy();
 		}
 	}
