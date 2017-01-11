@@ -11,6 +11,7 @@ export interface TypedTargetEvent<T extends EventTarget> extends Event {
 }
 
 export interface TextInputProperties extends WidgetProperties {
+	type?: string;
 	name?: string;
 	placeholder?: string
 }

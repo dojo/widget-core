@@ -21,6 +21,14 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 
 }
 
+export interface FormFieldMixinProperties extends WidgetProperties {
+	label?: string | {
+		content?: string,
+		position?: string,
+		hidden?: boolean
+	};
+}
+
 export interface FormFieldMixinState<V> {
 	/**
 	 * The form widget's name
@@ -254,7 +262,7 @@ const createFormMixin: FormMixinFactory = createStateful
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type, properties }: FormFieldMixinOptions<any, FormFieldMixinState<any>> & WidgetOptions<WidgetState, WidgetProperties> = {}
+			{ value, type, properties }: FormFieldMixinOptions<any, FormFieldMixinState<any>> & WidgetOptions<WidgetState, FormFieldMixinProperties> = {}
 		) {
 			if (value) {
 				instance.setState({ value });
