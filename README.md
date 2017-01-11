@@ -363,13 +363,44 @@ const createListWidget: ListFactory = createWidgetBase.mixin({
 export default createListWidget;
 ```
 
-### Using Event Handlers
+### Event Handlers
 
-For more complex widgets that require event handlers 
+The recommended pattern for event handlers is to declare them on the widget class, referencing the function using `this` generally within `getChildrenNodes` or a `nodeAttribute`.
 
-When autEvent handlers are **required** 
+Event handlers are can be encapsulated within the widget as demonstrated in the first example or they can delegate to a function that passed via `properties` shown in the second example.
+
+*internally defined handler*
 
 ```ts
+const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
+	mixin: {
+		onClick: function (this: MyWidget): void {
+			this.setState(!this.state.selected);
+		},
+		getChildrenNodes(this: MyWidget): DNode[] {
+			const { state: { selected } } = this;
+			
+			return [
+				v('input', { type: 'checkbox', onclick: this.onClick }),
+				v('input', { type: 'text', disabled: this.state.selected })
+			];
+		}
+	}
+});
+
+```
+
+*Handler passed via properties*
+
+```ts
+const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
+	mixin: {
+		onClick: function (this: MyWidget): void {
+			this.properties.mySpecialFunction();
+		}
+		...
+	}
+});
 
 ```
 
