@@ -40,5 +40,15 @@ registerSuite({
 		inputEl = vnode.children![0];
 
 		assert.strictEqual(inputEl.properties!.checked, 'true');
+	},
+	nodeAttributes() {
+		const checkbox = createCheckbox();
+		const nodeAttributes = checkbox.getNodeAttributes();
+		assert.equal(nodeAttributes.onchange, checkbox.onChange);
+	},
+	onInput() {
+		const checkbox = createCheckbox();
+		checkbox.onChange(<any> { target: { value: 'hello world' } });
+		assert.equal(checkbox.value, 'hello world');
 	}
 });

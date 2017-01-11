@@ -9,24 +9,26 @@ registerSuite({
 		const select = createSelect({
 			properties: {
 				id: 'foo',
-				name: 'bar'
-			},
-			options: {
-				'option1': 'First',
-				'option2': 'Second'
+				name: 'bar',
+				options: {
+					'option1': 'First',
+					'option2': 'Second'
+				}
 			}
 		});
 
 		assert.strictEqual(select.state.id, 'foo');
 		assert.strictEqual(select.state.name, 'bar');
-		assert.lengthOf(Object.keys(select.options), 2);
+		assert.lengthOf(Object.keys(select.state.options), 2);
 		assert.strictEqual(select.value, 'option1');
 	},
 	render() {
 		const select = createSelect({
-			options: {
-				'option1': 'First',
-				'option2': 'Second'
+			properties: {
+				options: {
+					'option1': 'First',
+					'option2': 'Second'
+				}
 			}
 		});
 		const vnode = <VNode> select.__render__();
@@ -38,5 +40,15 @@ registerSuite({
 		assert.strictEqual(selectEl.children![0].properties!.value, 'option1');
 		assert.strictEqual(selectEl.children![1].properties!.innerHTML, 'Second');
 		assert.strictEqual(selectEl.children![1].properties!.value, 'option2');
+	},
+	nodeAttributes() {
+		const select = createSelect();
+		const nodeAttributes = select.getNodeAttributes();
+		assert.equal(nodeAttributes.onchange, select.onChange);
+	},
+	onInput() {
+		const select = createSelect();
+		select.onChange(<any> { target: { value: 'hello world' } });
+		assert.equal(select.value, 'hello world');
 	}
 });

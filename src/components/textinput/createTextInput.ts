@@ -31,8 +31,8 @@ const createTextInput: TextInputFactory = createWidgetBase
 			],
 			tagName: 'input'
 		},
-		initialize(instance, { properties = {} }: TextInput) {
-			if ( !properties.type ) {
+		initialize(instance) {
+			if ( !instance.properties.type ) {
 				instance.setState({ type: 'text' });
 			}
 		}

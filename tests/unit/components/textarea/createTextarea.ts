@@ -33,5 +33,15 @@ registerSuite({
 		assert.strictEqual(inputEl.vnodeSelector, 'textarea');
 		assert.strictEqual(inputEl.properties!.name, 'bar');
 		assert.strictEqual(inputEl.properties!['maxlength'], '200');
+	},
+	nodeAttributes() {
+		const textarea = createTextarea();
+		const nodeAttributes = textarea.getNodeAttributes();
+		assert.equal(nodeAttributes.oninput, textarea.onInput);
+	},
+	onInput() {
+		const textarea = createTextarea();
+		textarea.onInput(<any> { target: { value: 'hello world' } });
+		assert.equal(textarea.value, 'hello world');
 	}
 });

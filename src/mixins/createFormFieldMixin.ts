@@ -1,11 +1,11 @@
 import { VNodeProperties } from '@dojo-interfaces/vdom';
 import { ComposeFactory } from '@dojo-compose/compose';
 import createStateful from '@dojo-compose/bases/createStateful';
-import createCancelableEvent from '@dojo-compose/bases/createCancelableEvent';
+import createCancelableEvent from 'dojo-compose/bases/createCancelableEvent';
 import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo-interfaces/core';
 import { EventedListener, Stateful, StatefulOptions } from '@dojo-interfaces/bases';
 import { assign } from '@dojo-core/lang';
-import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties, FormLabel } from './../interfaces';
+import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabel } from './../interfaces';
 import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
@@ -232,7 +232,7 @@ const createFormMixin: FormMixinFactory = createStateful
 						nodeAttributes['value'] = value;
 					}
 					// use this.type if no state.type is included
-					else if (key === 'type' && !state.hasOwnProperty('type')) {
+					else if (key === 'type' && !state.type) {
 						nodeAttributes['type'] = type;
 					}
 					else if (key === 'readonly' && state.readonly) {

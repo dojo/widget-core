@@ -40,5 +40,15 @@ registerSuite({
 		inputEl = vnode.children![0];
 
 		assert.strictEqual(inputEl.properties!.checked, 'true');
+	},
+	nodeAttributes() {
+		const radio = createRadio();
+		const nodeAttributes = radio.getNodeAttributes();
+		assert.equal(nodeAttributes.onchange, radio.onChange);
+	},
+	onInput() {
+		const radio = createRadio();
+		radio.onChange(<any> { target: { value: 'hello world' } });
+		assert.equal(radio.value, 'hello world');
 	}
 });
