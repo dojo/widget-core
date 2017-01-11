@@ -26,9 +26,7 @@ const createButton: ButtonFactory = createWidgetBase
 	.mixin({
 		mixin: {
 			onClick(this: Button, event: MouseEvent) {
-				if (this.properties.onClick) {
-					this.properties.onClick.call(this, event);
-				}
+				this.properties.onClick && this.properties.onClick(event);
 			},
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
