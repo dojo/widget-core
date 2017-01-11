@@ -17,7 +17,7 @@ For more background on dojo-widgets, there is a document describing the [widgeti
     	- [Simple Widgets](#simple-widgets)
     	- [d](#d)
     	- [Widgets with Children](#widgets-with-children)
-    - [Authoring Custom Widgets](#authoring-custom-widgets)
+    - [Authoring Widgets](#authoring-widgets)
     - [Event Handlers](#event-handlers)
     - [Projector](#projector)
     - [Internationalization](#internationalization)
@@ -365,9 +365,9 @@ export default createListWidget;
 
 ### Event Handlers
 
-The recommended pattern for event handlers is to declare them on the widget class, referencing the function using `this` generally within `getChildrenNodes` or a `nodeAttribute`.
+The recommended pattern for event handlers is to declare them on the widget class, referencing the function using `this` most commonly within `getChildrenNodes` or a `nodeAttributes` function.
 
-Event handlers are can be encapsulated within the widget as demonstrated in the first example or they can delegate to a function that passed via `properties` shown in the second example.
+Event handlers can be internal logic encapsulated within a widget as shown in the first example or they can delegate to a function that is passed via `properties` as shown in the second example.
 
 *internally defined handler*
 
