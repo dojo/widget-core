@@ -5,7 +5,7 @@ import createCancelableEvent from '@dojo-compose/bases/createCancelableEvent';
 import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo-interfaces/core';
 import { EventedListener, Stateful, StatefulOptions } from '@dojo-interfaces/bases';
 import { assign } from '@dojo-core/lang';
-import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties } from './../interfaces';
+import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties, FormLabel } from './../interfaces';
 import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
@@ -22,11 +22,7 @@ export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> exte
 }
 
 export interface FormFieldMixinProperties extends WidgetProperties {
-	label?: string | {
-		content?: string,
-		position?: string,
-		hidden?: boolean
-	};
+	label?: string | FormLabel;
 }
 
 export interface FormFieldMixinState<V> {
@@ -41,11 +37,25 @@ export interface FormFieldMixinState<V> {
 	value?: V;
 
 	/**
+	 * The type of the form field (equates to the `type` attribute in the DOM)
+	 */
+	type?: string;
+
+	/**
+	 * Prevents the user from interacting with the form field
+	 */
+	disabled?: boolean;
+
+	/**
+	 * Label settings
+	 */
+	label?: FormLabel;
+
+	/**
 	 * Accessibility attributes
 	 */
 	checked?: boolean;
 	descriptionID?: string;
-	disabled?: boolean;
 	inputmode?: string;
 	invalid?: boolean;
 	maxlength?: number | string;
@@ -75,14 +85,19 @@ export interface ValueChangeEvent<V> extends EventCancelableObject<'valuechange'
 
 export interface FormField<V> {
 	/**
-	 * An array of functions that generate the node attributes on a render
+	 * A function that generates node attribtues for the child form field
 	 */
-	nodeAttributes: NodeAttributeFunction<this>[];
+	getFormFieldNodeAttributes: NodeAttributeFunction<this>;
 
 	/**
 	 * Override the default getNode function on createWidgetBase to return child input
 	 */
 	getNode(): DNode;
+
+	/**
+	 * An array of functions that generate the node attributes on a render
+	 */
+	nodeAttributes?: NodeAttributeFunction<this>[];
 
 	/**
 	 * The HTML type for this widget
@@ -95,13 +110,9 @@ export interface FormField<V> {
 	value?: string;
 
 	/**
-	 * Label settings
+	 * Default values for a form field label
 	 */
-	label?: {
-		content: string,
-		position: string,
-		hidden: boolean
-	};
+	labelDefaults: FormLabel;
 }
 
 export interface FormFieldOverride<V> {
@@ -168,64 +179,6 @@ export function stringToValue(str: string): any {
 	}
 }
 
-export function getFormFieldNodeAttributes(state: any): VNodeProperties {
-	const allowedAttributes = ['value', 'type', 'checked', 'descriptionID', 'disabled', 'inputmode', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'invalid'];
-	const nodeAttributes: any = {};
-
-	for (const key in state) {
-		if (allowedAttributes.indexOf(key) === -1) {
-			continue;
-		}
-
-		// handle cases that aren't 1-to-1
-		if (key === 'readonly' && state.readonly) {
-			nodeAttributes['readonly'] = 'readonly';
-			nodeAttributes['aria-readonly'] = true;
-		}
-		else if (key === 'invalid') {
-			nodeAttributes['aria-invalid'] = state.invalid;
-		}
-		else if (key === 'descriptionID') {
-			nodeAttributes['aria-describedby'] = state.descriptionID;
-		}
-		else if ((key === 'maxlength' || key === 'minlength' || key === 'checked') && typeof state[key] !== 'string') {
-			nodeAttributes[key] = '' + state[key];
-		}
-		else {
-			nodeAttributes[key] = state[key];
-		}
-	}
-	return nodeAttributes;
-}
-
-function generateWrappedChildren(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode[] {
-	const { type, value, label, state } = this;
-	const inputAttributes = getFormFieldNodeAttributes(assign({}, state, <WidgetProperties> { type, value }));
-	const children = [
-		v(this.tagName,
-			inputAttributes,
-			this.getChildrenNodes()
-		)
-	];
-
-	if (label) {
-		// add label text
-		if (label.content.length > 0) {
-			children.push(v('span', {
-				innerHTML: label.content,
-				classes: { 'visually-hidden': label.hidden }
-			}));
-		}
-
-		// set correct order
-		if (label.position === 'above') {
-			children.reverse();
-		}
-	}
-
-	return children;
-}
-
 const createFormMixin: FormMixinFactory = createStateful
 	.mixin({
 		mixin: <FormField<any>> {
@@ -249,41 +202,118 @@ const createFormMixin: FormMixinFactory = createStateful
 				}
 			},
 
-			getNode(this: Widget<WidgetState, WidgetProperties> & FormField<any>): DNode {
-				const { label } = this;
+			labelDefaults: {
+				content: '',
+				position: 'below',
+				hidden: false
+			},
+
+			getFormFieldNodeAttributes(this: FormFieldMixin<any, FormFieldMixinState<any>>): VNodeProperties {
+				const { value, type, state } = this;
+				const stateAttributeKeys = Object.keys(state);
+				if (value) {
+					stateAttributeKeys.push('value');
+				}
+				if (type) {
+					stateAttributeKeys.push('type');
+				}
+
+				const allowedAttributes = ['value', 'type', 'checked', 'descriptionID', 'disabled', 'inputmode', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'invalid'];
+				const nodeAttributes: any = {};
+
+				for (const key of allowedAttributes) {
+
+					if (stateAttributeKeys.indexOf(key) === -1) {
+						continue;
+					}
+
+					// handle cases that aren't 1-to-1
+					if (key === 'value') {
+						nodeAttributes['value'] = value;
+					}
+					// use this.type if no state.type is included
+					else if (key === 'type' && !state.hasOwnProperty('type')) {
+						nodeAttributes['type'] = type;
+					}
+					else if (key === 'readonly' && state.readonly) {
+						nodeAttributes['readonly'] = 'readonly';
+						nodeAttributes['aria-readonly'] = true;
+					}
+					else if (key === 'invalid') {
+						nodeAttributes['aria-invalid'] = state.invalid;
+					}
+					else if (key === 'descriptionID') {
+						nodeAttributes['aria-describedby'] = state.descriptionID;
+					}
+					else if ((key === 'maxlength' || key === 'minlength' || key === 'checked') && typeof state[key] !== 'string') {
+						nodeAttributes[key] = '' + state[key];
+					}
+					else {
+						nodeAttributes[key] = state[key];
+					}
+				}
+				return nodeAttributes;
+			},
+
+			getNode(this: Widget<FormFieldMixinState<any>, WidgetProperties> & FormField<any>): DNode {
+				const { label } = this.state;
 				let tag = label ? 'label' : 'div';
 
 				if (this.classes.length) {
 					tag = `${this.tagName}.${this.classes.join('.')}`;
 				}
 
-				return v(tag, this.getNodeAttributes(), generateWrappedChildren.call(this));
+				return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
+			}
+		},
+		aspectAdvice: {
+			after: {
+				getChildrenNodes(this: Widget<FormFieldMixinState<any>, WidgetProperties> & FormField<any>, result: DNode[]) {
+					let { label } = this.state;
+					const inputAttributes = this.getFormFieldNodeAttributes.call(this);
+					const children = [
+						v(this.tagName,
+							inputAttributes,
+							result
+						)
+					];
+
+					if (label) {
+						// convert string label to object
+						if (typeof label === 'string') {
+							label = assign({}, this.labelDefaults, { content: label });
+						}
+						else {
+							label = assign({}, this.labelDefaults, label);
+						}
+
+						// add label text
+						if (label.content.length > 0) {
+							children.push(v('span', {
+								innerHTML: label.content,
+								classes: { 'visually-hidden': label.hidden }
+							}));
+						}
+
+						// set correct order
+						if (label.position === 'above') {
+							children.reverse();
+						}
+					}
+
+					return children;
+				}
 			}
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type, properties }: FormFieldMixinOptions<any, FormFieldMixinState<any>> & WidgetOptions<WidgetState, FormFieldMixinProperties> = {}
+			{ value, type }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
 		) {
 			if (value) {
 				instance.setState({ value });
 			}
 			if (type) {
 				instance.type = type;
-			}
-			if (properties && properties.hasOwnProperty('label')) {
-				const labelDefaults = {
-					content: '',
-					position: 'below',
-					hidden: false
-				};
-
-				// convert string label to object
-				if (typeof properties['label'] === 'string') {
-					instance.label = assign(labelDefaults, { content: properties['label'] });
-				}
-				else {
-					instance.label = assign(labelDefaults, properties['label']);
-				}
 			}
 		}
 	});

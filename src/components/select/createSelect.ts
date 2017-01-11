@@ -1,13 +1,8 @@
 import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from '../../createWidgetBase';
-import { Widget, WidgetOptions, WidgetState, WidgetProperties, DNode } from './../../interfaces';
+import { Widget, WidgetOptions, WidgetState, WidgetProperties, DNode, TypedTargetEvent } from './../../interfaces';
 import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
 import { v } from '../../d';
-
-/* TODO: I suspect this needs to go somewhere else */
-export interface TypedTargetEvent<T extends EventTarget> extends Event {
-	target: T;
-}
 
 export type SelectInputState = WidgetState & FormFieldMixinState<string>;
 

@@ -1,14 +1,9 @@
 import createWidgetBase from '../../createWidgetBase';
-import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
+import { VNodeProperties } from '@dojo-interfaces/vdom';
+import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
 import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
 import { DNode } from '../../interfaces';
 import { v } from '../../d';
-
-/* TODO: I suspect this needs to go somewhere else */
-export interface TypedTargetEvent<T extends EventTarget> extends Event {
-	target: T;
-}
 
 export interface TextInputProperties extends WidgetProperties {
 	type?: string;
@@ -37,7 +32,9 @@ const createTextInput: TextInputFactory = createWidgetBase
 			tagName: 'input'
 		},
 		initialize(instance, { properties = {} }: TextInput) {
-			instance.type = properties['type'] || 'text';
+			if ( !properties.type ) {
+				instance.setState({ type: 'text' });
+			}
 		}
 	});
 

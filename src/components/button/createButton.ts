@@ -7,12 +7,12 @@ export interface ButtonProperties extends WidgetProperties {
 	name?: string;
 	onClick?(event: MouseEvent): void;
 	type?: string;
+	disabled?: boolean;
 
 	/**
 	 * Accessibility attributes
 	 */
 	descriptionID?: string;
-	disabled?: boolean;
 	role?: string;
 	pressed?: boolean;
 	hasPopup?: boolean;
@@ -33,15 +33,15 @@ const createButton: ButtonFactory = createWidgetBase
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
 					return {
-						innerHTML: this.properties['content'],
-						type: this.properties['type'],
+						innerHTML: this.state.content,
+						type: this.properties.type,
 						onclick: this.onClick,
-						name: this.properties['name'],
-						role: this.properties['role'],
+						name: this.properties.name,
+						role: this.properties.role,
 						disabled: this.properties.disabled,
 						'aria-pressed': this.properties.pressed,
-						'aria-describedby': this.properties['descriptionID'],
-						'aria-haspopup': this.properties['hasPopup']
+						'aria-describedby': this.properties.descriptionID,
+						'aria-haspopup': this.properties.hasPopup
 					};
 				}
 			],
