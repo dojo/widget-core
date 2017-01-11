@@ -78,9 +78,7 @@ registerSuite({
 		},
 		'replace'() {
 			const projector = createProjector({
-				properties: {
-					tagName: 'body'
-				}
+				tagName: 'body'
 			});
 
 			projector.children = [ v('h2', [ 'foo' ] ) ];

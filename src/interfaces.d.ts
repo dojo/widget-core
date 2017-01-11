@@ -9,7 +9,6 @@ import { EventedListener, Stateful, StatefulOptions, State } from 'dojo-interfac
 import { EventTargettedObject, EventTypedObject, Handle, StylesMap } from 'dojo-interfaces/core';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import { ComposeFactory } from 'dojo-compose/compose';
-import { TagNameMixinProperties } from './mixins/tagNameMixin';
 
 /**
  * A function that is called to return top level node
@@ -249,7 +248,7 @@ export interface WidgetOptions<S extends WidgetState, P extends WidgetProperties
 	tagName?: string;
 }
 
-export interface WidgetProperties extends TagNameMixinProperties {
+export interface WidgetProperties {
 	id?: string;
 	classes?: string[];
 }

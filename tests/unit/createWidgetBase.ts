@@ -1,7 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import Promise from 'dojo-shim/Promise';
-import { assign } from 'dojo-core/lang';
 import createWidgetBase from '../../src/createWidgetBase';
 import { DNode, HNode, WidgetProperties } from './../../src/interfaces';
 import { VNode } from 'dojo-interfaces/vdom';
@@ -339,6 +338,9 @@ registerSuite({
 			let countWidgetCreated = 0;
 			let countWidgetDestroyed = 0;
 			const testChildWidget = createWidgetBase.mixin({
+				mixin: {
+					tagName: 'footer'
+				},
 				aspectAdvice: {
 					before: {
 						destroy() {
@@ -357,7 +359,7 @@ registerSuite({
 						getChildrenNodes: function(this: any): (DNode | null)[] {
 							const properties: WidgetProperties = this.state.classes ? { classes: this.state.classes } : {};
 							return [
-								this.state.hide ? null : w(testChildWidget, assign(<WidgetProperties> {tagName: 'footer' }, properties))
+								this.state.hide ? null : w(testChildWidget, properties)
 							];
 						}
 					}

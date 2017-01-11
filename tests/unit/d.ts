@@ -18,23 +18,23 @@ registerSuite({
 	},
 	w: {
 		'create WNode wrapper'() {
-			const properties: WidgetProperties = { id: 'id', tagName: 'header', classes: [ 'world' ] };
+			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
 			const dNode = w(createWidgetBase, properties);
 			assert.deepEqual(dNode.factory, createWidgetBase);
-			assert.deepEqual(dNode.properties, { tagName: 'header', id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
 		},
 		'create WNode wrapper using a factory label'() {
 			registry.define('my-widget', createWidgetBase);
-			const properties: WidgetProperties = { id: 'id', tagName: 'header', classes: [ 'world' ] };
+			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
 			const dNode = w('my-widget', properties);
 			assert.deepEqual(dNode.factory, 'my-widget');
-			assert.deepEqual(dNode.properties, { tagName: 'header', id: 'id', classes: [ 'world' ] });
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 		},
 		'create WNode wrapper with children'() {
-			const properties: WidgetProperties = { id: 'id', tagName: 'header', classes: [ 'world' ] };
+			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
 			const dNode = w(createWidgetBase, properties, [ w(createWidgetBase, properties) ]);
 			assert.deepEqual(dNode.factory, createWidgetBase);
-			assert.deepEqual(dNode.properties, { tagName: 'header', id: 'id', classes: [ 'world' ] });
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.lengthOf(dNode.children, 1);
 		}
 	},
