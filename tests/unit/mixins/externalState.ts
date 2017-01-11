@@ -1,5 +1,6 @@
 import compose from 'dojo-compose/compose';
 import * as registerSuite from 'intern!object';
+import Promise from 'dojo-shim/Promise';
 import * as assert from 'intern/chai!assert';
 import externalState from '../../../src/mixins/externalState';
 import { createObservableStore, ObservableStore } from 'dojo-stores/store/mixins/createObservableStoreMixin';
