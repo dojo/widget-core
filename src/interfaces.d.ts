@@ -55,9 +55,9 @@ export interface NodeAttributeFunction<T> {
 	(this: T, attributes: VNodeProperties): VNodeProperties;
 }
 
-export type WidgetFactoryFunction = () => Promise<WidgetFactory<Widget<WidgetProperties>, WidgetProperties>>
+export type WidgetFactoryFunction = () => Promise<WidgetBaseFactory>
 
-export type FactoryRegistryItem = WidgetFactory<Widget<WidgetProperties>, WidgetProperties> | Promise<WidgetFactory<Widget<WidgetProperties>, WidgetProperties>> | WidgetFactoryFunction
+export type FactoryRegistryItem = WidgetBaseFactory | Promise<WidgetBaseFactory> | WidgetFactoryFunction
 
 /**
  * Factory Registry
@@ -72,7 +72,7 @@ export interface FactoryRegistryInterface {
 	/**
 	 * Return the registered FactoryRegistryItem for the label.
 	 */
-	get(factoryLabel: string): WidgetFactory<Widget<WidgetProperties>, WidgetProperties> | Promise<WidgetFactory<Widget<WidgetProperties>, WidgetProperties>> | null;
+	get(factoryLabel: string): WidgetBaseFactory | Promise<WidgetBaseFactory> | null;
 
 	/**
 	 * Check if the factory label has already been used to define a FactoryRegistryItem.
@@ -96,7 +96,7 @@ export interface WNode {
 	/**
 	 * Factory to create a widget
 	 */
-	factory: WidgetFactory<Widget<WidgetProperties>, WidgetProperties> | string;
+	factory: WidgetBaseFactory | string;
 
 	/**
 	 * Options used to create factory a widget
