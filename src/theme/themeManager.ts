@@ -48,13 +48,13 @@ const createThemeManager: ThemeManagerFactory = compose({
 		const cacheKey = { baseThemeClasses, overrideClasses };
 
 		if (!cacheMap.has(cacheKey)) {
-			const loadedTheme = themeMap.get(this);
+			const currentTheme = themeMap.get(this);
 			const appliedClasses = Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
 				const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
 				let themeClassSource: Theme = baseThemeClasses;
 
-				if (loadedTheme && loadedTheme.hasOwnProperty(className)) {
-					themeClassSource = loadedTheme;
+				if (currentTheme && currentTheme.hasOwnProperty(className)) {
+					themeClassSource = currentTheme;
 				}
 
 				addClassNameToMap(classMap, themeClassSource, className);
