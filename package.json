@@ -23,7 +23,7 @@
     "test": "grunt test"
   },
   "peerDependencies": {
-    "dojo-compose": "2.0.0-beta.19",
+    "dojo-compose": ">=2.0.0-beta.10",
     "dojo-core": ">=2.0.0-alpha.14",
     "dojo-has": ">=2.0.0-alpha.4",
     "dojo-i18n": ">=2.0.0-alpha.4",
@@ -38,7 +38,7 @@
     "@types/jsdom": "2.0.*",
     "@types/sinon": "^1.16.31",
     "codecov.io": "0.1.6",
-    "dojo-interfaces": "2.0.0-alpha.9",
+    "dojo-interfaces": ">=2.0.0-alpha.9",
     "dojo-loader": ">=2.0.0-beta.7",
     "dojo-stores": "^2.0.0-alpha.7",
     "dts-generator": "~1.7.0",
