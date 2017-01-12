@@ -5,4 +5,5 @@ import './integrations';
 import './main';
 import './FactoryRegistry';
 import './components/all';
+import './theme/all';
 import './mixins/all';
