@@ -4,6 +4,7 @@ import global from 'dojo-core/global';
 import { VNode, VNodeProperties } from 'dojo-interfaces/vdom';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { Widget, WidgetState, WidgetOptions, WidgetProperties } from '../interfaces';
+import Promise from 'dojo-shim/Promise';
 
 /**
  * Represents the state of the projector
