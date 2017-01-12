@@ -1,18 +1,30 @@
-export type ActiveClassMap<T> = {
-	[P in keyof T]?: ActiveClasses;
-}
+import compose, { ComposeFactory } from 'dojo-compose/compose';
 
 export type ActiveClasses = {
 	[key: string]: boolean;
+}
+
+export type ActiveClassMap<T> = {
+	[P in keyof T]?: ActiveClasses;
 }
 
 type Theme = {
 	[key: string]: string;
 }
 
+export interface ThemeManager {
+	setTheme(theme: {}): void;
+	clearTheme(): void;
+	getThemeClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): ActiveClassMap<T>;
+}
+
+export interface ThemeManagerFactory extends ComposeFactory<ThemeManager, {}> { }
+
+const themeManagerThemeMap = new WeakMap<ThemeManager, Theme>();
+
 function addClassNameToMap(classMap: ActiveClasses, classList: Theme, className: string) {
 	if (classList && classList.hasOwnProperty(className)) {
-		// need to split this because css-module composition combines class names with a space
+		// split out the classname because css-module composition combines class names with a space
 		const generatedClassNames: string[] = classList[className].split(' ');
 		generatedClassNames.forEach((generatedClassName) => {
 			classMap[generatedClassName] = true;
@@ -20,29 +32,25 @@ function addClassNameToMap(classMap: ActiveClasses, classList: Theme, className:
 	}
 }
 
-export class ThemeManager  {
-	private _loadedTheme: Theme;
+const createThemeManager: ThemeManagerFactory = compose({
+	setTheme(this: ThemeManager, theme: {}) {
+		themeManagerThemeMap.set(this, theme);
+	},
 
-	setTheme(theme: {}) {
-		this._loadedTheme = theme;
-	}
+	clearTheme(this: ThemeManager) {
+		themeManagerThemeMap.delete(this);
+	},
 
-	clearTheme() {
-		this._loadedTheme = {};
-	}
-
-	getThemeClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): ActiveClassMap<T> {
-		// create the class map to be returned
+	getThemeClasses<T extends {}>(this: ThemeManager, baseThemeClasses: T, overrideClasses?: {}): ActiveClassMap<T> {
+		const loadedTheme = themeManagerThemeMap.get(this);
 		const activeClassMap: ActiveClassMap<T> = <ActiveClassMap<T>> {};
 
-		// loop through the class names
 		Object.keys(baseThemeClasses).forEach((className) => {
 			const classMap: ActiveClasses = activeClassMap[<keyof T> className] = {};
 			let themeClassSource: Theme = baseThemeClasses;
 
-			// check if loadedtheme exists and provides this classname first
-			if (this._loadedTheme && this._loadedTheme.hasOwnProperty(className)) {
-				themeClassSource = this._loadedTheme;
+			if (loadedTheme && loadedTheme.hasOwnProperty(className)) {
+				themeClassSource = loadedTheme;
 			}
 
 			addClassNameToMap(classMap, themeClassSource, className);
@@ -51,8 +59,8 @@ export class ThemeManager  {
 
 		return activeClassMap;
 	}
-};
+});
 
-const themeManager = new ThemeManager();
+const themeManager = createThemeManager();
 
 export default themeManager;
