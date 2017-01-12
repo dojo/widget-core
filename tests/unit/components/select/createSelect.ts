@@ -17,9 +17,9 @@ registerSuite({
 			}
 		});
 
-		assert.strictEqual(select.state.id, 'foo');
-		assert.strictEqual(select.state.name, 'bar');
-		assert.lengthOf(Object.keys(select.state.options), 2);
+		assert.strictEqual(select.properties.id, 'foo');
+		assert.strictEqual(select.properties.name, 'bar');
+		assert.lengthOf(Object.keys(select.properties.options), 2);
 		assert.strictEqual(select.value, 'option1');
 	},
 	render() {

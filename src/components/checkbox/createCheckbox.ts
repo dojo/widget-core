@@ -1,18 +1,15 @@
-import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
-import { Widget, WidgetOptions, WidgetState, WidgetProperties, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
+import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
+import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
 
-export type CheckboxState = WidgetState & FormFieldMixinState<string>;
+export type CheckboxProperties = WidgetProperties & FormFieldMixinProperties;
 
-export type CheckboxOptions = WidgetOptions<CheckboxState, WidgetProperties> & FormFieldMixinOptions<string, CheckboxState>;
-
-export type Checkbox = Widget<CheckboxState, WidgetProperties> & FormFieldMixin<string, CheckboxState> & {
+export type Checkbox = Widget<CheckboxProperties> & FormFieldMixin<string, any> & {
 	onChange(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
-export interface CheckboxFactory extends ComposeFactory<Checkbox, CheckboxOptions> { }
+export interface CheckboxFactory extends WidgetFactory<Checkbox, CheckboxProperties> { }
 
 const createCheckbox: CheckboxFactory = createWidgetBase
 	.mixin(createFormFieldMixin)

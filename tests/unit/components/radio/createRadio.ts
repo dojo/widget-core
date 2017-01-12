@@ -14,8 +14,8 @@ registerSuite({
 			}
 		});
 
-		assert.strictEqual(radio.state.id, 'foo');
-		assert.strictEqual(radio.state.name, 'bar');
+		assert.strictEqual(radio.properties.id, 'foo');
+		assert.strictEqual(radio.properties.name, 'bar');
 		assert.strictEqual(radio.value, 'baz');
 	},
 	render() {

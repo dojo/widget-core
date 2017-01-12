@@ -1,15 +1,9 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from '@dojo-interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
-import { DNode } from '../../interfaces';
-import { v } from '../../d';
+import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
 
-export interface TextInputProperties extends WidgetProperties {
-	type?: string;
-	name?: string;
-	placeholder?: string
-}
+export type TextInputProperties = WidgetProperties & FormFieldMixinProperties;
 
 export type TextInput = Widget<TextInputProperties> & FormFieldMixin<string, any> & {
 	onInput(event: TypedTargetEvent<HTMLInputElement>): void;
@@ -31,11 +25,11 @@ const createTextInput: TextInputFactory = createWidgetBase
 			],
 			tagName: 'input'
 		},
-		initialize(instance) {
+		/* initialize(instance: TextInput) {
 			if ( !instance.properties.type ) {
 				instance.setState({ type: 'text' });
 			}
-		}
+		} */
 	});
 
 export default createTextInput;

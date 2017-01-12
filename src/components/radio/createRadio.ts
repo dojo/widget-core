@@ -1,18 +1,15 @@
-import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
-import { Widget, WidgetOptions, WidgetState, WidgetProperties, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
+import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
+import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
 
-export type RadioState = WidgetState & FormFieldMixinState<string>;
+export type RadioProperties = WidgetProperties & FormFieldMixinProperties;
 
-export type RadioOptions = WidgetOptions<RadioState, WidgetProperties> & FormFieldMixinOptions<string, RadioState>;
-
-export type Radio = Widget<RadioState, WidgetProperties> & FormFieldMixin<string, RadioState> & {
+export type Radio = Widget<RadioProperties> & FormFieldMixin<string, any> & {
 	onChange(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
-export interface RadioFactory extends ComposeFactory<Radio, RadioOptions> { }
+export interface RadioFactory extends WidgetFactory<Radio, RadioProperties> { }
 
 const createRadio: RadioFactory = createWidgetBase
 	.mixin(createFormFieldMixin)

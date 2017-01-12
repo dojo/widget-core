@@ -1,18 +1,15 @@
-import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
-import { Widget, WidgetOptions, WidgetState, WidgetProperties, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
+import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
+import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
 
-export type TextareaState = WidgetState & FormFieldMixinState<string>;
+export type TextareaProperties = WidgetProperties & FormFieldMixinProperties;
 
-export type TextareaOptions = WidgetOptions<TextareaState, WidgetProperties> & FormFieldMixinOptions<string, TextareaState>;
-
-export type Textarea = Widget<TextareaState, WidgetProperties> & FormFieldMixin<string, TextareaState> & {
+export type Textarea = Widget<TextareaProperties> & FormFieldMixin<string, any> & {
 	onInput(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
-export interface TextareaFactory extends ComposeFactory<Textarea, TextareaOptions> { }
+export interface TextareaFactory extends WidgetFactory<Textarea, TextareaProperties> { }
 
 const createTextarea: TextareaFactory = createWidgetBase
 	.mixin(createFormFieldMixin)

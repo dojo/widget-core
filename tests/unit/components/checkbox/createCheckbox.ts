@@ -14,8 +14,8 @@ registerSuite({
 			}
 		});
 
-		assert.strictEqual(checkbox.state.id, 'foo');
-		assert.strictEqual(checkbox.state.name, 'bar');
+		assert.strictEqual(checkbox.properties.id, 'foo');
+		assert.strictEqual(checkbox.properties.name, 'bar');
 		assert.strictEqual(checkbox.value, 'baz');
 	},
 	render() {

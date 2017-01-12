@@ -1,29 +1,20 @@
-import { ComposeFactory } from 'dojo-compose/compose';
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
-import { Widget, WidgetOptions, WidgetState, WidgetProperties, DNode, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
+import { Widget, WidgetProperties, WidgetFactory, DNode, TypedTargetEvent } from './../../interfaces';
+import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
 import { v } from '../../d';
 
-export interface SelectInputState extends WidgetState, FormFieldMixinState<string> {
-	options?: {
-		[key: string]: string
-	};
-};
-
-export interface SelectInputProperties extends WidgetProperties {
+export interface SelectInputProperties extends WidgetProperties, FormFieldMixinProperties {
 	options?: {
 		[key: string]: string
 	};
 }
 
-export type SelectInputOptions = WidgetOptions<SelectInputState, SelectInputProperties> & FormFieldMixinOptions<string, SelectInputState>;
-
-export type SelectInput = Widget<SelectInputState, SelectInputProperties> & FormFieldMixin<string, SelectInputState> & {
+export type SelectInput = Widget<SelectInputProperties> & FormFieldMixin<string, any> & {
 	onChange(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
-export interface SelectInputFactory extends ComposeFactory<SelectInput, SelectInputOptions> { }
+export interface SelectInputFactory extends WidgetFactory<SelectInput, SelectInputProperties> { }
 
 const createSelectInput: SelectInputFactory = createWidgetBase
 	.mixin(createFormFieldMixin)
@@ -39,7 +30,7 @@ const createSelectInput: SelectInputFactory = createWidgetBase
 				}
 			],
 			getChildrenNodes: function(this: SelectInput): DNode[] {
-				const { options = {} } = this.state;
+				const { options = {} } = this.properties;
 				const optionNodes = [];
 				let key;
 
@@ -53,13 +44,8 @@ const createSelectInput: SelectInputFactory = createWidgetBase
 				return optionNodes;
 			}
 		},
-		initialize(instance, selectOptions: SelectInputOptions) {
-			let { options } = instance.state;
-
-			if (!options) {
-				options = {};
-				instance.setState({ options });
-			}
+		initialize(instance) {
+			let { options = {} } = instance.properties;
 
 			// select first option by default
 			if (Object.keys(options).length > 0) {

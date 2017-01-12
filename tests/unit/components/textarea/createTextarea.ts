@@ -14,9 +14,9 @@ registerSuite({
 			}
 		});
 
-		assert.strictEqual(textarea.state.id, 'foo');
-		assert.strictEqual(textarea.state.name, 'bar');
-		assert.strictEqual(textarea.state.placeholder, 'baz');
+		assert.strictEqual(textarea.properties.id, 'foo');
+		assert.strictEqual(textarea.properties.name, 'bar');
+		assert.strictEqual(textarea.properties.placeholder, 'baz');
 	},
 	render() {
 		const textarea = createTextarea({

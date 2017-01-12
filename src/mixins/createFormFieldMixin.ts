@@ -9,20 +9,47 @@ import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabel } fro
 import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
+}
+
+export interface FormFieldMixinProperties extends WidgetProperties {
+	/**
+	 * The form widget's name
+	 */
+	name?: string;
+
+	/**
+	 * The current value
+	 */
+	value?: any;
+
 	/**
 	 * The type of the form field (equates to the `type` attribute in the DOM)
 	 */
 	type?: string;
 
 	/**
-	 * The value of the form field
+	 * Prevents the user from interacting with the form field
 	 */
-	value?: V;
+	disabled?: boolean;
 
-}
-
-export interface FormFieldMixinProperties extends WidgetProperties {
+	/**
+	 * Label settings
+	 */
 	label?: string | FormLabel;
+
+	/**
+	 * Accessibility attributes
+	 */
+	checked?: boolean;
+	descriptionID?: string;
+	inputmode?: string;
+	invalid?: boolean;
+	maxlength?: number | string;
+	minlength?: number | string;
+	multiple?: boolean;
+	placeholder?: string;
+	readonly?: boolean;
+	required?: boolean;
 }
 
 export interface FormFieldMixinState<V> {
@@ -255,8 +282,8 @@ const createFormMixin: FormMixinFactory = createStateful
 				return nodeAttributes;
 			},
 
-			getNode(this: Widget<FormFieldMixinState<any>, WidgetProperties> & FormField<any>): DNode {
-				const { label } = this.state;
+			getNode(this: Widget<WidgetProperties> & FormField<any>): DNode {
+				const { label } = this.properties
 				let tag = label ? 'label' : 'div';
 
 				if (this.classes.length) {
@@ -268,8 +295,8 @@ const createFormMixin: FormMixinFactory = createStateful
 		},
 		aspectAdvice: {
 			after: {
-				getChildrenNodes(this: Widget<FormFieldMixinState<any>, WidgetProperties> & FormField<any>, result: DNode[]) {
-					let { label } = this.state;
+				getChildrenNodes(this: Widget<WidgetProperties> & FormField<any>, result: DNode[]) {
+					let { label } = this.properties;
 					const inputAttributes = this.getFormFieldNodeAttributes.call(this);
 					const children = [
 						v(this.tagName,
@@ -307,7 +334,7 @@ const createFormMixin: FormMixinFactory = createStateful
 		},
 		initialize(
 			instance: FormFieldMixin<any, FormFieldMixinState<any>>,
-			{ value, type }: FormFieldMixinOptions<any, FormFieldMixinState<any>> = {}
+			{ value, type }: FormFieldMixinProperties = {}
 		) {
 			if (value) {
 				instance.setState({ value });
