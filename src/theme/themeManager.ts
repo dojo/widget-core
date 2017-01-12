@@ -14,7 +14,6 @@ type Theme = {
 
 export interface ThemeManager {
 	setTheme(theme: {}): void;
-	clearTheme(): void;
 	getThemeClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): ActiveClassMap<T>;
 }
 
@@ -37,15 +36,10 @@ const createThemeManager: ThemeManagerFactory = compose({
 		themeManagerThemeMap.set(this, theme);
 	},
 
-	clearTheme(this: ThemeManager) {
-		themeManagerThemeMap.delete(this);
-	},
-
 	getThemeClasses<T extends {}>(this: ThemeManager, baseThemeClasses: T, overrideClasses?: {}): ActiveClassMap<T> {
 		const loadedTheme = themeManagerThemeMap.get(this);
-		const activeClassMap: ActiveClassMap<T> = <ActiveClassMap<T>> {};
 
-		Object.keys(baseThemeClasses).forEach((className) => {
+		return Object.keys(baseThemeClasses).reduce((activeClassMap, className) => {
 			const classMap: ActiveClasses = activeClassMap[<keyof T> className] = {};
 			let themeClassSource: Theme = baseThemeClasses;
 
@@ -55,9 +49,9 @@ const createThemeManager: ThemeManagerFactory = compose({
 
 			addClassNameToMap(classMap, themeClassSource, className);
 			overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
-		});
 
-		return activeClassMap;
+			return activeClassMap;
+		}, <ActiveClassMap<T>> {});
 	}
 });
 

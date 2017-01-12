@@ -13,7 +13,7 @@ const overrideClasses = {
 registerSuite({
 	name: 'themeManager',
 	beforeEach() {
-		themeManager.clearTheme();
+		themeManager.setTheme({});
 	},
 	'should return only base classes when no theme is set'() {
 		const themeClasses = themeManager.getThemeClasses({ class1: 'baseClass1' });
@@ -48,20 +48,5 @@ registerSuite({
 			class2: { [ testTheme.class2 ]: true },
 			class3: { baseClass3: true }
 		});
-	},
-	'should return only base classes after theme has been cleared'() {
-		themeManager.setTheme(testTheme);
-		let themeClasses = themeManager.getThemeClasses({ class1: 'baseClass1' });
-
-		assert.deepEqual(themeClasses, {
-			class1: { [ testTheme.class1 ]: true }
-		}, 'should contain theme class');
-
-		themeManager.clearTheme();
-		themeClasses = themeManager.getThemeClasses({ class1: 'baseClass1' });
-
-		assert.deepEqual(themeClasses, {
-			class1: { baseClass1: true }
-		}, 'should only contain base class');
 	}
 });
