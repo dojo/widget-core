@@ -18,13 +18,7 @@ type Theme = {
 	[key: string]: string;
 }
 
-type CacheKey = {
-	baseThemeClasses: {};
-	overrideClasses?: {};
-};
-
 let currentTheme: Theme = {};
-let cacheMap = new Map<CacheKey, AppliedClasses<any>>();
 
 function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, className: string) {
 	if (classList && classList.hasOwnProperty(className)) {
@@ -43,7 +37,6 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, clas
  */
 export function setTheme(theme: {}) {
 	currentTheme = theme;
-	cacheMap = new Map<CacheKey, AppliedClasses<{}>>();
 };
 /**
  * Gets complete list of classes from the manager to be applied to a widget.
@@ -54,25 +47,17 @@ export function setTheme(theme: {}) {
  * @returns AppliedClasses An object representing the resulting classes to be applied.
  */
 export function getTheme<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
-	const cacheKey = { baseThemeClasses, overrideClasses };
+	return Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
+		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
+		let themeClassSource: Theme = baseThemeClasses;
 
-	if (!cacheMap.has(cacheKey)) {
-		const appliedClasses = Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
-			const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
-			let themeClassSource: Theme = baseThemeClasses;
+		if (currentTheme && currentTheme.hasOwnProperty(className)) {
+			themeClassSource = currentTheme;
+		}
 
-			if (currentTheme && currentTheme.hasOwnProperty(className)) {
-				themeClassSource = currentTheme;
-			}
+		addClassNameToMap(classMap, themeClassSource, className);
+		overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
 
-			addClassNameToMap(classMap, themeClassSource, className);
-			overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
-
-			return currentAppliedClasses;
-		}, <AppliedClasses<T>> {});
-
-		cacheMap.set(cacheKey, appliedClasses);
-	}
-
-	return cacheMap.get(cacheKey);
+		return currentAppliedClasses;
+	}, <AppliedClasses<T>> {});
 };
