@@ -1,7 +1,15 @@
+/**
+ * A representation of the css-module class names
+ * to be applied where each class in appliedClasses
+ * is used.
+ */
 export type CSSModuleClassNames = {
 	[key: string]: boolean;
 }
 
+/**
+ * The object returned by getClasses.
+ */
 export type AppliedClasses<T> = {
 	[P in keyof T]?: CSSModuleClassNames;
 }
@@ -27,13 +35,25 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, clas
 		});
 	}
 }
-
+/**
+ * Set the current theme. Theme classes will override widget
+ * base classes.
+ *
+ * @param  theme The theme to be set
+ */
 export function setTheme(theme: {}) {
 	currentTheme = theme;
 	cacheMap = new Map<CacheKey, AppliedClasses<{}>>();
 };
-
-export function getClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
+/**
+ * Gets complete list of classes from the manager to be applied to a widget.
+ *
+ * @param  baseThemeClasses Classes passed in by the widget requesting classes. These are overridden by
+ * any theme classes with the same name.
+ * @param  overrideClasses? Classes to be added to the widget along side the theme / base class.
+ * @returns AppliedClasses An object representing the resulting classes to be applied.
+ */
+export function getTheme<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
 	const cacheKey = { baseThemeClasses, overrideClasses };
 
 	if (!cacheMap.has(cacheKey)) {

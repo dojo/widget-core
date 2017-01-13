@@ -1,6 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { setTheme, getClasses } from '../../../src/theme/themeManager';
+import { setTheme, getTheme } from '../../../src/theme/manager';
 
 const testTheme = {
 	class1: 'themeClass1',
@@ -16,19 +16,19 @@ registerSuite({
 		setTheme({});
 	},
 	'should return only base classes when no theme is set'() {
-		const themeClasses = getClasses({ class1: 'baseClass1' });
+		const themeClasses = getTheme({ class1: 'baseClass1' });
 
 		assert.deepEqual(themeClasses, { class1: { baseClass1: true } });
 	},
 	'should return theme class instead of base class when a theme is set'() {
 		setTheme(testTheme);
-		const themeClasses = getClasses({ class1: 'baseClass1' });
+		const themeClasses = getTheme({ class1: 'baseClass1' });
 
 		assert.deepEqual(themeClasses, { class1: { [ testTheme.class1 ]: true } });
 	},
 	'should return theme class and override class when a theme is set'() {
 		setTheme(testTheme);
-		const themeClasses = getClasses({ class1: 'baseClass1' }, overrideClasses);
+		const themeClasses = getTheme({ class1: 'baseClass1' }, overrideClasses);
 
 		assert.deepEqual(themeClasses, {
 			class1: { [ testTheme.class1 ]: true, [ overrideClasses.class1 ]: true }
@@ -37,7 +37,7 @@ registerSuite({
 	'should return multiple theme and override classes when a theme is set and multiple baseClasses are provided'() {
 		setTheme(testTheme);
 
-		const themeClasses = getClasses({
+		const themeClasses = getTheme({
 			class1: 'baseClass1',
 			class2: 'baseClass2',
 			class3: 'baseClass3'

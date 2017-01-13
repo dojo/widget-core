@@ -1,1 +1,1 @@
-import './themeManager';
+import './manager';
