@@ -5,7 +5,7 @@ import createCancelableEvent from 'dojo-compose/bases/createCancelableEvent';
 import { EventTargettedObject, EventCancelableObject, Handle } from '@dojo-interfaces/core';
 import { EventedListener, Stateful, StatefulOptions } from '@dojo-interfaces/bases';
 import { assign } from '@dojo-core/lang';
-import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabel } from './../interfaces';
+import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabelPropertiesProperties } from './../interfaces';
 import { v } from '../d';
 
 export interface FormFieldMixinOptions<V, S extends FormFieldMixinState<V>> extends StatefulOptions<S> {
@@ -35,7 +35,7 @@ export interface FormFieldMixinProperties extends WidgetProperties {
 	/**
 	 * Label settings
 	 */
-	label?: string | FormLabel;
+	label?: string | FormLabelProperties;
 
 	/**
 	 * Accessibility attributes
@@ -76,7 +76,7 @@ export interface FormFieldMixinState<V> {
 	/**
 	 * Label settings
 	 */
-	label?: FormLabel;
+	label?: FormLabelProperties;
 
 	/**
 	 * Accessibility attributes
@@ -139,7 +139,7 @@ export interface FormField<V> {
 	/**
 	 * Default values for a form field label
 	 */
-	labelDefaults: FormLabel;
+	labelDefaults: FormLabelProperties;
 }
 
 export interface FormFieldOverride<V> {

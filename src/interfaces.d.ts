@@ -301,7 +301,7 @@ export interface TypedTargetEvent<T extends EventTarget> extends Event {
 	target: T;
 }
 
-export interface FormLabel {
+export interface FormLabelProperties {
 	content: string;
 	position?: string;
 	hidden?: boolean;
