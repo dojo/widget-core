@@ -3,7 +3,7 @@ import { VNodeProperties } from 'dojo-interfaces/vdom';
 import createWidgetBase from '../../createWidgetBase';
 import { Widget, WidgetOptions, WidgetProperties, WidgetState } from './../../interfaces';
 import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
-import themeableMixin, { Themeable} from '../../mixins/createThemeableMixin';
+import themeable, { Themeable} from '../../mixins/themeable';
 
 export interface ButtonState extends WidgetState, FormFieldMixinState<string> {
 	label?: string;
@@ -24,7 +24,7 @@ export interface ButtonFactory extends ComposeFactory<Button, ButtonOptions> { }
 
 const createButton: ButtonFactory = createWidgetBase
 	.mixin(createFormFieldMixin)
-	.mixin(themeableMixin)
+	.mixin(themeable)
 	.mixin({
 		mixin: {
 			onClick(this: Button, event: MouseEvent) {
@@ -32,6 +32,8 @@ const createButton: ButtonFactory = createWidgetBase
 			},
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
+					const themeClasses = this.getTheme();
+					// themeClasses. should autocomplete to `hello`.
 					return { innerHTML: this.state.label, onclick: this.onClick };
 				}
 			],
