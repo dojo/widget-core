@@ -32,7 +32,7 @@ registerSuite({
 				items: [ 'a', 'b' ],
 				otherItems: [ 'c', 'd']
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items[1] = 'c';
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -45,7 +45,7 @@ registerSuite({
 				items: [ 'a', 'b' ],
 				otherItems: [ 'c', 'd']
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items.reverse();
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -59,7 +59,7 @@ registerSuite({
 					{ foo: 'bar' }
 				]
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items[0].foo = 'foo';
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -73,7 +73,7 @@ registerSuite({
 					{ foo: 'bar' }
 				]
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items.pop();
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -87,7 +87,7 @@ registerSuite({
 					{ foo: 'bar' }
 				]
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items[1] = { bar: 'foo' };
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -104,7 +104,7 @@ registerSuite({
 					baz: 'qux'
 				}
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).obj.foo = 'foo';
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -121,7 +121,7 @@ registerSuite({
 					baz: 'qux'
 				}
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).obj.bar = 'foo';
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -133,7 +133,7 @@ registerSuite({
 				id: 'id',
 				myFunc: () => {}
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).myFunc = () => {};
 
 			const updatedKeys = shallowPropertyComparisonMixin.mixin.diffProperties(properties, updatedProperties);
@@ -146,7 +146,7 @@ registerSuite({
 					{ foo: 'bar' }
 				]
 			};
-			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, []);
+			const updatedProperties = shallowPropertyComparisonMixin.mixin.assignProperties({}, properties, Object.keys(properties));
 			(<any> updatedProperties).items[0].foo = 'foo';
 
 			const widgetBase = createWidgetBase.mixin(shallowPropertyComparisonMixin)({ properties });

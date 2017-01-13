@@ -1,6 +1,5 @@
 import { entries } from '@dojo/shim/object';
 import { WidgetProperties, PropertyComparison } from './../interfaces';
-import { deepAssign } from '@dojo/core/lang';
 
 /**
  * Determine if the value is an Object
@@ -30,7 +29,7 @@ const shallowPropertyComparisonMixin: { mixin: PropertyComparison<WidgetProperti
 		diffProperties<S>(this: S, previousProperties: WidgetProperties, newProperties: WidgetProperties): string[] {
 			const changedPropertyKeys: string[] = [];
 
-			entries(newProperties).forEach(([key, value]) => {
+			entries(newProperties).forEach(([ key, value ]) => {
 				let isEqual = true;
 				if (previousProperties.hasOwnProperty(key)) {
 					const previousValue = (<any> previousProperties)[key];
@@ -66,7 +65,18 @@ const shallowPropertyComparisonMixin: { mixin: PropertyComparison<WidgetProperti
 			return changedPropertyKeys;
 		},
 		assignProperties<S>(this: S, previousProperties: WidgetProperties, newProperties: WidgetProperties, changedPropertyKeys: string[]): WidgetProperties {
-			return deepAssign({}, newProperties);
+			return Object.keys(newProperties).reduce((properties, key) => {
+				const newValue = newProperties[key];
+				if (Array.isArray(newValue)) {
+					properties[key] = newValue.map((value: any) => {
+						return isObject(value) ? Object.assign({}, value) : value;
+					});
+				}
+				else {
+					properties[key] = isObject(newValue) ? Object.assign({}, newValue) : newValue;
+				}
+				return properties;
+			}, <WidgetProperties> {});
 		}
 	}
 };
