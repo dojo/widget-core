@@ -31,7 +31,6 @@ const createButton: ButtonFactory = createWidgetBase
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
 					const themeClasses = this.getTheme();
-					themeClasses.hello;
 					// themeClasses. should autocomplete to `hello`.
 					return { innerHTML: this.properties.label, onclick: this.onClick };
 				}

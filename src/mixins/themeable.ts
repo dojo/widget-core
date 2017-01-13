@@ -1,12 +1,12 @@
-import { Handle } from 'dojo-interfaces/core';
-import { ObservablePatchableStore } from 'dojo-interfaces/abilities';
-import WeakMap from 'dojo-shim/WeakMap';
-import { includes } from 'dojo-shim/array';
-import { assign } from 'dojo-core/lang';
+import { Handle } from '@dojo/interfaces/core';
+import { ObservablePatchableStore } from '@dojo/interfaces/abilities';
+import WeakMap from '@dojo/shim/WeakMap';
+import { includes } from '@dojo/shim/array';
+import { assign } from '@dojo/core/lang';
 import { PropertiesChangeEvent } from './../interfaces';
-import { Evented } from 'dojo-interfaces/bases';
-import createEvented from 'dojo-compose/bases/createEvented';
-import { ComposeFactory } from 'dojo-compose/compose';
+import { Evented } from '@dojo/interfaces/bases';
+import createEvented from '@dojo/compose/bases/createEvented';
+import { ComposeFactory } from '@dojo/compose/compose';
 
 /**
  * A representation of the css-module class names
@@ -44,27 +44,27 @@ export interface ThemeableOptions {
 /**
  * Themeable Mixin
  */
-export interface ThemeableMixin extends Evented {
-	getTheme(): AppliedClasses<any>;
+export interface ThemeableMixin<P> extends Evented {
+	getTheme(): AppliedClasses<P>;
 }
 
 /**
  * Themeable
  */
-export interface Themeable extends ThemeableMixin {
-	baseTheme: {};
+export interface Themeable<P> extends ThemeableMixin<P> {
+	baseTheme: P;
 	properties: ThemeableProperties;
 }
 
 /**
  * Compose Themeable Factory interface
  */
-export interface ThemeableFactory extends ComposeFactory<ThemeableMixin, ThemeableOptions> {}
+export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<{}>, ThemeableOptions> {}
 
 /**
  * Private map for the widgets themeClasses.
  */
-const themeClassesMap = new WeakMap<ThemeableMixin, AppliedClasses<any>>();
+const themeClassesMap = new WeakMap<ThemeableMixin<{}>, AppliedClasses<any>>();
 
 function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
 	if (classList.hasOwnProperty(className)) {
@@ -76,7 +76,7 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndex
 	}
 }
 
-function generateThemeClasses<T>(instance: Themeable, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
+function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
 	const appliedClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
 		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
 		let themeClassSource: {} = instance.baseTheme;
@@ -92,7 +92,7 @@ function generateThemeClasses<T>(instance: Themeable, baseTheme: T, theme: {} = 
 	}, <AppliedClasses<T>> {});
 }
 
-function onPropertiesChanged(instance: Themeable, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
+function onPropertiesChanged<I>(instance: Themeable<I>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
 	const themeChanged = includes(changedPropertyKeys, 'theme');
 	const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
@@ -107,12 +107,12 @@ function onPropertiesChanged(instance: Themeable, { theme, overrideClasses }: Th
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
-		getTheme(this: Themeable): AppliedClasses<any> {
+		getTheme<I>(this: Themeable<I>): AppliedClasses<I> {
 			return themeClassesMap.get(this);
 		}
 	},
-	initialize(instance: Themeable) {
-		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<ThemeableMixin, ThemeableProperties>) => {
+	initialize<I>(instance: Themeable<I>) {
+		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<ThemeableMixin<I>, ThemeableProperties>) => {
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		const { theme, overrideClasses } = instance.properties;
