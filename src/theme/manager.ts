@@ -12,16 +12,14 @@ export type CSSModuleClassNames = {
  */
 export type AppliedClasses<T> = {
 	[P in keyof T]?: CSSModuleClassNames;
-}
+};
 
-type Theme = {
-	[key: string]: string;
-}
+type StringIndexedObject = { [key: string]: string; };
 
-let currentTheme: Theme = {};
+let currentTheme = {};
 
-function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, className: string) {
-	if (classList && classList.hasOwnProperty(className)) {
+function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
+	if (classList.hasOwnProperty(className)) {
 		// split out the classname because css-module composition combines class names with a space
 		const generatedClassNames: string[] = classList[className].split(' ');
 		generatedClassNames.forEach((generatedClassName) => {
@@ -38,6 +36,7 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, clas
 export function setTheme(theme: {}) {
 	currentTheme = theme;
 };
+
 /**
  * Gets complete list of classes from the manager to be applied to a widget.
  *
@@ -49,7 +48,7 @@ export function setTheme(theme: {}) {
 export function getTheme<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
 	return Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
 		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
-		let themeClassSource: Theme = baseThemeClasses;
+		let themeClassSource: {} = baseThemeClasses;
 
 		if (currentTheme && currentTheme.hasOwnProperty(className)) {
 			themeClassSource = currentTheme;
