@@ -1,5 +1,3 @@
-import compose, { ComposeFactory } from 'dojo-compose/compose';
-
 export type CSSModuleClassNames = {
 	[key: string]: boolean;
 }
@@ -12,20 +10,13 @@ type Theme = {
 	[key: string]: string;
 }
 
-export interface ThemeManager {
-	setTheme(theme: {}): void;
-	getThemeClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T>;
-}
-
-export interface ThemeManagerFactory extends ComposeFactory<ThemeManager, {}> { }
-
 type CacheKey = {
 	baseThemeClasses: {};
 	overrideClasses?: {};
 };
 
-const themeMap = new WeakMap<ThemeManager, Theme>();
-const themeManagerCacheMap = new WeakMap<ThemeManager, Map<CacheKey, AppliedClasses<any>>>();
+let currentTheme: Theme = {};
+let cacheMap = new Map<CacheKey, AppliedClasses<any>>();
 
 function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, className: string) {
 	if (classList && classList.hasOwnProperty(className)) {
@@ -37,39 +28,31 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, clas
 	}
 }
 
-const createThemeManager: ThemeManagerFactory = compose({
-	setTheme(this: ThemeManager, theme: {}) {
-		themeMap.set(this, theme);
-		themeManagerCacheMap.set(this, new Map<CacheKey, AppliedClasses<{}>>());
-	},
+export function setTheme(theme: {}) {
+	currentTheme = theme;
+	cacheMap = new Map<CacheKey, AppliedClasses<{}>>();
+};
 
-	getThemeClasses<T extends {}>(this: ThemeManager, baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
-		const cacheMap = themeManagerCacheMap.get(this);
-		const cacheKey = { baseThemeClasses, overrideClasses };
+export function getClasses<T extends {}>(baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
+	const cacheKey = { baseThemeClasses, overrideClasses };
 
-		if (!cacheMap.has(cacheKey)) {
-			const currentTheme = themeMap.get(this);
-			const appliedClasses = Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
-				const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
-				let themeClassSource: Theme = baseThemeClasses;
+	if (!cacheMap.has(cacheKey)) {
+		const appliedClasses = Object.keys(baseThemeClasses).reduce((currentAppliedClasses, className) => {
+			const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
+			let themeClassSource: Theme = baseThemeClasses;
 
-				if (currentTheme && currentTheme.hasOwnProperty(className)) {
-					themeClassSource = currentTheme;
-				}
+			if (currentTheme && currentTheme.hasOwnProperty(className)) {
+				themeClassSource = currentTheme;
+			}
 
-				addClassNameToMap(classMap, themeClassSource, className);
-				overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
+			addClassNameToMap(classMap, themeClassSource, className);
+			overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
 
-				return currentAppliedClasses;
-			}, <AppliedClasses<T>> {});
+			return currentAppliedClasses;
+		}, <AppliedClasses<T>> {});
 
-			cacheMap.set(cacheKey, appliedClasses);
-		}
-
-		return cacheMap.get(cacheKey);
+		cacheMap.set(cacheKey, appliedClasses);
 	}
-});
 
-const themeManager = createThemeManager();
-
-export default themeManager;
+	return cacheMap.get(cacheKey);
+};
