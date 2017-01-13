@@ -40,7 +40,7 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: Theme, clas
 const createThemeManager: ThemeManagerFactory = compose({
 	setTheme(this: ThemeManager, theme: {}) {
 		themeMap.set(this, theme);
-		themeManagerCacheMap.set(this, new Map<CacheKey, AppliedClasses<any>>());
+		themeManagerCacheMap.set(this, new Map<CacheKey, AppliedClasses<{}>>());
 	},
 
 	getThemeClasses<T extends {}>(this: ThemeManager, baseThemeClasses: T, overrideClasses?: {}): AppliedClasses<T> {
