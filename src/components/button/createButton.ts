@@ -1,26 +1,24 @@
-import { ComposeFactory } from 'dojo-compose/compose';
-import { VNodeProperties } from 'dojo-interfaces/vdom';
+import { VNodeProperties } from '@dojo/interfaces/vdom';
 import createWidgetBase from '../../createWidgetBase';
-import { Widget, WidgetOptions, WidgetProperties, WidgetState } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinState, FormFieldMixinOptions } from '../../mixins/createFormFieldMixin';
-import themeable, { Themeable} from '../../mixins/themeable';
-
-export interface ButtonState extends WidgetState, FormFieldMixinState<string> {
-	label?: string;
-}
+import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
+import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
+import themeable, { Themeable } from '../../mixins/themeable';
 
 export interface ButtonProperties extends WidgetProperties {
 	label?: string;
+	name?: string;
 	onClick?(event: MouseEvent): void;
 }
 
-export interface ButtonOptions extends WidgetOptions<ButtonState, ButtonProperties>, FormFieldMixinOptions<any, ButtonState> { }
+const css = {
+	hello: 'world'
+};
 
-export type Button = Widget<ButtonState, ButtonProperties> & FormFieldMixin<string, ButtonState> & Themeable & {
+export type Button = Widget<ButtonProperties> & FormFieldMixin<string, any> & Themeable<typeof css> & {
 	onClick(event?: MouseEvent): void;
 };
 
-export interface ButtonFactory extends ComposeFactory<Button, ButtonOptions> { }
+export interface ButtonFactory extends WidgetFactory<Button, ButtonProperties> { }
 
 const createButton: ButtonFactory = createWidgetBase
 	.mixin(createFormFieldMixin)
@@ -33,15 +31,14 @@ const createButton: ButtonFactory = createWidgetBase
 			nodeAttributes: [
 				function(this: Button): VNodeProperties {
 					const themeClasses = this.getTheme();
+					themeClasses.hello;
 					// themeClasses. should autocomplete to `hello`.
-					return { innerHTML: this.state.label, onclick: this.onClick };
+					return { innerHTML: this.properties.label, onclick: this.onClick };
 				}
 			],
 			tagName: 'button',
 			type: 'button',
-			baseTheme:{
-				hello: 'world'
-			}
+			baseTheme: css
 		}
 	});
 
