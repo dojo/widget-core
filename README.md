@@ -15,7 +15,7 @@ Provides Dojo2 core widget and mixin functionality for creating custom widgets. 
     	- [Introducing `v` & `w`](#v--w)
     	- [Widget Registry](#widget-registry)
     	- [Properties Lifecycle](#properties-lifecycle)
-    	- [Event Handlers](#event-handlers)
+    	- [Event Handling](#event-handling)
     	- [Internationalization](#internationalization)
     	- [Projector](#projector)
     - [Authoring Examples](#authoring-examples)
@@ -319,13 +319,27 @@ const widget = createI18nWidget({
 
 #### Projector
 
-To render widgets they must be appended to a `projector`. It is possible to create many projectors and attach them to `Elements` in the `DOM`, however `projectors` must not be nested.
+To render a widget into the DOM projector traits need to be added by using the `createProjectorMixin`. It is possible to have many projectors and attach them to elements in the DOM, however widgets with projector traits must not be nested.
 
-The projector works in the same way as any widget overridding `getChildrenNodes` when `createProjector` class is used as the base widget or `createProjectorMixin` is mixed into a widget (usually the root of the application). **Importantly** unlike widgets projecter instances are manually created and managed.
+Widgets that are used as projectors operate in the same way as any widget except they are instantiated explicitly and managed outside of the usual lifecycle. To attach the projector to the DOM call either `.append`, `.merge` or `.replace` depending on the type of attachment required.
 
-In order to attach the `createProjector` to the page call either `.append`, `.merge` or `.replace` depending on the type of attachment required and it returns a promise.
+ - append  - Creates the widget as a child to the projector's `root` node
+ - merge   - Merges the widget with the projector's `root` node
+ - replace - Replace the projector's `root` node with the widget
 
-Instantiating `createProjector` directly:
+Using the `createProjectorMixin` to turn any widget into a projector:
+
+```ts
+import createProjectorMixin from '@dojo/widgets/mixins/createProjectorMixin';
+import createMyWidget from './createMyWidget';
+
+const myProjectorWidget = createMyWidget.mixin(createProjectorMixin)();
+
+myProjectorWidget.append().then(() => {
+	// appended
+});
+```
+At times it may be required to directly instantiate a dedicated projector using `createProjector` and manually set the children for attaching to the DOM.
 
 ```ts
 import { DNode } from '@dojo/widgets/interfaces';
@@ -344,45 +358,6 @@ projector.setChildren([
 
 projector.append().then(() => {
 	console.log('projector is attached');
-});
-```
-
-Using the `createProjector` as a base for a root widget:
-
-```ts
-import { DNode } from '@dojo/widgets/interfaces';
-import { w } from '@dojo/widgets/d';
-import createProjector, { Projector } from '@dojo/widgets/createProjector';
-
-import createButton from './createMyButton';
-import createTextInput from './createMyTextInput';
-
-const createApp = createProjector.mixin({
-	mixin: {
-		getChildrenNodes: function(this: Projector): DNode[] {
-			return [
-				w(createTextInput, { id: 'textinput' }),
-				w(createButton, { id: 'button', label: 'Button' })
-			];
-		},
-		classes: [ 'main-app' ],
-		tagName: 'main'
-	}
-});
-
-export default createApp;
-```
-
-Using the `createProjectorMixin` to turn any widget into a projector:
-
-```ts
-import createProjectorMixin from '@dojo/widgets/mixins/createProjectorMixin';
-import createMyWidget from './createMyWidget';
-
-const myProjectorWidget = createMyWidget.mixin(createProjectorMixin)();
-
-myProjectorWidget.append().then(() => {
-	// appended
 });
 ```
 
