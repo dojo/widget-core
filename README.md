@@ -202,9 +202,9 @@ registry.define('my-widget', () => {
 
 #### Event Handling
 
-The recommended pattern for event listeners is to declare them on the widget class, referencing the function using `this` most commonly within `getChildrenNodes` or a `nodeAttributes` function.
+The recommended pattern for event listeners is to declare them on the widget class, referencing the function using `this`, most commonly within `getChildrenNodes` or a `nodeAttributes` function.
 
-Event listeners can be internal logic encapsulated within a widget or delegate to a function passed via `properties`. For convenience event listeners handlers are automatically bound to the scope of their widget.
+Event listeners can be internal logic encapsulated within a widget or delegate to a function passed via `properties`. For convenience event listeners are automatically bound to the scope of their enclosing widget.
 
 *internally defined handler*
 
