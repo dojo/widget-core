@@ -70,25 +70,25 @@ registerSuite({
 		'no updated properties'() {
 			const properties = { id: 'id', foo: 'bar' };
 			const widgetBase = createWidgetBase();
-			const updatedKeys = widgetBase.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 0);
 		},
 		'updated properties'() {
 			const widgetBase = createWidgetBase();
 			const properties = { id: 'id', foo: 'baz' };
-			const updatedKeys = widgetBase.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'new properties'() {
 			const widgetBase = createWidgetBase();
 			const properties = { id: 'id', foo: 'bar', bar: 'baz' };
-			const updatedKeys = widgetBase.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 1);
 		},
 		'updated / new properties with falsy values'() {
 			const widgetBase = createWidgetBase();
 			const properties = { id: 'id', foo: '', bar: null, baz: 0, qux: false };
-			const updatedKeys = widgetBase.diffProperties(<any> { id: 'id', foo: 'bar' }, properties);
+			const updatedKeys = widgetBase.diffProperties({ id: 'id', foo: 'bar' }, properties);
 			assert.lengthOf(updatedKeys, 4);
 			assert.deepEqual(updatedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		}
@@ -480,10 +480,10 @@ registerSuite({
 			assert.deepEqual((<any> myWidget.state).items, [ 'a', 'b' ]);
 			properties.items.push('c');
 			myWidget.setProperties(properties);
-			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c' ]);
-			properties.items.push('d');
+			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b' ]);
+			properties.items = [...properties.items];
 			myWidget.setProperties(properties);
-			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c', 'd' ]);
+			assert.deepEqual((<any> myWidget.state).items , [ 'a', 'b', 'c' ]);
 		},
 		'__render__ with internally updated array state'() {
 			const properties = {
