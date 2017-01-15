@@ -68,8 +68,8 @@ These are some of the **important** principles to keep in mind when creating and
 1. the widget *`__render__`* function should **never** be overridden
 2. except for projectors you should **never** need to deal directory with widget instances.
 3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
-4. `state` should **never** be set outside of the widget instance.
-5. should **never** update `properties` within a widget instance.
+4. **never** set state outside of the widget instance.
+5. **never** update `properties` within a widget instance.
 
 ### Overview
 
