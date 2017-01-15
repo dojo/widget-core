@@ -12,7 +12,7 @@ Provides Dojo2 core widget and mixin functionality for creating custom widgets. 
 - [Features](#features)
     - [Key Principles](#key-principles)
     - [Overview](#overview)
-    	- [`v` & `w`](#v--w)
+    	- [Introducing `v` & `w`](#v--w)
     	- [Widget Registry](#widget-registry)
     	- [Properties Lifecycle](#properties-lifecycle)
     	- [Event Handlers](#event-handlers)
@@ -65,10 +65,11 @@ It renders a `h1` element saying "Hello, Dojo!" on the page.
 
 These are some of the **important** principles to keep in mind when developing widgets:
  
-1. the widget *__render__* function should **never** be overridden
+1. the widget *`__render__`* function should **never** be overridden
 2. with the exception of projectors you should **never** need to deal directory with widget instances.
 3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
 4. `state` should **never** be set outside of the widget instance.
+5. `properties` should **never** be mutated within a widget instance.
 
 ### Overview
 
@@ -76,7 +77,7 @@ Dojo2 widgets has been designed using core reactive architecture concepts such a
 
 <!-- needs more details-->
 
-#### `v` & `w`
+#### Introducing `v` & `w`
 
 `v` & `w` are exported from `d.ts` and are used to express widget structures within Dojo 2. This structure constructed of `DNode`s (`DNode` is the intersection type of `HNode` and `WNode`).
 
@@ -203,11 +204,13 @@ registry.define('my-widget', () => {
 
 // talk about the properties lifecycle.
 
-#### Event Handlers
+#### Event Handling
 
-The recommended pattern for event handlers is to declare them on the widget class, referencing the function using `this` most commonly within `getChildrenNodes` or a `nodeAttributes` function.
+The recommended pattern for event listeners is to declare them on the widget class, referencing the function using `this` most commonly within `getChildrenNodes` or a `nodeAttributes` function.
 
-Event handlers can be internal logic encapsulated within a widget as shown in the first example or they can delegate to a function that is passed via `properties` as shown in the second example.
+Event listeners can be internal logic encapsulated within a widget as shown in the first example or they can delegate to a function that is passed via `properties` as shown in the second example.
+
+For convenience event listeners handlers are automatically bound to the scope of their widget. However listeners that are passed via `properties` will need to manually bound if access scope is required.
 
 *internally defined handler*
 
@@ -238,6 +241,23 @@ const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
 			this.properties.mySpecialFunction();
 		}
 		...
+	}
+});
+```
+
+*Binding a function passed to child widget*
+
+```ts
+import { specialClick } from './mySpecialFunctions';
+
+const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
+	mixin: {
+		getChildrenNodes(this: MyWidget): DNode[] {
+			const { properties: { specialClick } } = this;
+			return [
+				w(createChildWidget, { onClick: specialClick.bind(this) })
+			]
+		}
 	}
 });
 ```
