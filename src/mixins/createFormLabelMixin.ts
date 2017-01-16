@@ -55,11 +55,6 @@ export interface FormLabelMixin {
 	 * Override the default getNode function on createWidgetBase to return child input
 	 */
 	getNode(): DNode;
-
-	/**
-	 * Default values for a form field label
-	 */
-	labelDefaults: FormLabelProperties;
 }
 
 export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
@@ -67,15 +62,11 @@ export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
 export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, FormLabelMixinProperties> {}
 
 const createFormLabelMixin: FormLabelMixinFactory = compose({
-	labelDefaults: {
-		content: '',
-		position: 'below',
-		hidden: false
-	},
-
 	getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
 		const { properties } = this;
 		const attributeKeys = Object.keys(properties);
+
+		console.log('filtering input field attributes with properties:', attributeKeys);
 
 		const allowedAttributes = ['checked', 'descriptionID', 'disabled', 'inputmode', 'invalid', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'type', 'value'];
 		const nodeAttributes: any = {};
@@ -103,10 +94,13 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 				nodeAttributes[key] = properties[key];
 			}
 		}
+
+		console.log('returning node attributes:', nodeAttributes);
 		return nodeAttributes;
 	},
 
 	getNode(this: FormLabel): DNode {
+		console.log('getting node with properties', this.properties);
 		const { label } = this.properties;
 		let tag = label ? 'label' : 'div';
 
@@ -131,12 +125,18 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 				];
 
 				if (label) {
+					const labelDefaults = {
+						content: '',
+						position: 'below',
+						hidden: false
+					};
+
 					// convert string label to object
 					if (typeof label === 'string') {
-						label = assign({}, this.labelDefaults, { content: label });
+						label = assign({}, labelDefaults, { content: label });
 					}
 					else {
-						label = assign({}, this.labelDefaults, label);
+						label = assign({}, labelDefaults, label);
 					}
 
 					// add label text
@@ -152,6 +152,8 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 						children.reverse();
 					}
 				}
+
+				console.log('setting children to', children);
 
 				return children;
 			}
