@@ -270,10 +270,10 @@ const createI18nWidget = createWidgetBase
 				const messages = this.localizeBundle(greetingsBundle);
 
 				return [
-					d(createLabel, {
+					w(createLabel, {
 						// Passing a message string to a child widget.						label: messages.purchaseItems
 					}),
-					d(createButton, {
+					w(createButton, {
 						// Passing a formatted message string to a child widget.
 						label: messages.format('itemCount', { count: 2 })
 					})
