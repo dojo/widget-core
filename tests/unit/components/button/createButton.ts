@@ -64,10 +64,10 @@ registerSuite({
 		const onClick = function() {
 			onClickCount++;
 		};
-		const button = createButton({ properties: { onClick }});
+		const button = createButton({ properties: { onClick } });
 		button.onClick();
 		assert.equal(onClickCount, 1);
-		button.setProperties({});
+		button.setProperties({ onClick: () => {} });
 		button.onClick();
 		assert.equal(onClickCount, 1);
 	}
