@@ -11,7 +11,8 @@ import {
 	WidgetProperties,
 	WidgetBaseFactory,
 	FactoryRegistryItem,
-	PropertiesChangedRecord
+	PropertiesChangedRecord,
+	PropertyChangeRecord
 } from './interfaces';
 import { VNode, VNodeProperties } from '@dojo/interfaces/vdom';
 import { assign } from '@dojo/core/lang';
@@ -33,6 +34,7 @@ interface WidgetInternalState {
 	previousProperties: WidgetProperties;
 	historicChildrenMap: Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>;
 	currentChildrenMap: Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>;
+	diffPropertyFunctionMap: Map<string, string>;
 };
 
 /**
@@ -201,14 +203,34 @@ const createWidget: WidgetBaseFactory = createStateful
 
 			setProperties(this: Widget<WidgetProperties>, properties: WidgetProperties) {
 				const internalState = widgetInternalStateMap.get(this);
-				const processedProperties = this.diffProperties(internalState.previousProperties, properties);
-				internalState.properties = processedProperties.properties;
-				if (processedProperties.changedKeys.length) {
+
+				const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
+				const diffPropertyChangedKeys: string[] = [];
+
+				internalState.diffPropertyFunctionMap.forEach((property: string, diffFunction: string) => {
+					const previousProperty = internalState.previousProperties[property];
+					const newProperty = properties[property];
+					const result: PropertyChangeRecord = this[diffFunction](previousProperty, newProperty);
+
+					if (result.changed) {
+						diffPropertyChangedKeys.push(property);
+					}
+					delete properties[property];
+					delete internalState.previousProperties[property];
+					diffPropertyResults[property] = result.value;
+				});
+
+				const diffPropertiesResult = this.diffProperties(internalState.previousProperties, properties);
+				internalState.properties = assign(diffPropertiesResult.properties, diffPropertyResults);
+
+				const changedPropertyKeys = [...diffPropertiesResult.changedKeys, ...diffPropertyChangedKeys];
+
+				if (changedPropertyKeys.length) {
 					this.emit({
 						type: 'properties:changed',
 						target: this,
 						properties: this.properties,
-						changedPropertyKeys: processedProperties.changedKeys
+						changedPropertyKeys
 					});
 				}
 				internalState.previousProperties = this.properties;
@@ -273,8 +295,16 @@ const createWidget: WidgetBaseFactory = createStateful
 		},
 		initialize(instance: Widget<WidgetProperties>, options: WidgetOptions<WidgetState, WidgetProperties> = {}) {
 			const { tagName, properties = {} } = options;
+			const diffPropertyFunctionMap = new Map<string, string>();
 
 			instance.tagName = tagName || instance.tagName;
+
+			Object.keys(Object.getPrototypeOf(instance)).forEach((attribute) => {
+				const match = attribute.match(/^applyProperty(.*)/);
+				if (match) {
+					diffPropertyFunctionMap.set(match[0], `${match[1].slice(0, 1).toLowerCase()}${match[1].slice(1)}`);
+				}
+			});
 
 			widgetInternalStateMap.set(instance, {
 				dirty: true,
@@ -285,6 +315,7 @@ const createWidget: WidgetBaseFactory = createStateful
 				initializedFactoryMap: new Map<string, Promise<WidgetBaseFactory>>(),
 				historicChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
 				currentChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
+				diffPropertyFunctionMap,
 				children: []
 			});
 

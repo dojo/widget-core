@@ -93,6 +93,50 @@ registerSuite({
 			assert.deepEqual(result.changedKeys, [ 'foo', 'bar', 'baz', 'qux']);
 		}
 	},
+	setProperties: {
+		'call apply property functions if available'() {
+			let callCount = 0;
+			createWidgetBase.mixin({
+				mixin: {
+					applyPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+						callCount++;
+						assert.equal(newProperty, 'bar');
+						return {
+							changed: false,
+							value: newProperty
+						};
+					}
+				}
+			})({ properties: { foo: 'bar' } });
+
+			assert.equal(callCount, 1);
+		},
+		'result from apply property override diff and assign'() {
+			const widgetBase = createWidgetBase.mixin({
+				mixin: {
+					applyPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+						return {
+							changed: true,
+							value: newProperty
+						};
+					},
+					applyPropertyBaz(this: any, previousProperty: any, newProperty: any): any {
+						return {
+							changed: false,
+							value: newProperty
+						};
+					}
+				}
+			})({ properties: { foo: 'bar', baz: 'qux' }});
+
+			widgetBase.on('properties:changed', (event: any) => {
+				assert.include(event.changedPropertyKeys, 'foo');
+				assert.notInclude(event.changedPropertyKeys, 'baz');
+			});
+
+			widgetBase.setProperties({ foo: 'bar', baz: 'bar' });
+		}
+	},
 	onPropertiesChanged() {
 		const widgetBase = createWidgetBase();
 		widgetBase.onPropertiesChanged(<any> { foo: 'bar', myFunction: () => {} }, [ 'foo', 'myFunction' ]);

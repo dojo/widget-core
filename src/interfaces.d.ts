@@ -111,6 +111,11 @@ export interface WNode {
 
 export type DNode = HNode | WNode | string | null;
 
+export interface PropertyChangeRecord {
+	changed: boolean;
+	value: any;
+}
+
 export type Widget<P extends WidgetProperties> = Stateful<WidgetState> & WidgetMixin<P> & WidgetOverloads<P>
 
 export interface WidgetBaseFactory extends ComposeFactory<Widget<WidgetProperties>, WidgetOptions<WidgetState, WidgetProperties>> {}
@@ -145,6 +150,12 @@ export interface PropertyComparison<P extends WidgetProperties> {
 }
 
 export interface WidgetMixin<P extends WidgetProperties> extends PropertyComparison<P> {
+
+	/**
+	 * index key
+	 */
+	readonly [index: string]: any;
+
 	/**
 	 * Classes which are applied upon render.
 	 *
