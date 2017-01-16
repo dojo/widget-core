@@ -2,7 +2,6 @@ import compose from '@dojo/compose/compose';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import themeable, { Themeable } from '../../../src/mixins/themeable';
-// import Promise from '@dojo/shim/Promise';
 
 const baseTheme = {
 	class1: 'baseClass1',
@@ -43,16 +42,10 @@ registerSuite({
 			themeableInstance = themeableFactory();
 		},
 		'should return only base classes when no theme is set'() {
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ baseTheme.class1 ]: true },
 				class2: { [ baseTheme.class2 ]: true }
 			});
-		},
-		'should cache generated classes'() {
-			const firstThemeClasses = themeableInstance.getTheme();
-			const secondThemeClasses = themeableInstance.getTheme();
-			assert.strictEqual(firstThemeClasses, secondThemeClasses);
 		}
 	},
 	'with a theme': {
@@ -60,16 +53,10 @@ registerSuite({
 			themeableInstance = themeableFactory({ properties: { theme: testTheme }});
 		},
 		'should return theme class instead of base class when a theme is set'() {
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ testTheme.class1 ]: true },
 				class2: { [ baseTheme.class2 ]: true }
 			});
-		},
-		'should cache theme class responses'() {
-			const firstThemeClasses = themeableInstance.getTheme();
-			const secondThemeClasses = themeableInstance.getTheme();
-			assert.strictEqual(firstThemeClasses, secondThemeClasses);
 		},
 		'should regenerate and negate class names on theme change'() {
 			themeableInstance.emit({
@@ -79,8 +66,7 @@ registerSuite({
 				},
 				changedPropertyKeys: [ 'theme' ]
 			});
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
 				class2: { [ baseTheme.class2 ]: false, [ testTheme2.class2 ]: true }
 			});
@@ -94,16 +80,10 @@ registerSuite({
 			}});
 		},
 		'should return override class as well as baseclass'() {
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ testTheme.class1 ]: true },
 				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: true }
 			});
-		},
-		'should cache override class responses'() {
-			const firstThemeClasses = themeableInstance.getTheme();
-			const secondThemeClasses = themeableInstance.getTheme();
-			assert.strictEqual(firstThemeClasses, secondThemeClasses);
 		},
 		'should regenerate class names on overrides change'() {
 			themeableInstance.emit({
@@ -113,8 +93,7 @@ registerSuite({
 				},
 				changedPropertyKeys: [ 'overrideClasses' ]
 			});
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ testTheme.class1 ]: true },
 				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: false, [ overrideClasses2.class2 ]: true }
 			});
@@ -128,8 +107,7 @@ registerSuite({
 				},
 				changedPropertyKeys: [ 'theme', 'overrideClasses' ]
 			});
-			const themeClasses = themeableInstance.getTheme();
-			assert.deepEqual(themeClasses, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
 				class2: {
 					[ testTheme2.class2 ]: true,
@@ -145,9 +123,9 @@ registerSuite({
 
 		const theme1 = { class1: 'firstChange' };
 		const theme2 = { class1: 'secondChange' };
-		let themeClasses = themeableInstance.getTheme();
+		let themeClasses = themeableInstance.theme;
 
-		assert.deepEqual(themeClasses.class1, {
+		assert.deepEqual(themeableInstance.theme.class1, {
 			[ baseTheme.class1 ]: true
 		}, 'should have base theme set to true');
 
@@ -156,9 +134,9 @@ registerSuite({
 			properties: { theme: theme1 },
 			changedPropertyKeys: [ 'theme' ]
 		});
-		themeClasses = themeableInstance.getTheme();
+		themeClasses = themeableInstance.theme;
 
-		assert.deepEqual(themeClasses.class1, {
+		assert.deepEqual(themeableInstance.theme.class1, {
 			[ baseTheme.class1 ]: false,
 			[ theme1.class1 ]: true
 		}, 'should have base theme set to false and theme1 class1 set to true');
@@ -168,9 +146,9 @@ registerSuite({
 			properties: { theme: theme2 },
 			changedPropertyKeys: [ 'theme' ]
 		});
-		themeClasses = themeableInstance.getTheme();
+		themeClasses = themeableInstance.theme;
 
-		assert.deepEqual(themeClasses.class1, {
+		assert.deepEqual(themeableInstance.theme.class1, {
 			[ theme1.class1 ]: false,
 			[ theme2.class1 ]: true
 		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
