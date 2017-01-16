@@ -10,19 +10,19 @@ Provides Dojo2 core widget and mixin functionality for creating custom widgets. 
 
 - [Usage](#usage)
 - [Features](#features)
-    - [Key Principles](#key-principles)
     - [Overview](#overview)
     	- [Introducing `v` & `w`](#v--w)
     	- [Widget Registry](#widget-registry)
     	- [Properties Lifecycle](#properties-lifecycle)
     	- [Event Handling](#event-handling)
+    	- [Theming](#theming)
     	- [Internationalization](#internationalization)
     	- [Projector](#projector)
     - [Authoring Examples](#authoring-examples)
     	- [Sample Label Widget](sample-label-widget)
     	- [Sample List Widget](sample-list-widget)
+    - [Key Principles](#key-principles)
     - [API](#api)
-    	- [src/interfaces.d.ts](#srcinterfacesdts)
 - [How Do I Contribute?](#how-do-i-contribute)
     - [Installation](#installation)
     - [Testing](#testing)
@@ -48,8 +48,7 @@ Use the [@dojo/cli](https://github.com/dojo/cli) to create a complete Dojo skele
 
 ## Features
 
-@dojo/widgets are based on a virtual DOM implementation called [Maquette](http://maquettejs.org/) as well as some base classes
-provided in [@dojo/compose](https://github.com/dojo/compose).
+Dojo 2 widgets are built using the [@dojo/compose](https://github.com/dojo/compose) composition library that promotes trait mixins over inheritence.
 
 The smallest `@dojo/widgets` example looks like this:
 
@@ -60,16 +59,6 @@ projector.append();
 ```
 
 It renders a `h1` element saying "Hello, Dojo!" on the page.
-
-### Key Principles
-
-These are some of the **important** principles to keep in mind when creating and using widgets:
- 
-1. the widget *`__render__`* function should **never** be overridden
-2. except for projectors you should **never** need to deal directory with widget instances.
-3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
-4. **never** set state outside of the widget instance.
-5. **never** update `properties` within a widget instance.
 
 ### Overview
 
@@ -421,66 +410,19 @@ const createListWidget: ListFactory = createWidgetBase.mixin({
 export default createListWidget;
 ```
 
+### Key Principles
+
+These are some of the **important** principles to keep in mind when creating and using widgets:
+ 
+1. the widget *`__render__`* function should **never** be overridden
+2. except for projectors you should **never** need to deal directory with widget instances.
+3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
+4. **never** set state outside of the widget instance.
+5. **never** update `properties` within a widget instance.
+
 ### API
 
-#### src/interfaces.d.ts
-
- - Interfaces
- 	- [WidgetMixin](#widgetmixin)
- - Types
- 	- [Widget](#widget)
-
-###### WidgetMixin
-
-An interface for the base widget API
-
-```ts
-interface WidgetMixin<P extends WidgetProperties> extends PropertyComparison<P> {
-	readonly id: string | undefined;
-	readonly classes: string[];
-	readonly properties: Partial<P>;
-	readonly registry: FactoryRegistryInterface;
-	readonly children: DNode[];
-	tagName: string;
-	nodeAttributes: NodeAttributeFunction<Widget<WidgetProperties>>[];
-	getNode: NodeFunction;
-	getChildrenNodes: ChildNodeFunction;
-	getNodeAttributes(): VNodeProperties;
-	setProperties(this: Widget<P>, properties: P): void;
-	onPropertiesChanged(this: Widget<P>, properties: P, changedPropertyKeys: string[]): void;
-	__render__(): VNode | string | null;
-	invalidate(): void;
-}
-```
-
-**Member Summary**
-
----
-
-| Name | Type | Readonly | Description |
-|---|---|---|---|
-|id|`string | undefined`| true |The id of the widget|
-|classes|`string[]`| true |Base classes for the widgets top node |
-|properties| `Partial<P>` | true | The public properties API for widgets|
-|registry| `FactoryRegistryInterface` | true |Locally scoped widget registry|
-|children| `DNode[]` | true |Array of children|
-|tagName| `string` | false |The tag name of the top node|
-|nodeAttributes| `NodeAttributeFunction<Widget<P>[]`| false|Array of functions that get reduced to provide properties for the top level node|
-
-**Method Summary**
-
----
-
-| Method | Description |
-|---|---|
-|`getNode(this: Widget<P>): DNode`|Return the single top level node of a widget|
-|`getChildrenNodes(this: Widget<P>): DNode[]`|Return the children nodes of a widgets|
-|`getNodeAttributes(this: Widget<P>): VNodeProperties`|Call all registered `nodeAttribute` functions reducing the results|
-|`setProperties(this: Widget<P>, properties: P): void`|Runs the property lifecycle and sets the properties against the instance|
-|`setChildren(this: Widget<P>, children: DNode | DNode[]): void`|Set a single child or array of children on the widget| 
-|`onPropertiesChanged(this: Widget<P>, properties: P, changedPropertyKeys: string[]): void`|Called if properties have been considered different during the property lifecycle| 
-|`__render__(this: Widget<P>): VNode | string | null`|Renders the widget|
-|`invalidate(this: Widget<P>): void`|Invalidates the widget so it will be included in the next render|
+// add link to generated API docs.
 
 ## How Do I Contribute?
 
