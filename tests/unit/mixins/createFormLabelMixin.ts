@@ -1,6 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { VNode } from 'dojo-interfaces/vdom';
+import { VNode } from '@dojo/interfaces/vdom';
 import createWidgetBase from '../../../src/createWidgetBase';
 import createFormLabelMixin from '../../../src/mixins/createFormLabelMixin';
 

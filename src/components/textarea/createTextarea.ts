@@ -1,5 +1,5 @@
 import createWidgetBase from '../../createWidgetBase';
-import { VNodeProperties } from 'dojo-interfaces/vdom';
+import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
 import createFormLabelMixin, { FormLabelMixin, FormLabelMixinProperties } from '../../mixins/createFormLabelMixin';
 

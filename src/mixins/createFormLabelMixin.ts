@@ -1,6 +1,6 @@
-import { VNodeProperties } from '@dojo-interfaces/vdom';
-import compose, { ComposeFactory } from '@dojo-compose/compose';
-import { assign } from '@dojo-core/lang';
+import { VNodeProperties } from '@dojo/interfaces/vdom';
+import compose, { ComposeFactory } from '@dojo/compose/compose';
+import { assign } from '@dojo/core/lang';
 import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabelProperties } from './../interfaces';
 import { v } from '../d';
 
