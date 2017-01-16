@@ -1,5 +1,6 @@
 import { entries } from '@dojo/shim/object';
 import { WidgetProperties, PropertyComparison } from './../interfaces';
+import { assign } from '@dojo/core/lang';
 
 /**
  * Determine if the value is an Object
@@ -69,11 +70,11 @@ const shallowPropertyComparisonMixin: { mixin: PropertyComparison<WidgetProperti
 				const newValue = newProperties[key];
 				if (Array.isArray(newValue)) {
 					properties[key] = newValue.map((value: any) => {
-						return isObject(value) ? Object.assign({}, value) : value;
+						return isObject(value) ? assign({}, value) : value;
 					});
 				}
 				else {
-					properties[key] = isObject(newValue) ? Object.assign({}, newValue) : newValue;
+					properties[key] = isObject(newValue) ? assign({}, newValue) : newValue;
 				}
 				return properties;
 			}, <WidgetProperties> {});
