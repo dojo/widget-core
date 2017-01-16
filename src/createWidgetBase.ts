@@ -19,7 +19,6 @@ import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import { v, registry } from './d';
 import FactoryRegistry from './FactoryRegistry';
-import shallowPropertyComparisonMixin from './mixins/shallowPropertyComparisonMixin';
 
 interface WidgetInternalState {
 	children: DNode[];
@@ -214,7 +213,12 @@ const createWidget: WidgetBaseFactory = createStateful
 			},
 
 			diffProperties(this: Widget<WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties): string[] {
-				return Object.keys(newProperties);
+				return Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
+					if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
+						changedPropertyKeys.push(propertyKey);
+					}
+					return changedPropertyKeys;
+				}, []);
 			},
 
 			assignProperties(this: Widget<WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties, changedPropertyKeys: string[]): WidgetProperties {
@@ -298,7 +302,6 @@ const createWidget: WidgetBaseFactory = createStateful
 
 			instance.setProperties(properties);
 		}
-	})
-	.mixin(shallowPropertyComparisonMixin);
+	});
 
 export default createWidget;
