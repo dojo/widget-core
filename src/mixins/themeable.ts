@@ -4,6 +4,7 @@ import { PropertiesChangeEvent } from './../interfaces';
 import { Evented } from '@dojo/interfaces/bases';
 import createEvented from '@dojo/compose/bases/createEvented';
 import { ComposeFactory } from '@dojo/compose/compose';
+import { assign } from '@dojo/core/lang';
 
 /**
  * A representation of the css-module class names
@@ -73,8 +74,24 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndex
 	}
 }
 
+function negateOldClasses<T>(oldClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
+	return Object.keys(oldClasses).reduce((currentAppliedClasses, className) => {
+		const oldClassMap = oldClasses[<keyof T> className];
+
+		const negatedClassNameMap = Object.keys(oldClassMap).reduce((currentClassMap, oldAppliedClassName) => {
+			currentClassMap[oldAppliedClassName] = false;
+			return currentClassMap;
+		}, <CSSModuleClassNames> {});
+
+		const calculatedClassNameMap = assign({}, negatedClassNameMap, newClasses[<keyof T> className]);
+		currentAppliedClasses[<keyof T> className] = calculatedClassNameMap;
+
+		return currentAppliedClasses;
+	}, <AppliedClasses<T>> {});
+}
+
 function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	const themeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
+	const newThemeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
 		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
 		let themeClassSource: {} = instance.baseTheme;
 
@@ -88,16 +105,21 @@ function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme:
 		return currentAppliedClasses;
 	}, <AppliedClasses<T>> {});
 
-	themeClassesMap.set(instance, themeClasses);
+	if (themeClassesMap.has(instance)) {
+		const oldClasses = themeClassesMap.get(instance);
+		themeClassesMap.set(instance, negateOldClasses(oldClasses, newThemeClasses));
+	} else {
+		themeClassesMap.set(instance, newThemeClasses);
+	}
 }
 
 function onPropertiesChanged<I>(instance: Themeable<I>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
+	const { theme: propTheme, overrideClasses: propOverrideClasses } = instance.properties;
 	const themeChanged = includes(changedPropertyKeys, 'theme');
 	const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 	if (themeChanged || overrideClassesChanged) {
-		themeClassesMap.delete(instance);
-		generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
+		generateThemeClasses(instance, instance.baseTheme, theme || propTheme, overrideClasses || propOverrideClasses);
 	}
 }
 

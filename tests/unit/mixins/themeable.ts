@@ -45,8 +45,8 @@ registerSuite({
 		'should return only base classes when no theme is set'() {
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { baseClass1: true },
-				class2: { baseClass2: true }
+				class1: { [ baseTheme.class1 ]: true },
+				class2: { [ baseTheme.class2 ]: true }
 			});
 		},
 		'should cache generated classes'() {
@@ -62,8 +62,8 @@ registerSuite({
 		'should return theme class instead of base class when a theme is set'() {
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { themeClass1: true },
-				class2: { baseClass2: true }
+				class1: { [ testTheme.class1 ]: true },
+				class2: { [ baseTheme.class2 ]: true }
 			});
 		},
 		'should cache theme class responses'() {
@@ -71,8 +71,7 @@ registerSuite({
 			const secondThemeClasses = themeableInstance.getTheme();
 			assert.strictEqual(firstThemeClasses, secondThemeClasses);
 		},
-		'should regenerate class names on theme change'() {
-			themeableInstance.properties.theme = testTheme2;
+		'should regenerate and negate class names on theme change'() {
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
@@ -82,8 +81,8 @@ registerSuite({
 			});
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { baseClass1: true },
-				class2: { theme2Class2: true }
+				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
+				class2: { [ baseTheme.class2 ]: false, [ testTheme2.class2 ]: true }
 			});
 		}
 	},
@@ -97,8 +96,8 @@ registerSuite({
 		'should return override class as well as baseclass'() {
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { themeClass1: true },
-				class2: { baseClass2: true, overrideClass2: true }
+				class1: { [ testTheme.class1 ]: true },
+				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: true }
 			});
 		},
 		'should cache override class responses'() {
@@ -107,7 +106,6 @@ registerSuite({
 			assert.strictEqual(firstThemeClasses, secondThemeClasses);
 		},
 		'should regenerate class names on overrides change'() {
-			themeableInstance.properties.overrideClasses = overrideClasses2;
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
@@ -117,13 +115,11 @@ registerSuite({
 			});
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { baseClass1: true },
-				class2: { baseClass2: true, override2Class2: true }
+				class1: { [ testTheme.class1 ]: true },
+				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: false, [ overrideClasses2.class2 ]: true }
 			});
 		},
 		'should regenerate class names on theme and overrides change'() {
-			themeableInstance.properties.theme = testTheme2;
-			themeableInstance.properties.overrideClasses = overrideClasses2;
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
@@ -134,8 +130,13 @@ registerSuite({
 			});
 			const themeClasses = themeableInstance.getTheme();
 			assert.deepEqual(themeClasses, {
-				class1: { baseClass1: true },
-				class2: { theme2Class2: true, override2Class2: true }
+				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
+				class2: {
+					[ testTheme2.class2 ]: true,
+					[ baseTheme.class2 ]: false,
+					[ overrideClasses.class2 ]: false,
+					[ overrideClasses2.class2 ]: true
+				}
 			});
 		}
 	}
