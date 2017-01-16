@@ -79,7 +79,7 @@ Dojo2 widgets is designed using key reactive architecture concepts. These includ
 
 #### Introducing `v` & `w`
 
-`v` & `w` are exported from `d.ts` and used to express widget structures within Dojo 2. This structure constructed of `DNode`s (`DNode` is the intersection type of `HNode` and `WNode`).
+`v` & `w` are abstractions used to express structures that will be reflected in DOM. `v` is used to create nodes that represent DOM tags for example `div`, `header` etc and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
 
 ```ts
 import { v, w } from '@dojo/widgets/d';
@@ -92,8 +92,6 @@ import { DNode, HNode, WNode } from '@dojo/widgets/interfaces';
 ```
 
 ##### `v`
-
-`v` is an abstraction of Hyperscript that allows dojo 2 to manage caching and lazy creation.
 
 Creates an element with the specified `tag`
 
@@ -134,8 +132,6 @@ v(tag: string, properties: VNodeProperties, children?: (DNode | null)[]): HNode[
 ```
 
 ##### `w`
-
-`w` is an abstraction layer for @dojo/widgets. That enables lazy widget instantiation, instance management and caching.
 
 Creates a @dojo/widget using the `factory` and `properties`.
 
