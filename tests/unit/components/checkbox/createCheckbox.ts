@@ -5,7 +5,7 @@ import createCheckbox from '../../../../src/components/checkbox/createCheckbox';
 
 registerSuite({
 	name: 'createCheckbox',
-		construction() {
+	construction() {
 		const checkbox = createCheckbox({
 			properties: {
 				id: 'foo',
@@ -14,9 +14,9 @@ registerSuite({
 			}
 		});
 
-		assert.strictEqual(checkbox.properties.id, 'foo');
-		assert.strictEqual(checkbox.properties.name, 'bar');
-		assert.strictEqual(checkbox.value, 'baz');
+		assert.strictEqual(checkbox.properties!.id, 'foo');
+		assert.strictEqual(checkbox.properties!.name, 'bar');
+		assert.strictEqual(checkbox.properties!.value, 'baz');
 	},
 	render() {
 		const checkbox = createCheckbox({
@@ -35,7 +35,7 @@ registerSuite({
 		assert.strictEqual(inputEl.properties!.name, 'bar');
 		assert.strictEqual(inputEl.properties!.value, 'baz');
 
-		checkbox.setState({ checked: true });
+		checkbox.setProperties({ checked: true });
 		vnode = <VNode> checkbox.__render__();
 		inputEl = vnode.children![0];
 
@@ -49,6 +49,6 @@ registerSuite({
 	onInput() {
 		const checkbox = createCheckbox();
 		checkbox.onChange(<any> { target: { value: 'hello world' } });
-		assert.equal(checkbox.value, 'hello world');
+		assert.equal(checkbox.properties!.value, 'hello world');
 	}
 });

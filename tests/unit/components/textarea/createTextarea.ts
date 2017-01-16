@@ -42,6 +42,6 @@ registerSuite({
 	onInput() {
 		const textarea = createTextarea();
 		textarea.onInput(<any> { target: { value: 'hello world' } });
-		assert.equal(textarea.value, 'hello world');
+		assert.equal(textarea.properties.value, 'hello world');
 	}
 });

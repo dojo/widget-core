@@ -43,18 +43,12 @@ registerSuite({
 		assert.isUndefined(vnode.properties!.innerHTML);
 	},
 	disable() {
-		const button = createButton({
-			properties: {
-				id: 'foo',
-				content: 'bar',
-				name: 'baz'
-			}
-		});
-		let vnode = <VNode> button.__render__();
-		button.setState({
+		const button = createButton();
+		button.setProperties({
 			disabled: true
 		});
-		vnode = <VNode> button.__render__();
+		const vnode = <VNode> button.__render__();
+
 		assert.isTrue(vnode.properties!['disabled']);
 	},
 	onClick() {

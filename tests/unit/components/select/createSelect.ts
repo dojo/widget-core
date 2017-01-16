@@ -20,7 +20,7 @@ registerSuite({
 		assert.strictEqual(select.properties.id, 'foo');
 		assert.strictEqual(select.properties.name, 'bar');
 		assert.lengthOf(Object.keys(select.properties.options), 2);
-		assert.strictEqual(select.value, 'option1');
+		assert.strictEqual(select.properties.value, 'option1');
 	},
 	render() {
 		const select = createSelect({
@@ -49,6 +49,6 @@ registerSuite({
 	onInput() {
 		const select = createSelect();
 		select.onChange(<any> { target: { value: 'hello world' } });
-		assert.equal(select.value, 'hello world');
+		assert.equal(select.properties.value, 'hello world');
 	}
 });

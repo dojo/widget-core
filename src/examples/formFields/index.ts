@@ -3,6 +3,7 @@ import { w } from '../../d';
 import createProjector, { ProjectorMixin } from '../../createProjector';
 import createButton from '../../components/button/createButton';
 import createTextInput from '../../components/textinput/createTextInput';
+import createCheckbox from '../../components/checkbox/createCheckbox';
 
 const createApp = createProjector.mixin({
 	mixin: {
@@ -16,6 +17,10 @@ const createApp = createProjector.mixin({
 				w(createButton, {
 					id: 'button',
 					content: 'Sample Button'
+				}),
+				w(createCheckbox, {
+					value: 'foo',
+					label: 'Check me'
 				})
 			];
 		},

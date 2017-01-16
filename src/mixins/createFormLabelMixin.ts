@@ -66,8 +66,6 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 		const { properties } = this;
 		const attributeKeys = Object.keys(properties);
 
-		console.log('filtering input field attributes with properties:', attributeKeys);
-
 		const allowedAttributes = ['checked', 'descriptionID', 'disabled', 'inputmode', 'invalid', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'type', 'value'];
 		const nodeAttributes: any = {};
 
@@ -95,12 +93,10 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 			}
 		}
 
-		console.log('returning node attributes:', nodeAttributes);
 		return nodeAttributes;
 	},
 
 	getNode(this: FormLabel): DNode {
-		console.log('getting node with properties', this.properties);
 		const { label } = this.properties;
 		let tag = label ? 'label' : 'div';
 
@@ -152,8 +148,6 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 						children.reverse();
 					}
 				}
-
-				console.log('setting children to', children);
 
 				return children;
 			}

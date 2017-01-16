@@ -14,6 +14,7 @@ registerSuite({
 			}
 		});
 		assert.strictEqual(textInput.properties.id, 'foo');
+		assert.strictEqual(textInput.properties.type, 'text');
 		assert.strictEqual(textInput.properties.name, 'bar');
 		assert.strictEqual(textInput.properties.placeholder, 'baz');
 	},
@@ -42,7 +43,7 @@ registerSuite({
 	onInput() {
 		const textInput = createTextInput();
 		textInput.onInput(<any> { target: { value: 'hello world' } });
-		assert.equal(textInput.value, 'hello world');
+		assert.equal(textInput.properties.value, 'hello world');
 	},
 	'input types'() {
 		const emailInput = createTextInput({

@@ -16,7 +16,6 @@ const createRadio: RadioFactory = createWidgetBase
 	.mixin({
 		mixin: {
 			tagName: 'input',
-			type: 'radio',
 			onChange(this: Radio, event: TypedTargetEvent<HTMLInputElement>) {
 				this.properties.value = event.target.value;
 			},
@@ -25,6 +24,14 @@ const createRadio: RadioFactory = createWidgetBase
 					return { onchange: this.onChange };
 				}
 			]
+		},
+		aspectAdvice: {
+			before: {
+				onPropertiesChanged(this: Radio, properties: RadioProperties, changedPropertyKeys: string[]) {
+					properties.type = 'radio';
+					return [properties, changedPropertyKeys];
+				}
+			}
 		}
 	});
 

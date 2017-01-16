@@ -5,7 +5,7 @@ import createRadio from '../../../../src/components/radio/createRadio';
 
 registerSuite({
 	name: 'createRadio',
-		construction() {
+	construction() {
 		const radio = createRadio({
 			properties: {
 				id: 'foo',
@@ -16,7 +16,7 @@ registerSuite({
 
 		assert.strictEqual(radio.properties.id, 'foo');
 		assert.strictEqual(radio.properties.name, 'bar');
-		assert.strictEqual(radio.value, 'baz');
+		assert.strictEqual(radio.properties.value, 'baz');
 	},
 	render() {
 		const radio = createRadio({
@@ -35,7 +35,7 @@ registerSuite({
 		assert.strictEqual(inputEl.properties!.name, 'bar');
 		assert.strictEqual(inputEl.properties!.value, 'baz');
 
-		radio.setState({ checked: true });
+		radio.setProperties({ checked: true });
 		vnode = <VNode> radio.__render__();
 		inputEl = vnode.children![0];
 
@@ -49,6 +49,6 @@ registerSuite({
 	onInput() {
 		const radio = createRadio();
 		radio.onChange(<any> { target: { value: 'hello world' } });
-		assert.equal(radio.value, 'hello world');
+		assert.equal(radio.properties.value, 'hello world');
 	}
 });

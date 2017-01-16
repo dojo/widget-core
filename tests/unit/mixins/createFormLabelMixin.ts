@@ -16,31 +16,46 @@ registerSuite({
 	},
 	getFormFieldNodeAttributes() {
 		const formfield = formLabelWidget({
-			type: 'foo',
 			tagName: 'input',
-			randomProp: 'qux'
+			properties: {
+				type: 'foo',
+				randomProp: 'qux'
+			}
 		});
-
-		formfield.setState(<any> { value: 'bar', name: 'baz' });
 
 		let vnode = <VNode> formfield.__render__();
 		let inputfield = vnode.children![0];
 
+		assert.strictEqual(inputfield.vnodeSelector, 'input');
 		assert.strictEqual(inputfield.properties!['type'], 'foo');
-		assert.strictEqual(inputfield.properties!['value'], 'bar');
-		assert.strictEqual(inputfield.properties!['name'], 'baz');
-		assert.isUndefined(inputfield.properties!['randomProp']);
 
-		formfield.setState(<any> { disabled: true });
+		formfield.setProperties({
+			value: 'bar',
+			name: 'baz',
+			type: 'foo',
+			randomProp: 'qux'
+		});
 		vnode = <VNode> formfield.__render__();
 		inputfield = vnode.children![0];
 
 		assert.strictEqual(inputfield.properties!['type'], 'foo');
 		assert.strictEqual(inputfield.properties!['value'], 'bar');
 		assert.strictEqual(inputfield.properties!['name'], 'baz');
-		assert.isTrue(inputfield.properties!['disabled']);
+		assert.isUndefined(inputfield.properties!['randomProp']);
 
-		formfield.setState(<any> {
+		formfield.setProperties({
+			type: 'foo',
+			disabled: true
+		});
+		vnode = <VNode> formfield.__render__();
+		inputfield = vnode.children![0];
+
+		assert.strictEqual(inputfield.properties!['type'], 'foo');
+		assert.isTrue(inputfield.properties!['disabled']);
+		assert.isUndefined(inputfield.properties!['value']);
+		assert.isUndefined(inputfield.properties!['name']);
+
+		formfield.setProperties({
 			readonly: true,
 			invalid: false,
 			descriptionID: 'qux'
@@ -56,7 +71,9 @@ registerSuite({
 	'label': {
 		'string label'() {
 			const formfield = formLabelWidget({
+				properties: {
 					label: 'bar'
+				}
 			});
 			const vnode = <VNode> formfield.__render__();
 
@@ -66,10 +83,12 @@ registerSuite({
 		},
 		'label options'() {
 			const formfield = formLabelWidget({
-				label: {
-					content: 'bar',
-					position: 'above',
-					hidden: true
+				properties: {
+					label: {
+						content: 'bar',
+						position: 'above',
+						hidden: true
+					}
 				}
 			});
 			const vnode = <VNode> formfield.__render__();
