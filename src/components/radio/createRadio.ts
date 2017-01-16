@@ -1,24 +1,24 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
+import createFormLabelMixin, { FormLabelMixin, FormLabelMixinProperties } from '../../mixins/createFormLabelMixin';
 
-export type RadioProperties = WidgetProperties & FormFieldMixinProperties;
+export type RadioProperties = WidgetProperties & FormLabelMixinProperties;
 
-export type Radio = Widget<RadioProperties> & FormFieldMixin<string, any> & {
+export type Radio = Widget<RadioProperties> & FormLabelMixin & {
 	onChange(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
 export interface RadioFactory extends WidgetFactory<Radio, RadioProperties> { }
 
 const createRadio: RadioFactory = createWidgetBase
-	.mixin(createFormFieldMixin)
+	.mixin(createFormLabelMixin)
 	.mixin({
 		mixin: {
 			tagName: 'input',
 			type: 'radio',
 			onChange(this: Radio, event: TypedTargetEvent<HTMLInputElement>) {
-				this.value = event.target.value;
+				this.properties.value = event.target.value;
 			},
 			nodeAttributes: [
 				function(this: Radio): VNodeProperties {

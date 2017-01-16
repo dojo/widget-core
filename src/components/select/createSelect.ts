@@ -1,28 +1,28 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from 'dojo-interfaces/vdom';
 import { Widget, WidgetProperties, WidgetFactory, DNode, TypedTargetEvent } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin, FormFieldMixinProperties } from '../../mixins/createFormFieldMixin';
+import createFormLabelMixin, { FormLabelMixin, FormLabelMixinProperties } from '../../mixins/createFormLabelMixin';
 import { v } from '../../d';
 
-export interface SelectInputProperties extends WidgetProperties, FormFieldMixinProperties {
+export interface SelectInputProperties extends WidgetProperties, FormLabelMixinProperties {
 	options?: {
 		[key: string]: string
 	};
 }
 
-export type SelectInput = Widget<SelectInputProperties> & FormFieldMixin<string, any> & {
+export type SelectInput = Widget<SelectInputProperties> & FormLabelMixin & {
 	onChange(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
 export interface SelectInputFactory extends WidgetFactory<SelectInput, SelectInputProperties> { }
 
 const createSelectInput: SelectInputFactory = createWidgetBase
-	.mixin(createFormFieldMixin)
+	.mixin(createFormLabelMixin)
 	.mixin({
 		mixin: {
 			tagName: 'select',
 			onChange(this: SelectInput, event: TypedTargetEvent<HTMLInputElement>) {
-				this.value = event.target.value;
+				this.properties.value = event.target.value;
 			},
 			nodeAttributes: [
 				function(this: SelectInput): VNodeProperties {
@@ -44,12 +44,17 @@ const createSelectInput: SelectInputFactory = createWidgetBase
 				return optionNodes;
 			}
 		},
-		initialize(instance) {
-			let { options = {} } = instance.properties;
+		aspectAdvice: {
+			before: {
+				onPropertiesChanged(this: SelectInput, properties: SelectInputProperties, changedPropertyKeys: string[]) {
+					const { options = {} } = properties;
 
-			// select first option by default
-			if (Object.keys(options).length > 0) {
-				instance.value = instance.value || Object.keys(options)[0];
+					if ( !properties.value && Object.keys(options).length > 0 ) {
+						properties.value = Object.keys(options)[0];
+					}
+
+					return [properties, changedPropertyKeys];
+				}
 			}
 		}
 	});

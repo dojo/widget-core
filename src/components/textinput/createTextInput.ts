@@ -24,12 +24,18 @@ const createTextInput: TextInputFactory = createWidgetBase
 				}
 			],
 			tagName: 'input'
-		}
-		/* initialize(instance: TextInput) {
-			if ( !instance.properties.type ) {
-				instance.setState({ type: 'text' });
+		},
+		aspectAdvice: {
+			before: {
+				onPropertiesChanged(this: TextInput, properties: TextInputProperties, changedPropertyKeys: string[]) {
+					if ( !properties.type ) {
+						properties.type = 'text';
+					}
+
+					return [properties, changedPropertyKeys];
+				}
 			}
-		} */
+		}
 	});
 
 export default createTextInput;

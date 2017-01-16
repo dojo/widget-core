@@ -1,6 +1,6 @@
-import { VNodeProperties } from 'dojo-interfaces/vdom';
-import compose, { ComposeFactory } from 'dojo-compose/compose';
-import { assign } from 'dojo-core/lang';
+import { VNodeProperties } from '@dojo-interfaces/vdom';
+import compose, { ComposeFactory } from '@dojo-compose/compose';
+import { assign } from '@dojo-core/lang';
 import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabelProperties } from './../interfaces';
 import { v } from '../d';
 
@@ -13,7 +13,7 @@ export interface FormLabelMixinProperties extends WidgetProperties {
 	/**
 	 * The current value
 	 */
-	value?: any;
+	value?: string;
 
 	/**
 	 * The type of the form field (equates to the `type` attribute in the DOM)
@@ -26,7 +26,7 @@ export interface FormLabelMixinProperties extends WidgetProperties {
 	disabled?: boolean;
 
 	/**
-	 * Label settings
+	 * Label settings for form label text, position, and visibility
 	 */
 	label?: string | FormLabelProperties;
 
@@ -62,7 +62,7 @@ export interface FormLabelMixin {
 	labelDefaults: FormLabelProperties;
 }
 
-export type FormLabel = Widget<WidgetProperties> & FormLabelMixin;
+export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
 
 export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, FormLabelMixinProperties> {}
 
@@ -107,7 +107,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 	},
 
 	getNode(this: FormLabel): DNode {
-		const { label } = this.properties
+		const { label } = this.properties;
 		let tag = label ? 'label' : 'div';
 
 		if (this.classes.length) {
