@@ -139,5 +139,40 @@ registerSuite({
 				}
 			});
 		}
+	},
+	'should only negate each class once'() {
+		themeableInstance = themeableFactory();
+
+		const theme1 = { class1: 'firstChange' };
+		const theme2 = { class1: 'secondChange' };
+		let themeClasses = themeableInstance.getTheme();
+
+		assert.deepEqual(themeClasses.class1, {
+			[ baseTheme.class1 ]: true
+		}, 'should have base theme set to true');
+
+		themeableInstance.emit({
+			type: 'properties:changed',
+			properties: { theme: theme1 },
+			changedPropertyKeys: [ 'theme' ]
+		});
+		themeClasses = themeableInstance.getTheme();
+
+		assert.deepEqual(themeClasses.class1, {
+			[ baseTheme.class1 ]: false,
+			[ theme1.class1 ]: true
+		}, 'should have base theme set to false and theme1 class1 set to true');
+
+		themeableInstance.emit({
+			type: 'properties:changed',
+			properties: { theme: theme2 },
+			changedPropertyKeys: [ 'theme' ]
+		});
+		themeClasses = themeableInstance.getTheme();
+
+		assert.deepEqual(themeClasses.class1, {
+			[ theme1.class1 ]: false,
+			[ theme2.class1 ]: true
+		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
 	}
 });

@@ -74,25 +74,30 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndex
 	}
 }
 
-function negateOldClasses<T>(oldClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
-	return Object.keys(oldClasses).reduce((currentAppliedClasses, className) => {
-		const oldClassMap = oldClasses[<keyof T> className];
+function negatePreviousClasses<T>(oldClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
+	return Object.keys(oldClasses).reduce((newAppliedClasses, className: keyof T) => {
+		const oldCSSModuleClassNames: CSSModuleClassNames = oldClasses[className] || {};
 
-		const negatedClassNameMap = Object.keys(oldClassMap).reduce((currentClassMap, oldAppliedClassName) => {
-			currentClassMap[oldAppliedClassName] = false;
-			return currentClassMap;
+		const negatedClassNameMap = Object.keys(oldCSSModuleClassNames).reduce((newClassMap, oldAppliedClassName) => {
+			const currentClassNameFlag = oldCSSModuleClassNames[<keyof T> oldAppliedClassName];
+			// If it's true it needs to be negated and passed along, If it's false,
+			// don't return it as maquette will already have removed it.
+			if (currentClassNameFlag) {
+				newClassMap[oldAppliedClassName] = false;
+			}
+			return newClassMap;
 		}, <CSSModuleClassNames> {});
 
-		const calculatedClassNameMap = assign({}, negatedClassNameMap, newClasses[<keyof T> className]);
-		currentAppliedClasses[<keyof T> className] = calculatedClassNameMap;
+		const calculatedClassNameMap = assign({}, negatedClassNameMap, newClasses[className]);
+		newAppliedClasses[className] = calculatedClassNameMap;
 
-		return currentAppliedClasses;
+		return newAppliedClasses;
 	}, <AppliedClasses<T>> {});
 }
 
 function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	const newThemeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
-		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
+	const newThemeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className: keyof T) => {
+		const classMap: CSSModuleClassNames = currentAppliedClasses[className] = {};
 		let themeClassSource: {} = instance.baseTheme;
 
 		if (theme && theme.hasOwnProperty(className)) {
@@ -107,7 +112,7 @@ function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme:
 
 	if (themeClassesMap.has(instance)) {
 		const oldClasses = themeClassesMap.get(instance);
-		themeClassesMap.set(instance, negateOldClasses(oldClasses, newThemeClasses));
+		themeClassesMap.set(instance, negatePreviousClasses(oldClasses, newThemeClasses));
 	} else {
 		themeClassesMap.set(instance, newThemeClasses);
 	}
