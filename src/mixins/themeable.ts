@@ -1,8 +1,5 @@
-import { Handle } from '@dojo/interfaces/core';
-import { ObservablePatchableStore } from '@dojo/interfaces/abilities';
 import WeakMap from '@dojo/shim/WeakMap';
 import { includes } from '@dojo/shim/array';
-import { assign } from '@dojo/core/lang';
 import { PropertiesChangeEvent } from './../interfaces';
 import { Evented } from '@dojo/interfaces/bases';
 import createEvented from '@dojo/compose/bases/createEvented';
@@ -77,7 +74,7 @@ function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndex
 }
 
 function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	const appliedClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
+	const themeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className) => {
 		const classMap: CSSModuleClassNames = currentAppliedClasses[<keyof T> className] = {};
 		let themeClassSource: {} = instance.baseTheme;
 
@@ -90,6 +87,8 @@ function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme:
 
 		return currentAppliedClasses;
 	}, <AppliedClasses<T>> {});
+
+	themeClassesMap.set(instance, themeClasses);
 }
 
 function onPropertiesChanged<I>(instance: Themeable<I>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
