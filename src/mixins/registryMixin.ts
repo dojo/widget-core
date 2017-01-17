@@ -39,6 +39,10 @@ const registryFactory: RegistryFactory = createEvented.mixin({
 				internalRegistryMap.set(instance, evt.properties.registry);
 			}
 		}));
+		const { properties: { registry } } = instance;
+		if (registry) {
+			internalRegistryMap.set(instance, registry);
+		}
 	}
 });
 
