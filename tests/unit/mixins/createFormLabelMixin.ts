@@ -14,6 +14,17 @@ registerSuite({
 
 		assert.isDefined(formLabelMixin);
 	},
+	getNode() {
+		const formfield = formLabelWidget.override({
+			classes: ['foo', 'bar']
+		})();
+		formfield.setProperties({
+			label: 'baz'
+		});
+		const vnode = <VNode> formfield.__render__();
+
+		assert.strictEqual(vnode.vnodeSelector, 'label.foo.bar');
+	},
 	getFormFieldNodeAttributes() {
 		const formfield = formLabelWidget({
 			tagName: 'input',

@@ -1,7 +1,7 @@
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import compose, { ComposeFactory } from '@dojo/compose/compose';
 import { assign } from '@dojo/core/lang';
-import { NodeAttributeFunction, DNode, Widget, WidgetProperties, FormLabelProperties } from './../interfaces';
+import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties, FormLabelProperties } from './../interfaces';
 import { v } from '../d';
 
 export interface FormLabelMixinProperties extends WidgetProperties {
@@ -59,7 +59,7 @@ export interface FormLabelMixin {
 
 export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
 
-export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, FormLabelMixinProperties> {}
+export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, WidgetOptions<WidgetState, FormLabelMixinProperties>> {}
 
 const createFormLabelMixin: FormLabelMixinFactory = compose({
 	getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
@@ -101,7 +101,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 		let tag = label ? 'label' : 'div';
 
 		if (this.classes.length) {
-			tag = `${this.tagName}.${this.classes.join('.')}`;
+			tag = `${tag}.${this.classes.join('.')}`;
 		}
 
 		return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
