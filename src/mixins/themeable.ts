@@ -96,7 +96,7 @@ function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses
 }
 
 function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	const newThemeClasses = Object.keys(baseTheme).reduce((newAppliedClasses, className: keyof T) => {
+	return Object.keys(baseTheme).reduce((newAppliedClasses, className: keyof T) => {
 		const newCSSModuleClassNames: CSSModuleClassNames = {};
 
 		let themeClassSource: {} = baseTheme;
@@ -110,7 +110,9 @@ function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme:
 
 		return newAppliedClasses;
 	}, <AppliedClasses<T>> {});
+}
 
+function updateThemeClassesMap<I, T>(instance: Themeable<I>, newThemeClasses: AppliedClasses<T>) {
 	if (themeClassesMap.has(instance)) {
 		const previousThemeClasses = themeClassesMap.get(instance);
 		themeClassesMap.set(instance, negatePreviousClasses(previousThemeClasses, newThemeClasses));
@@ -125,7 +127,8 @@ function onPropertiesChanged<I>(instance: Themeable<I>, { theme, overrideClasses
 	const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 	if (themeChanged || overrideClassesChanged) {
-		generateThemeClasses(instance, instance.baseTheme, theme || propTheme, overrideClasses || propOverrideClasses);
+		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme || propTheme, overrideClasses || propOverrideClasses);
+		updateThemeClassesMap(instance, themeClasses);
 	}
 }
 
@@ -143,7 +146,8 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		const { theme, overrideClasses } = instance.properties;
-		generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
+		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
+		updateThemeClassesMap(instance, themeClasses);
 	}
 });
 
