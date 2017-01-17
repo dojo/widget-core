@@ -98,7 +98,7 @@ registerSuite({
 			let callCount = 0;
 			createWidgetBase.mixin({
 				mixin: {
-					applyPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
 						callCount++;
 						assert.equal(newProperty, 'bar');
 						return {
@@ -114,13 +114,13 @@ registerSuite({
 		'result from apply property override diff and assign'() {
 			const widgetBase = createWidgetBase.mixin({
 				mixin: {
-					applyPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
 						return {
 							changed: true,
 							value: newProperty
 						};
 					},
-					applyPropertyBaz(this: any, previousProperty: any, newProperty: any): any {
+					diffPropertyBaz(this: any, previousProperty: any, newProperty: any): any {
 						return {
 							changed: false,
 							value: newProperty

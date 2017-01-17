@@ -300,7 +300,7 @@ const createWidget: WidgetBaseFactory = createStateful
 			instance.tagName = tagName || instance.tagName;
 
 			Object.keys(Object.getPrototypeOf(instance)).forEach((attribute) => {
-				const match = attribute.match(/^applyProperty(.*)/);
+				const match = attribute.match(/^diffProperty(.*)/);
 				if (match) {
 					diffPropertyFunctionMap.set(match[0], `${match[1].slice(0, 1).toLowerCase()}${match[1].slice(1)}`);
 				}
