@@ -11,7 +11,7 @@ import {
 	WidgetProperties,
 	WidgetBaseFactory,
 	FactoryRegistryItem,
-	PropertiesChangedRecord,
+	PropertiesChangeRecord,
 	PropertyChangeRecord
 } from './interfaces';
 import { VNode, VNodeProperties } from '@dojo/interfaces/vdom';
@@ -242,7 +242,7 @@ const createWidget: WidgetBaseFactory = createStateful
 				internalState.previousProperties = this.properties;
 			},
 
-			diffProperties(this: Widget<WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties): PropertiesChangedRecord<WidgetProperties> {
+			diffProperties(this: Widget<WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties): PropertiesChangeRecord<WidgetProperties> {
 				return {
 					changedKeys: Object.keys(newProperties),
 					properties: assign({}, newProperties)

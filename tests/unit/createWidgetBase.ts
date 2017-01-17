@@ -94,7 +94,7 @@ registerSuite({
 		}
 	},
 	setProperties: {
-		'call apply property functions if available'() {
+		'call diff property functions if available'() {
 			let callCount = 0;
 			createWidgetBase.mixin({
 				mixin: {
@@ -111,7 +111,7 @@ registerSuite({
 
 			assert.equal(callCount, 1);
 		},
-		'result from apply property override diff and assign'() {
+		'result from diff property override diff and assign'() {
 			const widgetBase = createWidgetBase.mixin({
 				mixin: {
 					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
