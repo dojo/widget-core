@@ -255,10 +255,7 @@ export interface WidgetMixin<P extends WidgetProperties> extends PropertyCompari
 	 */
 	tagName: string;
 
-	/**
-	 * The specific Factory Registry passed to the widget via the `WidgetOptions`
-	 */
-	readonly registry: FactoryRegistryInterface;
+	registry: FactoryRegistryInterface | undefined;
 }
 
 export interface WidgetOptions<S extends WidgetState, P extends WidgetProperties> extends StatefulOptions<S> {

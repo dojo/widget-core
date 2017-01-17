@@ -44,10 +44,9 @@ const widgetInternalStateMap = new WeakMap<Widget<WidgetProperties>, WidgetInter
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 
 function getFromRegistry(instance: Widget<WidgetProperties>, factoryLabel: string): FactoryRegistryItem | null {
-	if (instance.registry.has(factoryLabel)) {
+	if (instance.registry && instance.registry.has(factoryLabel)) {
 		return instance.registry.get(factoryLabel);
 	}
-
 	return registry.get(factoryLabel);
 }
 
@@ -288,9 +287,7 @@ const createWidget: WidgetBaseFactory = createStateful
 				return internalState.cachedVNode;
 			},
 
-			get registry(this: Widget<WidgetProperties>): FactoryRegistry {
-				return widgetInternalStateMap.get(this).factoryRegistry;
-			},
+			registry: undefined,
 
 			tagName: 'div'
 		},
