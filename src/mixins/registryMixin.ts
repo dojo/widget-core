@@ -1,6 +1,6 @@
 import WeakMap from '@dojo/shim/WeakMap';
 import { includes } from '@dojo/shim/array';
-import { PropertiesChangeEvent } from './../interfaces';
+import { PropertiesChangeEvent, PropertyChangeRecord } from './../interfaces';
 import { Evented } from '@dojo/interfaces/bases';
 import createEvented from '@dojo/compose/bases/createEvented';
 import { ComposeFactory } from '@dojo/compose/compose';
@@ -15,6 +15,7 @@ export interface RegistryMixinOptions {
 }
 
 export interface RegistryMixin extends Evented {
+	diffPropertyRegistry(previousProperty: FactoryRegistry, property: FactoryRegistry): PropertyChangeRecord;
 }
 
 export interface RegistryFactory extends ComposeFactory<RegistryMixin, RegistryMixinOptions> {}
@@ -29,6 +30,12 @@ const internalRegistryMap = new WeakMap<Registry, FactoryRegistry>();
 const registryFactory: RegistryFactory = createEvented.mixin({
 	className: 'RegistryMixin',
 	mixin: {
+		diffPropertyRegistry(this: Registry, previousValue: FactoryRegistry, value: FactoryRegistry): PropertyChangeRecord {
+			return {
+				changed: previousValue !== value,
+				value: value
+			};
+		},
 		get registry(this: Registry): FactoryRegistry {
 			return internalRegistryMap.get(this);
 		}
@@ -39,7 +46,7 @@ const registryFactory: RegistryFactory = createEvented.mixin({
 				internalRegistryMap.set(instance, evt.properties.registry);
 			}
 		}));
-		const { properties: { registry } } = options;
+		const { properties: { registry } } = instance;
 		if (registry) {
 			internalRegistryMap.set(instance, registry);
 		}
