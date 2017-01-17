@@ -33,13 +33,13 @@ const registryFactory: RegistryFactory = createEvented.mixin({
 			return internalRegistryMap.get(this);
 		}
 	},
-	initialize(instance: Registry) {
+	initialize(instance: Registry, options: RegistryMixinOptions) {
 		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<RegistryMixin, RegistryMixinProperties>) => {
 			if (includes(evt.changedPropertyKeys, 'registry')) {
 				internalRegistryMap.set(instance, evt.properties.registry);
 			}
 		}));
-		const { properties: { registry } } = instance;
+		const { properties: { registry } } = options;
 		if (registry) {
 			internalRegistryMap.set(instance, registry);
 		}
