@@ -42,6 +42,8 @@ interface WidgetInternalState {
  */
 const widgetInternalStateMap = new WeakMap<Widget<WidgetProperties>, WidgetInternalState>();
 
+const propertyFunctionNameRegex = /^diffProperty(.*)/;
+
 function isWNode(child: DNode): child is WNode {
 	return Boolean(child && (<WNode> child).factory !== undefined);
 }
@@ -207,10 +209,14 @@ const createWidget: WidgetBaseFactory = createStateful
 				const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 				const diffPropertyChangedKeys: string[] = [];
 
-				internalState.diffPropertyFunctionMap.forEach((property: string, diffFunction: string) => {
+				internalState.diffPropertyFunctionMap.forEach((property: string, diffFunctionName: string) => {
 					const previousProperty = internalState.previousProperties[property];
 					const newProperty = properties[property];
-					const result: PropertyChangeRecord = this[diffFunction](previousProperty, newProperty);
+					const result: PropertyChangeRecord = this[diffFunctionName](previousProperty, newProperty);
+
+					if (!result) {
+						return;
+					}
 
 					if (result.changed) {
 						diffPropertyChangedKeys.push(property);
@@ -300,7 +306,7 @@ const createWidget: WidgetBaseFactory = createStateful
 			instance.tagName = tagName || instance.tagName;
 
 			Object.keys(Object.getPrototypeOf(instance)).forEach((attribute) => {
-				const match = attribute.match(/^diffProperty(.*)/);
+				const match = attribute.match(propertyFunctionNameRegex);
 				if (match) {
 					diffPropertyFunctionMap.set(match[0], `${match[1].slice(0, 1).toLowerCase()}${match[1].slice(1)}`);
 				}

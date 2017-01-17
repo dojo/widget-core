@@ -135,6 +135,21 @@ registerSuite({
 			});
 
 			widgetBase.setProperties({ foo: 'bar', baz: 'bar' });
+		},
+		'uses base diff when an individual property diff returns null'() {
+			const widgetBase = createWidgetBase.mixin({
+				mixin: {
+					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+						return null;
+					}
+				}
+			})({ properties: { foo: 'bar' } });
+
+			widgetBase.on('properties:changed', (event: any) => {
+				assert.include(event.changedPropertyKeys, 'foo');
+			});
+
+			widgetBase.setProperties({ foo: 'baz' });
 		}
 	},
 	onPropertiesChanged() {
