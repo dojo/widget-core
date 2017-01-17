@@ -64,31 +64,31 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<{}>, The
  */
 const themeClassesMap = new WeakMap<ThemeableMixin<{}>, AppliedClasses<any>>();
 
-function addClassNameToMap(classMap: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
+function addClassNameToCSSModuleClassNames(cssModuleClassNames: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
 	if (classList.hasOwnProperty(className)) {
 		// split out the classname because css-module composition combines class names with a space
 		const generatedClassNames: string[] = classList[className].split(' ');
 		generatedClassNames.forEach((generatedClassName) => {
-			classMap[generatedClassName] = true;
+			cssModuleClassNames[generatedClassName] = true;
 		});
 	}
 }
 
-function negatePreviousClasses<T>(oldClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
-	return Object.keys(oldClasses).reduce((newAppliedClasses, className: keyof T) => {
-		const oldCSSModuleClassNames: CSSModuleClassNames = oldClasses[className] || {};
+function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
+	return Object.keys(previousClasses).reduce((newAppliedClasses, className: keyof T) => {
+		const oldCSSModuleClassNames: CSSModuleClassNames = previousClasses[className] || {};
 
-		const negatedClassNameMap = Object.keys(oldCSSModuleClassNames).reduce((newClassMap, oldAppliedClassName) => {
-			const currentClassNameFlag = oldCSSModuleClassNames[<keyof T> oldAppliedClassName];
+		const negatedCSSModuleClassNames = Object.keys(oldCSSModuleClassNames).reduce((newCSSModuleClassNames, oldCSSModuleClassName) => {
+			const currentClassNameFlag = oldCSSModuleClassNames[<keyof T> oldCSSModuleClassName];
 			// If it's true it needs to be negated and passed along, If it's false,
 			// don't return it as maquette will already have removed it.
 			if (currentClassNameFlag) {
-				newClassMap[oldAppliedClassName] = false;
+				newCSSModuleClassNames[oldCSSModuleClassName] = false;
 			}
-			return newClassMap;
+			return newCSSModuleClassNames;
 		}, <CSSModuleClassNames> {});
 
-		const calculatedClassNameMap = assign({}, negatedClassNameMap, newClasses[className]);
+		const calculatedClassNameMap = assign({}, negatedCSSModuleClassNames, newClasses[className]);
 		newAppliedClasses[className] = calculatedClassNameMap;
 
 		return newAppliedClasses;
@@ -96,23 +96,24 @@ function negatePreviousClasses<T>(oldClasses: AppliedClasses<T>, newClasses: App
 }
 
 function generateThemeClasses<I, T>(instance: Themeable<I>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	const newThemeClasses = Object.keys(instance.baseTheme).reduce((currentAppliedClasses, className: keyof T) => {
-		const classMap: CSSModuleClassNames = currentAppliedClasses[className] = {};
-		let themeClassSource: {} = instance.baseTheme;
+	const newThemeClasses = Object.keys(baseTheme).reduce((newAppliedClasses, className: keyof T) => {
+		const newCSSModuleClassNames: CSSModuleClassNames = {};
 
-		if (theme && theme.hasOwnProperty(className)) {
+		let themeClassSource: {} = baseTheme;
+		if (theme.hasOwnProperty(className)) {
 			themeClassSource = theme;
 		}
 
-		addClassNameToMap(classMap, themeClassSource, className);
-		overrideClasses && addClassNameToMap(classMap, overrideClasses, className);
+		addClassNameToCSSModuleClassNames(newCSSModuleClassNames, themeClassSource, className);
+		overrideClasses && addClassNameToCSSModuleClassNames(newCSSModuleClassNames, overrideClasses, className);
+		newAppliedClasses[className] = newCSSModuleClassNames;
 
-		return currentAppliedClasses;
+		return newAppliedClasses;
 	}, <AppliedClasses<T>> {});
 
 	if (themeClassesMap.has(instance)) {
-		const oldClasses = themeClassesMap.get(instance);
-		themeClassesMap.set(instance, negatePreviousClasses(oldClasses, newThemeClasses));
+		const previousThemeClasses = themeClassesMap.get(instance);
+		themeClassesMap.set(instance, negatePreviousClasses(previousThemeClasses, newThemeClasses));
 	} else {
 		themeClassesMap.set(instance, newThemeClasses);
 	}
