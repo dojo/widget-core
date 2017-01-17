@@ -46,6 +46,7 @@ registerSuite({
 		'works with widget base'() {
 			const createWidgetWithRegistry = createWidgetBase.mixin(registryMixin);
 			const createHeader = createWidgetBase.override({ tagName: 'header' });
+			const createSpan = createWidgetBase.override({ tagName: 'span' });
 
 			const registry = new FactoryRegistry();
 			registry.define('my-header', createHeader);
@@ -56,9 +57,20 @@ registerSuite({
 
 			instance.children = [ w('my-header', {}) ];
 
-			const result = <VNode> instance.__render__();
+			let result = <VNode> instance.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
+
+			const newRegistry = new FactoryRegistry();
+			newRegistry.define('my-span', createSpan);
+
+			instance.setProperties({ registry: newRegistry });
+
+			instance.children = [ w('my-span', {}) ];
+
+			result = <VNode> instance.__render__();
+			assert.lengthOf(result.children, 1);
+			assert.strictEqual(result.children![0].vnodeSelector, 'span');
 
 		}
 	}
