@@ -71,7 +71,6 @@ registerSuite({
 			result = <VNode> instance.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'span');
-
 		}
 	}
 });
