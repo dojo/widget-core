@@ -174,7 +174,6 @@ registerSuite({
 			assert.deepEqual(propertiesChanged.changedKeys, [ 'myFunc' ]);
 		},
 	'intergration tests': {
-
 		'test compatibility with shallowPropertyComparisonMixin'() {
 			const properties = {
 				id: 'id',
