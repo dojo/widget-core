@@ -63,8 +63,12 @@ export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, Wi
 
 const createFormLabelMixin: FormLabelMixinFactory = compose({
 	getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
-		const { properties } = this;
+		const { properties, type } = this;
 		const attributeKeys = Object.keys(properties);
+
+		if (type) {
+			attributeKeys.push('type');
+		}
 
 		const allowedAttributes = ['checked', 'descriptionID', 'disabled', 'inputmode', 'invalid', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'type', 'value'];
 		const nodeAttributes: any = {};
@@ -74,7 +78,9 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 			if (attributeKeys.indexOf(key) === -1) {
 				continue;
 			}
-
+			else if (key === 'type') {
+				nodeAttributes['type'] = type;
+			}
 			else if (key === 'readonly' && properties.readonly) {
 				nodeAttributes['readonly'] = 'readonly';
 				nodeAttributes['aria-readonly'] = true;

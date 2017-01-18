@@ -43,19 +43,6 @@ const createSelectInput: SelectInputFactory = createWidgetBase
 
 				return optionNodes;
 			}
-		},
-		aspectAdvice: {
-			before: {
-				onPropertiesChanged(this: SelectInput, properties: SelectInputProperties, changedPropertyKeys: string[]) {
-					const { options = {} } = properties;
-
-					if ( !properties.value && Object.keys(options).length > 0 ) {
-						properties.value = Object.keys(options)[0];
-					}
-
-					return [properties, changedPropertyKeys];
-				}
-			}
 		}
 	});
 

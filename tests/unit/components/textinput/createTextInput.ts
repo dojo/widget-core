@@ -14,7 +14,7 @@ registerSuite({
 			}
 		});
 		assert.strictEqual(textInput.properties.id, 'foo');
-		assert.strictEqual(textInput.properties.type, 'text');
+		assert.strictEqual(textInput.type, 'text');
 		assert.strictEqual(textInput.properties.name, 'bar');
 		assert.strictEqual(textInput.properties.placeholder, 'baz');
 	},
@@ -36,12 +36,12 @@ registerSuite({
 		assert.strictEqual(inputEl.properties!.placeholder, 'baz');
 	},
 	nodeAttributes() {
-		const textInput = createTextInput();
+		const textInput = createTextInput({});
 		const nodeAttributes = textInput.getNodeAttributes();
 		assert.equal(nodeAttributes.oninput, textInput.onInput);
 	},
 	onInput() {
-		const textInput = createTextInput();
+		const textInput = createTextInput({});
 		textInput.onInput(<any> { target: { value: 'hello world' } });
 		assert.equal(textInput.properties.value, 'hello world');
 	},

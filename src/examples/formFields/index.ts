@@ -4,6 +4,7 @@ import createProjector, { ProjectorMixin } from '../../createProjector';
 import createButton from '../../components/button/createButton';
 import createTextInput from '../../components/textinput/createTextInput';
 import createCheckbox from '../../components/checkbox/createCheckbox';
+import createSelect from '../../components/select/createSelect';
 
 const createApp = createProjector.mixin({
 	mixin: {
@@ -17,6 +18,12 @@ const createApp = createProjector.mixin({
 				w(createButton, {
 					id: 'button',
 					content: 'Sample Button'
+				}),
+				w(createSelect, {
+					options: {
+						'option1': 'First Option',
+						'option2': 'Second Option'
+					}
 				}),
 				w(createCheckbox, {
 					value: 'foo',

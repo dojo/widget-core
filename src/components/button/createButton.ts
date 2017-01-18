@@ -1,6 +1,6 @@
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import createWidgetBase from '../../createWidgetBase';
-import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
+import { Widget, WidgetOptions, WidgetState, WidgetProperties, WidgetFactory, PropertiesChangeEvent } from './../../interfaces';
 
 export interface ButtonProperties extends WidgetProperties {
 	/*
@@ -31,6 +31,8 @@ export interface ButtonProperties extends WidgetProperties {
 }
 
 export type Button = Widget<ButtonProperties> & {
+	type?: string;
+
 	onClick(event?: MouseEvent): void;
 };
 
@@ -39,6 +41,7 @@ export interface ButtonFactory extends WidgetFactory<Button, ButtonProperties> {
 const createButton: ButtonFactory = createWidgetBase
 	.mixin({
 		mixin: {
+			tagName: 'button',
 			onClick(this: Button, event: MouseEvent) {
 				this.properties.onClick && this.properties.onClick(event);
 			},
@@ -56,8 +59,18 @@ const createButton: ButtonFactory = createWidgetBase
 						'aria-haspopup': this.properties.hasPopup
 					};
 				}
-			],
-			tagName: 'button'
+			]
+		},
+		initialize(instance: any, options: WidgetOptions<WidgetState, ButtonProperties>) {
+			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<Button, ButtonProperties>) => {
+				const { type } = evt.properties;
+				if (type) {
+					instance.type = type;
+				}
+			}));
+
+			const { properties = {} } = options;
+			instance.type = properties.type || 'text';
 		}
 	});
 

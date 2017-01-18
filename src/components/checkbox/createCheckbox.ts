@@ -16,6 +16,7 @@ const createCheckbox: CheckboxFactory = createWidgetBase
 	.mixin({
 		mixin: {
 			tagName: 'input',
+			type: 'checkbox',
 			onChange(this: Checkbox, event: TypedTargetEvent<HTMLInputElement>) {
 				this.properties.value = event.target.value;
 			},
@@ -24,14 +25,6 @@ const createCheckbox: CheckboxFactory = createWidgetBase
 					return { onchange: this.onChange };
 				}
 			]
-		},
-		aspectAdvice: {
-			before: {
-				onPropertiesChanged(this: Checkbox, properties: CheckboxProperties, changedPropertyKeys: string[]) {
-					properties.type = 'checkbox';
-					return [properties, changedPropertyKeys];
-				}
-			}
 		}
 	});
 

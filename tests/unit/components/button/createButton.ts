@@ -43,7 +43,7 @@ registerSuite({
 		assert.isUndefined(vnode.properties!.innerHTML);
 	},
 	disable() {
-		const button = createButton();
+		const button = createButton({});
 		button.setProperties({
 			disabled: true
 		});

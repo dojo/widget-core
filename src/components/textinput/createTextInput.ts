@@ -1,11 +1,13 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { Widget, WidgetProperties, WidgetFactory, TypedTargetEvent } from './../../interfaces';
+import { Widget, WidgetOptions, WidgetState, WidgetProperties, WidgetFactory, TypedTargetEvent, PropertiesChangeEvent } from './../../interfaces';
 import createFormLabelMixin, { FormLabelMixin, FormLabelMixinProperties } from '../../mixins/createFormLabelMixin';
 
 export type TextInputProperties = WidgetProperties & FormLabelMixinProperties;
 
 export type TextInput = Widget<TextInputProperties> & FormLabelMixin & {
+	type: string;
+
 	onInput(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
@@ -15,6 +17,8 @@ const createTextInput: TextInputFactory = createWidgetBase
 	.mixin(createFormLabelMixin)
 	.mixin({
 		mixin: {
+			tagName: 'input',
+			type: 'text',
 			onInput(this: TextInput, event: TypedTargetEvent<HTMLInputElement>) {
 				this.properties.value = event.target.value;
 			},
@@ -22,19 +26,18 @@ const createTextInput: TextInputFactory = createWidgetBase
 				function(this: TextInput): VNodeProperties {
 					return { oninput: this.onInput };
 				}
-			],
-			tagName: 'input'
+			]
 		},
-		aspectAdvice: {
-			before: {
-				onPropertiesChanged(this: TextInput, properties: TextInputProperties, changedPropertyKeys: string[]) {
-					if ( !properties.type ) {
-						properties.type = 'text';
-					}
-
-					return [properties, changedPropertyKeys];
+		initialize(instance, options: WidgetOptions<WidgetState, TextInputProperties>) {
+			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<TextInput, TextInputProperties>) => {
+				const { type } = evt.properties;
+				if (type) {
+					instance.type = type;
 				}
-			}
+			}));
+
+			const { properties = {} } = options;
+			instance.type = properties.type || 'text';
 		}
 	});
 

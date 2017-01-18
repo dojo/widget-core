@@ -29,7 +29,7 @@ registerSuite({
 		const formfield = formLabelWidget({
 			tagName: 'input',
 			properties: {
-				type: 'foo',
+				value: 'foo',
 				randomProp: 'qux'
 			}
 		});
@@ -38,37 +38,23 @@ registerSuite({
 		let inputfield = vnode.children![0];
 
 		assert.strictEqual(inputfield.vnodeSelector, 'input');
-		assert.strictEqual(inputfield.properties!['type'], 'foo');
-
-		formfield.setProperties({
-			value: 'bar',
-			name: 'baz',
-			type: 'foo',
-			randomProp: 'qux'
-		});
-		vnode = <VNode> formfield.__render__();
-		inputfield = vnode.children![0];
-
-		assert.strictEqual(inputfield.properties!['type'], 'foo');
-		assert.strictEqual(inputfield.properties!['value'], 'bar');
-		assert.strictEqual(inputfield.properties!['name'], 'baz');
+		assert.strictEqual(inputfield.properties!['value'], 'foo');
 		assert.isUndefined(inputfield.properties!['randomProp']);
 
 		formfield.setProperties({
-			type: 'foo',
-			disabled: true
+			value: 'bar',
+			name: 'baz'
 		});
 		vnode = <VNode> formfield.__render__();
 		inputfield = vnode.children![0];
 
-		assert.strictEqual(inputfield.properties!['type'], 'foo');
-		assert.isTrue(inputfield.properties!['disabled']);
-		assert.isUndefined(inputfield.properties!['value']);
-		assert.isUndefined(inputfield.properties!['name']);
+		assert.strictEqual(inputfield.properties!['value'], 'bar');
+		assert.strictEqual(inputfield.properties!['name'], 'baz');
 
 		formfield.setProperties({
 			readonly: true,
 			invalid: false,
+			disabled: true,
 			descriptionID: 'qux'
 		});
 		vnode = <VNode> formfield.__render__();
@@ -77,6 +63,7 @@ registerSuite({
 		assert.isTrue(inputfield.properties!['aria-readonly']);
 		assert.strictEqual(inputfield.properties!['readonly'], 'readonly');
 		assert.isFalse(inputfield.properties!['aria-invalid']);
+		assert.isTrue(inputfield.properties!['disabled']);
 		assert.strictEqual(inputfield.properties!['aria-describedby'], 'qux');
 	},
 	'label': {

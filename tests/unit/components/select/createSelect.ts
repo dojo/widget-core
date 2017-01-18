@@ -20,7 +20,6 @@ registerSuite({
 		assert.strictEqual(select.properties.id, 'foo');
 		assert.strictEqual(select.properties.name, 'bar');
 		assert.lengthOf(Object.keys(select.properties.options), 2);
-		assert.strictEqual(select.properties.value, 'option1');
 	},
 	render() {
 		const select = createSelect({
