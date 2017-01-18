@@ -30,6 +30,7 @@ registerSuite({
 			tagName: 'input',
 			properties: {
 				value: 'foo',
+				maxlength: 100,
 				randomProp: 'qux'
 			}
 		});
@@ -39,6 +40,7 @@ registerSuite({
 
 		assert.strictEqual(inputfield.vnodeSelector, 'input');
 		assert.strictEqual(inputfield.properties!['value'], 'foo');
+		assert.strictEqual(inputfield.properties!['maxlength'], '100');
 		assert.isUndefined(inputfield.properties!['randomProp']);
 
 		formfield.setProperties({
