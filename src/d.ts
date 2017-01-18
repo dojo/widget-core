@@ -15,8 +15,18 @@ import FactoryRegistry from './FactoryRegistry';
 export const WNODE = Symbol('Identifier for a WNode.');
 export const HNODE = Symbol('Identifier for a HNode.');
 
+/**
+ * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
+ */
 export function isWNode(child: DNode): child is WNode {
 	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
+}
+
+/**
+ * Helper function that returns true if the `DNode` is a `Node` using the `type` property
+ */
+export function isHNode(child: DNode): child is HNode {
+	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
 }
 
 export const registry = new FactoryRegistry();
