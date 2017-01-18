@@ -90,6 +90,8 @@ export interface HNode {
 	 * render function that wraps returns VNode
 	 */
 	render<T>(options?: { bind?: T }): VNode;
+
+	type: symbol;
 }
 
 export interface WNode {
@@ -107,6 +109,8 @@ export interface WNode {
 	 * DNode children
 	 */
 	children: DNode[];
+
+	type: symbol;
 }
 
 export type DNode = HNode | WNode | string | null;
