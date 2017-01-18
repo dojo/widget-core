@@ -76,7 +76,7 @@ function addClassNameToCSSModuleClassNames(cssModuleClassNames: CSSModuleClassNa
 
 function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
 	return Object.keys(previousClasses).reduce((newAppliedClasses, className: keyof T) => {
-		const oldCSSModuleClassNames: CSSModuleClassNames = previousClasses[className] || {};
+		const oldCSSModuleClassNames = <CSSModuleClassNames> previousClasses[className];
 
 		const negatedCSSModuleClassNames = Object.keys(oldCSSModuleClassNames).reduce((newCSSModuleClassNames, oldCSSModuleClassName) => {
 			const currentClassNameFlag = oldCSSModuleClassNames[<keyof T> oldCSSModuleClassName];

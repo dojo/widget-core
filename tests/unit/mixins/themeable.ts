@@ -152,5 +152,20 @@ registerSuite({
 			[ theme1.class1 ]: false,
 			[ theme2.class1 ]: true
 		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
+	},
+	'properties changing outside of the scope of theme should not change theme'() {
+		themeableInstance = themeableFactory();
+		const themeBeforeEmit = themeableInstance.theme;
+
+		themeableInstance.emit({
+			type: 'properties:changed',
+			properties: {
+				hello: 'world'
+			},
+			changedPropertyKeys: [ 'hello' ]
+		});
+
+		const themeAfterEmit = themeableInstance.theme;
+		assert.strictEqual(themeBeforeEmit, themeAfterEmit);
 	}
 });
