@@ -45,7 +45,7 @@ npm install @dojo/i18n
 npm install maquette
 ```
 
-Use the [@dojo/cli](https://github.com/dojo/cli) to create a complete Dojo skeleton application with the [@dojo/cli-create-app](https://github.com/dojo/cli-create-app) command.
+Use the [@dojo/cli](https://github.com/dojo/cli) to create a complete Dojo 2 skeleton application with the [@dojo/cli-create-app](https://github.com/dojo/cli-create-app) command.
 
 ## Features
 
@@ -76,7 +76,7 @@ Dojo 2 widgets is designed using key reactive architecture concepts. These inclu
 
 #### `v` & `w`
 
-`v` & `w` are abstractions used to express structures that will be reflected in DOM. `v` is used to create nodes that represent DOM tags, for example `div`, `header` etc. and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
+`v` & `w` are abstractions used to express structures that will be reflected in the DOM. `v` is used to create nodes that represent DOM tags, for example `div`, `header` etc. and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
 
 ```ts
 import { v, w } from '@dojo/widgets/d';
@@ -162,11 +162,11 @@ The class `createWidgetBase` provides key base functionality including caching a
 |getNode|Returns the top level node of a widget|Returns a `HNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
 |getChildrenNodes|Returns the child node structure of a widget|Returns the widgets children `DNode` array|
 |nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
-|diffProperties|Diffs the current properties against the previous properties and returns the updated/new keys in an array|Performs a shallow comparison using `===` of previous and current properties and returns an array of the keys.|
+|diffProperties|Diffs the current properties against the previous properties and returns an object with the changed keys and new properties|Performs a shallow comparison previous and current properties, copies the properties using `Object.assign` and returns the resulting `PropertiesChangeRecord`.|
 
 ##### Events
 
-`properties:changed` - The event is emitted when diffing the new properties determined changes. The event can be attached to by any extending widget.
+`properties:changed` - The event is emitted when `dffProperties` detected changed keys. The event can be attached to by any extending widget.
 
 *Attaching*
 
@@ -176,7 +176,7 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 });
 ```
 
-*Payload*
+*Example Payload*
 
 ```ts
 {
@@ -189,15 +189,15 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 
 #### Properties Lifecycle
 
-Properties are passed to the `w` function and represent the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto a widget and is prior to the widgets render cycle.
+Properties are passed to the `w` function and represent the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto a widget, this is prior to the widgets render cycle.
 
-The property lifecyle is performed in the widgets `setProperties` function and uses the instances `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and the new properties. 
+The property lifecyle is performed in the widgets `setProperties` function and uses the instances' `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and new properties. 
 
 **Note** If a widgets properties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
 
 The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all changed properties to the depth that is considered during the equality comparison.
 
-When `diffProperties` has completed the results are used to update the properties on the widget instance and if changed properties were returned then the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
+When `diffProperties` has completed the results are used to update the properties on the widget instance and if changed properties were returned then the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is complete and the finalized widget properties are available during the render cycle functions.
 
 ##### Finer property diff control
 
@@ -215,7 +215,7 @@ const createMyWidget = createWidgetBase.mixin({
 });
 ```
 
-If a property has a custom property diff function then it is excluded from the normal catch all `diffProperties` implementation.
+If a property has a custom diff function then it is excluded from the normal catch all `diffProperties` implementation.
 
 #### Projector
 
@@ -462,9 +462,9 @@ export default createListWidget;
 These are some of the **important** principles to keep in mind when creating and using widgets:
  
 1. the widget *`__render__`* function should **never** be overridden
-2. except for projectors you should **never** need to deal directory with widget instances.
+2. except for projectors you should **never** need to deal directly with widget instances.
 3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
-4. **never** set state outside of the widget instance.
+4. **never** set state outside of a widget instance.
 5. **never** update `properties` within a widget instance.
 
 ### API
