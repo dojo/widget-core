@@ -27,6 +27,12 @@ registerSuite({
 			});
 			assert.equal(instance.registry, registry);
 		},
+		'no passed registry, nothing available via getter'() {
+			const instance = createRegistryWithProperties({
+				properties: {}
+			});
+			assert.equal(instance.registry, undefined);
+		},
 		'passed registry updated on property change'() {
 			const registry = new FactoryRegistry();
 			const newRegistry = new FactoryRegistry();
@@ -41,6 +47,20 @@ registerSuite({
 				changedPropertyKeys: [ 'registry' ]
 			});
 			assert.equal(instance.registry, newRegistry);
+		},
+		'different property passed on property change should not affect registy'() {
+			const registry = new FactoryRegistry();
+			const instance = createRegistryWithProperties({
+				properties: { registry }
+			});
+			assert.equal(instance.registry, registry);
+			instance.emit({
+				type: 'properties:changed',
+				target: instance,
+				properties: { foo: true },
+				changedPropertyKeys: [ 'foo' ]
+			});
+			assert.equal(instance.registry, registry);
 		}
 	},
 	integration: {
