@@ -6,20 +6,35 @@ import createEvented from '@dojo/compose/bases/createEvented';
 import { ComposeFactory } from '@dojo/compose/compose';
 import FactoryRegistry from '../FactoryRegistry';
 
+/**
+ * Properties required for the RegistryMixin
+ */
 export interface RegistryMixinProperties {
 	registry: FactoryRegistry;
 }
 
+/**
+ * RegistryMixin Options
+ */
 export interface RegistryMixinOptions {
 	properties: RegistryMixinProperties;
 }
 
+/**
+ * RegistryMixin
+ */
 export interface RegistryMixin extends Evented {
 	diffPropertyRegistry(previousProperty: FactoryRegistry, property: FactoryRegistry): PropertyChangeRecord;
 }
 
+/**
+ * Compose RegistryFactory interface
+ */
 export interface RegistryFactory extends ComposeFactory<RegistryMixin, RegistryMixinOptions> {}
 
+/**
+ * Registry
+ */
 export interface Registry extends RegistryMixin {
 	readonly registry: FactoryRegistry;
 	readonly properties: RegistryMixinProperties;
