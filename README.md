@@ -19,10 +19,10 @@ Provides Dojo 2 core widget and mixin functionality for creating custom widgets.
     	- [Widget Registry](#widget-registry)
     	- [Theming](#theming)
     	- [Internationalization](#internationalization)
+    - [Key Principles](#key-principles)
     - [Examples](#examples)
     	- [Sample Label Widget](sample-label-widget)
     	- [Sample List Widget](sample-list-widget)
-    - [Key Principles](#key-principles)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
     - [Installation](#installation)
@@ -380,6 +380,17 @@ const widget = createI18nWidget({
 	locale: 'fr'
 });
 ```
+
+### Key Principles
+
+These are some of the **important** principles to keep in mind when creating and using widgets:
+ 
+1. the widget *`__render__`* function should **never** be overridden
+2. except for projectors you should **never** need to deal directly with widget instances.
+3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
+4. **never** set state outside of a widget instance.
+5. **never** update `properties` within a widget instance.
+
 ### Examples
 
 #### Sample Label Widget
@@ -456,16 +467,6 @@ const createListWidget: ListFactory = createWidgetBase.mixin({
 
 export default createListWidget;
 ```
-
-### Key Principles
-
-These are some of the **important** principles to keep in mind when creating and using widgets:
- 
-1. the widget *`__render__`* function should **never** be overridden
-2. except for projectors you should **never** need to deal directly with widget instances.
-3. hyperscript should **always** be written using the @dojo/widgets `v` helper function.
-4. **never** set state outside of a widget instance.
-5. **never** update `properties` within a widget instance.
 
 ### API
 
