@@ -189,15 +189,15 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 
 #### Properties Lifecycle
 
-Properties are passed to the `w` function and represent the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto a widget. This occurs prior to the widgets render cycle.
+Properties are passed to the `w` function and represent the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto a widget and is prior to the widgets render cycle.
 
 The property lifecyle is performed in the widgets `setProperties` function and uses the instances `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and the new properties. 
 
-*Note* If a widgets properties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
+**Note** If a widgets properties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
 
-The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all properties to the depth that is considered during the equality comparison.
+The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all changed properties to the depth that is considered during the equality comparison.
 
-When `diffProperties` has completed the results are used to update the properties on the widget instance and if changed properties are detected the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
+When `diffProperties` has completed the results are used to update the properties on the widget instance and if changed properties were returned then the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
 
 ##### Finer property diff control
 
