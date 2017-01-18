@@ -1,7 +1,11 @@
 import compose from '@dojo/compose/compose';
+import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import themeable, { Themeable } from '../../../src/mixins/themeable';
+import createWidgetBase from '../../../src/createWidgetBase';
+import { v } from '../../../src/d';
+import { Widget, WidgetProperties, DNode } from '../../../src/interfaces';
 
 const baseTheme = {
 	class1: 'baseClass1',
@@ -14,6 +18,10 @@ const testTheme = {
 
 const testTheme2 = {
 	class2: 'theme2Class2'
+};
+
+const testTheme3 = {
+	class1: 'theme3Class1'
 };
 
 const overrideClasses = {
@@ -168,5 +176,33 @@ registerSuite({
 
 		const themeAfterEmit = themeableInstance.theme;
 		assert.strictEqual(themeBeforeEmit, themeAfterEmit);
+	},
+	integration: {
+		'should work as mixin to createWidgetBase'() {
+			type ThemeableWidget = Widget<WidgetProperties> & Themeable<typeof baseTheme>;
+
+			const createThemeableWidget = createWidgetBase.mixin(themeable).mixin({
+				mixin: {
+					baseTheme,
+					getChildrenNodes(this: ThemeableWidget ): DNode[] {
+						return [
+							v('div', { classes: this.theme.class1 })
+						];
+					}
+				}
+			});
+
+			const themeableWidget: ThemeableWidget = createThemeableWidget({
+				properties: { theme: testTheme }
+			});
+
+			const result = <VNode> themeableWidget.__render__();
+			assert.deepEqual(result.children![0].properties!.classes, { [ testTheme.class1 ]: true });
+
+			themeableWidget.setProperties({ theme: testTheme3 });
+
+			const result2 = <VNode> themeableWidget.__render__();
+			assert.deepEqual(result2.children![0].properties!.classes, { [ testTheme.class1 ]: false, [ testTheme3.class1 ]: true });
+		}
 	}
 });
