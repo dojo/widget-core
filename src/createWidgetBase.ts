@@ -122,7 +122,7 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 	const internalState = widgetInternalStateMap.get(instance);
 
 	internalState.historicChildrenMap.forEach((child, key) => {
-		if (!internalState.currentChildrenMap.has(key)) {
+		if (!internalState.currentChildrenMap.has(key) && internalState.historicChildrenMap.has(key)) {
 			internalState.historicChildrenMap.delete(key);
 			child.destroy();
 		}

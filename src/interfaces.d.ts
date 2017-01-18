@@ -255,6 +255,9 @@ export interface WidgetMixin<P extends WidgetProperties> extends PropertyCompari
 	 */
 	tagName: string;
 
+	/**
+	 * The specific Factory Registry on the widget if passed
+	 */
 	registry: FactoryRegistryInterface | undefined;
 }
 

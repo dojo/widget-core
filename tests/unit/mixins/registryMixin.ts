@@ -5,6 +5,7 @@ import registryMixin from '../../../src/mixins/registryMixin';
 import FactoryRegistry from '../../../src/FactoryRegistry';
 import createWidgetBase from '../../../src/createWidgetBase';
 import { w } from '../../../src/d';
+import { DNode } from '../../../src/interfaces';
 import { VNode } from '@dojo/interfaces/vdom';
 
 const createRegistryWithProperties = compose({
@@ -44,29 +45,29 @@ registerSuite({
 	},
 	integration: {
 		'works with widget base'() {
-			const createWidgetWithRegistry = createWidgetBase.mixin(registryMixin);
+			const createWidgetWithRegistry = createWidgetBase.mixin(registryMixin).mixin({
+				mixin: {
+					getChildrenNodes(): DNode[] {
+						return [ w('test', { id: `${Math.random()}` }) ];
+					}
+				}
+			});
 			const createHeader = createWidgetBase.override({ tagName: 'header' });
 			const createSpan = createWidgetBase.override({ tagName: 'span' });
 
 			const registry = new FactoryRegistry();
-			registry.define('my-header', createHeader);
+			registry.define('test', createHeader);
 
-			const instance = createWidgetWithRegistry({
-				properties: { registry }
-			});
-
-			instance.children = [ w('my-header', {}) ];
+			const instance = createWidgetWithRegistry({ properties: { registry } });
 
 			let result = <VNode> instance.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
 
 			const newRegistry = new FactoryRegistry();
-			newRegistry.define('my-span', createSpan);
+			newRegistry.define('test', createSpan);
 
 			instance.setProperties({ registry: newRegistry });
-
-			instance.children = [ w('my-span', {}) ];
 
 			result = <VNode> instance.__render__();
 			assert.lengthOf(result.children, 1);
