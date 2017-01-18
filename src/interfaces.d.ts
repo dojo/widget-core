@@ -277,3 +277,9 @@ export interface WidgetProperties {
 }
 
 export interface WidgetFactory<W extends Widget<P>, P extends WidgetProperties> extends ComposeFactory<W, WidgetOptions<P>> {}
+
+export interface FormLabelProperties {
+	content: string;
+	position?: string;
+	hidden?: boolean;
+}

@@ -9,31 +9,36 @@ registerSuite({
 		const button = createButton({
 			properties: {
 				id: 'foo',
-				label: 'bar',
-				name: 'baz'
+				content: 'bar',
+				type: 'baz'
 			}
 		});
 		assert.strictEqual(button.properties.id, 'foo');
-		assert.strictEqual(button.properties.label, 'bar');
-		assert.strictEqual(button.properties.name, 'baz');
+		assert.strictEqual(button.properties.content, 'bar');
+		assert.strictEqual(button.type, 'baz');
 	},
 	render() {
 		const button = createButton({
 			properties: {
 				id: 'foo',
-				label: 'bar',
+				content: 'bar',
 				name: 'baz'
 			}
 		});
-		const vnode = <VNode> button.__render__();
+		let vnode = <VNode> button.__render__();
 		assert.strictEqual(vnode.vnodeSelector, 'button');
 		assert.strictEqual(vnode.properties!.innerHTML, 'bar');
 		assert.strictEqual(vnode.properties!['data-widget-id'], 'foo');
-		assert.strictEqual(vnode.properties!.name, 'baz');
-		assert.strictEqual(vnode.properties!['type'], 'button');
+		assert.strictEqual(vnode.properties!['name'], 'baz');
 		assert.lengthOf(vnode.children, 0);
+
+		button.setProperties({
+			type: 'submit'
+		});
+		vnode = <VNode> button.__render__();
+		assert.strictEqual(button.type, 'submit');
 	},
-	'button without label'() {
+	'button without text'() {
 		const button = createButton({
 			properties: {
 				id: 'foo',
@@ -44,22 +49,12 @@ registerSuite({
 		assert.isUndefined(vnode.properties!.innerHTML);
 	},
 	disable() {
-		const button = createButton({
-			properties: {
-				id: 'foo',
-				label: 'bar',
-				name: 'baz'
-			}
-		});
-		let vnode = <VNode> button.__render__();
-		assert.isFalse(vnode.properties!['disabled']);
+		const button = createButton({});
 		button.setProperties({
-			id: 'foo',
-			label: 'bar',
-			name: 'baz',
 			disabled: true
 		});
-		vnode = <VNode> button.__render__();
+		const vnode = <VNode> button.__render__();
+
 		assert.isTrue(vnode.properties!['disabled']);
 	},
 	onClick() {
