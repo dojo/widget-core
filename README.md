@@ -11,14 +11,15 @@ Provides Dojo2 core widget and mixin functionality for creating custom widgets. 
 - [Usage](#usage)
 - [Features](#features)
     - [Overview](#overview)
-    	- [Introducing `v` & `w`](#v--w)
-    	- [Widget Registry](#widget-registry)
+    	- [`v` & `w`](#v--w)
+    	- [Introducing createWidgetBase]()
     	- [Properties Lifecycle](#properties-lifecycle)
+    	- [Projector](#projector)
     	- [Event Handling](#event-handling)
+    	- [Widget Registry](#widget-registry)
     	- [Theming](#theming)
     	- [Internationalization](#internationalization)
-    	- [Projector](#projector)
-    - [Authoring Examples](#authoring-examples)
+    - [Examples](#examples)
     	- [Sample Label Widget](sample-label-widget)
     	- [Sample List Widget](sample-list-widget)
     - [Key Principles](#key-principles)
@@ -53,9 +54,16 @@ Dojo 2 widgets are built using the [@dojo/compose](https://github.com/dojo/compo
 The smallest `@dojo/widgets` example looks like this:
 
 ```ts
-const projector = createProjector();
-projector.setChildren(v('h1', [ 'Hello, Dojo!' ]));
-projector.append();
+const createMyWidget = createWidgetBase.extend({
+	tagName: 'h1',
+	nodeAttributes: [
+		function() {
+			return { innerHTML: 'Hello, Dojo!' };
+		}
+	]
+});
+
+createMyWidget.mixin(createProjectorMixin)().append();
 ```
 
 It renders a `h1` element saying "Hello, Dojo!" on the page.
@@ -66,7 +74,7 @@ Dojo2 widgets is designed using key reactive architecture concepts. These includ
 
 <!-- needs more details-->
 
-#### Introducing `v` & `w`
+#### `v` & `w`
 
 `v` & `w` are abstractions used to express structures that will be reflected in DOM. `v` is used to create nodes that represent DOM tags for example `div`, `header` etc and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
 
@@ -122,13 +130,13 @@ v(tag: string, properties: VNodeProperties, children?: (DNode | null)[]): HNode[
 
 ##### `w`
 
-Creates a @dojo/widget using the `factory` and `properties`.
+Creates a widget using the `factory` and `properties`.
 
 ```ts
 w<P extends WidgetProperties>(factory: string | WidgetFactory<Widget<P>, P>, properties: P): WNode[];
 ```
 
-Creates a @dojo/widget using the `factory`, `properties` and `children`
+Creates a widget using the `factory`, `properties` and `children`
 
 ```ts
 w<P extends WidgetProperties>(factory: string | WidgetFactory<Widget<P>, P>, properties: P, children: (DNode | null)[]): WNode[];
@@ -143,47 +151,67 @@ w('my-factory', properties);
 w('my-factory', properties, children);
 ```
 
-#### Widget Registry
+#### Introducing `createWidgetBase`
 
-The registry provides the ability to define a label against a `WidgetFactory`, a `Promise<WidgetFactory>` or a function that when executed returns a `Promise<WidgetFactory>`.
+The class `createWidgetBase` provides key base functionality including caching and widget lifecycle management which all widgets should extend.
 
-A global widget registry is exported from the `d.ts` class.
+##### Pubic API
+
+|Function|Description|Default Behaviour|
+|---|---|---|
+|getNode|Returns the top level node of a widget|Returns a `DNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
+|getChildrenNodes|Returns the child node structure of a widget|Returns the widgets children `DNode` array|
+|nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
+|diffProperties|Diffs the current properties against the previous properties and returns the updated/new keys in an array|Performs a shallow comparison using `===` of previous and current properties and returns an array of the keys.|
+
+##### Events
+
+`properties:changed` - The event is emitted when diffing the new properties determined changes. The event can be attached to by any extending widget.
+
+*Attaching*
 
 ```ts
-import { registry } from '@dojo/widgets/d';
-import createMyWidget from './createMyWidget';
-
-// registers the widget factory that will be available immediately
-registry.define('my-widget-1', createMyWidget);
-
-// registers a promise that is resolving to a widget factory and will be
-// available as soon as the promise resolves.
-registry.define('my-widget-2', Promise.resolve(createMyWidget));
-
-// registers a function that will be lazily executed the first time the factory
-// label is used within a widget render pipeline. The widget will be available
-// as soon as the promise is resolved after the initial get.
-registry.define('my-widget-3', () => Promise.resolve(createMyWidget));
+this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyProperties>) {
+	// do something
+});
 ```
 
-All widgets have access to a locally scoped registry (`this.registry`) created during instantiation. For factory resolution the local registry takes precedence over the global registry.
-
-It's recommended to use the factory registry when defining widgets with [`w`](#w--d) to support lazy factory resolution. 
-
-Example of registering a function that returns a `Promise` that resolves to a `Factory`.
+*Payload*
 
 ```ts
-import load from '@dojo/core/load';
-
-registry.define('my-widget', () => {
-	return load(require, './createMyWidget')
-		.then(([ createMyWidget ]) => createMyWidget.default);
-});
+{
+	type: 'properties:changed',
+	target: this,
+	properties: { foo: 'bar', baz: 'qux' },
+	changedKeyValues: [ 'foo' ]
+}
 ```
 
 #### Properties Lifecycle
 
-// talk about the properties lifecycle.
+#### Projector
+
+A projector is a term used to describe a widget that will be attached to a DOM element, also known as a root widget. Any widget can be converted into a projector simply by mixing in the `createProjectorMixin` mixin.
+
+```ts
+createMyWidget.mixin(createProjectorMixin)
+```
+
+Projectors operate as any widget **except** that they need to be manually instantiated and managed outside of the standard widget lifecycle. 
+
+There are 3 ways that a projector widget can be added to the DOM - `.append`, `.merge` or `.replace` depending on the type of attachment required.
+
+ - append  - Creates the widget as a child to the projector's `root` node
+ - merge   - Merges the widget with the projector's `root` node
+ - replace - Replace the projector's `root` node with the widget
+
+```ts
+const createWidgetProjector = createMyWidget.mixin(createProjectorMixin);
+
+createWidgetProjector().append(() => {
+	// appended
+});
+```
 
 #### Event Handling
 
@@ -241,6 +269,42 @@ const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
 });
 ```
 
+#### Widget Registry
+
+The registry provides the ability to define a label against a `WidgetFactory`, a `Promise<WidgetFactory>` or a function that when executed returns a `Promise<WidgetFactory>`.
+
+A global widget registry is exported from the `d.ts` class.
+
+```ts
+import { registry } from '@dojo/widgets/d';
+import createMyWidget from './createMyWidget';
+
+// registers the widget factory that will be available immediately
+registry.define('my-widget-1', createMyWidget);
+
+// registers a promise that is resolving to a widget factory and will be
+// available as soon as the promise resolves.
+registry.define('my-widget-2', Promise.resolve(createMyWidget));
+
+// registers a function that will be lazily executed the first time the factory
+// label is used within a widget render pipeline. The widget will be available
+// as soon as the promise is resolved after the initial get.
+registry.define('my-widget-3', () => Promise.resolve(createMyWidget));
+```
+
+It's recommended to use the factory registry when defining widgets with [`w`](#w--d) to support lazy factory resolution. 
+
+Example of registering a function that returns a `Promise` that resolves to a `Factory`.
+
+```ts
+import load from '@dojo/core/load';
+
+registry.define('my-widget', () => {
+	return load(require, './createMyWidget')
+		.then(([ createMyWidget ]) => createMyWidget.default);
+});
+```
+
 #### Theming
 
 // talk about the css and theming support
@@ -288,52 +352,7 @@ const widget = createI18nWidget({
 	locale: 'fr'
 });
 ```
-
-#### Projector
-
-To render a widget into the DOM projector traits need to mixed in using the `createProjectorMixin`. It is possible to have many projectors and attach them to elements in the DOM. However widgets with projector traits must not be nested.
-
-Projectors operate in the same way as any widget except need to be instantiated and managed outside of the usual lifecycle. To attach the projector to the DOM call either `.append`, `.merge` or `.replace` depending on the type of attachment required.
-
- - append  - Creates the widget as a child to the projector's `root` node
- - merge   - Merges the widget with the projector's `root` node
- - replace - Replace the projector's `root` node with the widget
-
-Using the `createProjectorMixin` to turn any widget into a projector:
-
-```ts
-import createProjectorMixin from '@dojo/widgets/mixins/createProjectorMixin';
-import createMyWidget from './createMyWidget';
-
-const myProjectorWidget = createMyWidget.mixin(createProjectorMixin)();
-
-myProjectorWidget.append().then(() => {
-	// appended
-});
-```
-At times it may be required to directly instantiate a dedicated projector using `createProjector` and manually set the children for attaching to the DOM.
-
-```ts
-import { DNode } from '@dojo/widgets/interfaces';
-import { w } from '@dojo/widgets/d';
-import createProjector, { Projector } from '@dojo/widgets/createProjector';
-
-import createButton from './createMyButton';
-import createTextInput from './createMyTextInput';
-
-const projector = createProjector();
-
-projector.setChildren([
-	w(createMyTextInput, { id: 'textinput' }),
-	w(createMyButton, { id: 'button', { label: 'Button' })
-]);
-
-projector.append().then(() => {
-	console.log('projector is attached');
-});
-```
-
-### Authoring Examples
+### Examples
 
 #### Sample Label Widget
 
