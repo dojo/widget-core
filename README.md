@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/dojo/widgets/branch/master/graph/badge.svg)](https://codecov.io/gh/dojo/widgets)
 [![npm version](https://badge.fury.io/js/%40dojo%2Fwidgets.svg)](https://badge.fury.io/js/%40dojo%2Fwidgets)
 
-Provides Dojo2 core widget and mixin functionality for creating custom widgets. For Dojo2 widgets please see [@dojo/widgets](https://github.com/dojo/widgets).
+Provides Dojo 2 core widget and mixin functionality for creating custom widgets. For Dojo 2 widgets please see [@dojo/widgets](https://github.com/dojo/widgets).
 
 **WARNING** This is *alpha* software. It is not yet production ready, so you should use at your own risk.
 
@@ -12,7 +12,7 @@ Provides Dojo2 core widget and mixin functionality for creating custom widgets. 
 - [Features](#features)
     - [Overview](#overview)
     	- [`v` & `w`](#v--w)
-    	- [Introducing createWidgetBase]()
+    	- [createWidgetBase](createwidgetbase)
     	- [Properties Lifecycle](#properties-lifecycle)
     	- [Projector](#projector)
     	- [Event Handling](#event-handling)
@@ -49,7 +49,7 @@ Use the [@dojo/cli](https://github.com/dojo/cli) to create a complete Dojo skele
 
 ## Features
 
-Dojo 2 widgets are built using the [@dojo/compose](https://github.com/dojo/compose) composition library that promotes trait mixins over inheritence.
+Dojo 2 widgets are built using the [@dojo/compose](https://github.com/dojo/compose) composition library that promotes traits and mixins over inheritence.
 
 The smallest `@dojo/widgets` example looks like this:
 
@@ -70,13 +70,13 @@ It renders a `h1` element saying "Hello, Dojo!" on the page.
 
 ### Overview
 
-Dojo2 widgets is designed using key reactive architecture concepts. These include unidirectional data flow, inversion of control and property passing.
+Dojo 2 widgets is designed using key reactive architecture concepts. These include unidirectional data flow, inversion of control and property passing.
 
 <!-- needs more details-->
 
 #### `v` & `w`
 
-`v` & `w` are abstractions used to express structures that will be reflected in DOM. `v` is used to create nodes that represent DOM tags for example `div`, `header` etc and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
+`v` & `w` are abstractions used to express structures that will be reflected in DOM. `v` is used to create nodes that represent DOM tags, for example `div`, `header` etc. and allows Dojo 2 to manage lazy hyperscript creation and element caching. `w` is used to create Dojo or custom widget nodes enabling support for lazy widget instantiation, instance management and caching.
 
 ```ts
 import { v, w } from '@dojo/widgets/d';
@@ -151,15 +151,15 @@ w('my-factory', properties);
 w('my-factory', properties, children);
 ```
 
-#### Introducing `createWidgetBase`
+#### `createWidgetBase`
 
-The class `createWidgetBase` provides key base functionality including caching and widget lifecycle management which all widgets should extend.
+The class `createWidgetBase` provides key base functionality including caching and widget lifecycle management which **all** widgets should extend from.
 
 ##### Pubic API
 
 |Function|Description|Default Behaviour|
 |---|---|---|
-|getNode|Returns the top level node of a widget|Returns a `DNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
+|getNode|Returns the top level node of a widget|Returns a `HNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
 |getChildrenNodes|Returns the child node structure of a widget|Returns the widgets children `DNode` array|
 |nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
 |diffProperties|Diffs the current properties against the previous properties and returns the updated/new keys in an array|Performs a shallow comparison using `===` of previous and current properties and returns an array of the keys.|
@@ -188,6 +188,32 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 ```
 
 #### Properties Lifecycle
+
+Properties are passed to the `w` function and represent are the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto this widget. This occurs during the widget instantiation or prior to the widgets render cycle (when the widget is already available).
+
+The property lifecyle is completed in the `setProperties` function and uses the instances `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and the new properties. If a widgets proeprties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
+
+The `diffProperties` function is also responsible for creating a copy (the default uses implementation `Object.assign({}, newProperties)` of all properties to the depth that is considered during the comparison.
+
+When `diffProperties` has completed the results are used to update the properties on the widget instance and the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
+
+##### Finer property diff control
+
+Included in `createWidgetBase` is functionality to support targetting a speficic property with a custom comparison function. This is done by adding a function to the widget class with `diffProperty` prefixed to the property name e.g. `diffPropertyFoo`.
+
+```ts
+
+const createMyWidget = createWidgetBase.mixin({
+	mixin: {
+		diffPropertyFoo<T>(this: MyWidget, previousProperty: T, newProperty: T) {
+			// can perfom complex comparison logic here between the two property values
+			// or even use externally stored state to assist the comparison.
+		}
+	}
+});
+```
+
+If a property has targetted diff function then it is excluded from the normal catch all `diffProperties` implementation.
 
 #### Projector
 
@@ -364,7 +390,7 @@ import { Widget, WidgetFactory, WidgetProperties } from '@dojo/widgets/interface
 import createWidgetBase from '@dojo/widgets/createWidgetBase';
 
 export interface LabelProperties extends WidgetProperties {
-    label: string;
+    content: string;
 }
 
 export type Label = Widget<LabelProperties>
@@ -376,7 +402,7 @@ const createLabelWidget: LabelFactory = createWidgetBase.mixin({
         tagName: 'label',
         nodeAttributes: [
             function(this: Label): VNodeProperties {
-                return { innerHTML: this.properties.label };
+                return { innerHTML: this.properties.content };
             }
         ]
     }
