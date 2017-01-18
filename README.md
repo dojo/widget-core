@@ -12,7 +12,7 @@ Provides Dojo 2 core widget and mixin functionality for creating custom widgets.
 - [Features](#features)
     - [Overview](#overview)
     	- [`v` & `w`](#v--w)
-    	- [createWidgetBase](createwidgetbase)
+    	- [createWidgetBase](#createwidgetbase)
     	- [Properties Lifecycle](#properties-lifecycle)
     	- [Projector](#projector)
     	- [Event Handling](#event-handling)
