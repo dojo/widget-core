@@ -91,6 +91,9 @@ export interface HNode {
 	 */
 	render<T>(options?: { bind?: T }): VNode;
 
+	/**
+	 * The type of node
+	 */
 	type: symbol;
 }
 
@@ -110,6 +113,9 @@ export interface WNode {
 	 */
 	children: DNode[];
 
+	/**
+	 * The type of node
+	 */
 	type: symbol;
 }
 

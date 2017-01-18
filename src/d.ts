@@ -12,7 +12,14 @@ import {
 } from './interfaces';
 import FactoryRegistry from './FactoryRegistry';
 
+/**
+ * The symbol intifier for a WNode type
+ */
 export const WNODE = Symbol('Identifier for a WNode.');
+
+/**
+ * The symbol intifier for a HNode type
+ */
 export const HNODE = Symbol('Identifier for a HNode.');
 
 /**
