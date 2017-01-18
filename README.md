@@ -189,23 +189,25 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 
 #### Properties Lifecycle
 
-Properties are passed to the `w` function and represent are the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto this widget. This occurs during the widget instantiation or prior to the widgets render cycle (when the widget is already available).
+Properties are passed to the `w` function and represent the public API for a widget. The properties lifecycle occurs as the properties that are passed are `set` onto a widget. This occurs prior to the widgets render cycle.
 
-The property lifecyle is completed in the `setProperties` function and uses the instances `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and the new properties. If a widgets proeprties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
+The property lifecyle is performed in the widgets `setProperties` function and uses the instances `diffProperties` function to determine whether any of the properties have changed since the last render. By default `diffProperties` provides a shallow comparison of the previous properties and the new properties. 
 
-The `diffProperties` function is also responsible for creating a copy (the default uses implementation `Object.assign({}, newProperties)` of all properties to the depth that is considered during the comparison.
+*Note* If a widgets properties contain complex data structures, the `diffProperties` function will need to be overridden to prevent returning incorrect changed properties.
 
-When `diffProperties` has completed the results are used to update the properties on the widget instance and the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
+The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all properties to the depth that is considered during the equality comparison.
+
+When `diffProperties` has completed the results are used to update the properties on the widget instance and if changed properties are detected the `properties:changed` event is emitted. Finally once all the attached events have been processed the lifecycle is completed and the widget's properties are processed and available during the render cycle functions.
 
 ##### Finer property diff control
 
-Included in `createWidgetBase` is functionality to support targetting a speficic property with a custom comparison function. This is done by adding a function to the widget class with `diffProperty` prefixed to the property name e.g. `diffPropertyFoo`.
+Included in `createWidgetBase` is functionality to support targetting a specific property with a custom comparison function. This is done by adding a function to the widget class with `diffProperty` prefixed to the property name e.g. `diffPropertyFoo`.
 
 ```ts
 
 const createMyWidget = createWidgetBase.mixin({
 	mixin: {
-		diffPropertyFoo<T>(this: MyWidget, previousProperty: T, newProperty: T) {
+		diffPropertyFoo(this: MyWidget, previousProperty: MyComplexObject, newProperty: MyComplexObject) {
 			// can perfom complex comparison logic here between the two property values
 			// or even use externally stored state to assist the comparison.
 		}
@@ -213,11 +215,11 @@ const createMyWidget = createWidgetBase.mixin({
 });
 ```
 
-If a property has targetted diff function then it is excluded from the normal catch all `diffProperties` implementation.
+If a property has a custom property diff function then it is excluded from the normal catch all `diffProperties` implementation.
 
 #### Projector
 
-A projector is a term used to describe a widget that will be attached to a DOM element, also known as a root widget. Any widget can be converted into a projector simply by mixing in the `createProjectorMixin` mixin.
+Projector is a term used to describe a widget that will be attached to a DOM element, also known as a root widget. Any widget can be converted into a projector simply by mixing in the `createProjectorMixin` mixin.
 
 ```ts
 createMyWidget.mixin(createProjectorMixin)
