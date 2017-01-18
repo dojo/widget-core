@@ -118,12 +118,11 @@ function updateThemeClassesMap<I, T>(instance: Themeable<I>, newThemeClasses: Ap
 }
 
 function onPropertiesChanged<I>(instance: Themeable<I>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
-	const { theme: propTheme, overrideClasses: propOverrideClasses } = instance.properties;
 	const themeChanged = includes(changedPropertyKeys, 'theme');
 	const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 	if (themeChanged || overrideClassesChanged) {
-		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme || propTheme, overrideClasses || propOverrideClasses);
+		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
 		updateThemeClassesMap(instance, themeClasses);
 	}
 }

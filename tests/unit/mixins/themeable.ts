@@ -89,6 +89,7 @@ registerSuite({
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
+					theme: testTheme,
 					overrideClasses: overrideClasses2
 				},
 				changedPropertyKeys: [ 'overrideClasses' ]
