@@ -129,7 +129,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 				if (label) {
 					const labelDefaults = {
 						content: '',
-						position: 'below',
+						position: 'after',
 						hidden: false
 					};
 
@@ -150,7 +150,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 					}
 
 					// set correct order
-					if (label.position === 'above') {
+					if (label.position === 'before') {
 						children.reverse();
 					}
 				}

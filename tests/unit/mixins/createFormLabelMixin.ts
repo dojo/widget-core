@@ -15,18 +15,18 @@ registerSuite({
 		assert.isDefined(formLabelMixin);
 	},
 	getNode() {
-		const formfield = formLabelWidget.override({
+		const formField = formLabelWidget.override({
 			classes: ['foo', 'bar']
 		})();
-		formfield.setProperties({
+		formField.setProperties({
 			label: 'baz'
 		});
-		const vnode = <VNode> formfield.__render__();
+		const vnode = <VNode> formField.__render__();
 
 		assert.strictEqual(vnode.vnodeSelector, 'label.foo.bar');
 	},
 	getFormFieldNodeAttributes() {
-		const formfield = formLabelWidget({
+		const formField = formLabelWidget({
 			tagName: 'input',
 			properties: {
 				value: 'foo',
@@ -35,63 +35,63 @@ registerSuite({
 			}
 		});
 
-		let vnode = <VNode> formfield.__render__();
-		let inputfield = vnode.children![0];
+		let vnode = <VNode> formField.__render__();
+		let inputField = vnode.children![0];
 
-		assert.strictEqual(inputfield.vnodeSelector, 'input');
-		assert.strictEqual(inputfield.properties!['value'], 'foo');
-		assert.strictEqual(inputfield.properties!['maxlength'], '100');
-		assert.isUndefined(inputfield.properties!['randomProp']);
+		assert.strictEqual(inputField.vnodeSelector, 'input');
+		assert.strictEqual(inputField.properties!['value'], 'foo');
+		assert.strictEqual(inputField.properties!['maxlength'], '100');
+		assert.isUndefined(inputField.properties!['randomProp']);
 
-		formfield.setProperties({
+		formField.setProperties({
 			value: 'bar',
 			name: 'baz'
 		});
-		vnode = <VNode> formfield.__render__();
-		inputfield = vnode.children![0];
+		vnode = <VNode> formField.__render__();
+		inputField = vnode.children![0];
 
-		assert.strictEqual(inputfield.properties!['value'], 'bar');
-		assert.strictEqual(inputfield.properties!['name'], 'baz');
+		assert.strictEqual(inputField.properties!['value'], 'bar');
+		assert.strictEqual(inputField.properties!['name'], 'baz');
 
-		formfield.setProperties({
+		formField.setProperties({
 			readonly: true,
 			invalid: false,
 			disabled: true,
 			descriptionID: 'qux'
 		});
-		vnode = <VNode> formfield.__render__();
-		inputfield = vnode.children![0];
+		vnode = <VNode> formField.__render__();
+		inputField = vnode.children![0];
 
-		assert.isTrue(inputfield.properties!['aria-readonly']);
-		assert.strictEqual(inputfield.properties!['readonly'], 'readonly');
-		assert.isFalse(inputfield.properties!['aria-invalid']);
-		assert.isTrue(inputfield.properties!['disabled']);
-		assert.strictEqual(inputfield.properties!['aria-describedby'], 'qux');
+		assert.isTrue(inputField.properties!['aria-readonly']);
+		assert.strictEqual(inputField.properties!['readonly'], 'readonly');
+		assert.isFalse(inputField.properties!['aria-invalid']);
+		assert.isTrue(inputField.properties!['disabled']);
+		assert.strictEqual(inputField.properties!['aria-describedby'], 'qux');
 	},
 	'label': {
 		'string label'() {
-			const formfield = formLabelWidget({
+			const formField = formLabelWidget({
 				properties: {
 					label: 'bar'
 				}
 			});
-			const vnode = <VNode> formfield.__render__();
+			const vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'label');
 			assert.lengthOf(vnode.children, 2);
 			assert.strictEqual(vnode.children![1].properties!.innerHTML, 'bar');
 		},
 		'label options'() {
-			const formfield = formLabelWidget({
+			const formField = formLabelWidget({
 				properties: {
 					label: {
 						content: 'bar',
-						position: 'above',
+						position: 'before',
 						hidden: true
 					}
 				}
 			});
-			const vnode = <VNode> formfield.__render__();
+			const vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'label');
 			assert.lengthOf(vnode.children, 2);
@@ -99,8 +99,8 @@ registerSuite({
 			assert.isTrue(vnode.children![0].properties!.classes!['visually-hidden']);
 		},
 		'no label'() {
-			const formfield = formLabelWidget();
-			const vnode = <VNode> formfield.__render__();
+			const formField = formLabelWidget();
+			const vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'div');
 			assert.lengthOf(vnode.children, 1);
