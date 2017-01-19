@@ -535,10 +535,10 @@ registerSuite({
 			assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b' ]);
 			properties.items.push('c');
 			myWidget.setProperties(properties);
-			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b' ]);
-			properties.items = [...properties.items];
-			myWidget.setProperties(properties);
 			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b', 'c' ]);
+			properties.items.push('d');
+			myWidget.setProperties(properties);
+			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b', 'c', 'd' ]);
 		},
 		'__render__ with internally updated array state'() {
 			const properties = {
