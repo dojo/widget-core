@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/dojo/widgets/branch/master/graph/badge.svg)](https://codecov.io/gh/dojo/widgets)
 [![npm version](https://badge.fury.io/js/%40dojo%2Fwidgets.svg)](https://badge.fury.io/js/%40dojo%2Fwidgets)
 
-This repo provides users with the ability to write their own widgets.
+This repo provides users with the ability to write their own Dojo 2 widgets.
 
 We also provide a suite of pre-built widgets to use in your applications: [(@dojo/widgets)](https://github.com/dojo/widgets).
 
@@ -28,8 +28,8 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [Internationalization](#internationalization)
     - [Key Principles](#key-principles)
     - [Examples](#examples)
-        - [Sample Label Widget](#sample-label-widget)
-        - [Sample List Widget](#sample-list-widget)
+        - [Example Label Widget](#example-label-widget)
+        - [Example List Widget](#example-list-widget)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
     - [Installation](#installation)
@@ -450,7 +450,7 @@ These are some of the **important** principles to keep in mind when creating and
 
 ### Examples
 
-#### Sample Label Widget
+#### Example Label Widget
 
 A simple widget with no children, such as a `label` widget, can be created like this:
 
@@ -481,7 +481,7 @@ const createLabelWidget: LabelFactory = createWidgetBase.mixin({
 export default createLabelWidget;
 ```
 
-#### Sample List Widget
+#### Example List Widget
 
 To create structured widgets, override the `getChildrenNodes` function:
 
