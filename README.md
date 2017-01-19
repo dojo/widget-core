@@ -13,13 +13,13 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
 - [Usage](#usage)
 - [Features](#features)
     - [Overview](#overview)
-        - [`v` & `w`](#v--w)
-            - [`v`](#v)
-            - [`w`](#w)
-        - [Writing custom widgets](#writing-custom-widgets)
-            -[Public API](#public-api)
+    - [`v` & `w`](#v--w)
+        - [`v`](#v)
+        - [`w`](#w)
+    - [Writing custom widgets](#writing-custom-widgets)
+        - [Public API](#public-api)
         - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
-            -[Custom property diff control](#custom-property-diff-control)
+            - [Custom property diff control](#custom-property-diff-control)
         - [Projector](#projector)
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
@@ -85,7 +85,7 @@ We also make use of a VirtualDOM (VDOM) in Dojo 2.
 In order to interact with our VDOM, you need to pass it [HyperScript](https://github.com/dominictarr/hyperscript).
 In Dojo 2 we provide 2 functions that make interacting with the VDOM, easy and intuitive:
 
-#### `v` & `w`
+### `v` & `w`
 
 The `v` & `w` functions are available from the `@dojo/widgets/d` package.
 
@@ -108,7 +108,7 @@ The argument and return types for `v` and `w` are available from `@dojo/widgets/
 import { DNode, HNode, WNode } from '@dojo/widgets/interfaces';
 ```
 
-##### `v`
+#### `v`
 
 The following code creates an element with the specified `tag`
 
@@ -145,7 +145,7 @@ v(tag: string, properties: VNodeProperties, children?: (DNode | null)[]): HNode[
 
 As well as interacting with the VDOM by passing it HyperScript, you can also pass it Dojo 2 Widgets or Custom Widgets using the `w` function.
 
-##### `w`
+#### `w`
 
 The following code creates a widget using the `factory` and `properties`.
 
@@ -171,7 +171,7 @@ w('my-factory', properties, children);
 The example above that uses a string for the `factory`, is taking advantage of our [widget registry](#widget-registry) functionality.
 The widget registry allows you to lazy instantiate widgets.
 
-#### Writing Custom Widgets
+### Writing Custom Widgets
 
 The `createWidgetBase` class provides the functionality needed to create Custom Widgets.
 This functionality includes caching and widget lifecycle management.
@@ -184,7 +184,7 @@ import { createWidgetBase } from '@dojo/widgets/createWidgetBase';
 
 **All** widgets should extend from this class.
 
-##### Pubic API
+#### Pubic API
 
 |Function|Description|Default Behaviour|
 |---|---|---|
