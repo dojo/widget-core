@@ -215,7 +215,7 @@ The depth of the returned diff is equal to the depth used during the equality co
 ##### Custom property diff control
 
 Included in `createWidgetBase` is functionality to support targeting a specific property with a custom comparison function.
-This is done by adding a function to the widget class with `diffProperty` suffixed to the property name.
+This is done by adding a function to the widget class with `diffProperty` prefixed to the property name.
  
 e.g. for a property `foo` you would add a function called `diffPropertyFoo`
 (the casing of the comparison function name is unimportant).
@@ -232,7 +232,7 @@ const createMyWidget = createWidgetBase.mixin({
 });
 ```
 
-If a property has a custom diff function then that property is excluded from those passed to the catch all `diffProperties` implementation.
+If a property has a custom diff function then that property is excluded from those passed to the `diffProperties` function.
 
 ##### The 'properties:changed' event 
 
