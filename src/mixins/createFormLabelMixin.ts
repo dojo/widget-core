@@ -1,9 +1,27 @@
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import compose, { ComposeFactory } from '@dojo/compose/compose';
 import { assign } from '@dojo/core/lang';
-import { NodeAttributeFunction, DNode, Widget, WidgetOptions, WidgetState, WidgetProperties, FormLabelProperties } from './../interfaces';
+import {
+	DNode,
+	Widget,
+	WidgetOptions,
+	WidgetState,
+	WidgetProperties
+} from './../interfaces';
 import { v } from '../d';
 
+/**
+ * Label settings for form label text content, position (before or after), and visibility
+ */
+export interface LabelProperties {
+	content: string;
+	position?: string;
+	hidden?: boolean;
+}
+
+/**
+ * Form Label Properties
+ */
 export interface FormLabelMixinProperties extends WidgetProperties {
 	/**
 	 * The form widget's name
@@ -28,38 +46,87 @@ export interface FormLabelMixinProperties extends WidgetProperties {
 	/**
 	 * Label settings for form label text, position, and visibility
 	 */
-	label?: string | FormLabelProperties;
+	label?: string | LabelProperties;
 
 	/**
-	 * Accessibility attributes
+	 * Checked/unchecked HTML attribute
 	 */
 	checked?: boolean;
+
+	/**
+	 * ID of an element that provides more descriptive text
+	 */
 	describedBy?: string;
-	inputMode?: string;
+
+	/**
+	 * Indicates the value entered in the form field is invalid
+	 */
 	invalid?: boolean;
+
+	/**
+	 * Maximum number of characters allowed in the input
+	 */
 	maxLength?: number | string;
+
+	/**
+	 * Minimum number of characters allowed in the input
+	 */
 	minLength?: number | string;
+
+	/**
+	 * Controls whether multiple values are allowed (applies to email, file, and select inputs)
+	 */
 	multiple?: boolean;
+
+	/**
+	 * Placeholder text
+	 */
 	placeholder?: string;
+
+	/**
+	 * Allows or prevents user interaction
+	 */
 	readOnly?: boolean;
+
+	/**
+	 * Whether or not a value is required
+	 */
 	required?: boolean;
 }
 
+/**
+ * Form Label Mixin
+ */
 export interface FormLabelMixin {
 	/**
 	 * A function that generates node attribtues for the child form field
 	 */
-	getFormFieldNodeAttributes: NodeAttributeFunction<this>;
+	getFormFieldNodeAttributes: () => VNodeProperties;
 
 	/**
-	 * Override the default getNode function on createWidgetBase to return child input
+	 * Override the default getNode function on createWidgetBase to return child input wrapped in a <label>
 	 */
 	getNode(): DNode;
 }
 
+/**
+ * Form Label
+ */
 export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
 
+/**
+ * Form Label Factory interface
+ */
 export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, WidgetOptions<WidgetState, FormLabelMixinProperties>> {}
+
+/**
+ * Default settings for form labels
+ */
+const labelDefaults = {
+	content: '',
+	position: 'after',
+	hidden: false
+};
 
 const createFormLabelMixin: FormLabelMixinFactory = compose({
 	getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
@@ -70,7 +137,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 			attributeKeys.push('type');
 		}
 
-		const allowedAttributes = ['checked', 'describedBy', 'disabled', 'inputMode', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
+		const allowedAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
 		const nodeAttributes: any = {};
 
 		for (const key of allowedAttributes) {
@@ -79,10 +146,10 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 				continue;
 			}
 			else if (key === 'type') {
-				nodeAttributes['type'] = type;
+				nodeAttributes.type = type;
 			}
 			else if (key === 'readOnly' && properties.readOnly) {
-				nodeAttributes['readonly'] = 'readonly';
+				nodeAttributes.readonly = 'readonly';
 				nodeAttributes['aria-readonly'] = true;
 			}
 			else if (key === 'invalid') {
@@ -113,50 +180,39 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 		return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
 	}
 })
-.mixin({
-	aspectAdvice: {
-		after: {
-			getChildrenNodes(this: FormLabel, result: DNode[]) {
-				let { label } = this.properties;
-				const inputAttributes = this.getFormFieldNodeAttributes.call(this);
-				const children = [
-					v(this.tagName,
-						inputAttributes,
-						result
-					)
-				];
+.aspect({
+	after: {
+		getChildrenNodes(this: FormLabel, result: DNode[]): DNode[] {
+			let { label } = this.properties;
+			const inputAttributes = this.getFormFieldNodeAttributes();
+			const children = [
+				v(this.tagName, inputAttributes, result)
+			];
 
-				if (label) {
-					const labelDefaults = {
-						content: '',
-						position: 'after',
-						hidden: false
-					};
-
-					// convert string label to object
-					if (typeof label === 'string') {
-						label = assign({}, labelDefaults, { content: label });
-					}
-					else {
-						label = assign({}, labelDefaults, label);
-					}
-
-					// add label text
-					if (label.content.length > 0) {
-						children.push(v('span', {
-							innerHTML: label.content,
-							classes: { 'visually-hidden': label.hidden }
-						}));
-					}
-
-					// set correct order
-					if (label.position === 'before') {
-						children.reverse();
-					}
+			if (label) {
+				// convert string label to object
+				if (typeof label === 'string') {
+					label = assign({}, labelDefaults, { content: label });
+				}
+				else {
+					label = assign({}, labelDefaults, label);
 				}
 
-				return children;
+				// add label text
+				if (label.content.length > 0) {
+					children.push(v('span', {
+						innerHTML: label.content,
+						classes: { 'visually-hidden': label.hidden }
+					}));
+				}
+
+				// set correct order
+				if (label.position === 'before') {
+					children.reverse();
+				}
 			}
+
+			return children;
 		}
 	}
 });
