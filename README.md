@@ -38,7 +38,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
 
 ## Usage
 
-To use @dojo/widgets, install the package along with its required peer dependencies.
+To use @dojo/widgets, install the package along with its required peer dependencies:
 
 ```shell
 npm install @dojo/widgets
@@ -84,7 +84,7 @@ This library provides the ability to construct and manipulate traits and mixins.
 
 We also make use of a VirtualDOM (VDOM) in Dojo 2.
 In order to interact with our VDOM, you need to pass it [HyperScript](https://github.com/dominictarr/hyperscript).
-In Dojo 2 we provide 2 functions that make interacting with the VDOM, easy and intuitive:
+In Dojo 2 we provide 2 functions that make interacting with the VDOM, easy and intuitive: `v` and `w`.
 
 ### `v` & `w`
 
@@ -205,20 +205,20 @@ The properties lifecycle is performed in the widgets `setProperties` function.
 This function uses the widget instance's `diffProperties` function to determine whether any of the properties have changed since the last render cycle.
 By default `diffProperties` provides a shallow comparison of the previous properties and new properties. 
 
-**Note** If a widget's properties contain complex data structures that you need to diff, then the `diffProperties` function will need to be overridden.
-
 The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all changed properties.
 The depth of the returned diff is equal to the depth used during the equality comparison.
 
 // example of depth
+
+**Note** If a widget's properties contain complex data structures that you need to diff, then the `diffProperties` function will need to be overridden.
 
 ##### Custom property diff control
 
 Included in `createWidgetBase` is functionality to support targeting a specific property with a custom comparison function.
 This is done by adding a function to the widget class with `diffProperty` suffixed to the property name.
  
-e.g. for a property `foo` you would add a function called `diffPropertyFoo`.
-(note that casing of the comparison function name is unimportant).
+e.g. for a property `foo` you would add a function called `diffPropertyFoo`
+(the casing of the comparison function name is unimportant).
 
 ```ts
 
@@ -238,8 +238,6 @@ If a property has a custom diff function then that property is excluded from tho
 
 When `diffProperties` has completed, the results are used to update the properties on the widget instance.
 If any properties were changed, then the `properties:changed` event is emitted.
-
-Event: `properties:changed`
 
 *Attaching*
 
