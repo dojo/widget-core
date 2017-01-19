@@ -20,6 +20,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [Public API](#public-api)
         - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
             - [Custom property diff control](#custom-property-diff-control)
+            - [The `properties:changed` event](#the-properties-changed-event)
         - [Projector](#projector)
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
@@ -233,6 +234,8 @@ const createMyWidget = createWidgetBase.mixin({
 
 If a property has a custom diff function then that property is excluded from those passed to the catch all `diffProperties` implementation.
 
+##### The 'properties:changed' event 
+
 When `diffProperties` has completed, the results are used to update the properties on the widget instance.
 If any properties were changed, then the `properties:changed` event is emitted.
 
@@ -288,11 +291,11 @@ createWidgetProjector().append(() => {
 
 #### Event Handling
 
-The recommended pattern for event listeners is to declare them on the widget class, referencing the function using `this`.
+The recommended pattern for custom event handlers is to declare them on the widget class and reference the function using `this`.
 Event handlers are most commonly called from the `getChildrenNodes` function or a `nodeAttributes` function.
 
-Event listeners can be internal logic encapsulated within a widget or delegate to a function passed via `properties`.
-For convenience event listeners are automatically bound to the scope of their enclosing widget.
+Event handlers can be internal logic encapsulated within a widget or delegate to a function passed into the widget via `properties`.
+For convenience event handlers are automatically bound to the scope of their enclosing widget.
 
 *internally defined handler*
 
