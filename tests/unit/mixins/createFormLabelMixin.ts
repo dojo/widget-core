@@ -30,7 +30,7 @@ registerSuite({
 			tagName: 'input',
 			properties: {
 				value: 'foo',
-				maxlength: 100,
+				maxLength: 100,
 				randomProp: 'qux'
 			}
 		});
@@ -54,10 +54,10 @@ registerSuite({
 		assert.strictEqual(inputField.properties!['name'], 'baz');
 
 		formField.setProperties({
-			readonly: true,
+			readOnly: true,
 			invalid: false,
 			disabled: true,
-			descriptionID: 'qux'
+			describedBy: 'qux'
 		});
 		vnode = <VNode> formField.__render__();
 		inputField = vnode.children![0];

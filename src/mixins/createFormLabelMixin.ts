@@ -34,14 +34,14 @@ export interface FormLabelMixinProperties extends WidgetProperties {
 	 * Accessibility attributes
 	 */
 	checked?: boolean;
-	descriptionID?: string;
-	inputmode?: string;
+	describedBy?: string;
+	inputMode?: string;
 	invalid?: boolean;
-	maxlength?: number | string;
-	minlength?: number | string;
+	maxLength?: number | string;
+	minLength?: number | string;
 	multiple?: boolean;
 	placeholder?: string;
-	readonly?: boolean;
+	readOnly?: boolean;
 	required?: boolean;
 }
 
@@ -70,7 +70,7 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 			attributeKeys.push('type');
 		}
 
-		const allowedAttributes = ['checked', 'descriptionID', 'disabled', 'inputmode', 'invalid', 'maxlength', 'minlength', 'multiple', 'name', 'placeholder', 'readonly', 'required', 'type', 'value'];
+		const allowedAttributes = ['checked', 'describedBy', 'disabled', 'inputMode', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
 		const nodeAttributes: any = {};
 
 		for (const key of allowedAttributes) {
@@ -81,21 +81,21 @@ const createFormLabelMixin: FormLabelMixinFactory = compose({
 			else if (key === 'type') {
 				nodeAttributes['type'] = type;
 			}
-			else if (key === 'readonly' && properties.readonly) {
+			else if (key === 'readOnly' && properties.readOnly) {
 				nodeAttributes['readonly'] = 'readonly';
 				nodeAttributes['aria-readonly'] = true;
 			}
 			else if (key === 'invalid') {
 				nodeAttributes['aria-invalid'] = properties.invalid;
 			}
-			else if (key === 'descriptionID') {
-				nodeAttributes['aria-describedby'] = properties.descriptionID;
+			else if (key === 'describedBy') {
+				nodeAttributes['aria-describedby'] = properties.describedBy;
 			}
-			else if ((key === 'maxlength' || key === 'minlength' || key === 'checked') && typeof properties[key] !== 'string') {
-				nodeAttributes[key] = '' + properties[key];
+			else if ((key === 'maxLength' || key === 'minLength' || key === 'checked') && typeof properties[key] !== 'string') {
+				nodeAttributes[key.toLowerCase()] = '' + properties[key];
 			}
 			else {
-				nodeAttributes[key] = properties[key];
+				nodeAttributes[key.toLowerCase()] = properties[key];
 			}
 		}
 
