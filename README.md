@@ -6,25 +6,29 @@
 
 This repo provides users with the ability to write their own widgets.
 
-We also provide a suite of pre-built widgets to use in your applications [here (@dojo/widgets)](https://github.com/dojo/widgets).
+We also provide a suite of pre-built widgets to use in your applications: [(@dojo/widgets)](https://github.com/dojo/widgets).
 
 **WARNING** This is *alpha* software. It is not yet production ready, so you should use at your own risk.
 
 - [Usage](#usage)
 - [Features](#features)
     - [Overview](#overview)
-    	- [`v` & `w`](#v--w)
-    	- [createWidgetBase](#createwidgetbase)
-    	- [Properties Lifecycle](#properties-lifecycle)
-    	- [Projector](#projector)
-    	- [Event Handling](#event-handling)
-    	- [Widget Registry](#widget-registry)
-    	- [Theming](#theming)
-    	- [Internationalization](#internationalization)
+        - [`v` & `w`](#v--w)
+            - [`v`](#v)
+            - [`w`](#w)
+        - [Writing custom widgets](#writing-custom-widgets)
+            -[Public API](#public-api)
+        - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
+            -[Custom property diff control](#custom-property-diff-control)
+        - [Projector](#projector)
+        - [Event Handling](#event-handling)
+        - [Widget Registry](#widget-registry)
+        - [Theming](#theming)
+        - [Internationalization](#internationalization)
     - [Key Principles](#key-principles)
     - [Examples](#examples)
-    	- [Sample Label Widget](#sample-label-widget)
-    	- [Sample List Widget](#sample-list-widget)
+        - [Sample Label Widget](#sample-label-widget)
+        - [Sample List Widget](#sample-list-widget)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
     - [Installation](#installation)
@@ -164,7 +168,7 @@ w('my-factory', properties);
 w('my-factory', properties, children);
 ```
 
-The example above that uses a string for the `factory`, is taking advantage of our [widget registry](####Widget Registry) functionality.
+The example above that uses a string for the `factory`, is taking advantage of our [widget registry](#widget-registry) functionality.
 The widget registry allows you to lazy instantiate widgets.
 
 #### Writing Custom Widgets
@@ -189,7 +193,7 @@ import { createWidgetBase } from '@dojo/widgets/createWidgetBase';
 |nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
 |diffProperties|Diffs the current properties against the previous properties and returns an object with the changed keys and new properties|Performs a shallow comparison previous and current properties, copies the properties using `Object.assign` and returns the resulting `PropertiesChangeRecord`.|
 
-#### The Properties and Render lifecycles
+#### The 'properties' and 'render' lifecycles
 
 The widget's properties lifecycle occurs before its render lifecycle.
 
@@ -205,9 +209,9 @@ By default `diffProperties` provides a shallow comparison of the previous proper
 The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all changed properties.
 The depth of the returned diff is equal to the depth used during the equality comparison.
 
-<!-- example of depth -->
+// example of depth
 
-##### Finer property diff control
+##### Custom property diff control
 
 Included in `createWidgetBase` is functionality to support targeting a specific property with a custom comparison function.
 This is done by adding a function to the widget class with `diffProperty` suffixed to the property name.
@@ -232,9 +236,7 @@ If a property has a custom diff function then that property is excluded from tho
 When `diffProperties` has completed, the results are used to update the properties on the widget instance.
 If any properties were changed, then the `properties:changed` event is emitted.
 
-##### Events
-
-`properties:changed`
+Event: `properties:changed`
 
 *Attaching*
 
@@ -244,7 +246,7 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 });
 ```
 
-*Example Payload*
+*Example event payload*
 
 ```ts
 {
@@ -257,7 +259,7 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 
 Finally once all the attached events have been processed, the properties lifecycle is complete and the finalized widget properties are available during the render cycle functions.
 
-<!-- bit about render lifecycle -->
+// bit about render lifecycle
 
 #### Projector
 
@@ -342,7 +344,7 @@ const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
 });
 ```
 
-####Widget Registry
+#### Widget Registry
 
 The registry provides the ability to define a label against a `WidgetFactory`, a `Promise<WidgetFactory>` or a function that when executed returns a `Promise<WidgetFactory>`.
 
@@ -365,7 +367,7 @@ registry.define('my-widget-2', Promise.resolve(createMyWidget));
 registry.define('my-widget-3', () => Promise.resolve(createMyWidget));
 ```
 
-It is recommended to use the factory registry when defining widgets with [`w`](#w--d) to support lazy factory resolution. 
+It is recommended to use the factory registry when defining widgets with [`w`](#w--d), to support lazy factory resolution. 
 
 Example of registering a function that returns a `Promise` that resolves to a `Factory`.
 
@@ -387,7 +389,8 @@ registry.define('my-widget', () => {
 Widgets can be internationalized by mixing in `@dojo/widgets/mixins/createI18nMixin`.
 [Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`. 
 
-If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned and the widget will be invalidated once the locale-specific messages have been loaded.
+If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned.
+The widget will be invalidated once the locale-specific messages have been loaded.
 
 Each widget can have its own locale by setting its `state.locale`. 
 If no locale is set, then the default locale, as set by [`@dojo/i18n`](https://github.com/dojo/i18n), is assumed.
