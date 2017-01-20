@@ -7,3 +7,4 @@ import './externalState';
 import './themeable';
 import './registryMixin';
 import './internalState';
+import './passedPropertiesMixin';
