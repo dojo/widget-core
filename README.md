@@ -589,7 +589,6 @@ We are using autoprefixer to add vendor prefixes to the properties that need the
 
 Widgets can be internationalized by mixing in `@dojo/widgets/mixins/createI18nMixin`.
 [Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`.
->>>>>>> 69ff6c7c406f3a73cdae3eb7c8462b3a4eee5e5a
 
 If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned.
 The widget will be invalidated once the locale-specific messages have been loaded.
