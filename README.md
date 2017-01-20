@@ -18,9 +18,9 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [`w`](#w)
     - [Writing custom widgets](#writing-custom-widgets)
         - [Public API](#public-api)
-        - [The 'properties' and 'render' lifecycles](#the-'properties'-and-'render'-lifecycles)
+        - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
             - [Custom property diff control](#custom-property-diff-control)
-            - [The `properties:changed` event](#the-'properties:changed'-event)
+            - [The `properties:changed` event](#the-propertieschanged-event)
         - [Projector](#projector)
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
@@ -184,7 +184,7 @@ import { createWidgetBase } from '@dojo/widgets/createWidgetBase';
 
 **All** widgets should extend from this class.
 
-#### Pubic API
+#### Public API
 
 |Function|Description|Default Behaviour|
 |---|---|---|
