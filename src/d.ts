@@ -7,6 +7,8 @@ import {
 	HNode,
 	WNode,
 	Widget,
+	DecoratorModifier,
+	DecoratorPredicate,
 	WidgetProperties,
 	WidgetFactory
 } from './interfaces';
@@ -34,14 +36,6 @@ export function isWNode(child: DNode): child is WNode {
  */
 export function isHNode(child: DNode): child is HNode {
 	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
-}
-
-export interface DecoratorPredicate {
-	(dNode: DNode): Boolean;
-}
-
-export interface DecoratorModifier {
-	(dNode: DNode): DNode;
 }
 
 export function decorateDNodes(dNodes: DNode[], predicate: DecoratorPredicate, modifier: DecoratorModifier): DNode[] {

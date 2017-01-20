@@ -121,6 +121,14 @@ export interface WNode {
 
 export type DNode = HNode | WNode | string | null;
 
+export interface DecoratorPredicate {
+	(dNode: DNode): Boolean;
+}
+
+export interface DecoratorModifier {
+	(dNode: DNode): DNode;
+}
+
 export interface PropertyChangeRecord {
 	changed: boolean;
 	value: any;
