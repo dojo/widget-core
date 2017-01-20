@@ -301,3 +301,13 @@ export interface WidgetState extends State {
 }
 
 export interface WidgetFactory<W extends Widget<P>, P extends WidgetProperties> extends ComposeFactory<W, WidgetOptions<WidgetState, P>> {}
+
+export interface TypedTargetEvent<T extends EventTarget> extends Event {
+	target: T;
+}
+
+export interface FormLabelProperties {
+	content: string;
+	position?: string;
+	hidden?: boolean;
+}

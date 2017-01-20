@@ -9,19 +9,19 @@ registerSuite({
 		const button = createButton({
 			properties: {
 				id: 'foo',
-				label: 'bar',
+				content: 'bar',
 				name: 'baz'
 			}
 		});
 		assert.strictEqual(button.properties.id, 'foo');
-		assert.strictEqual(button.properties.label, 'bar');
+		assert.strictEqual(button.properties.content, 'bar');
 		assert.strictEqual(button.properties.name, 'baz');
 	},
 	render() {
 		const button = createButton({
 			properties: {
 				id: 'foo',
-				label: 'bar',
+				content: 'bar',
 				name: 'baz'
 			}
 		});
@@ -29,11 +29,10 @@ registerSuite({
 		assert.strictEqual(vnode.vnodeSelector, 'button');
 		assert.strictEqual(vnode.properties!.innerHTML, 'bar');
 		assert.strictEqual(vnode.properties!['data-widget-id'], 'foo');
-		assert.strictEqual(vnode.properties!.name, 'baz');
-		assert.strictEqual(vnode.properties!['type'], 'button');
+		assert.strictEqual(vnode.properties!['name'], 'baz');
 		assert.lengthOf(vnode.children, 0);
 	},
-	'button without label'() {
+	'button without text'() {
 		const button = createButton({
 			properties: {
 				id: 'foo',
@@ -44,19 +43,12 @@ registerSuite({
 		assert.isUndefined(vnode.properties!.innerHTML);
 	},
 	disable() {
-		const button = createButton({
-			properties: {
-				id: 'foo',
-				label: 'bar',
-				name: 'baz'
-			}
-		});
-		let vnode = <VNode> button.__render__();
-		assert.isFalse(vnode.properties!['disabled']);
-		button.setState({
+		const button = createButton({});
+		button.setProperties({
 			disabled: true
 		});
-		vnode = <VNode> button.__render__();
+		const vnode = <VNode> button.__render__();
+
 		assert.isTrue(vnode.properties!['disabled']);
 	},
 	onClick() {

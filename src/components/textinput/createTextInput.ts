@@ -1,37 +1,43 @@
 import createWidgetBase from '../../createWidgetBase';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { Widget, WidgetProperties, WidgetFactory } from './../../interfaces';
-import createFormFieldMixin, { FormFieldMixin } from '../../mixins/createFormFieldMixin';
+import { Widget, WidgetOptions, WidgetState, WidgetProperties, WidgetFactory, TypedTargetEvent, PropertiesChangeEvent } from './../../interfaces';
+import createFormLabelMixin, { FormLabelMixin, FormLabelMixinProperties } from '../../mixins/createFormLabelMixin';
 
-/* TODO: I suspect this needs to go somewhere else */
-export interface TypedTargetEvent<T extends EventTarget> extends Event {
-	target: T;
-}
+export type TextInputProperties = WidgetProperties & FormLabelMixinProperties;
 
-export interface TextInputProperties extends WidgetProperties {
-	name?: string;
-}
+export type TextInput = Widget<TextInputProperties> & FormLabelMixin & {
+	type: string;
 
-export type TextInput = Widget<TextInputProperties> & FormFieldMixin<string, any> & {
 	onInput(event: TypedTargetEvent<HTMLInputElement>): void;
 };
 
 export interface TextInputFactory extends WidgetFactory<TextInput, TextInputProperties> { }
 
 const createTextInput: TextInputFactory = createWidgetBase
-	.mixin(createFormFieldMixin)
+	.mixin(createFormLabelMixin)
 	.mixin({
 		mixin: {
-			type: 'text',
 			tagName: 'input',
+			type: 'text',
 			onInput(this: TextInput, event: TypedTargetEvent<HTMLInputElement>) {
-				this.value = event.target.value;
+				this.properties.value = event.target.value;
 			},
 			nodeAttributes: [
 				function(this: TextInput): VNodeProperties {
 					return { oninput: this.onInput };
 				}
 			]
+		},
+		initialize(instance, options: WidgetOptions<WidgetState, TextInputProperties>) {
+			instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<TextInput, TextInputProperties>) => {
+				const { type } = evt.properties;
+				if (type) {
+					instance.type = type;
+				}
+			}));
+
+			const { properties = {} } = options;
+			instance.type = properties.type || 'text';
 		}
 	});
 
