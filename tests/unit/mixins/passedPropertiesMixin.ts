@@ -20,7 +20,7 @@ registerSuite({
 				}
 			});
 
-			const createWidgetWithRegistry = createWidgetBase
+			const createWidgetWithPassedProperties = createWidgetBase
 				.mixin(passedPropertiesMixin)
 				.override({ propertiesToPass: [ 'passed' ] })
 				.mixin({
@@ -43,7 +43,7 @@ registerSuite({
 					}
 				});
 
-			const instance = createWidgetWithRegistry({ properties: { passed: true } });
+			const instance = createWidgetWithPassedProperties({ properties: { passed: true } });
 			instance.__render__();
 			assert.equal(propertiesPassedCount, 5);
 		}
