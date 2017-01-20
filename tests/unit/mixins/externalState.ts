@@ -111,6 +111,13 @@ registerSuite({
 			return promise;
 		},
 		'when observing the whole store'() {
+			const store = createObservableStore({
+				data: [
+					{ id: '1', foo: 'bar' },
+					{ id: '2', foo: 'bar' }
+				]
+			});
+
 			const externalStateMixin = externalStateWithProperties({ properties: { externalState: store } });
 			let intialStateChange = true;
 
