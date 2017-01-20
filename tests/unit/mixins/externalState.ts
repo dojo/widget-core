@@ -27,11 +27,8 @@ registerSuite({
 		});
 	},
 	observe: {
-		'throw error if `id` property is not passed'() {
-			assert.throws(() => externalStateWithProperties(<any> { externalState: store }), Error);
-		},
 		'throw error if `externalState` property is not passed'() {
-			assert.throws(() => externalStateWithProperties(<any> { id: '1' }), Error);
+			assert.throws(() => externalStateWithProperties({properties: { id: '1' } }), Error);
 		},
 		observe() {
 			const properties = {
@@ -86,31 +83,72 @@ registerSuite({
 		assert.deepEqual(externalStateMixin.state, Object.create(null));
 		return promise;
 	},
-	setState() {
-		const externalStateMixin = externalStateWithProperties({ properties: { id: '1', externalState: store } });
-		let intialStateChange = true;
+	setState: {
+		'when observing a single item'() {
+			const externalStateMixin = externalStateWithProperties({ properties: { id: '1', externalState: store } });
+			let intialStateChange = true;
 
-		const promise = new Promise((resolve, reject) => {
-			externalStateMixin.on('state:changed', () => {
-				try {
-					if (intialStateChange) {
-						intialStateChange = false;
-						assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'bar'});
+			const promise = new Promise((resolve, reject) => {
+				externalStateMixin.on('state:changed', () => {
+					try {
+						if (intialStateChange) {
+							intialStateChange = false;
+							assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'bar'});
+						}
+						else {
+							assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'baz', baz: 'qux' });
+							resolve();
+						}
+					} catch (err) {
+						reject(err);
 					}
-					else {
-						assert.deepEqual(externalStateMixin.state, { id: '1', foo: 'baz', baz: 'qux' });
-						resolve();
-					}
-				} catch (err) {
-					reject(err);
-				}
+				});
 			});
-		});
 
-		externalStateMixin.observe();
-		assert.deepEqual(externalStateMixin.state, Object.create(null));
-		externalStateMixin.setState({ id: '1', foo: 'baz', baz: 'qux' });
-		return promise;
+			externalStateMixin.observe();
+			assert.deepEqual(externalStateMixin.state, Object.create(null));
+			externalStateMixin.setState({ id: '1', foo: 'baz', baz: 'qux' });
+			return promise;
+		},
+		'when observing the whole store'() {
+			const externalStateMixin = externalStateWithProperties({ properties: { externalState: store } });
+			let intialStateChange = true;
+
+			const promise = new Promise((resolve, reject) => {
+				externalStateMixin.on('state:changed', () => {
+					try {
+						if (intialStateChange) {
+							intialStateChange = false;
+							assert.isOk(externalStateMixin.state);
+							assert.lengthOf(externalStateMixin.state, 2);
+							assert.deepEqual(externalStateMixin.state, [
+								{ id: '1', foo: 'bar'}, { id: '2', foo: 'bar' }
+							]);
+						}
+						else {
+							assert.isOk(externalStateMixin.state);
+							assert.lengthOf(externalStateMixin.state, 2);
+							assert.deepEqual(externalStateMixin.state, [
+								{ id: '1', foo: 'baz', baz: 'qux'}, { id: '2', foo: 'bar' }
+							]);
+							resolve();
+						}
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
+
+			externalStateMixin.observe();
+			externalStateMixin.setState({ id: '1', foo: 'baz', baz: 'qux' });
+
+			return promise;
+		},
+		'throws error if no id can be determined'() {
+			const externalStateMixin = externalStateWithProperties({ properties: { externalState: store } });
+			externalStateMixin.observe();
+			assert.throws(() => externalStateMixin.setState({ foo: 'baz', baz: 'qux' }), Error);
+		}
 	},
 	'on "properties:changed" event': {
 		'initial properties'() {
