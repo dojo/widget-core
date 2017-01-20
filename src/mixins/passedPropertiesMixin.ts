@@ -25,7 +25,6 @@ const passedPropertiesMixin: PassedPropertiesFactory = compose<PassedProperties,
 						this.propertiesToPass.map((property: string) => {
 							dNode.properties[property] = this.properties[property];
 						});
-						return dNode;
 					}
 				);
 			}

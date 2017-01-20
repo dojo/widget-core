@@ -126,7 +126,7 @@ export interface DecoratorPredicate {
 }
 
 export interface DecoratorModifier {
-	(dNode: DNode): DNode;
+	(dNode: DNode): void;
 }
 
 export interface PropertyChangeRecord {
