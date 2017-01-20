@@ -13,8 +13,8 @@ registerSuite({
 
 			const createSpan = createWidgetBase.mixin({
 				initialize(instance) {
-					const { properties: { hello } } = instance;
-					if (hello) {
+					const { properties: { passed } } = instance;
+					if (passed) {
 						propertiesPassedCount++;
 					}
 				}
@@ -22,7 +22,7 @@ registerSuite({
 
 			const createWidgetWithRegistry = createWidgetBase
 				.mixin(passedPropertiesMixin)
-				.override({ propertiesToPass: [ 'hello' ] })
+				.override({ propertiesToPass: [ 'passed' ] })
 				.mixin({
 					mixin: {
 						getChildrenNodes(): DNode[] {
@@ -43,7 +43,7 @@ registerSuite({
 					}
 				});
 
-			const instance = createWidgetWithRegistry({ properties: { hello: 'world' } });
+			const instance = createWidgetWithRegistry({ properties: { passed: true } });
 			instance.__render__();
 			assert.equal(propertiesPassedCount, 5);
 		}

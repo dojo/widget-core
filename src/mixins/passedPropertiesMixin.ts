@@ -2,8 +2,7 @@ import compose, { ComposeFactory } from '@dojo/compose/compose';
 import { isWNode } from '../../src/d';
 import { Widget, WidgetProperties, DNode } from '../interfaces';
 
-export interface PassedPropertiesOptions {
-}
+export interface PassedPropertiesOptions {}
 
 export interface PassedProperties {
 	propertiesToPass: string[];
