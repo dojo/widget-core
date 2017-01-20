@@ -18,7 +18,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [`w`](#w)
     - [Writing custom widgets](#writing-custom-widgets)
         - [Public API](#public-api)
-        - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
+        - [The 'properties' lifecycle](#the-properties-lifecycle)
             - [Custom property diff control](#custom-property-diff-control)
             - [The `properties:changed` event](#the-propertieschanged-event)
         - [Projector](#projector)
@@ -79,7 +79,7 @@ This code renders a `h1` element onto the page, that says "Hello, Dojo!".
 All widgets in Dojo 2 are designed using key reactive architecture concepts.
 These concepts include unidirectional data flow, inversion of control and property passing.
 
-Dojo 2's  widget suite is built using the [@dojo/compose](https://github.com/dojo/compose) composition library.
+Dojo 2's widget suite is built using the [@dojo/compose](https://github.com/dojo/compose) composition library.
 This library provides the ability to construct and manipulate traits and mixins.
 
 We also make use of a VirtualDOM (VDOM) in Dojo 2.
@@ -193,7 +193,7 @@ import { createWidgetBase } from '@dojo/widgets/createWidgetBase';
 |nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
 |diffProperties|Diffs the current properties against the previous properties and returns an object with the changed keys and new properties|Performs a shallow comparison previous and current properties, copies the properties using `Object.assign` and returns the resulting `PropertiesChangeRecord`.|
 
-#### The 'properties' and 'render' lifecycles
+#### The 'properties' lifecycle
 
 The widget's properties lifecycle occurs before its render lifecycle.
 
@@ -207,7 +207,7 @@ By default `diffProperties` provides a shallow comparison of the previous proper
 The `diffProperties` function is also responsible for creating a copy (the default implementation uses`Object.assign({}, newProperties)` of all changed properties.
 The depth of the returned diff is equal to the depth used during the equality comparison.
 
-// example of depth
+<!-- add example of 'depth' -->
 
 **Note** If a widget's properties contain complex data structures that you need to diff, then the `diffProperties` function will need to be overridden.
 
@@ -259,7 +259,7 @@ this.on('properties:changed', (evt: PropertiesChangedEvent<MyWidget, MyPropertie
 
 Finally once all the attached events have been processed, the properties lifecycle is complete and the finalized widget properties are available during the render cycle functions.
 
-// bit about render lifecycle
+<!-- render lifecycle goes here -->
 
 #### Projector
 
@@ -382,7 +382,7 @@ registry.define('my-widget', () => {
 
 #### Theming
 
-// talk about the css and theming support
+// To be completed
 
 #### Internationalization (i18n)
 
