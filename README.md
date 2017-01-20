@@ -25,7 +25,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
         - [Theming](#theming)
-        - [Internationalization](#Internationalizationi18n)
+        - [Internationalization](#internationalizationi18n)
     - [Key Principles](#key-principles)
     - [Examples](#examples)
         - [Example Label Widget](#example-label-widget)
