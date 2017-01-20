@@ -18,9 +18,9 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [`w`](#w)
     - [Writing custom widgets](#writing-custom-widgets)
         - [Public API](#public-api)
-        - [The 'properties' and 'render' lifecycles](#the-properties-and-render-lifecycles)
+        - [The 'properties' and 'render' lifecycles](#the-'properties'-and-'render'-lifecycles)
             - [Custom property diff control](#custom-property-diff-control)
-            - [The `properties:changed` event](#the-properties-changed-event)
+            - [The `properties:changed` event](#the-'properties:changed'-event)
         - [Projector](#projector)
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
@@ -88,12 +88,6 @@ In Dojo 2 we provide 2 functions that make interacting with the VDOM, easy and i
 
 ### `v` & `w`
 
-The `v` & `w` functions are available from the `@dojo/widgets/d` package.
-
-```ts
-import { v, w } from '@dojo/widgets/d';
-```
-
 These functions express structures that will be passed to the VDOM.
 
 `v` creates nodes that represent DOM tags, e.g. `div`, `header` etc.
@@ -102,6 +96,11 @@ This function allows Dojo 2 to manage lazy hyperscript creation and element cach
  `w` creates Dojo 2 widgets or custom widget.
 This function provides support for lazy widget instantiation, instance management and caching.
 
+The `v` & `w` functions are available from the `@dojo/widgets/d` package.
+
+```ts
+import { v, w } from '@dojo/widgets/d';
+```
 
 The argument and return types for `v` and `w` are available from `@dojo/widgets/interfaces`, and are as follows:
 
