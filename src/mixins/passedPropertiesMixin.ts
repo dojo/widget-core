@@ -1,6 +1,6 @@
 import compose, { ComposeFactory } from '@dojo/compose/compose';
-import { isWNode } from '../../src/d';
-import { Widget, WidgetProperties, DNode } from '../interfaces';
+import { isWNode, decorateDNodes } from '../../src/d';
+import { Widget, WidgetProperties, DNode, WNode } from '../interfaces';
 
 export interface PassedPropertiesOptions {}
 
@@ -18,21 +18,16 @@ const passedPropertiesMixin: PassedPropertiesFactory = compose<PassedProperties,
 	aspectAdvice: {
 		after: {
 			getChildrenNodes(this: Projector, dNodes: DNode[]): DNode[] {
-				let nodes = [ ...dNodes ];
-				while (nodes.length) {
-					const node = nodes.pop();
-					if (node && typeof node !== 'string') {
-						if (isWNode(node)) {
-							this.propertiesToPass.map((property: string) => {
-								node.properties[property] = this.properties[property];
-							});
-						}
-						if (node.children) {
-							nodes = [ ...nodes, ...(<any> node).children ];
-						}
+				return decorateDNodes(
+					dNodes,
+					(dNode) => isWNode(dNode),
+					(dNode: WNode) => {
+						this.propertiesToPass.map((property: string) => {
+							dNode.properties[property] = this.properties[property];
+						});
+						return dNode;
 					}
-				}
-				return dNodes;
+				);
 			}
 		}
 	}
