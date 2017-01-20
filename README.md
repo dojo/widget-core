@@ -380,6 +380,7 @@ registry.define('my-widget', () => {
 });
 ```
 
+
 #### Theming
 
 Widgets are themed using `css-modules` and the `themeable` mixin. Each widget should import it's own `baseTheme` and then apply the generate classes to the vdom it creates. Theme classes are acquired by calling `instance.theme.<themeClass>`.
@@ -422,7 +423,7 @@ import * as baseTheme from './styles/tabpanel';
 import themeableMixin, { Themeable } from '../mixins/themeable';
 
 export type TabPanel = Widget<WidgetProperties> & Themeable<typeof baseTheme>;
-export interface TabPanelFactory extends ComposeFactory<TabPanel, WidgetProperties> {}
+export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetProperties> {}
 
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
 	mixin: {
@@ -460,7 +461,7 @@ Usage Extending on the previous `tabPanel` example.
 ``` typescript
 import * as customTheme from './themes/customTheme';
 
-w(createTabPanel, { properties: { theme: customTheme } });
+w(createTabPanel, { theme: customTheme });
 // Resulting widget will have green tabs instead of baseTheme red.
 ```
 
@@ -471,7 +472,7 @@ Example building on the above custom theme.
 ``` typescript
 import * as customTheme from './themes/customTheme';
 
-const myTabPanel = w(createTabPanel, {});
+const myTabPanel = createTabPanel();
 // myTabPanel will have red tabs.
 
 myTabPanel.setProperties({ theme: customTheme });
