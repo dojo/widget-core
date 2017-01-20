@@ -177,7 +177,12 @@ export interface WidgetMixin<P extends WidgetProperties> extends PropertyCompari
 	/**
 	 * An array of children `DNode`s returned via `getChildrenNodes`
 	 */
-	children: DNode[];
+	readonly children: DNode[];
+
+	/**
+	 * Set children
+	 */
+	setChildren(children: DNode | DNode[]): void;
 
 	/**
 	 * Get the top level node and children when rendering the widget.
@@ -256,9 +261,9 @@ export interface WidgetMixin<P extends WidgetProperties> extends PropertyCompari
 	tagName: string;
 
 	/**
-	 * The specific Factory Registry passed to the widget via the `WidgetOptions`
+	 * The specific Factory Registry on the widget if passed
 	 */
-	readonly registry: FactoryRegistryInterface;
+	registry: FactoryRegistryInterface | undefined;
 }
 
 export interface WidgetOptions<S extends WidgetState, P extends WidgetProperties> extends StatefulOptions<S> {

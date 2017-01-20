@@ -19,15 +19,12 @@ import WeakMap from '@dojo/shim/WeakMap';
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import { v, registry, isWNode } from './d';
-import FactoryRegistry from './FactoryRegistry';
-import shallowPropertyComparisonMixin from './mixins/shallowPropertyComparisonMixin';
 
 interface WidgetInternalState {
 	children: DNode[];
 	dirty: boolean;
 	widgetClasses: string[];
 	cachedVNode?: VNode | string;
-	factoryRegistry: FactoryRegistry;
 	initializedFactoryMap: Map<string, Promise<WidgetBaseFactory>>;
 	properties: WidgetProperties;
 	previousProperties: WidgetProperties;
@@ -44,10 +41,9 @@ const widgetInternalStateMap = new WeakMap<Widget<WidgetProperties>, WidgetInter
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 
 function getFromRegistry(instance: Widget<WidgetProperties>, factoryLabel: string): FactoryRegistryItem | null {
-	if (instance.registry.has(factoryLabel)) {
+	if (instance.registry && instance.registry.has(factoryLabel)) {
 		return instance.registry.get(factoryLabel);
 	}
-
 	return registry.get(factoryLabel);
 }
 
@@ -106,7 +102,7 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			instance.emit({ type: 'error', target: instance, error: new Error(errorMsg) });
 		}
 
-		child.children = children;
+		child.setChildren(children);
 		internalState.currentChildrenMap.set(childrenMapKey, child);
 
 		return child.__render__();
@@ -125,7 +121,7 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 	const internalState = widgetInternalStateMap.get(instance);
 
 	internalState.historicChildrenMap.forEach((child, key) => {
-		if (!internalState.currentChildrenMap.has(key)) {
+		if (!internalState.currentChildrenMap.has(key) && internalState.historicChildrenMap.has(key)) {
 			internalState.historicChildrenMap.delete(key);
 			child.destroy();
 		}
@@ -155,17 +151,17 @@ const createWidget: WidgetBaseFactory = createStateful
 				return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
 			},
 
-			set children(this: Widget<WidgetProperties>, children: DNode[]) {
+			get children(this: Widget<WidgetProperties>) {
+				return widgetInternalStateMap.get(this).children;
+			},
+
+			setChildren(this: Widget<WidgetProperties>, children: DNode[]): void {
 				const internalState = widgetInternalStateMap.get(this);
 				internalState.children = children;
 				this.emit({
 					type: 'widget:children',
 					target: this
 				});
-			},
-
-			get children() {
-				return widgetInternalStateMap.get(this).children;
 			},
 
 			getChildrenNodes(this: Widget<WidgetProperties>): DNode[] {
@@ -238,10 +234,14 @@ const createWidget: WidgetBaseFactory = createStateful
 			},
 
 			diffProperties(this: Widget<WidgetProperties>, previousProperties: WidgetProperties, newProperties: WidgetProperties): PropertiesChangeRecord<WidgetProperties> {
-				return {
-					changedKeys: Object.keys(newProperties),
-					properties: assign({}, newProperties)
-				};
+				const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
+					if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
+						changedPropertyKeys.push(propertyKey);
+					}
+					return changedPropertyKeys;
+				}, []);
+
+				return { changedKeys, properties: assign({}, newProperties) };
 			},
 
 			onPropertiesChanged: function(this: Widget<WidgetProperties>, properties: WidgetProperties, changedPropertyKeys: string[]): void {
@@ -288,9 +288,7 @@ const createWidget: WidgetBaseFactory = createStateful
 				return internalState.cachedVNode;
 			},
 
-			get registry(this: Widget<WidgetProperties>): FactoryRegistry {
-				return widgetInternalStateMap.get(this).factoryRegistry;
-			},
+			registry: undefined,
 
 			tagName: 'div'
 		},
@@ -312,7 +310,6 @@ const createWidget: WidgetBaseFactory = createStateful
 				widgetClasses: [],
 				properties: {},
 				previousProperties: {},
-				factoryRegistry: new FactoryRegistry(),
 				initializedFactoryMap: new Map<string, Promise<WidgetBaseFactory>>(),
 				historicChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
 				currentChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
@@ -330,7 +327,6 @@ const createWidget: WidgetBaseFactory = createStateful
 
 			instance.setProperties(properties);
 		}
-	})
-	.mixin(shallowPropertyComparisonMixin);
+	});
 
 export default createWidget;
