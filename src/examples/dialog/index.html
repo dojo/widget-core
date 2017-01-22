@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dialog Examples</title>
+</head>
+<body>
+	<script src="../../../../node_modules/dojo-loader/loader.min.js"></script>
+	<style>
+		.dialog .main {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: #FFF;
+			width: 450px;
+			min-height: 250px;
+			box-shadow: 0 0 7px 0px rgba(0, 0, 0, 0.25);
+			border-radius: 2px;
+			overflow: hidden;
+			font-family: sans-serif;
+			max-width: calc(100% - 30px);
+		}
+
+		.dialog .main .title {
+			background-color: #34495e;
+			font-size: 20px;
+			color: #FFF;
+			padding: 14px 35px;
+			position: relative;
+		}
+
+		.dialog .main .title .close {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			right: 35px;
+			cursor: pointer;
+			line-height: 1;
+		}
+
+		.dialog .content {
+			padding: 14px 35px;
+		}
+
+		.dialog .show {
+			transition: opacity .2s;
+			opacity: 0;
+		}
+
+		.dialog .show-active {
+			opacity: 1;
+		}
+
+		.dialog .hide {
+			transition: opacity .2s;
+			opacity: 1;
+		}
+
+		.dialog .hide-active {
+			opacity: 0;
+		}
+
+		.dialog .underlay {
+			width: 100%;
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 100%;
+		}
+
+		.dialog[data-underlay="true"] .underlay {
+			background: rgba(0, 0, 0, 0.3);
+		}
+
+		.slideIn {
+			transition: top .2s;
+			top: -150px !important;
+		}
+
+		.slideIn-active {
+			top: 50% !important;
+		}
+
+		.slideOut {
+			transition: top .2s;
+			top: 50% !important;
+		}
+
+		.slideOut-active {
+			top: -150px !important;
+		}
+
+		button {
+			margin-bottom: 50px;
+		}
+
+		.option {
+			margin-bottom: 10px;
+		}
+	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/maquette/2.4.2/css-transitions.min.js"></script>
+	<script>
+		require.config({
+			baseUrl: '../../../..',
+			packages: [
+				{ name: 'src', location: '_build/src' },
+				{ name: 'dojo-actions', location: 'node_modules/dojo-actions' },
+				{ name: 'dojo-compose', location: 'node_modules/dojo-compose' },
+				{ name: 'dojo-core', location: 'node_modules/dojo-core' },
+				{ name: 'dojo-has', location: 'node_modules/dojo-has' },
+				{ name: 'dojo-shim', location: 'node_modules/dojo-shim' },
+				{ name: 'dojo-stores', location: 'node_modules/dojo-stores'},
+				{ name: 'immutable', location: 'node_modules/immutable/dist', main: 'immutable' },
+				{ name: 'maquette', location: 'node_modules/maquette/dist', main: 'maquette' },
+				{ name: 'rxjs', location: 'node_modules/@reactivex/rxjs/dist/amd' }
+			]
+		});
+
+		/* Requiring in the main module */
+		require([ 'src/examples/dialog/index' ], function () {});
+	</script>
+</body>
+</html>
