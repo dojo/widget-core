@@ -7,7 +7,6 @@ import {
 	DNode,
 	Widget,
 	WidgetOptions,
-	WidgetState,
 	WidgetProperties,
 	PropertiesChangeEvent
 } from './../interfaces';
@@ -115,7 +114,7 @@ export type FormLabel = Widget<FormLabelMixinProperties> & FormLabelMixin;
 /**
  * Form Label Factory interface
  */
-export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, WidgetOptions<WidgetState, FormLabelMixinProperties>> {}
+export interface FormLabelMixinFactory extends ComposeFactory<FormLabelMixin, WidgetOptions<FormLabelMixinProperties>> {}
 
 /**
  * Default settings for form labels
@@ -169,7 +168,7 @@ const createFormLabelMixin: FormLabelMixinFactory = createEvented.mixin({
 		}
 	},
 
-	initialize(instance: FormLabel) {
+	initialize(instance: any) {
 		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<FormLabelMixin, FormLabelMixinProperties>) => {
 			instance.tagName = evt.properties.label ? 'label' : 'div';
 		}));
