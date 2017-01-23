@@ -479,7 +479,7 @@ registerSuite({
 
 			const consoleStub = stub(console, 'error');
 			widgetBase.__render__();
-			assert.isTrue(consoleStub.calledWith('must provide unique keys when using the same widget factory multiple times'));
+			assert.isTrue(consoleStub.calledWith('It is recommended to provide unique keys when using the same widget factory multiple times'));
 			consoleStub.restore();
 		},
 		'render with updated properties'() {
