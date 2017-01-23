@@ -1,12 +1,15 @@
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import compose, { ComposeFactory } from '@dojo/compose/compose';
+import { ComposeFactory } from '@dojo/compose/compose';
 import { assign } from '@dojo/core/lang';
+import { Evented } from '@dojo/interfaces/bases';
+import createEvented from '@dojo/compose/bases/createEvented';
 import {
 	DNode,
 	Widget,
 	WidgetOptions,
 	WidgetState,
-	WidgetProperties
+	WidgetProperties,
+	PropertiesChangeEvent
 } from './../interfaces';
 import { v } from '../d';
 
@@ -97,16 +100,11 @@ export interface FormLabelMixinProperties extends WidgetProperties {
 /**
  * Form Label Mixin
  */
-export interface FormLabelMixin {
+export interface FormLabelMixin extends Evented {
 	/**
 	 * A function that generates node attribtues for the child form field
 	 */
 	getFormFieldNodeAttributes: () => VNodeProperties;
-
-	/**
-	 * Override the default getNode function on createWidgetBase to return child input wrapped in a <label>
-	 */
-	getNode(): DNode;
 }
 
 /**
@@ -128,56 +126,57 @@ const labelDefaults = {
 	hidden: false
 };
 
-const createFormLabelMixin: FormLabelMixinFactory = compose({
-	getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
-		const { properties, type } = this;
-		const attributeKeys = Object.keys(properties);
+const createFormLabelMixin: FormLabelMixinFactory = createEvented.mixin({
+	mixin: {
+		getFormFieldNodeAttributes(this: FormLabel): VNodeProperties {
+			const { properties, type } = this;
+			const attributeKeys = Object.keys(properties);
 
-		if (type) {
-			attributeKeys.push('type');
+			if (type) {
+				attributeKeys.push('type');
+			}
+
+			const allowedAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
+			const nodeAttributes: any = {};
+
+			for (const key of allowedAttributes) {
+
+				if (attributeKeys.indexOf(key) === -1) {
+					continue;
+				}
+				else if (key === 'type') {
+					nodeAttributes.type = type;
+				}
+				else if (key === 'readOnly' && properties.readOnly) {
+					nodeAttributes.readonly = 'readonly';
+					nodeAttributes['aria-readonly'] = true;
+				}
+				else if (key === 'invalid') {
+					nodeAttributes['aria-invalid'] = properties.invalid;
+				}
+				else if (key === 'describedBy') {
+					nodeAttributes['aria-describedby'] = properties.describedBy;
+				}
+				else if ((key === 'maxLength' || key === 'minLength' || key === 'checked') && typeof properties[key] !== 'string') {
+					nodeAttributes[key.toLowerCase()] = '' + properties[key];
+				}
+				else {
+					nodeAttributes[key.toLowerCase()] = properties[key];
+				}
+			}
+
+			return nodeAttributes;
 		}
-
-		const allowedAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
-		const nodeAttributes: any = {};
-
-		for (const key of allowedAttributes) {
-
-			if (attributeKeys.indexOf(key) === -1) {
-				continue;
-			}
-			else if (key === 'type') {
-				nodeAttributes.type = type;
-			}
-			else if (key === 'readOnly' && properties.readOnly) {
-				nodeAttributes.readonly = 'readonly';
-				nodeAttributes['aria-readonly'] = true;
-			}
-			else if (key === 'invalid') {
-				nodeAttributes['aria-invalid'] = properties.invalid;
-			}
-			else if (key === 'describedBy') {
-				nodeAttributes['aria-describedby'] = properties.describedBy;
-			}
-			else if ((key === 'maxLength' || key === 'minLength' || key === 'checked') && typeof properties[key] !== 'string') {
-				nodeAttributes[key.toLowerCase()] = '' + properties[key];
-			}
-			else {
-				nodeAttributes[key.toLowerCase()] = properties[key];
-			}
-		}
-
-		return nodeAttributes;
 	},
 
-	getNode(this: FormLabel): DNode {
-		const { label } = this.properties;
-		let tag = label ? 'label' : 'div';
+	initialize(instance: FormLabel) {
+		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<FormLabelMixin, FormLabelMixinProperties>) => {
+			instance.tagName = evt.properties.label ? 'label' : 'div';
+		}));
 
-		if (this.classes.length) {
-			tag = `${tag}.${this.classes.join('.')}`;
+		if (instance.properties && instance.properties.label) {
+			instance.tagName = 'label';
 		}
-
-		return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
 	}
 })
 .aspect({

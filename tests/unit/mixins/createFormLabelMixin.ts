@@ -14,17 +14,6 @@ registerSuite({
 
 		assert.isDefined(formLabelMixin);
 	},
-	getNode() {
-		const formField = formLabelWidget.override({
-			classes: ['foo', 'bar']
-		})();
-		formField.setProperties({
-			label: 'baz'
-		});
-		const vnode = <VNode> formField.__render__();
-
-		assert.strictEqual(vnode.vnodeSelector, 'label.foo.bar');
-	},
 	getFormFieldNodeAttributes() {
 		const formField = formLabelWidget({
 			tagName: 'input',
@@ -120,6 +109,29 @@ registerSuite({
 		'no label'() {
 			const formField = formLabelWidget();
 			const vnode = <VNode> formField.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'div');
+			assert.lengthOf(vnode.children, 1);
+		},
+		'changing label'() {
+			const formField = formLabelWidget();
+			let vnode = <VNode> formField.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'div');
+			assert.lengthOf(vnode.children, 1);
+
+			formField.setProperties({
+				label: 'bar'
+			});
+			vnode = <VNode> formField.__render__();
+
+			assert.strictEqual(vnode.vnodeSelector, 'label');
+			assert.lengthOf(vnode.children, 2);
+
+			formField.setProperties({
+				label: null
+			});
+			vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'div');
 			assert.lengthOf(vnode.children, 1);
