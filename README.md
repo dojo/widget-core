@@ -380,13 +380,48 @@ registry.define('my-widget', () => {
 });
 ```
 
-
 #### Theming
 
-Widgets are themed using `css-modules` and the `themeable` mixin. Each widget should import it's own `baseTheme` and then apply the generate classes to the vdom it creates. Theme classes are acquired by calling `instance.theme.<themeClass>`.
+##### Overview
 
-##### Themeable Mixin
-The Themeable mixin provides a widget with the `css-module` theme classes it needs to style it's components. It requires a `baseTheme` to be set and a generic to determine the typings for the returned `theme` classes. The `baseTheme` must contain a complete set of all of the classes you wish to apply to a widget as all theme and override classes are keyed off of it.
+Widgets are themed using `css-modules` and the `themeable` mixin. Each widget must implement a `baseTheme` which controls the classNames which can be applied to it. These classNames can be replaced by themeClasses and can be supplemented with overrideClasses. Theme classes are acquired by calling `instance.theme.<themeClass>`.
+
+##### Authoring a baseTheme
+
+A base theme is authored using `css-modules` and `cssnext`. The baseTheme `css` file should be located in a `styles` folder adjacent to the `typescript` code.
+The `typed-css-modules` [cli](https://github.com/Quramy/typed-css-modules#cli) should be used in `watch` mode in order to generate typings for typescript usage.
+
+```
+tabPanel
+├── createTabPanel.ts
+└── styles
+    └── tabPanel.css
+```
+
+The `baseTheme` must contain a complete set of all of the classes you wish to apply to a widget as all theme and override classes are keyed off of it.
+Classnames are locally scoped as part of the build but must be unique within the widget framework such that they can be themed and overridden.
+
+```  css
+/* tabpanel.css */
+.tabPanelTabs {
+	background: red;
+}
+
+.tabPanelTab {
+	background: blue;
+}
+```
+
+##### Applying a baseTheme
+
+To apply a base theme a widget must use the `themeableMixin` and import it's `baseTheme`.
+
+``` typescript
+import * as baseTheme from './styles/tabpanel';
+```
+
+Theme classes to be applied to a widgets VDom are acquired using `instance.theme.<themeClass>`.
+The `themeableMixin` takes a generic to determine the typings for the returned `theme` classes.
 
 ``` typescript
 interface ThemeableMixin<P> extends Evented {
@@ -404,21 +439,10 @@ interface Themeable<P> extends ThemeableMixin<P> {
 }
 ```
 
-Usage:
-
-```  css
-// tabpanel.css
-.tabPanelTabs {
-	background: red;
-}
-
-.tabPanelTab {
-	background: blue;
-}
-```
+Basic usage:
 
 ``` typescript
-// tabpanel.ts
+/* tabpanel.ts */
 import * as baseTheme from './styles/tabpanel';
 import themeableMixin, { Themeable } from '../mixins/themeable';
 
@@ -440,13 +464,14 @@ const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).m
 });
 ```
 
-##### Setting a theme
+##### Applying a theme
+
 Themeable properties includes an optional `theme` property which can be set to pass a theme to a widget. Theme classes will override `baseTheme` classes. When a `theme` property is set or changed, the widgets `theme` classes will be regenerated and the widget invalidated such that it is redrawn. Themes are used to apply consistent styling across the widget code base.
 
 Usage Extending on the previous `tabPanel` example.
 
 ``` css
-// customTheme.css
+/* customTheme.css */
 .tabPanelTabs {
 	background: green;
 }
@@ -458,6 +483,8 @@ Usage Extending on the previous `tabPanel` example.
 }
 ```
 
+Import the theme and pass it to the widget via it's `properties`. The theme classes will be automatically mixed into `instance.theme`.
+
 ``` typescript
 import * as customTheme from './themes/customTheme';
 
@@ -465,26 +492,14 @@ w(createTabPanel, { theme: customTheme });
 // Resulting widget will have green tabs instead of baseTheme red.
 ```
 
-##### Changing a theme
-A theme can be changed on a widget by using it's `setProperties` function.
-Example building on the above custom theme.
+The theme can be applied to individual widgets or to a project and prop passed down to it's children.
 
-``` typescript
-import * as customTheme from './themes/customTheme';
-
-const myTabPanel = createTabPanel();
-// myTabPanel will have red tabs.
-
-myTabPanel.setProperties({ theme: customTheme });
-// myTabPanel will now have green tabs.
-```
-
-##### Styling specific widget nodes with overrideClasses
+##### Overriding theme classes
 
 As we are using `css-modules` to scope widget css classes, the generated class names cannot be used to target specific nodes and apply custom styling to them. Instead you must use the `overrideClasses` property to pass your generated classes to the widget. This will only effect one instance of a widget and will be applied on top of, rather than instead of theme classes.
 
 ``` css
-// tabPanelOverrides.css
+/* tabPanelOverrides.css */
 .tabPanelTabs {
 	font-weight: bold;
 }
@@ -493,96 +508,9 @@ As we are using `css-modules` to scope widget css classes, the generated class n
 ``` typescript
 import * as tabPanelOverrides from './overrides/tabPanelOverrides';
 
-w(createTabPanel, { properties: { overrideClasses: tabPanelOverrides } });
+w(createTabPanel, { overrideClasses: tabPanelOverrides });
 // Resulting widget will still have baseTheme red tabs,
 // but will have font-weight: bold; applied also.
-```
-
-##### css-modules and css-next
-
-We are using `postcss` and `cssnext` to process our css files. This allows us to write css using the latest advances and proposed specifications.
-
-###### composes
-
-css-modules provides us with `composes` functionality which works similar to `scss` `@extend`. If for example you were creating a widget and wanted your class to extend another, you can do:
-
-``` css
-.link {
-	composes: button from 'path/to/button.css';
-}
-```
-
-This will add the generated class name for `button` to the generated class name for `link`.
-
-###### css-variables
-
-css variables (also known as css-properties) can be used like `scss` `$` style variables to decorate your classes. They should be defined within the `:root` selector of a css file. These variables will be converted to values where they are used as part of our build process but they will remain as their `computed`  value provided they are in a file named `variables.css`. This makes them available in client applications to apply common theme variables to custom widgets.
-Computed values are a representation of the variable after any [`color`](https://drafts.csswg.org/css-color/) functions have been applied.
-
-Variable usage in a widget css file:
-
-``` css
-// button.css
-:root {
-	--button-background: red;
-}
-
-.button {
-	background: var(--button-background)
-}
-
-// Will become:
-.button {
-	background: red;
-}
-```
-
-Variable usage in a variables.css file
-
-``` css
-:root {
-	--button-background: red;
-	--button-hover-background: color(var(--button-background) l(+20%));
-}
-
-// Will become:
-:root {
-	--button-background: red;
-	--button-hover-background: rgb(255, 102, 102);
-}
-```
-
-
-###### import
-
-css file imports can be performed using the `scss` style `@import` command in our files. This can be used to import variables into your css to decorate your classes.  This will work in both `@dojo/widgets` and in custom widgets.
-
-Example using the variables file from above.
-
-``` css
-// button.css
-@import 'path/to/variables.css';
-
-.button {
-	background: var(--button-background)
-	// button will have a red background
-}
-```
-
-###### Vendor prefixing
-
-We are using autoprefixer to add vendor prefixes to the properties that need them so there is no need to prefix your classes with `moz-` etc... We currently support IE10 plus the last 2 versions of each browser.
-
-``` css
-.flex-container {
-	display: flex;
-}
-
-// becomes:
-.flex-container {
-	display: -ms-flexbox;
-	display: flex;
-}
 ```
 
 #### Internationalization (i18n)
