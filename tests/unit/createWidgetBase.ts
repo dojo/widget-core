@@ -572,6 +572,71 @@ registerSuite({
 			assert.deepEqual(result2, result4);
 			assert.strictEqual(result1.vnodeSelector, 'div');
 			assert.strictEqual(result1.properties!['data-widget-id'], 'foo');
+		},
+		'render multiple child widgets using the same factory'() {
+			let childWidgetInstantiatedCount = 0;
+			const createChildWidget = createWidgetBase.mixin({
+				initialize() {
+					childWidgetInstantiatedCount++;
+				}
+			});
+
+			const createTestWidget = createWidgetBase.mixin({
+				mixin: {
+					getChildrenNodes(): DNode[] {
+						return [
+							w(createChildWidget, {}),
+							v('div', {}, [
+								'text',
+								w(createChildWidget, {}, [
+									w(createChildWidget, {})
+								]),
+								v('div', {}, [
+									w(createChildWidget, {})
+								])
+							]),
+							w(createChildWidget, {})
+						];
+					}
+				}
+			});
+
+			const testWidget = createTestWidget();
+			testWidget.__render__();
+
+			assert.equal(childWidgetInstantiatedCount, 5);
+		},
+		'support updating factories for children with an `id`'() {
+			let renderWidgetOne = true;
+			let widgetOneInstantiated = false;
+			let widgetTwoInstantiated = false;
+			const createWidgetOne = createWidgetBase.mixin({
+				initialize() {
+					widgetOneInstantiated = true;
+				}
+			});
+			const createWidgetTwo = createWidgetBase.mixin({
+				initialize() {
+					widgetTwoInstantiated = true;
+				}
+			});
+			const createMyWidget = createWidgetBase.mixin({
+				mixin: {
+					getChildrenNodes(): DNode[] {
+						return [
+							renderWidgetOne ? w(createWidgetOne, { id: '1' }) : w(createWidgetTwo, { id: '1' })
+						];
+					}
+				}
+			});
+
+			const myWidget = createMyWidget();
+			myWidget.__render__();
+			assert.isTrue(widgetOneInstantiated);
+			renderWidgetOne = false;
+			myWidget.invalidate();
+			myWidget.__render__();
+			assert.isTrue(widgetTwoInstantiated);
 		}
 	},
 	'id': {
