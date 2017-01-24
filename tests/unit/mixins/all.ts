@@ -1,9 +1,9 @@
 import './createCssTransitionMixin';
-import './createFormFieldMixin';
+import './createFormLabelMixin';
 import './createI18nMixin';
 import './createProjectorMixin';
 import './shallowPropertyComparisonMixin';
-import './externalState';
+import './storeMixin';
 import './themeable';
 import './registryMixin';
 import './internalState';
