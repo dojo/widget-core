@@ -84,9 +84,14 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 		}
 
 		const childrenMapKey = id || factory;
-		const cachedChildren = internalState.cachedChildrenMap.get(childrenMapKey) || [];
-		const [ cachedChild ] = cachedChildren.filter((cachedChildWrapper) => {
-			return cachedChildWrapper.factory === factory && !cachedChildWrapper.used;
+		let cachedChildren = internalState.cachedChildrenMap.get(childrenMapKey) || [];
+		let cachedChild: WidgetCacheWrapper | undefined;
+		cachedChildren.some((cachedChildWrapper) => {
+			if (cachedChildWrapper.factory === factory && !cachedChildWrapper.used) {
+				cachedChild = cachedChildWrapper;
+				return true;
+			}
+			return false;
 		});
 
 		if (cachedChild) {
@@ -101,12 +106,13 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			child.own(child.on('invalidated', () => {
 				instance.invalidate();
 			}));
-			internalState.cachedChildrenMap.set(childrenMapKey, [...cachedChildren, { child, factory, used: true }]);
+			cachedChildren = [...cachedChildren, { child, factory, used: true }];
+			internalState.cachedChildrenMap.set(childrenMapKey, cachedChildren);
 			instance.own(child);
 		}
-		if (!id && cachedChildren.length > 0) {
-			const errorMsg = 'must provide unique keys when using the same widget factory multiple times';
-			console.error(errorMsg);
+		if (!id && cachedChildren.length > 1) {
+			const errorMsg = 'It is recommended to provide unique keys when using the same widget factory multiple times';
+			console.warn(errorMsg);
 			instance.emit({ type: 'error', target: instance, error: new Error(errorMsg) });
 		}
 

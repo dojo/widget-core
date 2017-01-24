@@ -465,21 +465,31 @@ registerSuite({
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
+
+			const createWidgetOne = createWidgetBase.mixin({});
+			const createWidgetTwo = createWidgetBase.mixin({});
+
 			const widgetBase = createWidgetBase
 				.mixin({
 					mixin: {
 						getChildrenNodes: function(this: any): (DNode | null)[] {
 							return [
-								w(createWidgetBase, {}),
-								w(createWidgetBase, {})
+								w(createWidgetOne, {}),
+								w(createWidgetTwo, {}),
+								w(createWidgetTwo, {})
 							];
 						}
 					}
 				})();
 
-			const consoleStub = stub(console, 'error');
+			const consoleStub = stub(console, 'warn');
 			widgetBase.__render__();
-			assert.isTrue(consoleStub.calledWith('must provide unique keys when using the same widget factory multiple times'));
+			assert.isTrue(consoleStub.calledOnce);
+			assert.isTrue(consoleStub.calledWith('It is recommended to provide unique keys when using the same widget factory multiple times'));
+			widgetBase.invalidate();
+			widgetBase.__render__();
+			assert.isTrue(consoleStub.calledThrice);
+			assert.isTrue(consoleStub.calledWith('It is recommended to provide unique keys when using the same widget factory multiple times'));
 			consoleStub.restore();
 		},
 		'render with updated properties'() {
