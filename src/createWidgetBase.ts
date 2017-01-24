@@ -18,6 +18,7 @@ import WeakMap from '@dojo/shim/WeakMap';
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import { v, registry, isWNode } from './d';
+import MultiMap from '@dojo/core/MultiMap';
 
 interface WidgetInternalState {
 	children: DNode[];
@@ -27,8 +28,9 @@ interface WidgetInternalState {
 	initializedFactoryMap: Map<string, Promise<WidgetBaseFactory>>;
 	properties: WidgetProperties;
 	previousProperties: WidgetProperties;
-	historicChildrenMap: Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>;
-	currentChildrenMap: Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>;
+	historicChildrenMap: MultiMap<Widget<WidgetProperties>>;
+	currentChildrenMap: MultiMap<Widget<WidgetProperties>>;
+	factoryCountMap: Map<WidgetBaseFactory, number>;
 	diffPropertyFunctionMap: Map<string, string>;
 };
 
@@ -78,7 +80,15 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			}
 		}
 
-		const childrenMapKey = id || factory;
+		let childrenMapKey: [ string | undefined, WidgetBaseFactory ] | [  WidgetBaseFactory, number ] = [ id, factory ];
+
+		if (!id) {
+			const { factoryCountMap } = internalState;
+			let factoryCounter = factoryCountMap.get(factory) || 0;
+			childrenMapKey = [ factory, factoryCounter ];
+			factoryCountMap.set(factory, ++factoryCounter);
+		}
+
 		const cachedChild = internalState.historicChildrenMap.get(childrenMapKey);
 
 		if (cachedChild) {
@@ -95,8 +105,9 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			internalState.historicChildrenMap.set(childrenMapKey, child);
 			instance.own(child);
 		}
-		if (!id && internalState.currentChildrenMap.has(factory)) {
-			const errorMsg = 'must provide unique keys when using the same widget factory multiple times';
+
+		if (!id && internalState.factoryCountMap.has(factory)) {
+			const errorMsg = 'It is recommended to provide unique keys when using the same widget factory multiple times';
 			console.error(errorMsg);
 			instance.emit({ type: 'error', target: instance, error: new Error(errorMsg) });
 		}
@@ -126,6 +137,7 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 		}
 	});
 	internalState.currentChildrenMap.clear();
+	internalState.factoryCountMap.clear();
 }
 
 function formatTagNameAndClasses(tagName: string, classes: string[]) {
@@ -299,8 +311,9 @@ const createWidget: WidgetBaseFactory = createEvented
 				properties: {},
 				previousProperties: {},
 				initializedFactoryMap: new Map<string, Promise<WidgetBaseFactory>>(),
-				historicChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
-				currentChildrenMap: new Map<string | Promise<WidgetBaseFactory> | WidgetBaseFactory, Widget<WidgetProperties>>(),
+				historicChildrenMap: new MultiMap<Widget<WidgetProperties>>(),
+				currentChildrenMap: new MultiMap<Widget<WidgetProperties>>(),
+				factoryCountMap: new Map<WidgetBaseFactory, number>(),
 				diffPropertyFunctionMap,
 				children: []
 			});
