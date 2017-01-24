@@ -384,11 +384,12 @@ registry.define('my-widget', () => {
 
 ##### Overview
 
-Widgets are themed using `css-modules` and the `themeable` mixin. Each widget must implement a `baseTheme` which controls the classNames which can be applied to it. These classNames can be replaced by themeClasses and can be supplemented with overrideClasses. Theme classes are acquired by calling `instance.theme.<themeClass>`.
+Widgets are themed using `css-modules` and the `themeable` mixin. Each widget must implement a .css file that contains all the css classes that will be used to style it. The baseTheme is the css API for the Widget: baseTheme css classes can be overridden by external themes. Further customisation of specific Custom Widget classes can be achieved by passing overrideClasses into the widget.
+The `themeable` mixin provides any themes passed into the widget via this.theme.which controls the classNames which can be applied to it. These classNames can be replaced by themeClasses and can be supplemented with overrideClasses. Theme classes are acquired by calling `instance.theme.<themeClass>`.
 
 ##### Authoring a baseTheme
 
-A base theme is authored using `css-modules` and `cssnext`. The baseTheme `css` file should be located in a `styles` folder adjacent to the `typescript` code.
+A base theme is authored using `css-modules` and `cssnext`. The baseTheme `css` file should be located in a `styles` folder within the Widget's package directory.
 The `typed-css-modules` [cli](https://github.com/Quramy/typed-css-modules#cli) should be used in `watch` mode in order to generate typings for typescript usage.
 
 ```
@@ -398,7 +399,7 @@ tabPanel
     └── tabPanel.css
 ```
 
-The `baseTheme` must contain a complete set of all of the classes you wish to apply to a widget as all theme and override classes are keyed off of it.
+The `baseTheme` must contain a complete set of all of the classes you wish to apply to a widget as all theme and override classes are limited by the classnames made available here.
 Classnames are locally scoped as part of the build but must be unique within the widget framework such that they can be themed and overridden.
 
 ```  css
@@ -414,13 +415,13 @@ Classnames are locally scoped as part of the build but must be unique within the
 
 ##### Applying a baseTheme
 
-To apply a base theme a widget must use the `themeableMixin` and import it's `baseTheme`.
+To apply a base theme a widget must use the `themeable` mixin and import it's `baseTheme`.
 
 ``` typescript
 import * as baseTheme from './styles/tabpanel';
 ```
 
-Theme classes to be applied to a widgets VDom are acquired using `instance.theme.<themeClass>`.
+Theme classes to be applied to a widgets VDOM are acquired using `this.theme.<themeClass>`.
 The `themeableMixin` takes a generic to determine the typings for the returned `theme` classes.
 
 ``` typescript
@@ -466,7 +467,7 @@ const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).m
 
 ##### Applying a theme
 
-Themeable properties includes an optional `theme` property which can be set to pass a theme to a widget. Theme classes will override `baseTheme` classes. When a `theme` property is set or changed, the widgets `theme` classes will be regenerated and the widget invalidated such that it is redrawn. Themes are used to apply consistent styling across the widget code base.
+Themeable widgets include an optional `theme` property which can be set to pass in a theme. Theme classes will override `baseTheme` classes. When a `theme` property is set or changed, the widgets `theme` classes will be regenerated and the widget invalidated such that it is redrawn. Themes are used to apply consistent styling across the widget code base.
 
 Usage Extending on the previous `tabPanel` example.
 
@@ -483,7 +484,7 @@ Usage Extending on the previous `tabPanel` example.
 }
 ```
 
-Import the theme and pass it to the widget via it's `properties`. The theme classes will be automatically mixed into `instance.theme`.
+Import the theme and pass it to the widget via it's `properties`. The theme classes will be automatically mixed into the widget and available via `this.theme`.
 
 ``` typescript
 import * as customTheme from './themes/customTheme';
@@ -516,7 +517,7 @@ w(createTabPanel, { overrideClasses: tabPanelOverrides });
 #### Internationalization (i18n)
 
 Widgets can be internationalized by mixing in `@dojo/widget-core/mixins/createI18nMixin`.
-[Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`. 
+[Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`.
 
 If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned.
 The widget will be invalidated once the locale-specific messages have been loaded.
