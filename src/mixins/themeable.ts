@@ -62,7 +62,7 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, Th
 /**
  * Private map for the widgets themeClasses.
  */
-const themeClassesMap = new WeakMap<ThemeableMixin<{}>, AppliedClasses<any>>();
+const themeClassesMap = new WeakMap<Themeable<any>, AppliedClasses<any>>();
 
 function addClassNameToCSSModuleClassNames(cssModuleClassNames: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
 	if (classList.hasOwnProperty(className)) {
