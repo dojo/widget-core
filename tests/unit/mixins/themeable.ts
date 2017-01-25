@@ -1,8 +1,8 @@
-import compose from '@dojo/compose/compose';
+import { ComposeFactory } from '@dojo/compose/compose';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import themeable, { Themeable } from '../../../src/mixins/themeable';
+import themeable, { toggle, Themeable, ThemeableMixin, ThemeableFactory } from '../../../src/mixins/themeable';
 import createWidgetBase from '../../../src/createWidgetBase';
 import { v } from '../../../src/d';
 import { Widget, WidgetProperties, DNode } from '../../../src/interfaces';
@@ -32,22 +32,26 @@ const overrideClasses2 = {
 	class2: 'override2Class2'
 };
 
-const themeableFactory = compose({
-	properties: <any> {},
-	baseTheme
-}, (instance, options: any) => {
-	if (options) {
-		instance.properties = options.properties;
-	}
-}).mixin(themeable);
 
-let themeableInstance: Themeable<typeof baseTheme>;
+const themeableFactory: ThemeableFactory = themeable.mixin({
+	mixin: {
+		baseTheme,
+		properties: {}
+	},
+	initialize(instance, options: any) {
+		if (options) {
+			instance.properties = options.properties;
+		}
+	}
+});
+
+let themeableInstance: ThemeableMixin<typeof baseTheme>;
 
 registerSuite({
-	name: 'themeManager',
+	name: 'themeable',
 	'no theme': {
 		beforeEach() {
-			themeableInstance = themeableFactory();
+			themeableInstance = themeableFactory<typeof baseTheme>();
 		},
 		'should return only base classes when no theme is set'() {
 			assert.deepEqual(themeableInstance.theme, {
@@ -58,7 +62,7 @@ registerSuite({
 	},
 	'with a theme': {
 		beforeEach() {
-			themeableInstance = themeableFactory({ properties: { theme: testTheme }});
+			themeableInstance = themeableFactory<typeof baseTheme>({ properties: { theme: testTheme }});
 		},
 		'should return theme class instead of base class when a theme is set'() {
 			assert.deepEqual(themeableInstance.theme, {
@@ -82,7 +86,7 @@ registerSuite({
 	},
 	'with overrides and a theme': {
 		beforeEach() {
-			themeableInstance = themeableFactory({ properties: {
+			themeableInstance = themeableFactory<typeof baseTheme>({ properties: {
 				theme: testTheme,
 				overrideClasses: overrideClasses
 			}});
@@ -128,7 +132,7 @@ registerSuite({
 		}
 	},
 	'should only negate each class once'() {
-		themeableInstance = themeableFactory();
+		themeableInstance = themeableFactory<typeof baseTheme>();
 
 		const theme1 = { class1: 'firstChange' };
 		const theme2 = { class1: 'secondChange' };
@@ -163,7 +167,7 @@ registerSuite({
 		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
 	},
 	'properties changing outside of the scope of theme should not change theme'() {
-		themeableInstance = themeableFactory();
+		themeableInstance = themeableFactory<typeof baseTheme>();
 		const themeBeforeEmit = themeableInstance.theme;
 
 		themeableInstance.emit({
@@ -192,7 +196,7 @@ registerSuite({
 				}
 			});
 
-			const themeableWidget: ThemeableWidget = createThemeableWidget({
+			const themeableWidget = createThemeableWidget({
 				properties: { theme: testTheme }
 			});
 
