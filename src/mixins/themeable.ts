@@ -19,7 +19,7 @@ export type CSSModuleClassNames = {
  * The object returned by getClasses.
  */
 export type AppliedClasses<T> = {
-	[P in keyof T]?: CSSModuleClassNames;
+	[P in keyof T]: CSSModuleClassNames;
 };
 
 type StringIndexedObject = { [key: string]: string; };
@@ -57,7 +57,7 @@ export interface Themeable<T> extends ThemeableMixin<T> {
 /**
  * Compose Themeable Factory interface
  */
-export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<{}>, ThemeableOptions> {}
+export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, ThemeableOptions> {}
 
 /**
  * Private map for the widgets themeClasses.
