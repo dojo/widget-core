@@ -15,6 +15,10 @@ export type CSSModuleClassNames = {
 	[key: string]: boolean;
 }
 
+export type ClassNames<T> = {
+	[P in keyof T]: P;
+}
+
 /**
  * The object returned by getClasses.
  */
@@ -43,7 +47,8 @@ export interface ThemeableOptions {
  * Themeable Mixin
  */
 export interface ThemeableMixin<T> extends Evented {
-	theme: AppliedClasses<T>;
+	className: AppliedClasses<T>;
+	getClasses: (...classNames: string[]) => CSSModuleClassNames;
 }
 
 /**
@@ -63,6 +68,8 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, Th
  * Private map for the widgets themeClasses.
  */
 const themeClassesMap = new WeakMap<Themeable<any>, AppliedClasses<any>>();
+
+const classNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
 
 function addClassNameToCSSModuleClassNames(cssModuleClassNames: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
 	if (classList.hasOwnProperty(className)) {
@@ -127,13 +134,25 @@ function onPropertiesChanged<T>(instance: Themeable<T>, { theme, overrideClasses
 	}
 }
 
+function getClassNames<T>(baseTheme: T): ClassNames<T> {
+	return Object.keys(baseTheme).reduce((currentClassNames, key: keyof T) => {
+		currentClassNames[key] = key;
+		return currentClassNames;
+	}, <ClassNames<T>> {});
+}
+
 /**
  * Themeable Factory
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
-		get theme(this: Themeable<any>): AppliedClasses<any> {
-			return themeClassesMap.get(this);
+		get className(this: Themeable<any>): ClassNames<any> {
+			return classNameMap.get(this);
+			// return themeClassesMap.get(this);
+		},
+		getClasses(this: Themeable<any>, ...classNames: string[]) {
+			let response: CSSModuleClassNames = {};
+			return response;
 		}
 	},
 	initialize<T>(instance: Themeable<T>) {
@@ -141,6 +160,7 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		onPropertiesChanged(instance, instance.properties, [ 'theme' ]);
+		classNameMap.set(instance, getClassNames(instance.baseTheme));
 	}
 });
 
