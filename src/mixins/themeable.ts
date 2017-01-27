@@ -28,14 +28,9 @@ type StringIndexedObject = { [key: string]: string; };
  * Properties required for the themeable mixin
  */
 export interface ThemeableProperties {
-	theme?: Theme<any, any>;
+	theme?: {};
 	overrideClasses?: {};
 }
-
-export interface Theme<T, K extends string> {
-	K?: T;
-	[key: string]: any;
-};
 
 /**
  * Themeable Options
@@ -105,7 +100,7 @@ function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses
 	}, <AppliedClasses<T>> {});
 }
 
-function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: Theme<T, any> = {}, overrideClasses: {} = {}) {
+function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: {} = {}) {
 	const applicableThemeClasses = theme.hasOwnProperty(path) ? theme[path] : {};
 
 	return Object.keys(baseThemeClasses).reduce((newAppliedClasses, className: keyof T) => {
