@@ -37,7 +37,7 @@ export function isHNode(child: DNode): child is HNode {
 }
 
 /**
- * Generic decorate function for DNodes, the modified in place based on the provided predicate
+ * Generic decorate function for DNodes, the nodes are modified in place based on the provided predicate
  * and modifier functions.
  *
  * If no predicate is supplied then the modifier will be executed on all nodes.

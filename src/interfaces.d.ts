@@ -97,7 +97,7 @@ export interface HNode {
 	render<T>(options?: { bind?: T }): VNode;
 
 	/**
-	 * The properties used to create the vnode
+	 * The properties used to create the VNode
 	 */
 	properties: VNodeProperties;
 
