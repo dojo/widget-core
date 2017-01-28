@@ -162,7 +162,7 @@ const createWidget: WidgetBaseFactory = createEvented
 
 			classes: [],
 
-			getNode(): DNode {
+			getNode(this: Widget<WidgetProperties>): DNode {
 				const tag = formatTagNameAndClasses(this.tagName, this.classes);
 				return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
 			},
@@ -286,7 +286,7 @@ const createWidget: WidgetBaseFactory = createEvented
 			__render__(this: Widget<WidgetProperties>): VNode | string | null {
 				const internalState = widgetInternalStateMap.get(this);
 				if (internalState.dirty || !internalState.cachedVNode) {
-					const widget = dNodeToVNode(this, this.getNode());
+					const widget = dNodeToVNode(this, this.render());
 					manageDetachedChildren(this);
 					if (widget) {
 						internalState.cachedVNode = widget;
