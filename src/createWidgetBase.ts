@@ -120,7 +120,7 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 		return child.__render__();
 	}
 
-	dNode.children = dNode.children
+	dNode.vnodes = dNode.children
 		.filter((child) => child !== null)
 		.map((child: DNode) => {
 			return dNodeToVNode(instance, child);
