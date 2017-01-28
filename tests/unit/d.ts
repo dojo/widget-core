@@ -13,7 +13,7 @@ class TestFactoryRegistry extends FactoryRegistry {
 }
 
 const createTestWidget = createWidgetBase.override({
-	render() {
+	getNode() {
 		return v('outernode', { type: 'mytype' }, [
 			v('child-one'),
 			v('child-two'),
@@ -119,7 +119,7 @@ registerSuite({
 					node.properties['decorated'] = true;
 				}
 			};
-			const node = <HNode> testWidget.render();
+			const node = <HNode> testWidget.getNode();
 			assert.isOk(node);
 			decorate(node, modifier, predicate);
 			if (node) {
@@ -144,7 +144,7 @@ registerSuite({
 					node.properties['decorated'] = true;
 				}
 			};
-			const node = <HNode> testWidget.render();
+			const node = <HNode> testWidget.getNode();
 			assert.isOk(node);
 			decorate(node, modifier, predicate);
 			if (node) {
@@ -169,7 +169,7 @@ registerSuite({
 					assign(node.properties, { id: 'id' });
 				}
 			};
-			const children: any = (<HNode> testWidget.render()).children;
+			const children: any = (<HNode> testWidget.getNode()).children;
 			assert.isOk(children);
 			decorate(children, modifier);
 			if (children) {
@@ -194,7 +194,7 @@ registerSuite({
 					node = 'replaced string';
 				}
 			};
-			const children: any = (<HNode> testWidget.render()).children;
+			const children: any = (<HNode> testWidget.getNode()).children;
 			assert.isOk(children);
 			decorate(children, modifier);
 			if (children) {
