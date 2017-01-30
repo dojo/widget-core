@@ -7,6 +7,8 @@ import {
 	HNode,
 	WNode,
 	Widget,
+	DecoratorModifier,
+	DecoratorPredicate,
 	WidgetProperties,
 	WidgetFactory
 } from './interfaces';
@@ -34,6 +36,22 @@ export function isWNode(child: DNode): child is WNode {
  */
 export function isHNode(child: DNode): child is HNode {
 	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
+}
+
+export function decorateDNodes(dNodes: DNode[], predicate: DecoratorPredicate, modifier: DecoratorModifier): DNode[] {
+	let nodes = [ ...dNodes ];
+	while (nodes.length) {
+		const node = nodes.pop();
+		if (node && typeof node !== 'string') {
+			if (predicate(node)) {
+				modifier(node);
+			}
+			if (node.children) {
+				nodes = [ ...nodes, ...(<any> node).children ];
+			}
+		}
+	}
+	return dNodes;
 }
 
 export const registry = new FactoryRegistry();

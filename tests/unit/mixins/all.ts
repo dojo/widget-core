@@ -7,3 +7,4 @@ import './storeMixin';
 import './themeable';
 import './registryMixin';
 import './internalState';
+import './passedPropertiesMixin';
