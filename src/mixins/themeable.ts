@@ -145,9 +145,17 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 		},
 		getClasses(this: Themeable<any>, ...classNames: string[]) {
 			const classNameMap = themeClassesMap.get(this);
+			const newClassNames: string[] = [];
 			const appliedClasses = classNames.reduce((currentAppliedClasses, className) => {
-				assign(currentAppliedClasses, classNameMap[className]);
+				if (classNameMap.hasOwnProperty(className)) {
+					assign(currentAppliedClasses, classNameMap[className]);
+				} else {
+					assign(currentAppliedClasses, { [className]: true });
+					newClassNames.push(className);
+				}
 			}, <any> {});
+
+			updateNegativeClassNames(this, newClassNames);
 			return assign({}, negativeClassMap.get(this), appliedClasses);
 		}
 	},
