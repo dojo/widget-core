@@ -55,8 +55,13 @@ export interface ThemeableMixin<T> extends Evented {
  * Themeable
  */
 export interface Themeable<T> extends ThemeableMixin<T> {
-	baseTheme: T;
+	baseTheme: BaseTheme<T>;
 	properties: ThemeableProperties;
+}
+
+export interface BaseTheme<T> {
+	classes: T;
+	path: string;
 }
 
 /**
@@ -102,10 +107,12 @@ function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses
 	}, <AppliedClasses<T>> {});
 }
 
-function generateThemeClasses<T>(instance: Themeable<T>, baseTheme: T, theme: {} = {}, overrideClasses: {} = {}) {
-	return Object.keys(baseTheme).reduce((newAppliedClasses, className: keyof T) => {
+function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: {} = {}) {
+	const applicableThemeClasses = theme.hasOwnProperty(path) ? theme[path] : {};
+
+	return Object.keys(baseThemeClasses).reduce((newAppliedClasses, className: keyof T) => {
 		const newCSSModuleClassNames: CSSModuleClassNames = {};
-		const themeClassSource = theme.hasOwnProperty(className) ? theme : baseTheme;
+		const themeClassSource = applicableThemeClasses.hasOwnProperty(className) ? applicableThemeClasses : baseThemeClasses;
 
 		addClassNameToCSSModuleClassNames(newCSSModuleClassNames, themeClassSource, className);
 		overrideClasses && addClassNameToCSSModuleClassNames(newCSSModuleClassNames, overrideClasses, className);
