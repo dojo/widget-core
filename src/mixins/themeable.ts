@@ -11,8 +11,12 @@ import { assign } from '@dojo/core/lang';
  * to be applied where each class in appliedClasses
  * is used.
  */
-export type CSSModuleClassNames = {
+export type FlaggedCSSModuleClassNames = {
 	[key: string]: boolean;
+}
+
+export type CSSModuleClassNameMap<T> = {
+	[P in keyof T]: string[];
 }
 
 export type ClassNames<T> = {
@@ -23,7 +27,7 @@ export type ClassNames<T> = {
  * The object returned by getClasses.
  */
 export type AppliedClasses<T> = {
-	[P in keyof T]: CSSModuleClassNames;
+	[P in keyof T]: FlaggedCSSModuleClassNames;
 };
 
 type StringIndexedObject = { [key: string]: string; };
@@ -47,8 +51,8 @@ export interface ThemeableOptions {
  * Themeable Mixin
  */
 export interface ThemeableMixin<T> extends Evented {
-	className: AppliedClasses<T>;
-	getClasses: (...classNames: string[]) => CSSModuleClassNames;
+	classNames: AppliedClasses<T>;
+	getClasses: (...classNames: string[]) => FlaggedCSSModuleClassNames;
 }
 
 /**
@@ -73,62 +77,45 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, Th
  * Private map for the widgets themeClasses.
  */
 const themeClassesMap = new WeakMap<Themeable<any>, AppliedClasses<any>>();
-
 const classNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
+const negativeClassMap = new WeakMap<Themeable<any>, FlaggedCSSModuleClassNames>();
 
-function addClassNameToCSSModuleClassNames(cssModuleClassNames: CSSModuleClassNames, classList: StringIndexedObject, className: string) {
-	if (classList.hasOwnProperty(className)) {
-		// split out the classname because css-module composition combines class names with a space
-		const generatedClassNames: string[] = classList[className].split(' ');
-		generatedClassNames.forEach((generatedClassName) => {
-			cssModuleClassNames[generatedClassName] = true;
-		});
-	}
+function updateNegativeClassNames<T>(instance: Themeable<T>, classNames: string[]) {
+	const negativeClassFlags = setClassNameFlags(classNames, false);
+	const currentNegativeClassFlags = negativeClassMap.get(instance);
+	negativeClassMap.set(instance, assign({}, currentNegativeClassFlags, negativeClassFlags));
 }
 
-function negatePreviousClasses<T>(previousClasses: AppliedClasses<T>, newClasses: AppliedClasses<T>) {
-	return Object.keys(previousClasses).reduce((newAppliedClasses, className: keyof T) => {
-		const oldCSSModuleClassNames = <CSSModuleClassNames> previousClasses[className];
-
-		const negatedCSSModuleClassNames = Object.keys(oldCSSModuleClassNames).reduce((newCSSModuleClassNames, oldCSSModuleClassName) => {
-			const currentClassNameFlag = oldCSSModuleClassNames[oldCSSModuleClassName];
-			// If it's true it needs to be negated and passed along, If it's false,
-			// don't return it as maquette will already have removed it.
-			if (currentClassNameFlag) {
-				newCSSModuleClassNames[oldCSSModuleClassName] = false;
-			}
-			return newCSSModuleClassNames;
-		}, <CSSModuleClassNames> {});
-
-		const calculatedClassNameMap = assign({}, negatedCSSModuleClassNames, newClasses[className]);
-		newAppliedClasses[className] = calculatedClassNameMap;
-
-		return newAppliedClasses;
-	}, <AppliedClasses<T>> {});
+function setClassNameFlags(classNames: string[], applied: boolean) {
+	return classNames.reduce((negatedClassNames: FlaggedCSSModuleClassNames, className) => {
+		negatedClassNames[className] = applied;
+		return negatedClassNames;
+	}, <FlaggedCSSModuleClassNames> {});
 }
 
-function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: {} = {}) {
+function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: any = {}) {
 	const applicableThemeClasses = theme.hasOwnProperty(path) ? theme[path] : {};
+	const combinedThemeClasses = assign({}, baseThemeClasses, applicableThemeClasses);
+	let allClasses: string[] = [];
 
-	return Object.keys(baseThemeClasses).reduce((newAppliedClasses, className: keyof T) => {
-		const newCSSModuleClassNames: CSSModuleClassNames = {};
-		const themeClassSource = applicableThemeClasses.hasOwnProperty(className) ? applicableThemeClasses : baseThemeClasses;
+	const themeClasses = Object.keys(combinedThemeClasses).reduce((newAppliedClasses, className: keyof T) => {
+		const cssClassNames = combinedThemeClasses[className].split(' ');
+		const overrideCssClassNames = overrideClasses.hasOwnProperty(className) ? overrideClasses[className].split(' ') : [];
+		const combinedCssClassNames = [...cssClassNames, ...overrideCssClassNames];
+		allClasses = [...allClasses, ...combinedThemeClasses];
 
-		addClassNameToCSSModuleClassNames(newCSSModuleClassNames, themeClassSource, className);
-		overrideClasses && addClassNameToCSSModuleClassNames(newCSSModuleClassNames, overrideClasses, className);
-		newAppliedClasses[className] = newCSSModuleClassNames;
+		newAppliedClasses[className] = setClassNameFlags(combinedCssClassNames, true);
 
 		return newAppliedClasses;
 	}, <AppliedClasses<T>> {});
+
+	updateNegativeClassNames(instance, allClasses);
+
+	return themeClasses;
 }
 
 function updateThemeClassesMap<T>(instance: Themeable<T>, newThemeClasses: AppliedClasses<T>) {
-	if (themeClassesMap.has(instance)) {
-		const previousThemeClasses = themeClassesMap.get(instance);
-		themeClassesMap.set(instance, negatePreviousClasses(previousThemeClasses, newThemeClasses));
-	} else {
-		themeClassesMap.set(instance, newThemeClasses);
-	}
+	themeClassesMap.set(instance, newThemeClasses);
 }
 
 function onPropertiesChanged<T>(instance: Themeable<T>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
@@ -153,13 +140,15 @@ function getClassNames<T>(baseTheme: T): ClassNames<T> {
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
-		get className(this: Themeable<any>): ClassNames<any> {
+		get classNames(this: Themeable<any>): ClassNames<any> {
 			return classNameMap.get(this);
-			// return themeClassesMap.get(this);
 		},
 		getClasses(this: Themeable<any>, ...classNames: string[]) {
-			let response: CSSModuleClassNames = {};
-			return response;
+			const classNameMap = themeClassesMap.get(this);
+			const appliedClasses = classNames.reduce((currentAppliedClasses, className) => {
+				assign(currentAppliedClasses, classNameMap[className]);
+			}, <any> {});
+			return assign({}, negativeClassMap.get(this), appliedClasses);
 		}
 	},
 	initialize<T>(instance: Themeable<T>) {
