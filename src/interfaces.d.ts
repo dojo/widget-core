@@ -85,7 +85,7 @@ export interface HNode {
 	/**
 	 * Array of processed VNode children.
 	 */
-	vnodes?: (string | VNode | null)[];
+	vNodes?: (string | VNode | null)[];
 	/**
 	 * Specified children
 	 */

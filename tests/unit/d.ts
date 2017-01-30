@@ -159,7 +159,7 @@ registerSuite({
 				assert.isUndefined(children![7].properties['decorated']);
 			}
 		},
-		'applies modifier to all rows when no predicate supplied'() {
+		'applies modifier to all nodes when no predicate supplied'() {
 			const testWidget = createTestWidget();
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
