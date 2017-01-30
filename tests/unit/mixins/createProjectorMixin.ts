@@ -80,9 +80,13 @@ registerSuite({
 			});
 		},
 		'replace'() {
-			const projector = createTestWidget({
-				tagName: 'body'
-			});
+			const projector = createTestWidget.mixin({
+				mixin: {
+					render(this: any) {
+						return v('body', this.children);
+					}
+				}
+			})();
 
 			projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
