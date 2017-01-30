@@ -28,11 +28,9 @@ function handleDomInsertion(instance: Widget<DomWrapperProperties>, newNode: Nod
 	const data = domWrapperData.get(instance);
 
 	if (data) {
-		const domNode = data.vNode.domNode!;
-
 		// replace the vNode domElement with our new element...
-		if (domNode.parentNode) {
-			domNode.parentNode.replaceChild(notNullNode, domNode);
+		if (data.vNode.domNode && data.vNode.domNode.parentNode) {
+			data.vNode.domNode.parentNode.replaceChild(notNullNode, data.vNode.domNode);
 		}
 
 		// and update the reference to our vnode
@@ -65,8 +63,7 @@ const createDomWrapper: DomWrapperFactory = createWidget.mixin({
 		},
 		__render__(this: Widget<DomWrapperProperties>, vNode: VNode) {
 			if (vNode && typeof vNode !== 'string') {
-				if (vNode.domNode !== null) {
-					// we need to hold on to our vNode for future updates
+				if (!domWrapperData.has(this)) {
 					domWrapperData.set(this, {
 						vNode: vNode
 					});
