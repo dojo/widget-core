@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://rawgit.com/WebReflection/document-register-element/master/build/document-register-element.js"></script>
+	<script src="../../../../../node_modules/@dojo/loader/loader.js"></script>
+</head>
+<body>
+<test-button id="testButton" label="hello" label-suffix="world"></test-button>
+
+<script>
+	window.buttonClicked = false;
+	window.ready = false;
+
+	require.config({
+		packages: [
+			{ name: '@dojo', location: '../../../../../node_modules/@dojo' },
+			{ name: 'maquette', location: '../../../../../node_modules/maquette/dist', main: 'maquette' }
+		]
+	})
+
+	require(['./registerCustomElementV0'], function() {
+		window.ready = true;
+
+		document.getElementById('testButton').addEventListener('button-click', function() {
+			window.buttonClicked = true;
+		});
+	});
+</script>
+</body>
+</html>
