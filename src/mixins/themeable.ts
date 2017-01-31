@@ -106,7 +106,6 @@ const availableClassNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
  */
 const allClassNamesMap = new WeakMap<Themeable<any>, AppliedCSSModuleClassNames>();
 
-
 function appendToAllClassNames<T>(instance: Themeable<T>, classNames: string[]) {
 	const negativeClassFlags = setClassNameApplied(classNames, false);
 	const currentNegativeClassFlags = allClassNamesMap.get(instance);
