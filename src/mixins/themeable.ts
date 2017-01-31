@@ -63,6 +63,9 @@ export interface Themeable<T> extends ThemeableMixin<T> {
 	properties: ThemeableProperties;
 }
 
+/**
+ * BaseTheme
+ */
 export interface BaseTheme<T> {
 	classes: T;
 	path: string;
@@ -74,7 +77,7 @@ export interface BaseTheme<T> {
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, ThemeableOptions> {}
 
 /**
- * Private map for the widgets themeClasses.
+ * Private maps
  */
 const themeClassesMap = new WeakMap<Themeable<any>, AppliedClasses<any>>();
 const classNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
