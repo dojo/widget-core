@@ -65,7 +65,7 @@ registerSuite({
 	'classes object': {
 		'should return classNames object with base classes set'() {
 			themeableInstance = themeableFactory();
-			assert.deepEqual(themeableInstance.classNames, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: 'class1',
 				class2: 'class2'
 			});
@@ -74,7 +74,7 @@ registerSuite({
 			themeableInstance = themeableFactory({
 				properties: { theme: themeExtraClasses }
 			});
-			assert.deepEqual(themeableInstance.classNames, {
+			assert.deepEqual(themeableInstance.theme, {
 				class1: 'class1',
 				class2: 'class2'
 			});
@@ -83,8 +83,8 @@ registerSuite({
 	'class names function': {
 		'should return baseTheme flagged classes via the classes function'() {
 			themeableInstance = themeableFactory();
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ baseTheme.classes.class1 ]: true,
 				[ baseTheme.classes.class2 ]: true
@@ -92,8 +92,8 @@ registerSuite({
 		},
 		'should return negated classes for those that are not passed'() {
 			themeableInstance = themeableFactory();
-			const { class1 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1);
+			const { class1 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1);
 			assert.deepEqual(flaggedClasses, {
 				[ baseTheme.classes.class1 ]: true,
 				[ baseTheme.classes.class2 ]: false
@@ -101,9 +101,9 @@ registerSuite({
 		},
 		'should pass through new classes that do not exist in baseTheme'() {
 			themeableInstance = themeableFactory();
-			const { class1 } = themeableInstance.classNames;
+			const { class1 } = themeableInstance.theme;
 			const newClassName = 'newClassName';
-			const flaggedClasses = themeableInstance.getClasses(class1, newClassName);
+			const flaggedClasses = themeableInstance.classes(class1, newClassName);
 			assert.deepEqual(flaggedClasses, {
 				[ baseTheme.classes.class1 ]: true,
 				[ baseTheme.classes.class2 ]: false,
@@ -112,16 +112,16 @@ registerSuite({
 		},
 		'should negate any new classes that are not requested on second call'() {
 			themeableInstance = themeableFactory();
-			const { class1 } = themeableInstance.classNames;
+			const { class1 } = themeableInstance.theme;
 			const newClassName = 'newClassName';
-			const flaggedClassesFirstCall = themeableInstance.getClasses(class1, newClassName);
+			const flaggedClassesFirstCall = themeableInstance.classes(class1, newClassName);
 			assert.deepEqual(flaggedClassesFirstCall, {
 				[ baseTheme.classes.class1 ]: true,
 				[ baseTheme.classes.class2 ]: false,
 				[ newClassName ]: true
 			}, `${newClassName} should be true on first call`);
 
-			const flaggedClassesSecondCall = themeableInstance.getClasses(class1);
+			const flaggedClassesSecondCall = themeableInstance.classes(class1);
 			assert.deepEqual(flaggedClassesSecondCall, {
 				[ baseTheme.classes.class1 ]: true,
 				[ baseTheme.classes.class2 ]: false,
@@ -134,8 +134,8 @@ registerSuite({
 			themeableInstance = themeableFactory({
 				properties: { theme: testTheme1 }
 			});
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ testTheme1.testPath.class1 ]: true,
 				[ baseTheme.classes.class2 ]: true
@@ -153,8 +153,8 @@ registerSuite({
 				changedPropertyKeys: [ 'theme' ]
 			});
 
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ testTheme1.testPath.class1 ]: false,
 				[ testTheme2.testPath.class1 ]: true,
@@ -167,8 +167,8 @@ registerSuite({
 			themeableInstance = themeableFactory({
 				properties: { overrideClasses: overrideClasses1 }
 			});
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ baseTheme.classes.class1 ]: true,
 				[ overrideClasses1.class1 ]: true,
@@ -187,8 +187,8 @@ registerSuite({
 				changedPropertyKeys: [ 'overrideClasses' ]
 			});
 
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ baseTheme.classes.class1 ]: true,
 				[ overrideClasses1.class1 ]: false,
@@ -203,8 +203,8 @@ registerSuite({
 				properties: { theme: testTheme3 }
 			});
 
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				testTheme3Class1: true,
 				testTheme3AdjoinedClass1: true,
@@ -224,8 +224,8 @@ registerSuite({
 				changedPropertyKeys: [ 'theme' ]
 			});
 
-			const { class1, class2 } = themeableInstance.classNames;
-			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			const { class1, class2 } = themeableInstance.theme;
+			const flaggedClasses = themeableInstance.classes(class1, class2);
 			assert.deepEqual(flaggedClasses, {
 				[ testTheme1.testPath.class1 ]: true,
 				testTheme3Class1: false,
@@ -242,9 +242,9 @@ registerSuite({
 				mixin: {
 					baseTheme,
 					getChildrenNodes(this: ThemeableWidget ): DNode[] {
-						const { class1 } = this.classNames;
+						const { class1 } = this.theme;
 						return [
-							v('div', { classes: this.getClasses(class1) })
+							v('div', { classes: this.classes(class1) })
 						];
 					}
 				}

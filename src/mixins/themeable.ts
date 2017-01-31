@@ -51,8 +51,8 @@ export interface ThemeableOptions {
  * Themeable Mixin
  */
 export interface ThemeableMixin<T> extends Evented {
-	classNames: ClassNames<T>;
-	getClasses: (...classNames: string[]) => FlaggedCSSModuleClassNames;
+	theme: ClassNames<T>;
+	classes: (...classNames: string[]) => FlaggedCSSModuleClassNames;
 }
 
 /**
@@ -140,10 +140,10 @@ function getClassNames<T>(baseTheme: BaseTheme<T>): ClassNames<T> {
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
-		get classNames(this: Themeable<any>): ClassNames<any> {
+		get theme(this: Themeable<any>): ClassNames<any> {
 			return classNameMap.get(this);
 		},
-		getClasses(this: Themeable<any>, ...classNames: string[]) {
+		classes(this: Themeable<any>, ...classNames: string[]) {
 			const themeClasses = themeClassesMap.get(this);
 			const newClassNames: string[] = [];
 			const appliedClasses = classNames.reduce((currentAppliedClasses, className) => {
