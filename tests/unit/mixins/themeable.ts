@@ -13,7 +13,7 @@ const baseThemeClasses = {
 };
 
 const baseTheme: BaseTheme<typeof baseThemeClasses> = {
-	path: 'testPath',
+	key: 'testPath',
 	classes: baseThemeClasses
 };
 

@@ -73,7 +73,7 @@ export interface Themeable<T> extends ThemeableMixin<T> {
  */
 export interface BaseTheme<T> {
 	classes: T;
-	path: string;
+	key: string;
 }
 
 /**
@@ -115,8 +115,8 @@ function setClassNameApplied(classNames: string[], applied: boolean) {
 	}, <AppliedCSSModuleClassNames> {});
 }
 
-function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: any = {}) {
-	const applicableThemeClasses = theme.hasOwnProperty(path) ? theme[path] : {};
+function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, key }: BaseTheme<T>, theme: any = {}, overrideClasses: any = {}) {
+	const applicableThemeClasses = theme.hasOwnProperty(key) ? theme[key] : {};
 	const combinedThemeClasses = assign({}, baseThemeClasses, applicableThemeClasses);
 	let allClasses: string[] = [];
 
