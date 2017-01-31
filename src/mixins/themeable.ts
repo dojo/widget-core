@@ -11,7 +11,7 @@ import { assign } from '@dojo/core/lang';
  * to be applied where each class in appliedClasses
  * is used.
  */
-export type FlaggedCSSModuleClassNames = {
+export type AppliedCSSModuleClassNames = {
 	[key: string]: boolean;
 }
 
@@ -26,8 +26,8 @@ export type ClassNames<T> = {
 /**
  * The object returned by getClasses.
  */
-export type AppliedClasses<T> = {
-	[P in keyof T]: FlaggedCSSModuleClassNames;
+export type CSSModuleClasses<T> = {
+	[P in keyof T]: AppliedCSSModuleClassNames;
 };
 
 type StringIndexedObject = { [key: string]: string; };
@@ -52,7 +52,7 @@ export interface ThemeableOptions {
  */
 export interface ThemeableMixin<T> extends Evented {
 	theme: ClassNames<T>;
-	classes: (...classNames: string[]) => FlaggedCSSModuleClassNames;
+	classes: (...classNames: string[]) => AppliedCSSModuleClassNames;
 }
 
 /**
@@ -79,21 +79,21 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, Th
 /**
  * Private maps
  */
-const themeClassesMap = new WeakMap<Themeable<any>, AppliedClasses<any>>();
-const classNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
-const negativeClassMap = new WeakMap<Themeable<any>, FlaggedCSSModuleClassNames>();
+const cssModuleClassNameMap = new WeakMap<Themeable<any>, CSSModuleClasses<any>>();
+const availableClassNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
+const allClassNamesMap = new WeakMap<Themeable<any>, AppliedCSSModuleClassNames>();
 
-function updateNegativeClassNames<T>(instance: Themeable<T>, classNames: string[]) {
-	const negativeClassFlags = setClassNameFlags(classNames, false);
-	const currentNegativeClassFlags = negativeClassMap.get(instance);
-	negativeClassMap.set(instance, assign({}, currentNegativeClassFlags, negativeClassFlags));
+function appendToAllClassNames<T>(instance: Themeable<T>, classNames: string[]) {
+	const negativeClassFlags = setClassNameApplied(classNames, false);
+	const currentNegativeClassFlags = allClassNamesMap.get(instance);
+	allClassNamesMap.set(instance, assign({}, currentNegativeClassFlags, negativeClassFlags));
 }
 
-function setClassNameFlags(classNames: string[], applied: boolean) {
-	return classNames.reduce((flaggedClassNames: FlaggedCSSModuleClassNames, className) => {
+function setClassNameApplied(classNames: string[], applied: boolean) {
+	return classNames.reduce((flaggedClassNames: AppliedCSSModuleClassNames, className) => {
 		flaggedClassNames[className] = applied;
 		return flaggedClassNames;
-	}, <FlaggedCSSModuleClassNames> {});
+	}, <AppliedCSSModuleClassNames> {});
 }
 
 function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeClasses, path }: BaseTheme<T>, theme: any = {}, overrideClasses: any = {}) {
@@ -107,18 +107,14 @@ function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeCla
 		const combinedCssClassNames = [...cssClassNames, ...overrideCssClassNames];
 		allClasses = [...allClasses, ...combinedCssClassNames];
 
-		newAppliedClasses[className] = setClassNameFlags(combinedCssClassNames, true);
+		newAppliedClasses[className] = setClassNameApplied(combinedCssClassNames, true);
 
 		return newAppliedClasses;
-	}, <AppliedClasses<T>> {});
+	}, <CSSModuleClasses<T>> {});
 
-	updateNegativeClassNames(instance, allClasses);
+	appendToAllClassNames(instance, allClasses);
 
 	return themeClasses;
-}
-
-function updateThemeClassesMap<T>(instance: Themeable<T>, newThemeClasses: AppliedClasses<T>) {
-	themeClassesMap.set(instance, newThemeClasses);
 }
 
 function onPropertiesChanged<T>(instance: Themeable<T>, { theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
@@ -127,11 +123,11 @@ function onPropertiesChanged<T>(instance: Themeable<T>, { theme, overrideClasses
 
 	if (themeChanged || overrideClassesChanged) {
 		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
-		updateThemeClassesMap(instance, themeClasses);
+		cssModuleClassNameMap.set(instance, themeClasses);
 	}
 }
 
-function getClassNames<T>(baseTheme: BaseTheme<T>): ClassNames<T> {
+function getAvailableClassNames<T>(baseTheme: BaseTheme<T>): ClassNames<T> {
 	return Object.keys(baseTheme.classes).reduce((currentClassNames, key: keyof T) => {
 		currentClassNames[key] = key;
 		return currentClassNames;
@@ -144,23 +140,23 @@ function getClassNames<T>(baseTheme: BaseTheme<T>): ClassNames<T> {
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
 		get theme(this: Themeable<any>): ClassNames<any> {
-			return classNameMap.get(this);
+			return availableClassNameMap.get(this);
 		},
 		classes(this: Themeable<any>, ...classNames: string[]) {
-			const themeClasses = themeClassesMap.get(this);
+			const cssModuleClassNames = cssModuleClassNameMap.get(this);
 			const newClassNames: string[] = [];
-			const appliedClasses = classNames.reduce((currentAppliedClasses, className) => {
-				if (themeClasses.hasOwnProperty(className)) {
-					assign(currentAppliedClasses, themeClasses[className]);
+			const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
+				if (cssModuleClassNames.hasOwnProperty(className)) {
+					assign(currentCSSModuleClassNames, cssModuleClassNames[className]);
 				} else {
-					assign(currentAppliedClasses, { [className]: true });
+					assign(currentCSSModuleClassNames, { [className]: true });
 					newClassNames.push(className);
 				}
-				return currentAppliedClasses;
+				return currentCSSModuleClassNames;
 			}, <any> {});
 
-			updateNegativeClassNames(this, newClassNames);
-			return assign({}, negativeClassMap.get(this), appliedClasses);
+			appendToAllClassNames(this, newClassNames);
+			return assign({}, allClassNamesMap.get(this), appliedClasses);
 		}
 	},
 	initialize<T>(instance: Themeable<T>) {
@@ -168,7 +164,7 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		onPropertiesChanged(instance, instance.properties, [ 'theme' ]);
-		classNameMap.set(instance, getClassNames(instance.baseTheme));
+		availableClassNameMap.set(instance, getAvailableClassNames(instance.baseTheme));
 	}
 });
 
