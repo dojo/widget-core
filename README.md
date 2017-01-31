@@ -284,7 +284,7 @@ createWidgetProjector().append(() => {
 #### Event Handling
 
 The recommended pattern for custom event handlers is to declare them on the widget class and reference the function using `this`.
-Event handlers are most commonly called from the `render`.
+Event handlers are most commonly called from `render`.
 
 Event handlers can be internal logic encapsulated within a widget or delegate to a function passed into the widget via `properties`.
 For convenience event handlers are automatically bound to the scope of their enclosing widget.
@@ -292,9 +292,9 @@ For convenience event handlers are automatically bound to the scope of their enc
 *internally defined handler*
 
 ```ts
-const createMyWidget: MyWidgetFactory = createWidgetBase.
-mixin(internalStateMixin)
-mixin({
+const createMyWidget: MyWidgetFactory = createWidgetBase
+.mixin(internalStateMixin)
+.mixin({
 	mixin: {
 		onClick: function (this: MyWidget): void {
 			this.setState(!this.state.selected);
