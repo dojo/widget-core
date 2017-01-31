@@ -42,6 +42,8 @@ interface WidgetInternalState {
  */
 const widgetInternalStateMap = new WeakMap<Widget<WidgetProperties>, WidgetInternalState>();
 
+const bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
+
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 
 function getFromRegistry(instance: Widget<WidgetProperties>, factoryLabel: string): FactoryRegistryItem | null {
@@ -94,6 +96,10 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			return false;
 		});
 
+		if (!properties.hasOwnProperty('bind')) {
+			properties.bind = instance;
+		}
+
 		if (cachedChild) {
 			child = cachedChild.child;
 			child.setProperties(properties);
@@ -140,6 +146,24 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 			return false;
 		});
 		internalState.cachedChildrenMap.set(key, filterCachedChildren);
+	});
+}
+
+function bindFunctionProperties(instance: Widget<WidgetProperties>, properties: WidgetProperties) {
+	Object.keys(properties).forEach((propertyKey) => {
+		const func = properties[propertyKey];
+		const bind = properties.bind;
+
+		if (typeof func === 'function') {
+			const bindInfo = bindFunctionPropertyMap.get(func) || {};
+			let { boundFunc, scope } = bindInfo;
+
+			if (!boundFunc || scope !== bind) {
+				boundFunc = func.bind(bind);
+				bindFunctionPropertyMap.set(func, { boundFunc, scope: bind });
+			}
+			properties[propertyKey] = boundFunc;
+		}
 	});
 }
 
@@ -190,6 +214,8 @@ const createWidget: WidgetBaseFactory = createEvented
 
 				const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 				const diffPropertyChangedKeys: string[] = [];
+
+				bindFunctionProperties(this, properties);
 
 				internalState.diffPropertyFunctionMap.forEach((property: string, diffFunctionName: string) => {
 					const previousProperty = internalState.previousProperties[property];
