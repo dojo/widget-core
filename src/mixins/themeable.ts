@@ -7,17 +7,15 @@ import { ComposeFactory } from '@dojo/compose/compose';
 import { assign } from '@dojo/core/lang';
 
 /**
- * A representation of the css-module class names
- * to be applied where each class in appliedClasses
- * is used.
+ * A representation of the css-module class names to be applied
+ * where each class in appliedClasses is used.
  */
 export type AppliedCSSModuleClassNames = {
 	[key: string]: boolean;
 }
 
 /**
- * A mapping from class names to generatred
- * css-module class names
+ * A mapping from class names to generatred css-module class names
  */
 export type CSSModuleClassNameMap<T> = {
 	[P in keyof T]: string[];
@@ -31,8 +29,8 @@ export type ClassNames<T> = {
 }
 
 /**
- * The object returned by getClasses required
- * by maquette for adding / removing classes
+ * The object returned by getClasses required by maquette for
+ * adding / removing classes
  */
 export type CSSModuleClasses<T> = {
 	[P in keyof T]: AppliedCSSModuleClassNames;
@@ -70,9 +68,8 @@ export interface Themeable<T> extends ThemeableMixin<T> {
 }
 
 /**
- * BaseTheme to be passed as this.baseTheme
- * The path string is used to perform a lookup
- * against any theme that has been set.
+ * BaseTheme to be passed as this.baseTheme. The path string is used to
+ * perform a lookup against any theme that has been set.
  */
 export interface BaseTheme<T> {
 	classes: T;
@@ -87,7 +84,7 @@ export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, Th
 type StringIndexedObject = { [key: string]: string; };
 
 /**
- * Map containing lookups for available css module class names,.
+ * Map containing lookups for available css module class names.
  * Responding object contains each css module class name that applies
  * with a boolean set to true.
  */
@@ -95,7 +92,7 @@ const cssModuleClassNameMap = new WeakMap<Themeable<any>, CSSModuleClasses<any>>
 
 /**
  * Map containing a lookup for all the class names provided in the
- * widgets baseTheme.
+ * widget's baseTheme.
  */
 const availableClassNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
 
