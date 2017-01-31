@@ -20,7 +20,7 @@ export type CSSModuleClassNameMap<T> = {
 }
 
 export type ClassNames<T> = {
-	[P in keyof T]: P;
+	[P in keyof T]: string;
 }
 
 /**
@@ -51,7 +51,7 @@ export interface ThemeableOptions {
  * Themeable Mixin
  */
 export interface ThemeableMixin<T> extends Evented {
-	classNames: AppliedClasses<T>;
+	classNames: ClassNames<T>;
 	getClasses: (...classNames: string[]) => FlaggedCSSModuleClassNames;
 }
 
@@ -87,9 +87,9 @@ function updateNegativeClassNames<T>(instance: Themeable<T>, classNames: string[
 }
 
 function setClassNameFlags(classNames: string[], applied: boolean) {
-	return classNames.reduce((negatedClassNames: FlaggedCSSModuleClassNames, className) => {
-		negatedClassNames[className] = applied;
-		return negatedClassNames;
+	return classNames.reduce((flaggedClassNames: FlaggedCSSModuleClassNames, className) => {
+		flaggedClassNames[className] = applied;
+		return flaggedClassNames;
 	}, <FlaggedCSSModuleClassNames> {});
 }
 
@@ -102,7 +102,7 @@ function generateThemeClasses<T>(instance: Themeable<T>, { classes: baseThemeCla
 		const cssClassNames = combinedThemeClasses[className].split(' ');
 		const overrideCssClassNames = overrideClasses.hasOwnProperty(className) ? overrideClasses[className].split(' ') : [];
 		const combinedCssClassNames = [...cssClassNames, ...overrideCssClassNames];
-		allClasses = [...allClasses, ...combinedThemeClasses];
+		allClasses = [...allClasses, ...combinedCssClassNames];
 
 		newAppliedClasses[className] = setClassNameFlags(combinedCssClassNames, true);
 
@@ -128,8 +128,8 @@ function onPropertiesChanged<T>(instance: Themeable<T>, { theme, overrideClasses
 	}
 }
 
-function getClassNames<T>(baseTheme: T): ClassNames<T> {
-	return Object.keys(baseTheme).reduce((currentClassNames, key: keyof T) => {
+function getClassNames<T>(baseTheme: BaseTheme<T>): ClassNames<T> {
+	return Object.keys(baseTheme.classes).reduce((currentClassNames, key: keyof T) => {
 		currentClassNames[key] = key;
 		return currentClassNames;
 	}, <ClassNames<T>> {});
@@ -144,15 +144,16 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			return classNameMap.get(this);
 		},
 		getClasses(this: Themeable<any>, ...classNames: string[]) {
-			const classNameMap = themeClassesMap.get(this);
+			const themeClasses = themeClassesMap.get(this);
 			const newClassNames: string[] = [];
 			const appliedClasses = classNames.reduce((currentAppliedClasses, className) => {
-				if (classNameMap.hasOwnProperty(className)) {
-					assign(currentAppliedClasses, classNameMap[className]);
+				if (themeClasses.hasOwnProperty(className)) {
+					assign(currentAppliedClasses, themeClasses[className]);
 				} else {
 					assign(currentAppliedClasses, { [className]: true });
 					newClassNames.push(className);
 				}
+				return currentAppliedClasses;
 			}, <any> {});
 
 			updateNegativeClassNames(this, newClassNames);

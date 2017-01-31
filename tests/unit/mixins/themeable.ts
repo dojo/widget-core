@@ -17,30 +17,36 @@ const baseTheme: BaseTheme<typeof baseThemeClasses> = {
 	classes: baseThemeClasses
 };
 
-const testTheme = {
+const themeExtraClasses = {
 	testPath: {
-		class1: 'themeClass1'
+		extraClass: 'extraClass'
+	}
+};
+
+const testTheme1 = {
+	testPath: {
+		class1: 'theme1Class1'
 	}
 };
 
 const testTheme2 = {
 	testPath: {
-		class2: 'theme2Class2'
+		class1: 'theme2Class1'
 	}
 };
 
 const testTheme3 = {
 	testPath: {
-		class1: 'theme3Class1'
+		class1: 'testTheme3Class1 testTheme3AdjoinedClass1'
 	}
 };
 
-const overrideClasses = {
-	class2: 'overrideClass2'
+const overrideClasses1 = {
+	class1: 'override1Class1'
 };
 
 const overrideClasses2 = {
-	class2: 'override2Class2'
+	class1: 'override2Class1'
 };
 
 const themeableFactory = compose({
@@ -56,28 +62,89 @@ let themeableInstance: Themeable<typeof baseThemeClasses>;
 
 registerSuite({
 	name: 'themeManager',
-	'no theme': {
-		beforeEach() {
+	'classes object': {
+		'should return classNames object with base classes set'() {
 			themeableInstance = themeableFactory();
+			assert.deepEqual(themeableInstance.classNames, {
+				class1: 'class1',
+				class2: 'class2'
+			});
 		},
-		'should return only base classes when no theme is set'() {
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.classes.class1 ]: true },
-				class2: { [ baseTheme.classes.class2 ]: true }
+		'should not include extra theme classes in classNames object'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: themeExtraClasses }
+			});
+			assert.deepEqual(themeableInstance.classNames, {
+				class1: 'class1',
+				class2: 'class2'
 			});
 		}
 	},
-	'with a theme': {
-		beforeEach() {
-			themeableInstance = themeableFactory({ properties: { theme: testTheme }});
-		},
-		'should return theme class instead of base class when a theme is set'() {
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.testPath.class1 ]: true },
-				class2: { [ baseTheme.classes.class2 ]: true }
+	'class names function': {
+		'should return baseTheme flagged classes via the classes function'() {
+			themeableInstance = themeableFactory();
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ baseTheme.classes.class1 ]: true,
+				[ baseTheme.classes.class2 ]: true
 			});
 		},
-		'should regenerate and negate class names on theme change'() {
+		'should return negated classes for those that are not passed'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1);
+			assert.deepEqual(flaggedClasses, {
+				[ baseTheme.classes.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false
+			});
+		},
+		'should pass through new classes that do not exist in baseTheme'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = themeableInstance.classNames;
+			const newClassName = 'newClassName';
+			const flaggedClasses = themeableInstance.getClasses(class1, newClassName);
+			assert.deepEqual(flaggedClasses, {
+				[ baseTheme.classes.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false,
+				[ newClassName ]: true
+			});
+		},
+		'should negate any new classes that are not requested on second call'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = themeableInstance.classNames;
+			const newClassName = 'newClassName';
+			const flaggedClassesFirstCall = themeableInstance.getClasses(class1, newClassName);
+			assert.deepEqual(flaggedClassesFirstCall, {
+				[ baseTheme.classes.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false,
+				[ newClassName ]: true
+			}, `${newClassName} should be true on first call`);
+
+			const flaggedClassesSecondCall = themeableInstance.getClasses(class1);
+			assert.deepEqual(flaggedClassesSecondCall, {
+				[ baseTheme.classes.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false,
+				[ newClassName ]: false
+			}, `${newClassName} should be false on second call`);
+		}
+	},
+	'setting a theme': {
+		'should override basetheme classes with theme classes'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme1 }
+			});
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ testTheme1.testPath.class1 ]: true,
+				[ baseTheme.classes.class2 ]: true
+			});
+		},
+		'should negate old theme class when a new theme is set'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme1 }
+			});
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
@@ -85,110 +152,89 @@ registerSuite({
 				},
 				changedPropertyKeys: [ 'theme' ]
 			});
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.classes.class1 ]: true, [ testTheme.testPath.class1 ]: false },
-				class2: { [ baseTheme.classes.class2 ]: false, [ testTheme2.testPath.class2 ]: true }
+
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ testTheme1.testPath.class1 ]: false,
+				[ testTheme2.testPath.class1 ]: true,
+				[ baseTheme.classes.class2 ]: true
 			});
 		}
 	},
-	'with overrides and a theme': {
-		beforeEach() {
-			themeableInstance = themeableFactory({ properties: {
-				theme: testTheme,
-				overrideClasses: overrideClasses
-			}});
-		},
-		'should return override class as well as baseclass'() {
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.testPath.class1 ]: true },
-				class2: { [ baseTheme.classes.class2 ]: true, [ overrideClasses.class2 ]: true }
+	'setting override classes': {
+		'should supplement basetheme classes with override classes'() {
+			themeableInstance = themeableFactory({
+				properties: { overrideClasses: overrideClasses1 }
+			});
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ baseTheme.classes.class1 ]: true,
+				[ overrideClasses1.class1 ]: true,
+				[ baseTheme.classes.class2 ]: true
 			});
 		},
-		'should regenerate class names on overrides change'() {
+		'should set override classes to false when they are changed'() {
+			themeableInstance = themeableFactory({
+				properties: { overrideClasses: overrideClasses1 }
+			});
 			themeableInstance.emit({
 				type: 'properties:changed',
 				properties: {
-					theme: testTheme,
 					overrideClasses: overrideClasses2
 				},
 				changedPropertyKeys: [ 'overrideClasses' ]
 			});
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.testPath.class1 ]: true },
-				class2: { [ baseTheme.classes.class2 ]: true, [ overrideClasses.class2 ]: false, [ overrideClasses2.class2 ]: true }
-			});
-		},
-		'should regenerate class names on theme and overrides change'() {
-			themeableInstance.emit({
-				type: 'properties:changed',
-				properties: {
-					theme: testTheme2,
-					overrideClasses: overrideClasses2
-				},
-				changedPropertyKeys: [ 'theme', 'overrideClasses' ]
-			});
-			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.classes.class1 ]: true, [ testTheme.testPath.class1 ]: false },
-				class2: {
-					[ testTheme2.testPath.class2 ]: true,
-					[ baseTheme.classes.class2 ]: false,
-					[ overrideClasses.class2 ]: false,
-					[ overrideClasses2.class2 ]: true
-				}
+
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ baseTheme.classes.class1 ]: true,
+				[ overrideClasses1.class1 ]: false,
+				[ overrideClasses2.class1 ]: true,
+				[ baseTheme.classes.class2 ]: true
 			});
 		}
 	},
-	'should only negate each class once'() {
-		themeableInstance = themeableFactory();
+	'splitting adjoined classes': {
+		'should split adjoined classes into multiple classes'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme3 }
+			});
 
-		const theme1 = { testPath: { class1: 'firstChange' }};
-		const theme2 = { testPath: { class1: 'secondChange' }};
-		let themeClasses = themeableInstance.theme;
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				testTheme3Class1: true,
+				testTheme3AdjoinedClass1: true,
+				[ baseTheme.classes.class2 ]: true
+			});
+		},
+		'should remove adjoined classes when they are no longer provided'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme3 }
+			});
 
-		assert.deepEqual(themeableInstance.theme.class1, {
-			[ baseTheme.classes.class1 ]: true
-		}, 'should have base theme set to true');
+			themeableInstance.emit({
+				type: 'properties:changed',
+				properties: {
+					theme: testTheme1
+				},
+				changedPropertyKeys: [ 'theme' ]
+			});
 
-		themeableInstance.emit({
-			type: 'properties:changed',
-			properties: { theme: theme1 },
-			changedPropertyKeys: [ 'theme' ]
-		});
-		themeClasses = themeableInstance.theme;
-
-		assert.deepEqual(themeableInstance.theme.class1, {
-			[ baseTheme.classes.class1 ]: false,
-			[ theme1.testPath.class1 ]: true
-		}, 'should have base theme set to false and theme1 class1 set to true');
-
-		themeableInstance.emit({
-			type: 'properties:changed',
-			properties: { theme: theme2 },
-			changedPropertyKeys: [ 'theme' ]
-		});
-		themeClasses = themeableInstance.theme;
-
-		assert.deepEqual(themeableInstance.theme.class1, {
-			[ theme1.testPath.class1 ]: false,
-			[ theme2.testPath.class1 ]: true
-		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
+			const { class1, class2 } = themeableInstance.classNames;
+			const flaggedClasses = themeableInstance.getClasses(class1, class2);
+			assert.deepEqual(flaggedClasses, {
+				[ testTheme1.testPath.class1 ]: true,
+				testTheme3Class1: false,
+				testTheme3AdjoinedClass1: false,
+				[ baseTheme.classes.class2 ]: true
+			});
+		}
 	},
-	'properties changing outside of the scope of theme should not change theme'() {
-		themeableInstance = themeableFactory();
-		const themeBeforeEmit = themeableInstance.theme;
-
-		themeableInstance.emit({
-			type: 'properties:changed',
-			properties: {
-				hello: 'world'
-			},
-			changedPropertyKeys: [ 'hello' ]
-		});
-
-		const themeAfterEmit = themeableInstance.theme;
-		assert.strictEqual(themeBeforeEmit, themeAfterEmit);
-	},
-	integration: {
+	'integration': {
 		'should work as mixin to createWidgetBase'() {
 			type ThemeableWidget = Widget<WidgetProperties> & Themeable<typeof baseThemeClasses>;
 
@@ -196,26 +242,31 @@ registerSuite({
 				mixin: {
 					baseTheme,
 					getChildrenNodes(this: ThemeableWidget ): DNode[] {
+						const { class1 } = this.classNames;
 						return [
-							v('div', { classes: this.theme.class1 })
+							v('div', { classes: this.getClasses(class1) })
 						];
 					}
 				}
 			});
 
 			const themeableWidget: ThemeableWidget = createThemeableWidget({
-				properties: { theme: testTheme }
+				properties: { theme: testTheme1 }
 			});
 
 			const result = <VNode> themeableWidget.__render__();
-			assert.deepEqual(result.children![0].properties!.classes, { [ testTheme.testPath.class1 ]: true });
+			assert.deepEqual(result.children![0].properties!.classes, {
+				[ testTheme1.testPath.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false
+			});
 
-			themeableWidget.setProperties({ theme: testTheme3 });
+			themeableWidget.setProperties({ theme: testTheme2 });
 
 			const result2 = <VNode> themeableWidget.__render__();
 			assert.deepEqual(result2.children![0].properties!.classes, {
-				[ testTheme.testPath.class1 ]: false,
-				[ testTheme3.testPath.class1 ]: true
+				[ testTheme1.testPath.class1 ]: false,
+				[ testTheme2.testPath.class1 ]: true,
+				[ baseTheme.classes.class2 ]: false
 			});
 		}
 	}
