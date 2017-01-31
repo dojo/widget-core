@@ -15,20 +15,29 @@ export type AppliedCSSModuleClassNames = {
 	[key: string]: boolean;
 }
 
+/**
+ * A mapping from class names to generatred
+ * css-module class names
+ */
 export type CSSModuleClassNameMap<T> = {
 	[P in keyof T]: string[];
 }
 
+/**
+ * A lookup object for available class names
+ */
 export type ClassNames<T> = {
 	[P in keyof T]: string;
 }
 
 /**
- * The object returned by getClasses.
+ * The object returned by getClasses required
+ * by maquette for adding / removing classes
  */
 export type CSSModuleClasses<T> = {
 	[P in keyof T]: AppliedCSSModuleClassNames;
 };
+
 
 type StringIndexedObject = { [key: string]: string; };
 
@@ -64,7 +73,9 @@ export interface Themeable<T> extends ThemeableMixin<T> {
 }
 
 /**
- * BaseTheme
+ * BaseTheme to be passed as this.baseTheme
+ * The path string is used to perform a lookup
+ * against any theme that has been set.
  */
 export interface BaseTheme<T> {
 	classes: T;
@@ -77,11 +88,24 @@ export interface BaseTheme<T> {
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, ThemeableOptions> {}
 
 /**
- * Private maps
+ * Map containing lookups for available css module class names,.
+ * Responding object contains each css module class name that applies
+ * with a boolean set to true.
  */
 const cssModuleClassNameMap = new WeakMap<Themeable<any>, CSSModuleClasses<any>>();
+
+/**
+ * Map containing a lookup for all the class names provided in the
+ * widgets baseTheme.
+ */
 const availableClassNameMap = new WeakMap<Themeable<any>, ClassNames<any>>();
+
+/**
+ * Map containing every class name that has been applied to the widget.
+ * Responding object consits of each ckass name with a boolean set to false.
+ */
 const allClassNamesMap = new WeakMap<Themeable<any>, AppliedCSSModuleClassNames>();
+
 
 function appendToAllClassNames<T>(instance: Themeable<T>, classNames: string[]) {
 	const negativeClassFlags = setClassNameApplied(classNames, false);
