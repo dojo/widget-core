@@ -151,16 +151,16 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 
 function bindFunctionProperties(instance: Widget<WidgetProperties>, properties: WidgetProperties) {
 	Object.keys(properties).forEach((propertyKey) => {
-		const func = properties[propertyKey];
+		const property = properties[propertyKey];
 		const bind = properties.bind;
 
-		if (typeof func === 'function') {
-			const bindInfo = bindFunctionPropertyMap.get(func) || {};
+		if (typeof property === 'function') {
+			const bindInfo = bindFunctionPropertyMap.get(property) || {};
 			let { boundFunc, scope } = bindInfo;
 
 			if (!boundFunc || scope !== bind) {
-				boundFunc = func.bind(bind);
-				bindFunctionPropertyMap.set(func, { boundFunc, scope: bind });
+				boundFunc = property.bind(bind);
+				bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
 			}
 			properties[propertyKey] = boundFunc;
 		}
