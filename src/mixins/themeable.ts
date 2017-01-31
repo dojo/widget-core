@@ -38,9 +38,6 @@ export type CSSModuleClasses<T> = {
 	[P in keyof T]: AppliedCSSModuleClassNames;
 };
 
-
-type StringIndexedObject = { [key: string]: string; };
-
 /**
  * Properties required for the themeable mixin
  */
@@ -86,6 +83,8 @@ export interface BaseTheme<T> {
  * Compose Themeable Factory interface
  */
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin<any>, ThemeableOptions> {}
+
+type StringIndexedObject = { [key: string]: string; };
 
 /**
  * Map containing lookups for available css module class names,.
