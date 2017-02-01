@@ -109,7 +109,7 @@ const baseThemeReverseLookupMap = new WeakMap<Themeable, ClassNames>();
 
 /**
  * Map containing every class name that has been applied to the widget.
- * Responding object consits of each class name with a boolean set to false.
+ * Responding object consists of each class name with a boolean set to false.
  */
 const allClassNamesMap = new WeakMap<Themeable, ClassNameFlags>();
 
