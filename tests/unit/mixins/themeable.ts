@@ -231,6 +231,25 @@ registerSuite({
 				[ testTheme2.testPath.class1 ]: true,
 				[ baseThemeClasses.class2 ]: true
 			});
+		},
+		'will not regenerate theme classes if theme changed property is not set'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme1 }
+			});
+			themeableInstance.emit({
+				type: 'properties:changed',
+				properties: {
+					theme: testTheme2
+				},
+				changedPropertyKeys: [ 'id' ]
+			});
+
+			const { class1, class2 } = baseThemeClasses;
+			const flaggedClasses = themeableInstance.classes(class1, class2).get();
+			assert.deepEqual(flaggedClasses, {
+				[ testTheme1.testPath.class1 ]: true,
+				[ baseThemeClasses.class2 ]: true
+			}, 'theme2 classes should not be present');
 		}
 	},
 	'setting override classes': {
