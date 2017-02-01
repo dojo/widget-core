@@ -1,7 +1,7 @@
 import createWidgetBase from '../../../src/createWidgetBase';
 import { v } from '../../../src/d';
 import { WidgetProperties, Widget } from '../../../src/interfaces';
-import { registerCustomElementV1 } from '../../../src/registerCustomElement';
+import registerCustomElement from '../../../src/registerCustomElement';
 
 interface TestButtonProperties extends WidgetProperties {
 	label: string;
@@ -32,7 +32,7 @@ const createTestButton = createWidgetBase.mixin({
 	}
 });
 
-registerCustomElementV1(function () {
+registerCustomElement(function () {
 	return {
 		tagName: 'test-button',
 		widgetFactory: createTestButton,
@@ -43,6 +43,25 @@ registerCustomElementV1(function () {
 			{
 				attributeName: 'label-suffix',
 				propertyName: 'suffix'
+			}
+		],
+		events: [
+			{
+				propertyName: 'onClick',
+				eventName: 'button-click'
+			}
+		]
+	};
+});
+
+registerCustomElement(function () {
+	return {
+		tagName: 'no-attributes',
+		widgetFactory: createTestButton,
+		properties: [
+			{
+				propertyName: 'buttonLabel',
+				widgetPropertyName: 'label'
 			}
 		],
 		events: [

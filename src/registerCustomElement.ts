@@ -19,7 +19,7 @@ export interface CustomElementDescriptorFactory {
  *
  * @param descriptorFactory
  */
-export function registerCustomElementV1(descriptorFactory: CustomElementDescriptorFactory) {
+export function registerCustomElement(descriptorFactory: CustomElementDescriptorFactory) {
 	const descriptor = descriptorFactory();
 	let widgetInstance: Widget<any>;
 
@@ -56,4 +56,4 @@ export function registerCustomElementV1(descriptorFactory: CustomElementDescript
 	});
 }
 
-export default registerCustomElementV1;
+export default registerCustomElement;
