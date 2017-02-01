@@ -2,26 +2,37 @@ import compose from '@dojo/compose/compose';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import themeable, { Themeable } from '../../../src/mixins/themeable';
+import themeable, { Themeable, BaseTheme } from '../../../src/mixins/themeable';
 import createWidgetBase from '../../../src/createWidgetBase';
 import { v } from '../../../src/d';
 import { Widget, WidgetProperties, DNode } from '../../../src/interfaces';
 
-const baseTheme = {
+const baseThemeClasses = {
 	class1: 'baseClass1',
 	class2: 'baseClass2'
 };
 
+const baseTheme: BaseTheme<typeof baseThemeClasses> = {
+	path: 'testPath',
+	classes: baseThemeClasses
+};
+
 const testTheme = {
-	class1: 'themeClass1'
+	testPath: {
+		class1: 'themeClass1'
+	}
 };
 
 const testTheme2 = {
-	class2: 'theme2Class2'
+	testPath: {
+		class2: 'theme2Class2'
+	}
 };
 
 const testTheme3 = {
-	class1: 'theme3Class1'
+	testPath: {
+		class1: 'theme3Class1'
+	}
 };
 
 const overrideClasses = {
@@ -41,7 +52,7 @@ const themeableFactory = compose({
 	}
 }).mixin(themeable);
 
-let themeableInstance: Themeable<typeof baseTheme>;
+let themeableInstance: Themeable<typeof baseThemeClasses>;
 
 registerSuite({
 	name: 'themeManager',
@@ -51,8 +62,8 @@ registerSuite({
 		},
 		'should return only base classes when no theme is set'() {
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.class1 ]: true },
-				class2: { [ baseTheme.class2 ]: true }
+				class1: { [ baseTheme.classes.class1 ]: true },
+				class2: { [ baseTheme.classes.class2 ]: true }
 			});
 		}
 	},
@@ -62,8 +73,8 @@ registerSuite({
 		},
 		'should return theme class instead of base class when a theme is set'() {
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.class1 ]: true },
-				class2: { [ baseTheme.class2 ]: true }
+				class1: { [ testTheme.testPath.class1 ]: true },
+				class2: { [ baseTheme.classes.class2 ]: true }
 			});
 		},
 		'should regenerate and negate class names on theme change'() {
@@ -75,8 +86,8 @@ registerSuite({
 				changedPropertyKeys: [ 'theme' ]
 			});
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
-				class2: { [ baseTheme.class2 ]: false, [ testTheme2.class2 ]: true }
+				class1: { [ baseTheme.classes.class1 ]: true, [ testTheme.testPath.class1 ]: false },
+				class2: { [ baseTheme.classes.class2 ]: false, [ testTheme2.testPath.class2 ]: true }
 			});
 		}
 	},
@@ -89,8 +100,8 @@ registerSuite({
 		},
 		'should return override class as well as baseclass'() {
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.class1 ]: true },
-				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: true }
+				class1: { [ testTheme.testPath.class1 ]: true },
+				class2: { [ baseTheme.classes.class2 ]: true, [ overrideClasses.class2 ]: true }
 			});
 		},
 		'should regenerate class names on overrides change'() {
@@ -103,8 +114,8 @@ registerSuite({
 				changedPropertyKeys: [ 'overrideClasses' ]
 			});
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ testTheme.class1 ]: true },
-				class2: { [ baseTheme.class2 ]: true, [ overrideClasses.class2 ]: false, [ overrideClasses2.class2 ]: true }
+				class1: { [ testTheme.testPath.class1 ]: true },
+				class2: { [ baseTheme.classes.class2 ]: true, [ overrideClasses.class2 ]: false, [ overrideClasses2.class2 ]: true }
 			});
 		},
 		'should regenerate class names on theme and overrides change'() {
@@ -117,10 +128,10 @@ registerSuite({
 				changedPropertyKeys: [ 'theme', 'overrideClasses' ]
 			});
 			assert.deepEqual(themeableInstance.theme, {
-				class1: { [ baseTheme.class1 ]: true, [ testTheme.class1 ]: false },
+				class1: { [ baseTheme.classes.class1 ]: true, [ testTheme.testPath.class1 ]: false },
 				class2: {
-					[ testTheme2.class2 ]: true,
-					[ baseTheme.class2 ]: false,
+					[ testTheme2.testPath.class2 ]: true,
+					[ baseTheme.classes.class2 ]: false,
 					[ overrideClasses.class2 ]: false,
 					[ overrideClasses2.class2 ]: true
 				}
@@ -130,12 +141,12 @@ registerSuite({
 	'should only negate each class once'() {
 		themeableInstance = themeableFactory();
 
-		const theme1 = { class1: 'firstChange' };
-		const theme2 = { class1: 'secondChange' };
+		const theme1 = { testPath: { class1: 'firstChange' }};
+		const theme2 = { testPath: { class1: 'secondChange' }};
 		let themeClasses = themeableInstance.theme;
 
 		assert.deepEqual(themeableInstance.theme.class1, {
-			[ baseTheme.class1 ]: true
+			[ baseTheme.classes.class1 ]: true
 		}, 'should have base theme set to true');
 
 		themeableInstance.emit({
@@ -146,8 +157,8 @@ registerSuite({
 		themeClasses = themeableInstance.theme;
 
 		assert.deepEqual(themeableInstance.theme.class1, {
-			[ baseTheme.class1 ]: false,
-			[ theme1.class1 ]: true
+			[ baseTheme.classes.class1 ]: false,
+			[ theme1.testPath.class1 ]: true
 		}, 'should have base theme set to false and theme1 class1 set to true');
 
 		themeableInstance.emit({
@@ -158,8 +169,8 @@ registerSuite({
 		themeClasses = themeableInstance.theme;
 
 		assert.deepEqual(themeableInstance.theme.class1, {
-			[ theme1.class1 ]: false,
-			[ theme2.class1 ]: true
+			[ theme1.testPath.class1 ]: false,
+			[ theme2.testPath.class1 ]: true
 		}, 'should have theme1 class1 set to false and theme2 class1 set to true');
 	},
 	'properties changing outside of the scope of theme should not change theme'() {
@@ -179,7 +190,7 @@ registerSuite({
 	},
 	integration: {
 		'should work as mixin to createWidgetBase'() {
-			type ThemeableWidget = Widget<WidgetProperties> & Themeable<typeof baseTheme>;
+			type ThemeableWidget = Widget<WidgetProperties> & Themeable<typeof baseThemeClasses>;
 
 			const createThemeableWidget = createWidgetBase.mixin(themeable).mixin({
 				mixin: {
@@ -197,12 +208,15 @@ registerSuite({
 			});
 
 			const result = <VNode> themeableWidget.__render__();
-			assert.deepEqual(result.children![0].properties!.classes, { [ testTheme.class1 ]: true });
+			assert.deepEqual(result.children![0].properties!.classes, { [ testTheme.testPath.class1 ]: true });
 
 			themeableWidget.setProperties({ theme: testTheme3 });
 
 			const result2 = <VNode> themeableWidget.__render__();
-			assert.deepEqual(result2.children![0].properties!.classes, { [ testTheme.class1 ]: false, [ testTheme3.class1 ]: true });
+			assert.deepEqual(result2.children![0].properties!.classes, {
+				[ testTheme.testPath.class1 ]: false,
+				[ testTheme3.testPath.class1 ]: true
+			});
 		}
 	}
 });
