@@ -74,15 +74,15 @@ export interface ThemeableMixin extends Evented {
  * Themeable
  */
 export interface Themeable extends ThemeableMixin {
-	baseTheme: BaseTheme;
+	baseClasses: BaseClasses;
 	properties: ThemeableProperties;
 }
 
 /**
- * BaseTheme to be passed as this.baseTheme. The path string is used to
+ * BaseClasses to be passed as this.baseClasses. The path string is used to
  * perform a lookup against any theme that has been set.
  */
-export interface BaseTheme {
+export interface BaseClasses {
 	classes: ClassNames;
 	key: string;
 }
@@ -103,9 +103,9 @@ const generatedClassNameMap = new WeakMap<Themeable, ClassNameFlagsMap>();
 
 /**
  * Map containing a reverse lookup for all the class names provided in the
- * widget's baseTheme.
+ * widget's baseClasses.
  */
-const baseThemeReverseLookupMap = new WeakMap<Themeable, ClassNames>();
+const baseClassesReverseLookupMap = new WeakMap<Themeable, ClassNames>();
 
 /**
  * Map containing every class name that has been applied to the widget.
@@ -126,11 +126,11 @@ function createClassNameObject(classNames: string[], applied: boolean) {
 	}, {});
 }
 
-function generateThemeClasses(instance: Themeable, { classes: baseThemeClasses, key }: BaseTheme, theme: any = {}, overrideClasses: any = {}) {
+function generateThemeClasses(instance: Themeable, { classes: baseClassesClasses, key }: BaseClasses, theme: any = {}, overrideClasses: any = {}) {
 	let allClasses: string[] = [];
-	const sourceThemeClasses = theme.hasOwnProperty(key) ? assign({}, baseThemeClasses, theme[key]) : baseThemeClasses;
+	const sourceThemeClasses = theme.hasOwnProperty(key) ? assign({}, baseClassesClasses, theme[key]) : baseClassesClasses;
 
-	const themeClasses = Object.keys(baseThemeClasses).reduce((newAppliedClassNames, className: string) => {
+	const themeClasses = Object.keys(baseClassesClasses).reduce((newAppliedClassNames, className: string) => {
 		let cssClassNames = sourceThemeClasses[className].split(' ');
 
 		if (overrideClasses.hasOwnProperty(className)) {
@@ -154,12 +154,12 @@ function onPropertiesChanged(instance: Themeable, { theme, overrideClasses }: Th
 	const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 	if (themeChanged || overrideClassesChanged) {
-		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
+		const themeClasses = generateThemeClasses(instance, instance.baseClasses, theme, overrideClasses);
 		generatedClassNameMap.set(instance, themeClasses);
 	}
 }
 
-function createBaseThemeLookup({ classes }: BaseTheme): ClassNames {
+function createBaseClassesLookup({ classes }: BaseClasses): ClassNames {
 	return Object.keys(classes).reduce((currentClassNames, key: string) => {
 		currentClassNames[classes[key]] = key;
 		return currentClassNames;
@@ -185,15 +185,15 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
 		classes(this: Themeable, ...classNames: string[]) {
 			const cssModuleClassNames = generatedClassNameMap.get(this);
-			const baseThemeReverseLookup = baseThemeReverseLookupMap.get(this);
+			const baseClassesReverseLookup = baseClassesReverseLookupMap.get(this);
 
 			const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
-				const classNameKey = baseThemeReverseLookup[className];
+				const classNameKey = baseClassesReverseLookup[className];
 				if (cssModuleClassNames.hasOwnProperty(classNameKey)) {
 					assign(currentCSSModuleClassNames, cssModuleClassNames[classNameKey]);
 				}
 				else {
-					console.warn(`Class name: ${className} and lookup key: ${classNameKey} not from baseTheme, use chained 'fixed' method instead`);
+					console.warn(`Class name: ${className} and lookup key: ${classNameKey} not from baseClasses, use chained 'fixed' method instead`);
 				}
 				return currentCSSModuleClassNames;
 			}, {});
@@ -222,7 +222,7 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		onPropertiesChanged(instance, instance.properties, [ 'theme' ]);
-		baseThemeReverseLookupMap.set(instance, createBaseThemeLookup(instance.baseTheme));
+		baseClassesReverseLookupMap.set(instance, createBaseClassesLookup(instance.baseClasses));
 	}
 });
 
