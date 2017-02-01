@@ -12,7 +12,7 @@ import {
 	PropertiesChangeRecord,
 	PropertyChangeRecord
 } from './interfaces';
-import { VNode, VNodeProperties } from '@dojo/interfaces/vdom';
+import { VNode } from '@dojo/interfaces/vdom';
 import { assign } from '@dojo/core/lang';
 import WeakMap from '@dojo/shim/WeakMap';
 import Promise from '@dojo/shim/Promise';
@@ -42,6 +42,8 @@ interface WidgetInternalState {
  */
 const widgetInternalStateMap = new WeakMap<Widget<WidgetProperties>, WidgetInternalState>();
 
+const bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
+
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 
 function getFromRegistry(instance: Widget<WidgetProperties>, factoryLabel: string): FactoryRegistryItem | null {
@@ -59,7 +61,7 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 	}
 
 	if (isWNode(dNode)) {
-		const { children, properties } = dNode;
+		const { children, properties = {} } = dNode;
 		const { key } = properties;
 
 		let { factory } = dNode;
@@ -94,11 +96,13 @@ function dNodeToVNode(instance: Widget<WidgetProperties>, dNode: DNode): VNode |
 			return false;
 		});
 
+		if (!properties.hasOwnProperty('bind')) {
+			properties.bind = instance;
+		}
+
 		if (cachedChild) {
 			child = cachedChild.child;
-			if (properties) {
-				child.setProperties(properties);
-			}
+			child.setProperties(properties);
 			cachedChild.used = true;
 		}
 		else {
@@ -145,11 +149,22 @@ function manageDetachedChildren(instance: Widget<WidgetProperties>): void {
 	});
 }
 
-function formatTagNameAndClasses(tagName: string, classes: string[]) {
-	if (classes.length) {
-		return `${tagName}.${classes.join('.')}`;
-	}
-	return tagName;
+function bindFunctionProperties(instance: Widget<WidgetProperties>, properties: WidgetProperties) {
+	Object.keys(properties).forEach((propertyKey) => {
+		const property = properties[propertyKey];
+		const bind = properties.bind;
+
+		if (typeof property === 'function') {
+			const bindInfo = bindFunctionPropertyMap.get(property) || {};
+			let { boundFunc, scope } = bindInfo;
+
+			if (!boundFunc || scope !== bind) {
+				boundFunc = property.bind(bind);
+				bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
+			}
+			properties[propertyKey] = boundFunc;
+		}
+	});
 }
 
 const createWidget: WidgetBaseFactory = createEvented
@@ -160,11 +175,8 @@ const createWidget: WidgetBaseFactory = createEvented
 				return properties;
 			},
 
-			classes: [],
-
 			getNode(this: Widget<WidgetProperties>): DNode {
-				const tag = formatTagNameAndClasses(this.tagName, this.classes);
-				return v(tag, this.getNodeAttributes(), this.getChildrenNodes());
+				return v('div', {}, this.getChildrenNodes());
 			},
 
 			get children(this: Widget<WidgetProperties>) {
@@ -182,19 +194,6 @@ const createWidget: WidgetBaseFactory = createEvented
 
 			getChildrenNodes(this: Widget<WidgetProperties>): DNode[] {
 				return this.children;
-			},
-
-			getNodeAttributes(this: Widget<WidgetProperties>, overrides?: VNodeProperties): VNodeProperties {
-				const props: VNodeProperties = {};
-
-				this.nodeAttributes.forEach((fn) => {
-					const newProps: VNodeProperties = fn.call(this);
-					if (newProps) {
-						assign(props, newProps);
-					}
-				});
-
-				return props;
 			},
 
 			invalidate(this: Widget<WidgetProperties>): void {
@@ -215,6 +214,8 @@ const createWidget: WidgetBaseFactory = createEvented
 
 				const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 				const diffPropertyChangedKeys: string[] = [];
+
+				bindFunctionProperties(this, properties);
 
 				internalState.diffPropertyFunctionMap.forEach((property: string, diffFunctionName: string) => {
 					const previousProperty = internalState.previousProperties[property];
@@ -264,25 +265,6 @@ const createWidget: WidgetBaseFactory = createEvented
 				return this.getNode();
 			},
 
-			nodeAttributes: [
-				function (this: Widget<WidgetProperties>): VNodeProperties {
-					const baseIdProp = this.properties && this.properties.id ? { 'data-widget-id': this.properties.id } : {};
-					const { styles = {} } = this.properties || {};
-					const classes: { [index: string]: boolean; } = {};
-
-					const internalState = widgetInternalStateMap.get(this);
-
-					internalState.widgetClasses.forEach((c) => classes[c] = false);
-
-					if (this.properties && this.properties.classes) {
-						this.properties.classes.forEach((c) => classes[c] = true);
-						internalState.widgetClasses =  this.properties.classes;
-					}
-
-					return assign(baseIdProp, { key: this, classes, styles });
-				}
-			],
-
 			__render__(this: Widget<WidgetProperties>): VNode | string | null {
 				const internalState = widgetInternalStateMap.get(this);
 				if (internalState.dirty || !internalState.cachedVNode) {
@@ -297,15 +279,11 @@ const createWidget: WidgetBaseFactory = createEvented
 				return internalState.cachedVNode;
 			},
 
-			registry: undefined,
-
-			tagName: 'div'
+			registry: undefined
 		},
 		initialize(instance: Widget<WidgetProperties>, options: WidgetOptions<WidgetProperties> = {}) {
-			const { tagName, properties = {} } = options;
+			const { properties = {} } = options;
 			const diffPropertyFunctionMap = new Map<string, string>();
-
-			instance.tagName = tagName || instance.tagName;
 
 			Object.keys(Object.getPrototypeOf(instance)).forEach((attribute) => {
 				const match = attribute.match(propertyFunctionNameRegex);

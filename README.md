@@ -26,6 +26,11 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [Widget Registry](#widget-registry)
         - [Theming](#theming)
         - [Internationalization](#internationalization-i18n)
+        - [Web Components](#web-components)
+        	- [Attributes](#attributes)
+        	- [Properties](#properties)
+        	- [Events](#events)
+        	- [Initialization](#initialization)
     - [Key Principles](#key-principles)
     - [Examples](#examples)
         - [Example Label Widget](#example-label-widget)
@@ -61,12 +66,9 @@ The smallest `@dojo/widget-core` example looks like this:
 
 ```ts
 const createMyWidget = createWidgetBase.extend({
-	tagName: 'h1',
-	nodeAttributes: [
-		function() {
-			return { innerHTML: 'Hello, Dojo!' };
-		}
-	]
+   render(): DNode {
+       return v('h1', { innerHTML: 'Hello, Dojo!' });
+   }
 });
 
 createMyWidget.mixin(createProjectorMixin)().append();
@@ -188,9 +190,7 @@ import { createWidgetBase } from '@dojo/widget-core/createWidgetBase';
 
 |Function|Description|Default Behaviour|
 |---|---|---|
-|getNode|Returns the top level node of a widget|Returns a `HNode` with the widgets `tagName`, the result of `this.getNodeAttributes` and `this.children`|
-|getChildrenNodes|Returns the child node structure of a widget|Returns the widgets children `DNode` array|
-|nodeAttributes|An array of functions that return VNodeProperties to be applied to the top level node|Returns attributes for `data-widget-id`, `classes` and `styles` using the widget's specified `properties` (`id`, `classes`, `styles`) at the time of render|
+|render|Returns the DNode structure of the widget|Returns a `div` HNode with children of `this.children`.
 |diffProperties|Diffs the current properties against the previous properties and returns an object with the changed keys and new properties|Performs a shallow comparison previous and current properties, copies the properties using `Object.assign` and returns the resulting `PropertiesChangeRecord`.|
 
 #### The 'properties' lifecycle
@@ -289,7 +289,7 @@ createWidgetProjector().append(() => {
 #### Event Handling
 
 The recommended pattern for custom event handlers is to declare them on the widget class and reference the function using `this`.
-Event handlers are most commonly called from the `getChildrenNodes` function or a `nodeAttributes` function.
+Event handlers are most commonly called from `render`.
 
 Event handlers can be internal logic encapsulated within a widget or delegate to a function passed into the widget via `properties`.
 For convenience event handlers are automatically bound to the scope of their enclosing widget.
@@ -297,18 +297,20 @@ For convenience event handlers are automatically bound to the scope of their enc
 *internally defined handler*
 
 ```ts
-const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
+const createMyWidget: MyWidgetFactory = createWidgetBase
+.mixin(internalStateMixin)
+.mixin({
 	mixin: {
 		onClick: function (this: MyWidget): void {
 			this.setState(!this.state.selected);
 		},
-		getChildrenNodes(this: MyWidget): DNode[] {
+		render(this: MyWidget): DNode {
 			const { state: { selected } } = this;
 
-			return [
+			return v('div', [
 				v('input', { type: 'checkbox', onclick: this.onClick }),
 				v('input', { type: 'text', disabled: this.state.selected })
-			];
+			]);
 		}
 	}
 });
@@ -334,11 +336,10 @@ import { specialClick } from './mySpecialFunctions';
 
 const createMyWidget: MyWidgetFactory = createWidgetBase.mixin({
 	mixin: {
-		getChildrenNodes(this: MyWidget): DNode[] {
+		render(this: MyWidget): DNode {
 			const { properties: { specialClick } } = this;
-			return [
-				w(createChildWidget, { onClick: specialClick.bind(this) })
-			]
+
+			return	w(createChildWidget, { onClick: specialClick.bind(this) });
 		}
 	}
 });
@@ -436,14 +437,11 @@ export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetPropertie
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
 	mixin: {
 		baseClasses,
-		getChildrenNodes: function (this: TabPanel): DNode[] {
-			const { root, tab } = baseClasses.classes;
-			return [
-				v(`ul`, { classes: this.classes(root).get() }, [
+		render: function (this: TabPanel): DNode[] {
+			return
+				v('ul', { classes: this.classes(root).get() }, [
 					v('li', { classes: this.classes(tab).get() }, [ 'tab1' ])
-					// ...
 				]);
-			];
 		}
 	}
 });
@@ -507,14 +505,13 @@ export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetPropertie
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
 	mixin: {
 		baseClasses,
-		getChildrenNodes: function (this: TabPanel): DNode[] {
+		render: function (this: TabPanel): DNode[] {
 			const { root, tab } = baseClasses.classes;
-			return [
+			return
 				v(`ul`, { classes: this.classes(root).get() }, [
 					v('li', { classes: this.classes().fixed(tab).get() }, [ 'tab1' ])
 					// ...
 				]);
-			];
 		}
 	}
 });
@@ -530,7 +527,7 @@ Widgets can be internationalized by mixing in `@dojo/widget-core/mixins/createI1
 If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned.
 The widget will be invalidated once the locale-specific messages have been loaded.
 
-Each widget can have its own locale by setting its `state.locale`.
+Each widget can have its own locale by passing a property - `properties.locale`.
 If no locale is set, then the default locale, as set by [`@dojo/i18n`](https://github.com/dojo/i18n), is assumed.
 
 ```ts
@@ -538,22 +535,14 @@ const createI18nWidget = createWidgetBase
 	.mixin(createI18nMixin)
 	.mixin({
 		mixin: {
-			nodeAttributes: [
-				function (attributes: VNodeProperties): VNodeProperties {
-					// Load the `greetings` messages for the current locale.
-					const messages = this.localizeBundle(greetings);
-					return { title: messages.hello };
-				}
-			],
-
-			getChildrenNodes: function () {
+			render: function () {
 				// Load the "greetings" messages for the current locale. If the locale-specific
 				// messages have not been loaded yet, then the default messages are returned,
 				// and the widget will be invalidated once the locale-specific messages have
 				// loaded.
 				const messages = this.localizeBundle(greetingsBundle);
 
-				return [
+				return v('div', { title: messages.hello }, [
 					w(createLabel, {
 						// Passing a message string to a child widget.						label: messages.purchaseItems
 					}),
@@ -561,7 +550,7 @@ const createI18nWidget = createWidgetBase
 						// Passing a formatted message string to a child widget.
 						label: messages.format('itemCount', { count: 2 })
 					})
-				];
+				]);
 			}
 		}
 	});
@@ -572,6 +561,145 @@ const widget = createI18nWidget({
 	locale: 'fr'
 });
 ```
+
+#### Web Components
+
+Custom Widgets can be turned into [Custom Elements](https://www.w3.org/TR/2016/WD-custom-elements-20161013/) with
+minimal extra effort.
+
+Just create a `CustomElementDescriptor` factory and use the build tooling to do the rest of the work,
+
+```ts
+import { CustomElementDescriptor } from '@dojo/widget-core/customElements';
+
+export default function createCustomElement(): CustomElementDescriptor {
+	return {
+	   attributes: [
+		   {
+			   attributeName: 'label'
+		   }
+	   ],
+	   events: [
+		   {
+			   propertyName: 'onChange',
+			   name: 'change'
+		   }
+	   ]
+   };
+};
+```
+
+##### Attributes
+
+You can explicitly map widget properties to DOM node attributes with the `attributes` array.
+
+```ts
+{
+    attributes: [
+        {
+            attributeName: 'label'
+        },
+        {
+            attributeName: 'placeholder',
+            propertyName: 'placeHolder'
+        },
+        {
+            attributeName: 'delete-on-focus',
+            propertyName: 'deleteOnFocus',
+            value: value => Boolean(value || 0)
+        }
+    ]
+}
+```
+
+* `attributeName` refers to the attribute that will set on the DOM element, so, `<text-widget label="test" />`.
+* `propertyName` refers to the property on the widget to set, and if not set, defaults to the `attributeName`.
+* `value` lets you specify a transformation function on the attribute value. This function should return the value that
+will be set on the widget's property.
+
+Adding an attribute to the element will automatically add a corresponding property to the element as well.
+
+```ts
+// as an attribute
+textWidget.setAttribute('label', 'First Name');
+
+// as a property
+textWidget.label = 'First Name';
+```
+
+##### Properties
+
+You can map DOM element properties to widget properties,
+
+```ts
+{
+    properties: [
+        {
+            propertyName: 'placeholder',
+            widgetPropertyName: 'placeHolder'
+        }
+    ]
+}
+
+// ...
+
+textWidget.placeholder = 'Enter first name';
+```
+
+* `propertyName` is the name of the property on the DOM element
+* `widgetPropertyName` is the name of the property on the widget. If unspecified, `propertyName` is used instead.
+* `getValue`, if specified, will be called with the widget's property value as an argument. The returned value is returned as the DOM element property value.
+* `setValue`, if specified, is called with the DOM elements property value. The returned value is used for the widget property's value.
+
+##### Events
+
+Some widgets have function properties, like events, that need to be exposed to your element. You can use the
+`events` array to map widget properties to DOM events.
+
+```ts
+{
+    events: [
+        {
+            propertyName: 'onChange',
+            eventName: 'change'
+        }
+    ]
+}
+```
+
+This will add a property to `onChange` that will emit the `change` custom event. You can listen like any other
+DOM event,
+
+```ts
+textWidget.addEventListener('change', function (event) {
+    // do something
+});
+```
+
+##### Initialization
+
+Custom logic can be performed after properties/attributes have been defined but before the projector is created. This
+allows you full control over your widget, allowing you to add custom properties, event handlers, work with child nodes, etc.
+The initialization function is run from the context of the HTML element.
+
+```ts
+{
+    initialization(properties) {
+        const footer = this.getElementsByTagName('footer');
+        if (footer) {
+            properties.footer = footer;
+        }
+
+        const header = this.getElementsByTagName('header');
+        if (header) {
+            properties.header = header;
+        }
+    }
+}
+```
+
+It should be noted that children nodes are removed from the DOM when widget instantiation happens, and added as children
+to the widget instance.
 
 ### Key Principles
 
@@ -604,12 +732,9 @@ export interface LabelFactory extends WidgetFactory<Label, LabelProperties> {}
 
 const createLabelWidget: LabelFactory = createWidgetBase.mixin({
     mixin: {
-        tagName: 'label',
-        nodeAttributes: [
-            function(this: Label): VNodeProperties {
-                return { innerHTML: this.properties.content };
-            }
-        ]
+        render(this: Label): DNode {
+            return v('label', { innerHTML: this.properties.content });
+        }
     }
 });
 
@@ -617,8 +742,6 @@ export default createLabelWidget;
 ```
 
 #### Example List Widget
-
-To create structured widgets, override the `getChildrenNodes` function:
 
 ```ts
 import { DNode, Widget, WidgetFactory, WidgetProperties } from '@dojo/widget-core/interfaces';
@@ -648,11 +771,11 @@ function listItem(item: ListItem, itemNumber: number): DNode {
 
 const createListWidget: ListFactory = createWidgetBase.mixin({
 	mixin: {
-		getChildrenNodes: function (this: List): DNode[] {
+		render: function (this: List): DNode {
 			const { properties: { items = [] } } = this;
 			const listItems = items.map(listItem);
 
-			return [ v('ul', listItems) ];
+			return v('ul', listItems);
 		}
 	}
 });
