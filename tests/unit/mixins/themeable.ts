@@ -6,6 +6,7 @@ import themeable, { Themeable, BaseTheme } from '../../../src/mixins/themeable';
 import createWidgetBase from '../../../src/createWidgetBase';
 import { v } from '../../../src/d';
 import { Widget, WidgetProperties, DNode } from '../../../src/interfaces';
+import { stub, SinonStub } from 'sinon';
 
 const baseThemeClasses = {
 	class1: 'baseClass1',
@@ -53,10 +54,17 @@ const themeableFactory = compose({
 }).mixin(themeable);
 
 let themeableInstance: Themeable;
+let consoleStub: SinonStub;
 
 registerSuite({
 	name: 'themeManager',
-	'class names function': {
+	'classes function': {
+		beforeEach() {
+			consoleStub = stub(console, 'error');
+		},
+		afterEach() {
+			consoleStub.restore();
+		},
 		'should return baseTheme flagged classes via the classes function'() {
 			themeableInstance = themeableFactory();
 			const { class1, class2 } = baseThemeClasses;
@@ -65,6 +73,8 @@ registerSuite({
 				[ baseThemeClasses.class1 ]: true,
 				[ baseThemeClasses.class2 ]: true
 			});
+
+			assert.isFalse(consoleStub.called);
 		},
 		'should return negated classes for those that are not passed'() {
 			themeableInstance = themeableFactory();
@@ -74,35 +84,120 @@ registerSuite({
 				[ baseThemeClasses.class1 ]: true,
 				[ baseThemeClasses.class2 ]: false
 			});
+
+			assert.isFalse(consoleStub.called);
 		},
-		'should pass through new classes that do not exist in baseTheme'() {
+		'should ignore any new classes that do not exist in the baseTheme and show console error'() {
 			themeableInstance = themeableFactory();
 			const { class1 } = baseThemeClasses;
 			const newClassName = 'newClassName';
 			const flaggedClasses = themeableInstance.classes(class1, newClassName).get();
+
+			assert.deepEqual(flaggedClasses, {
+				[ baseThemeClasses.class1 ]: true,
+				[ baseThemeClasses.class2 ]: false
+			});
+
+			assert.isTrue(consoleStub.calledOnce);
+			assert.isTrue(consoleStub.firstCall.args[0].indexOf(newClassName) > -1);
+		},
+		'should split adjoined classes into multiple classes'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme3 }
+			});
+
+			const { class1, class2 } = baseThemeClasses;
+			const flaggedClasses = themeableInstance.classes(class1, class2).get();
+			assert.deepEqual(flaggedClasses, {
+				testTheme3Class1: true,
+				testTheme3AdjoinedClass1: true,
+				[ baseThemeClasses.class2 ]: true
+			});
+		},
+		'should remove adjoined classes when they are no longer provided'() {
+			themeableInstance = themeableFactory({
+				properties: { theme: testTheme3 }
+			});
+
+			themeableInstance.emit({
+				type: 'properties:changed',
+				properties: {
+					theme: testTheme1
+				},
+				changedPropertyKeys: [ 'theme' ]
+			});
+
+			const { class1, class2 } = baseThemeClasses;
+			const flaggedClasses = themeableInstance.classes(class1, class2).get();
+			assert.deepEqual(flaggedClasses, {
+				[ testTheme1.testPath.class1 ]: true,
+				testTheme3Class1: false,
+				testTheme3AdjoinedClass1: false,
+				[ baseThemeClasses.class2 ]: true
+			});
+		}
+	},
+	'classes.fixed chained function': {
+		'should pass through new classes'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = baseThemeClasses;
+			const fixedClassName = 'fixedClassName';
+			const flaggedClasses = themeableInstance.classes(class1).fixed(fixedClassName).get();
 			assert.deepEqual(flaggedClasses, {
 				[ baseThemeClasses.class1 ]: true,
 				[ baseThemeClasses.class2 ]: false,
-				[ newClassName ]: true
+				[ fixedClassName ]: true
 			});
 		},
 		'should negate any new classes that are not requested on second call'() {
 			themeableInstance = themeableFactory();
 			const { class1 } = baseThemeClasses;
-			const newClassName = 'newClassName';
-			const flaggedClassesFirstCall = themeableInstance.classes(class1, newClassName).get();
+			const fixedClassName = 'fixedClassName';
+			const flaggedClassesFirstCall = themeableInstance.classes(class1).fixed(fixedClassName).get();
 			assert.deepEqual(flaggedClassesFirstCall, {
 				[ baseThemeClasses.class1 ]: true,
 				[ baseThemeClasses.class2 ]: false,
-				[ newClassName ]: true
-			}, `${newClassName} should be true on first call`);
+				[ fixedClassName ]: true
+			}, `${fixedClassName} should be true on first call`);
 
 			const flaggedClassesSecondCall = themeableInstance.classes(class1).get();
 			assert.deepEqual(flaggedClassesSecondCall, {
 				[ baseThemeClasses.class1 ]: true,
 				[ baseThemeClasses.class2 ]: false,
-				[ newClassName ]: false
-			}, `${newClassName} should be false on second call`);
+				[ fixedClassName ]: false
+			}, `${fixedClassName} should be false on second call`);
+		},
+		'should split adjoined fixed classes into multiple classes'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = baseThemeClasses;
+			const adjoinedClassName = 'adjoinedClassName1 adjoinedClassName2';
+			const flaggedClasses = themeableInstance.classes(class1).fixed(adjoinedClassName).get();
+			assert.deepEqual(flaggedClasses, {
+				[ baseThemeClasses.class1 ]: true,
+				[ baseThemeClasses.class2 ]: false,
+				'adjoinedClassName1': true,
+				'adjoinedClassName2': true
+			});
+		},
+		'should remove adjoined fixed classes when they are no longer provided'() {
+			themeableInstance = themeableFactory();
+			const { class1 } = baseThemeClasses;
+			const adjoinedClassName = 'adjoinedClassName1 adjoinedClassName2';
+			const flaggedClassesFirstCall = themeableInstance.classes(class1).fixed(adjoinedClassName).get();
+			assert.deepEqual(flaggedClassesFirstCall, {
+				[ baseThemeClasses.class1 ]: true,
+				[ baseThemeClasses.class2 ]: false,
+				'adjoinedClassName1': true,
+				'adjoinedClassName2': true
+			}, 'adjoined classed should both be true on first call');
+
+			const flaggedClassesSecondCall = themeableInstance.classes(class1).get();
+			assert.deepEqual(flaggedClassesSecondCall, {
+				[ baseThemeClasses.class1 ]: true,
+				[ baseThemeClasses.class2 ]: false,
+				'adjoinedClassName1': false,
+				'adjoinedClassName2': false
+			}, `adjoiend class names should be false on second call`);
 		}
 	},
 	'setting a theme': {
@@ -169,43 +264,6 @@ registerSuite({
 				[ baseThemeClasses.class1 ]: true,
 				[ overrideClasses1.class1 ]: false,
 				[ overrideClasses2.class1 ]: true,
-				[ baseThemeClasses.class2 ]: true
-			});
-		}
-	},
-	'splitting adjoined classes': {
-		'should split adjoined classes into multiple classes'() {
-			themeableInstance = themeableFactory({
-				properties: { theme: testTheme3 }
-			});
-
-			const { class1, class2 } = baseThemeClasses;
-			const flaggedClasses = themeableInstance.classes(class1, class2).get();
-			assert.deepEqual(flaggedClasses, {
-				testTheme3Class1: true,
-				testTheme3AdjoinedClass1: true,
-				[ baseThemeClasses.class2 ]: true
-			});
-		},
-		'should remove adjoined classes when they are no longer provided'() {
-			themeableInstance = themeableFactory({
-				properties: { theme: testTheme3 }
-			});
-
-			themeableInstance.emit({
-				type: 'properties:changed',
-				properties: {
-					theme: testTheme1
-				},
-				changedPropertyKeys: [ 'theme' ]
-			});
-
-			const { class1, class2 } = baseThemeClasses;
-			const flaggedClasses = themeableInstance.classes(class1, class2).get();
-			assert.deepEqual(flaggedClasses, {
-				[ testTheme1.testPath.class1 ]: true,
-				testTheme3Class1: false,
-				testTheme3AdjoinedClass1: false,
 				[ baseThemeClasses.class2 ]: true
 			});
 		}
