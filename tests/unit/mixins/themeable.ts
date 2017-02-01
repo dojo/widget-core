@@ -60,7 +60,7 @@ registerSuite({
 	name: 'themeManager',
 	'classes function': {
 		beforeEach() {
-			consoleStub = stub(console, 'error');
+			consoleStub = stub(console, 'warn');
 		},
 		afterEach() {
 			consoleStub.restore();

@@ -7,18 +7,11 @@ import { ComposeFactory } from '@dojo/compose/compose';
 import { assign } from '@dojo/core/lang';
 
 /**
- * A representation of the css-module class names to be applied
- * where each class in appliedClasses is used.
+ * A representation of the css class names to be applied and
+ * removed.
  */
-export type AppliedCSSModuleClassNames = {
+export type ClassNameFlags = {
 	[key: string]: boolean;
-}
-
-/**
- * A mapping from class names to generatred css-module class names
- */
-export type CSSModuleClassNameMap = {
-	[key: string]: string[];
 }
 
 /**
@@ -30,10 +23,10 @@ export type ClassNames = {
 
 /**
  * The object returned by getClasses required by maquette for
- * adding / removing classes
+ * adding / removing classes. They are flagged to true / false.
  */
-export type CSSModuleClasses = {
-	[key: string]: AppliedCSSModuleClassNames;
+export type ClassNameFlagsMap = {
+	[key: string]: ClassNameFlags;
 };
 
 /**
@@ -51,17 +44,30 @@ export interface ThemeableOptions {
 	properties: ThemeableProperties;
 }
 
-export interface ClassesChain {
-	classes: AppliedCSSModuleClassNames;
-	fixed: (...classes: string[]) => ClassesChain;
-	get: () => AppliedCSSModuleClassNames;
+/**
+ * Returned by classes function.
+ */
+export interface ClassesFunctionChain {
+	/**
+	 * The classes to be returned when get() is called
+	 */
+	classes: ClassNameFlags;
+	/**
+	 * Function to pass fixed class names that bypass the theming
+	 * process
+	 */
+	fixed: (...classes: string[]) => ClassesFunctionChain;
+	/**
+	 * Finalize function to return the generated class names
+	 */
+	get: () => ClassNameFlags;
 }
 
 /**
  * Themeable Mixin
  */
 export interface ThemeableMixin extends Evented {
-	classes: (...classNames: string[]) => ClassesChain;
+	classes: (...classNames: string[]) => ClassesFunctionChain;
 }
 
 /**
@@ -93,31 +99,31 @@ type StringIndexedObject = { [key: string]: string; };
  * Responding object contains each css module class name that applies
  * with a boolean set to true.
  */
-const cssModuleClassNameMap = new WeakMap<Themeable, CSSModuleClasses>();
+const generatedClassNameMap = new WeakMap<Themeable, ClassNameFlagsMap>();
 
 /**
  * Map containing a reverse lookup for all the class names provided in the
  * widget's baseTheme.
  */
-const baseThemeLookupMap = new WeakMap<Themeable, ClassNames>();
+const baseThemeReverseLookupMap = new WeakMap<Themeable, ClassNames>();
 
 /**
  * Map containing every class name that has been applied to the widget.
- * Responding object consits of each ckass name with a boolean set to false.
+ * Responding object consits of each class name with a boolean set to false.
  */
-const allClassNamesMap = new WeakMap<Themeable, AppliedCSSModuleClassNames>();
+const allClassNamesMap = new WeakMap<Themeable, ClassNameFlags>();
 
 function appendToAllClassNames(instance: Themeable, classNames: string[]) {
-	const negativeClassFlags = setClassNameApplied(classNames, false);
+	const negativeClassFlags = createClassNameObject(classNames, false);
 	const currentNegativeClassFlags = allClassNamesMap.get(instance);
 	allClassNamesMap.set(instance, assign({}, currentNegativeClassFlags, negativeClassFlags));
 }
 
-function setClassNameApplied(classNames: string[], applied: boolean) {
-	return classNames.reduce((flaggedClassNames: AppliedCSSModuleClassNames, className) => {
+function createClassNameObject(classNames: string[], applied: boolean) {
+	return classNames.reduce((flaggedClassNames: ClassNameFlags, className) => {
 		flaggedClassNames[className] = applied;
 		return flaggedClassNames;
-	}, <AppliedCSSModuleClassNames> {});
+	}, {});
 }
 
 function generateThemeClasses(instance: Themeable, { classes: baseThemeClasses, key }: BaseTheme, theme: any = {}, overrideClasses: any = {}) {
@@ -133,10 +139,10 @@ function generateThemeClasses(instance: Themeable, { classes: baseThemeClasses, 
 
 		allClasses = [...allClasses, ...cssClassNames];
 
-		newAppliedClassNames[className] = setClassNameApplied(cssClassNames, true);
+		newAppliedClassNames[className] = createClassNameObject(cssClassNames, true);
 
 		return newAppliedClassNames;
-	}, <CSSModuleClasses> {});
+	}, <ClassNameFlagsMap> {});
 
 	appendToAllClassNames(instance, allClasses);
 
@@ -149,7 +155,7 @@ function onPropertiesChanged(instance: Themeable, { theme, overrideClasses }: Th
 
 	if (themeChanged || overrideClassesChanged) {
 		const themeClasses = generateThemeClasses(instance, instance.baseTheme, theme, overrideClasses);
-		cssModuleClassNameMap.set(instance, themeClasses);
+		generatedClassNameMap.set(instance, themeClasses);
 	}
 }
 
@@ -160,11 +166,12 @@ function createBaseThemeLookup({ classes }: BaseTheme): ClassNames {
 	}, <ClassNames> {});
 }
 
-function splitClassStrings(...classes: string[]): string[] {
+function splitClassStrings(classes: string[]): string[] {
 	return classes.reduce((splitClasses: string[], className) => {
 		if (className.indexOf(' ') > -1) {
 			splitClasses.push(...className.split(' '));
-		} else {
+		}
+		else {
 			splitClasses.push(className);
 		}
 		return splitClasses;
@@ -177,31 +184,32 @@ function splitClassStrings(...classes: string[]): string[] {
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
 		classes(this: Themeable, ...classNames: string[]) {
-			const cssModuleClassNames = cssModuleClassNameMap.get(this);
-			const baseThemeLookup = baseThemeLookupMap.get(this);
+			const cssModuleClassNames = generatedClassNameMap.get(this);
+			const baseThemeReverseLookup = baseThemeReverseLookupMap.get(this);
 
 			const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
-				const classNameKey = baseThemeLookup[className];
+				const classNameKey = baseThemeReverseLookup[className];
 				if (cssModuleClassNames.hasOwnProperty(classNameKey)) {
 					assign(currentCSSModuleClassNames, cssModuleClassNames[classNameKey]);
-				} else {
-					console.error(`Class name: ${className} and lookup key: ${classNameKey} not from baseTheme, use chained 'fixed' method instead`);
+				}
+				else {
+					console.warn(`Class name: ${className} and lookup key: ${classNameKey} not from baseTheme, use chained 'fixed' method instead`);
 				}
 				return currentCSSModuleClassNames;
-			}, <any> {});
+			}, {});
 
-			let responseClasses = assign({}, allClassNamesMap.get(this), appliedClasses);
+			const responseClasses = assign({}, allClassNamesMap.get(this), appliedClasses);
 			const instance = this;
 
-			const classesResponseChain: ClassesChain = {
+			const classesResponseChain: ClassesFunctionChain = {
 				classes: responseClasses,
-				fixed(this: ClassesChain, ...classes: string[]) {
-					const splitClasses = splitClassStrings(...classes);
-					assign(this.classes, setClassNameApplied(splitClasses, true));
+				fixed(this: ClassesFunctionChain, ...classes: string[]) {
+					const splitClasses = splitClassStrings(classes);
+					assign(this.classes, createClassNameObject(splitClasses, true));
 					appendToAllClassNames(instance, splitClasses);
 					return this;
 				},
-				get(this: ClassesChain) {
+				get(this: ClassesFunctionChain) {
 					return this.classes;
 				}
 			};
@@ -214,7 +222,7 @@ const themeableFactory: ThemeableFactory = createEvented.mixin({
 			onPropertiesChanged(instance, evt.properties, evt.changedPropertyKeys);
 		}));
 		onPropertiesChanged(instance, instance.properties, [ 'theme' ]);
-		baseThemeLookupMap.set(instance, createBaseThemeLookup(instance.baseTheme));
+		baseThemeReverseLookupMap.set(instance, createBaseThemeLookup(instance.baseTheme));
 	}
 });
 
