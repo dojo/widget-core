@@ -420,7 +420,7 @@ Classnames are locally scoped as part of the build. A theme `key` is generated a
 To apply baseClasses a widget must use the `themeable` mixin and import it's `baseClasses` object.
 
 ``` typescript
-import * as baseClasses from './styles/tabpanel';
+import baseClasses from './styles/tabpanel';
 ```
 Theme classes to be applied to a widgets VDOM are acquired using `this.classes(<themeClass>)`.
 
@@ -428,7 +428,7 @@ Basic usage:
 
 ``` typescript
 /* tabpanel.ts */
-import * as baseClasses from './styles/tabpanel';
+import baseClasses from './styles/tabpanel';
 import themeableMixin, { Themeable } from '../mixins/themeable';
 
 export type TabPanel = Widget<WidgetProperties> & Themeable;
@@ -497,7 +497,7 @@ The `this.classes` function returns a chained `fixed` function that can be used 
 
 ``` typescript
 /* tabpanel.ts */
-import * as baseClasses from './styles/tabpanel';
+import baseClasses from './styles/tabpanel';
 import themeableMixin, { Themeable } from '../mixins/themeable';
 
 export type TabPanel = Widget<WidgetProperties> & Themeable;
