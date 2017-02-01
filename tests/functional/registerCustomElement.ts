@@ -63,6 +63,5 @@ function createTests(url: string) {
 registerSuite({
 	name: 'registerCustomElement',
 
-	'v1': createTests((<any> require).toUrl('./support/registerCustomElementV1.html')),
-	'v0': createTests((<any> require).toUrl('./support/registerCustomElementV0.html'))
+	'v1': createTests((<any> require).toUrl('./support/registerCustomElementV1.html'))
 });
