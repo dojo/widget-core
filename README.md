@@ -438,6 +438,7 @@ const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).m
 	mixin: {
 		baseClasses,
 		render: function (this: TabPanel): DNode[] {
+			const { root, tab } = baseClasses.classes;
 			return
 				v('ul', { classes: this.classes(root).get() }, [
 					v('li', { classes: this.classes(tab).get() }, [ 'tab1' ])
