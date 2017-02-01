@@ -138,6 +138,16 @@ registerSuite({
 		}
 	},
 	'classes.fixed chained function': {
+		'should work without any classes passed to first function'() {
+			themeableInstance = themeableFactory();
+			const fixedClassName = 'fixedClassName';
+			const flaggedClasses = themeableInstance.classes().fixed(fixedClassName).get();
+			assert.deepEqual(flaggedClasses, {
+				[ baseThemeClasses.class1 ]: false,
+				[ baseThemeClasses.class2 ]: false,
+				[ fixedClassName ]: true
+			});
+		},
 		'should pass through new classes'() {
 			themeableInstance = themeableFactory();
 			const { class1 } = baseThemeClasses;
