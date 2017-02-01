@@ -121,19 +121,21 @@ function setClassNameApplied(classNames: string[], applied: boolean) {
 }
 
 function generateThemeClasses(instance: Themeable, { classes: baseThemeClasses, key }: BaseTheme, theme: any = {}, overrideClasses: any = {}) {
-	const applicableThemeClasses = theme.hasOwnProperty(key) ? theme[key] : {};
-	const combinedThemeClasses = assign({}, baseThemeClasses, applicableThemeClasses);
 	let allClasses: string[] = [];
+	const sourceThemeClasses = theme.hasOwnProperty(key) ? assign({}, baseThemeClasses, theme[key]) : baseThemeClasses;
 
-	const themeClasses = Object.keys(combinedThemeClasses).reduce((newAppliedClasses, className: string) => {
-		const cssClassNames = combinedThemeClasses[className].split(' ');
-		const overrideCssClassNames = overrideClasses.hasOwnProperty(className) ? overrideClasses[className].split(' ') : [];
-		const combinedCssClassNames = [...cssClassNames, ...overrideCssClassNames];
-		allClasses = [...allClasses, ...combinedCssClassNames];
+	const themeClasses = Object.keys(baseThemeClasses).reduce((newAppliedClassNames, className: string) => {
+		let cssClassNames = sourceThemeClasses[className].split(' ');
 
-		newAppliedClasses[className] = setClassNameApplied(combinedCssClassNames, true);
+		if (overrideClasses.hasOwnProperty(className)) {
+			cssClassNames = [...cssClassNames, ...overrideClasses[className].split(' ')];
+		}
 
-		return newAppliedClasses;
+		allClasses = [...allClasses, ...cssClassNames];
+
+		newAppliedClassNames[className] = setClassNameApplied(cssClassNames, true);
+
+		return newAppliedClassNames;
 	}, <CSSModuleClasses> {});
 
 	appendToAllClassNames(instance, allClasses);
@@ -158,35 +160,15 @@ function createBaseThemeLookup({ classes }: BaseTheme): ClassNames {
 	}, <ClassNames> {});
 }
 
-function getThemeableClasses(this: Themeable, ...classNames: string[]) {
-	const cssModuleClassNames = cssModuleClassNameMap.get(this);
-	const baseThemeLookup = baseThemeLookupMap.get(this);
-	const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
-		const classNameKey = baseThemeLookup[className];
-		if (cssModuleClassNames.hasOwnProperty(classNameKey)) {
-			assign(currentCSSModuleClassNames, cssModuleClassNames[classNameKey]);
+function splitClassStrings(...classes: string[]): string[] {
+	return classes.reduce((splitClasses: string[], className) => {
+		if (className.indexOf(' ') > -1) {
+			splitClasses.push(...className.split(' '));
 		} else {
-			console.error(`Class name: ${className} and lookup key: ${classNameKey} not from baseTheme, use chained 'fixed' method instead`);
+			splitClasses.push(className);
 		}
-		return currentCSSModuleClassNames;
-	}, <any> {});
-
-	let responseClasses = assign({}, allClassNamesMap.get(this), appliedClasses);
-	const instance = this;
-
-	const response: ClassesChain = {
-		classes: responseClasses,
-		fixed(this: ClassesChain, ...classes: string[]) {
-			assign(this.classes, setClassNameApplied(classes, true));
-			appendToAllClassNames(instance, classes);
-			return this;
-		},
-		get(this: ClassesChain) {
-			return this.classes;
-		}
-	};
-
-	return response;
+		return splitClasses;
+	}, []);
 }
 
 /**
@@ -194,7 +176,38 @@ function getThemeableClasses(this: Themeable, ...classNames: string[]) {
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
-		classes: getThemeableClasses
+		classes(this: Themeable, ...classNames: string[]) {
+			const cssModuleClassNames = cssModuleClassNameMap.get(this);
+			const baseThemeLookup = baseThemeLookupMap.get(this);
+
+			const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
+				const classNameKey = baseThemeLookup[className];
+				if (cssModuleClassNames.hasOwnProperty(classNameKey)) {
+					assign(currentCSSModuleClassNames, cssModuleClassNames[classNameKey]);
+				} else {
+					console.error(`Class name: ${className} and lookup key: ${classNameKey} not from baseTheme, use chained 'fixed' method instead`);
+				}
+				return currentCSSModuleClassNames;
+			}, <any> {});
+
+			let responseClasses = assign({}, allClassNamesMap.get(this), appliedClasses);
+			const instance = this;
+
+			const classesResponseChain: ClassesChain = {
+				classes: responseClasses,
+				fixed(this: ClassesChain, ...classes: string[]) {
+					const splitClasses = splitClassStrings(...classes);
+					assign(this.classes, setClassNameApplied(splitClasses, true));
+					appendToAllClassNames(instance, splitClasses);
+					return this;
+				},
+				get(this: ClassesChain) {
+					return this.classes;
+				}
+			};
+
+			return classesResponseChain;
+		}
 	},
 	initialize(instance: Themeable) {
 		instance.own(instance.on('properties:changed', (evt: PropertiesChangeEvent<ThemeableMixin, ThemeableProperties>) => {
