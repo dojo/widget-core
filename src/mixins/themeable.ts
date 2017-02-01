@@ -27,7 +27,7 @@ export type ClassNames = {
  */
 export type ClassNameFlagsMap = {
 	[key: string]: ClassNameFlags;
-};
+}
 
 /**
  * Properties required for the themeable mixin
