@@ -291,13 +291,14 @@ registerSuite({
 		'should work as mixin to createWidgetBase'() {
 			type ThemeableWidget = Widget<WidgetProperties> & Themeable;
 
+			const fixedClassName = 'fixedClassName';
 			const createThemeableWidget = createWidgetBase.mixin(themeable).mixin({
 				mixin: {
 					baseTheme,
 					getChildrenNodes(this: ThemeableWidget ): DNode[] {
 						const { class1 } = baseThemeClasses;
 						return [
-							v('div', { classes: this.classes(class1).get() })
+							v('div', { classes: this.classes(class1).fixed(fixedClassName).get() })
 						];
 					}
 				}
@@ -310,7 +311,8 @@ registerSuite({
 			const result = <VNode> themeableWidget.__render__();
 			assert.deepEqual(result.children![0].properties!.classes, {
 				[ testTheme1.testPath.class1 ]: true,
-				[ baseThemeClasses.class2 ]: false
+				[ baseThemeClasses.class2 ]: false,
+				[ fixedClassName ]: true
 			});
 
 			themeableWidget.setProperties({ theme: testTheme2 });
@@ -319,7 +321,8 @@ registerSuite({
 			assert.deepEqual(result2.children![0].properties!.classes, {
 				[ testTheme1.testPath.class1 ]: false,
 				[ testTheme2.testPath.class1 ]: true,
-				[ baseThemeClasses.class2 ]: false
+				[ baseThemeClasses.class2 ]: false,
+				[ fixedClassName ]: true
 			});
 		}
 	}
