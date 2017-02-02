@@ -74,7 +74,7 @@ export interface ThemeableMixin extends Evented {
  * Themeable
  */
 export interface Themeable extends ThemeableMixin {
-	baseClasses: BaseClasses;
+	baseClasses: {};
 	properties: ThemeableProperties;
 }
 
@@ -83,7 +83,7 @@ export interface Themeable extends ThemeableMixin {
  */
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin, ThemeableOptions> {}
 
-export type BaseClasses = { [key: string]: string; };
+type BaseClasses = { [key: string]: string; };
 
 /**
  * Map containing lookups for available css module class names.
