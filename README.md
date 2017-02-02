@@ -381,8 +381,6 @@ registry.define('my-widget', () => {
 });
 ```
 
-
-
 #### Theming
 
 ##### Overview
@@ -438,14 +436,13 @@ export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetPropertie
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
 	mixin: {
 		baseClasses,
-		getChildrenNodes: function (this: TabPanel): DNode[] {
+		render: function (this: TabPanel) {
 			const { root, tab } = baseClasses;
-			return [
+			return
 				v(`ul`, { classes: this.classes(root).get() }, [
 					v('li', { classes: this.classes(tab).get() }, [ 'tab1' ])
 					// ...
 				]);
-			];
 		}
 	}
 });
@@ -509,14 +506,13 @@ export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetPropertie
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
 	mixin: {
 		baseClasses,
-		getChildrenNodes: function (this: TabPanel): DNode[] {
+		render: function (this: TabPanel) {
 			const { root, tab } = baseClasses;
-			return [
+			return
 				v(`ul`, { classes: this.classes(root).get() }, [
 					v('li', { classes: this.classes().fixed(tab).get() }, [ 'tab1' ])
 					// ...
 				]);
-			];
 		}
 	}
 });
