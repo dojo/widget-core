@@ -83,7 +83,7 @@ export interface Themeable extends ThemeableMixin {
  */
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin, ThemeableOptions> {}
 
-type BaseClasses = { [key: string]: string; };
+export type BaseClasses = { [key: string]: string; };
 
 /**
  * Map containing lookups for available css module class names.
