@@ -79,20 +79,11 @@ export interface Themeable extends ThemeableMixin {
 }
 
 /**
- * BaseClasses to be passed as this.baseClasses. The path string is used to
- * perform a lookup against any theme that has been set.
- */
-export interface BaseClasses {
-	classes: ClassNames;
-	key: string;
-}
-
-/**
  * Compose Themeable Factory interface
  */
 export interface ThemeableFactory extends ComposeFactory<ThemeableMixin, ThemeableOptions> {}
 
-type StringIndexedObject = { [key: string]: string; };
+type BaseClasses = { [key: string]: string; };
 
 /**
  * Map containing lookups for available css module class names.
@@ -113,6 +104,8 @@ const baseClassesReverseLookupMap = new WeakMap<Themeable, ClassNames>();
  */
 const allClassNamesMap = new WeakMap<Themeable, ClassNameFlags>();
 
+const THEME_KEY = ' _key';
+
 function appendToAllClassNames(instance: Themeable, classNames: string[]) {
 	const negativeClassFlags = createClassNameObject(classNames, false);
 	const currentNegativeClassFlags = allClassNamesMap.get(instance);
@@ -126,11 +119,16 @@ function createClassNameObject(classNames: string[], applied: boolean) {
 	}, {});
 }
 
-function generateThemeClasses(instance: Themeable, { classes: baseClassesClasses, key }: BaseClasses, theme: any = {}, overrideClasses: any = {}) {
+function generateThemeClasses(instance: Themeable, baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}) {
 	let allClasses: string[] = [];
-	const sourceThemeClasses = theme.hasOwnProperty(key) ? assign({}, baseClassesClasses, theme[key]) : baseClassesClasses;
+	const themeKey = baseClasses[THEME_KEY];
+	const sourceThemeClasses = themeKey && theme.hasOwnProperty(themeKey) ? assign({}, baseClasses, theme[themeKey]) : baseClasses;
 
-	const themeClasses = Object.keys(baseClassesClasses).reduce((newAppliedClassNames, className: string) => {
+	const themeClasses = Object.keys(baseClasses).reduce((newAppliedClassNames, className: string) => {
+		if (className === THEME_KEY) {
+			return newAppliedClassNames;
+		}
+
 		let cssClassNames = sourceThemeClasses[className].split(' ');
 
 		if (overrideClasses.hasOwnProperty(className)) {
@@ -159,7 +157,7 @@ function onPropertiesChanged(instance: Themeable, { theme, overrideClasses }: Th
 	}
 }
 
-function createBaseClassesLookup({ classes }: BaseClasses): ClassNames {
+function createBaseClassesLookup(classes: BaseClasses): ClassNames {
 	return Object.keys(classes).reduce((currentClassNames, key: string) => {
 		currentClassNames[classes[key]] = key;
 		return currentClassNames;
