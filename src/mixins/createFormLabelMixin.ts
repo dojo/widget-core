@@ -60,7 +60,7 @@ export interface FormLabelMixinProperties {
 	/**
 	 * ID of a form element associated with the form field
 	 */
-	form?: string;
+	formId?: string;
 
 	/**
 	 * Indicates the value entered in the form field is invalid
@@ -179,8 +179,8 @@ const createFormLabelMixin = compose<FormLabelMixin, {}>({})
 
 				// move classes to label node
 				const { classes } = result.properties;
-				const { form } = this.properties;
-				assign(labelNodeAttributes, { classes, form });
+				const { formId } = this.properties;
+				assign(labelNodeAttributes, { classes, 'form': formId });
 			}
 
 			if (this.properties.label) {

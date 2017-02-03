@@ -86,7 +86,7 @@ registerSuite({
 					label: 'foo',
 					value: 'bar',
 					maxLength: 100,
-					form: 'baz',
+					formId: 'baz',
 					classes: { 'qux': true }
 				}
 			});
