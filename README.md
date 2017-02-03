@@ -391,7 +391,7 @@ The `themeable` mixin provides a `classes` function that controls the classes to
 ##### Authoring a baseTheme
 
 A base theme is authored using `css-modules` and `cssnext`. The baseTheme `css` file should be located in a `styles` folder within the Widget's package directory.
-The `typed-css-modules` [cli](https://github.com/Quramy/typed-css-modules#cli) should be used in `watch` mode in order to generate typings for typescript usage.
+The [`typed-css-modules`](https://github.com/Quramy/typed-css-modules) cli should be used in `watch` mode in order to generate typings for typescript usage.
 
 ```
 tabPanel
@@ -428,9 +428,9 @@ Basic usage:
 ``` typescript
 /* tabpanel.ts */
 import * as baseClasses from './styles/tabpanel.css';
-import themeableMixin, { Themeable } from '../mixins/themeable';
+import themeableMixin, { ThemeableMixin } from '../mixins/themeable';
 
-export type TabPanel = Widget<WidgetProperties> & Themeable;
+export type TabPanel = Widget<WidgetProperties> & ThemeableMixin;
 export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetProperties> {}
 
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
@@ -498,9 +498,9 @@ The `this.classes` function returns a chained `fixed` function that can be used 
 ``` typescript
 /* tabpanel.ts */
 import * as baseClasses from './styles/tabpanel.css';
-import themeableMixin, { Themeable } from '../mixins/themeable';
+import themeableMixin, { ThemeableMixin } from '../mixins/themeable';
 
-export type TabPanel = Widget<WidgetProperties> & Themeable;
+export type TabPanel = Widget<WidgetProperties> & ThemeableMixin;
 export interface TabPanelFactory extends WidgetFactory<TabPanel, WidgetProperties> {}
 
 const createTabPanel: TabPanelFactory = createWidgetBase.mixin(themeableMixin).mixin({
