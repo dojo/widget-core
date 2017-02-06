@@ -68,13 +68,13 @@ export interface ClassesFunctionChain {
  */
 export interface ThemeableMixin extends Evented {
 	classes: (...classNames: string[]) => ClassesFunctionChain;
+	baseClasses: {};
 }
 
 /**
  * Themeable
  */
-export interface Themeable extends ThemeableMixin {
-	baseClasses: {};
+interface Themeable extends ThemeableMixin {
 	properties: ThemeableProperties;
 }
 
@@ -181,6 +181,7 @@ function splitClassStrings(classes: string[]): string[] {
  */
 const themeableFactory: ThemeableFactory = createEvented.mixin({
 	mixin: {
+		baseClasses: {},
 		classes(this: Themeable, ...classNames: string[]) {
 			const cssModuleClassNames = generatedClassNameMap.get(this);
 			const baseClassesReverseLookup = baseClassesReverseLookupMap.get(this);

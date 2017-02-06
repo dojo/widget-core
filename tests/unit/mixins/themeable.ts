@@ -2,7 +2,7 @@ import compose from '@dojo/compose/compose';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import themeable, { Themeable } from '../../../src/mixins/themeable';
+import themeable, { ThemeableMixin } from '../../../src/mixins/themeable';
 import createWidgetBase from '../../../src/createWidgetBase';
 import { v } from '../../../src/d';
 import { Widget, WidgetProperties, DNode } from '../../../src/interfaces';
@@ -41,15 +41,18 @@ const overrideClasses2 = {
 };
 
 const themeableFactory = compose({
-	properties: <any> {},
-	baseClasses
+	properties: <any> {}
 }, (instance, options: any) => {
 	if (options) {
 		instance.properties = options.properties;
 	}
-}).mixin(themeable);
+}).mixin(themeable).mixin({
+	mixin: {
+		baseClasses
+	}
+});
 
-let themeableInstance: Themeable;
+let themeableInstance: ThemeableMixin;
 let consoleStub: SinonStub;
 
 registerSuite({
@@ -295,7 +298,7 @@ registerSuite({
 	},
 	'integration': {
 		'should work as mixin to createWidgetBase'() {
-			type ThemeableWidget = Widget<WidgetProperties> & Themeable;
+			type ThemeableWidget = Widget<WidgetProperties> & ThemeableMixin;
 
 			const fixedClassName = 'fixedClassName';
 			const createThemeableWidget = createWidgetBase.mixin(themeable).mixin({
