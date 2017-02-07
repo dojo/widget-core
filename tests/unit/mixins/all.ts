@@ -1,8 +1,6 @@
-import './createFormLabelMixin';
-import './createI18nMixin';
-import './createProjectorMixin';
-import './shallowPropertyComparisonMixin';
-import './storeMixin';
-import './themeable';
-import './registryMixin';
-import './internalState';
+import './ThemeableMixin';
+import './FormLabelMixin';
+import './ProjectorMixin';
+import './StatefulMixin';
+import './RegistryMixin';
+import './I18nMixin';

@@ -2,21 +2,21 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { VNode } from '@dojo/interfaces/vdom';
 import { v, w } from './../../../src/d';
-import createWidgetBase from '../../../src/createWidgetBase';
-import createFormLabelMixin from '../../../src/mixins/createFormLabelMixin';
+import { WidgetBase } from '../../../src/WidgetBase';
+import { FormLabelMixin } from '../../../src/mixins/FormLabelMixin';
 
-const formLabelWidget = createWidgetBase.mixin(createFormLabelMixin);
+class FormLabelWidget extends FormLabelMixin(WidgetBase) { }
 
 registerSuite({
 	name: 'mixins/createFormLabelMixin',
 	construction() {
-		const formLabelMixin = createFormLabelMixin();
+		const formLabelMixin: any = new FormLabelWidget({});
 
 		assert.isDefined(formLabelMixin);
 	},
 	getFormFieldNodeAttributes: {
 		'for HNode'() {
-			const formField = formLabelWidget({
+			const formField: any = new FormLabelWidget({
 				properties: {
 					value: 'foo',
 					maxLength: 100,
@@ -55,13 +55,13 @@ registerSuite({
 			assert.strictEqual(vnode.properties!['aria-describedby'], 'qux');
 		},
 		'for WNode'() {
-			const createExtendedFormField = formLabelWidget.override({
+			class ExtendedFormField extends FormLabelWidget {
 				render() {
-					return w(formLabelWidget, {});
+					return w(FormLabelWidget, {});
 				}
-			});
+			};
 
-			const formField = createExtendedFormField({
+			const formField: any = new ExtendedFormField({
 				properties: {
 					value: 'foo',
 					maxLength: 100,
@@ -76,12 +76,13 @@ registerSuite({
 			assert.isUndefined(vnode.properties!['maxlength']);
 		},
 		'label properties'() {
-			const inputWithClasses = createWidgetBase.override({
-				render(this: any) {
+			class ExtendedFormField extends FormLabelWidget {
+				render() {
 					return v('input', { classes: this.properties.classes });
 				}
-			});
-			const formField = inputWithClasses.mixin(createFormLabelMixin)({
+			};
+
+			const formField: any = new ExtendedFormField({
 				properties: {
 					label: 'foo',
 					value: 'bar',
@@ -99,7 +100,7 @@ registerSuite({
 		}
 	},
 	'type'() {
-		const formField: any = formLabelWidget();
+		const formField: any = new FormLabelWidget({});
 		formField.type = 'foo';
 
 		const vnode = <VNode> formField.__render__();
@@ -108,7 +109,7 @@ registerSuite({
 	},
 	'label': {
 		'string label'() {
-			const formField = formLabelWidget({
+			const formField: any = new FormLabelWidget({
 				properties: {
 					label: 'bar'
 				}
@@ -120,7 +121,7 @@ registerSuite({
 			assert.strictEqual(vnode.children![1].properties!.innerHTML, 'bar');
 		},
 		'label options'() {
-			const formField = formLabelWidget({
+			const formField: any = new FormLabelWidget({
 				properties: {
 					label: {
 						content: 'bar',
@@ -147,14 +148,14 @@ registerSuite({
 			assert.lengthOf(vnode.children, 1);
 		},
 		'no label'() {
-			const formField = formLabelWidget();
+			const formField: any = new FormLabelWidget({});
 			const vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'div');
 			assert.lengthOf(vnode.children, 0);
 		},
 		'changing label'() {
-			const formField = formLabelWidget();
+			const formField: any = new FormLabelWidget({});
 			let vnode = <VNode> formField.__render__();
 
 			assert.strictEqual(vnode.vnodeSelector, 'div');

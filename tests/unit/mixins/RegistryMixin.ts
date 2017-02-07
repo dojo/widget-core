@@ -1,34 +1,25 @@
-import compose from '@dojo/compose/compose';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import registryMixin from '../../../src/mixins/registryMixin';
+import { RegistryMixin } from '../../../src/mixins/RegistryMixin';
 import FactoryRegistry from '../../../src/FactoryRegistry';
-import createWidgetBase from '../../../src/createWidgetBase';
+import { WidgetBase, WidgetProperties } from '../../../src/WidgetBase';
 import { w, v } from '../../../src/d';
-import { DNode } from '../../../src/interfaces';
 import { VNode } from '@dojo/interfaces/vdom';
 
-const createRegistryWithProperties = compose({
-	properties: <any> {},
-	registry: <any> undefined
-}, (instance, options: any) => {
-	if (options) {
-		instance.properties = options.properties;
-	}
-}).mixin(registryMixin);
+class TestWithRegistry extends RegistryMixin(WidgetBase) {}
 
 registerSuite({
-	name: 'mixins/registryMixin',
+	name: 'mixins/RegistryMixin',
 	property: {
 		'passed registry is available via getter'() {
 			const registry = new FactoryRegistry();
-			const instance = createRegistryWithProperties({
+			const instance: any = new TestWithRegistry({
 				properties: { registry }
 			});
 			assert.equal(instance.registry, registry);
 		},
 		'no passed registry, nothing available via getter'() {
-			const instance = createRegistryWithProperties({
+			const instance: any = new TestWithRegistry({
 				properties: {}
 			});
 			assert.equal(instance.registry, undefined);
@@ -36,7 +27,7 @@ registerSuite({
 		'passed registry updated on property change'() {
 			const registry = new FactoryRegistry();
 			const newRegistry = new FactoryRegistry();
-			const instance = createRegistryWithProperties({
+			const instance: any = new TestWithRegistry({
 				properties: { registry }
 			});
 			assert.equal(instance.registry, registry);
@@ -50,7 +41,7 @@ registerSuite({
 		},
 		'different property passed on property change should not affect registy'() {
 			const registry = new FactoryRegistry();
-			const instance = createRegistryWithProperties({
+			const instance: any = new TestWithRegistry({
 				properties: { registry }
 			});
 			assert.equal(instance.registry, registry);
@@ -65,35 +56,35 @@ registerSuite({
 	},
 	integration: {
 		'works with widget base'() {
-			const createWidgetWithRegistry = createWidgetBase.mixin(registryMixin).mixin({
-				mixin: {
-					getChildrenNodes(): DNode[] {
-						return [ w('test', { id: `${Math.random()}` }) ];
-					}
+			class IntegrationTest extends TestWithRegistry {
+				render() {
+					return v('div', [
+						w('test', { id: `${Math.random()}` })
+					]);
 				}
-			});
-			const createHeader = createWidgetBase.override({
+			}
+			class Header extends WidgetBase<WidgetProperties> {
 				render() {
 					return v('header');
 				}
-			});
-			const createSpan = createWidgetBase.override({
+			}
+			class Span extends WidgetBase<WidgetProperties> {
 				render() {
 					return v('span');
 				}
-			});
+			}
 
 			const registry = new FactoryRegistry();
-			registry.define('test', createHeader);
+			registry.define('test', Header);
 
-			const instance = createWidgetWithRegistry({ properties: { registry } });
+			const instance: any = new IntegrationTest({ properties: { registry } });
 
 			let result = <VNode> instance.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
 
 			const newRegistry = new FactoryRegistry();
-			newRegistry.define('test', createSpan);
+			newRegistry.define('test', Span);
 
 			instance.setProperties({ registry: newRegistry });
 

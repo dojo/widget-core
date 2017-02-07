@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { initializeElement, handleAttributeChanged, CustomElementDescriptor } from '../../src/customElements';
 import { Widget } from '../../src/interfaces';
-import createWidget from '../../src/createWidgetBase';
+import { WidgetBase } from '../../src/WidgetBase';
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 
@@ -16,7 +16,7 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 		setWidgetInstance(instance: Widget<any>) {
 			widgetInstance = instance;
 		},
-		getWidgetFactory: () => createWidget,
+		getWidgetFactory: () => WidgetBase,
 		getDescriptor: () => descriptor,
 		children: [],
 		getAttribute(name: string) {
@@ -52,7 +52,7 @@ registerSuite({
 				'convert': '4'
 			}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				attributes: [
 					{
 						attributeName: 'a'
@@ -85,7 +85,7 @@ registerSuite({
 				'my-attribute': '2'
 			}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				attributes: [
 					{
 						attributeName: 'a'
@@ -109,7 +109,7 @@ registerSuite({
 				'my-attribute': '2'
 			}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				attributes: [
 					{
 						attributeName: 'a'
@@ -131,7 +131,7 @@ registerSuite({
 		'attribute changes are sent to widget'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				attributes: [
 					{
 						attributeName: 'a'
@@ -150,7 +150,7 @@ registerSuite({
 
 		'unregistered attribute changes do nothing'() {
 			let element = createFakeElement({}, {
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				tagName: 'test'
 			});
 
@@ -165,7 +165,7 @@ registerSuite({
 		'property names default to provided name'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				properties: [
 					{
 						propertyName: 'a'
@@ -186,7 +186,7 @@ registerSuite({
 		'widget property names can be specified'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				properties: [
 					{
 						propertyName: 'a',
@@ -205,7 +205,7 @@ registerSuite({
 		'properties can transform with getter'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				properties: [
 					{
 						propertyName: 'a',
@@ -226,7 +226,7 @@ registerSuite({
 		'properties can transform with a setter'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				properties: [
 					{
 						propertyName: 'a',
@@ -259,7 +259,7 @@ registerSuite({
 		'events are created'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				events: [
 					{
 						propertyName: 'onTest',
@@ -283,7 +283,7 @@ registerSuite({
 		'children get wrapped in dom wrappers'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget
+				widgetFactory: WidgetBase
 			});
 			element.children = [ {
 				key: 'test',
@@ -307,7 +307,7 @@ registerSuite({
 		'properties are sent to widget'() {
 			let element = createFakeElement({}, {
 				tagName: 'test',
-				widgetFactory: createWidget,
+				widgetFactory: WidgetBase,
 				initialization(properties: any) {
 					properties.prop1 = 'test';
 				}

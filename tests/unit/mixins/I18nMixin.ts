@@ -2,17 +2,17 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import i18n, { invalidate, switchLocale, systemLocale } from '@dojo/i18n/i18n';
 import * as sinon from 'sinon';
-import createI18nMixin, { I18nWidget, I18nProperties } from '../../../src/mixins/createI18nMixin';
-import { Widget, WidgetProperties } from './../../../src/interfaces';
-import createWidgetBase from '../../../src/createWidgetBase';
+import { I18nMixin } from '../../../src/mixins/I18nMixin';
+import { WidgetBase } from '../../../src/WidgetBase';
 import { w, isHNode, isWNode } from './../../../src/d';
 import bundle from '../../support/nls/greetings';
 
-const createLocalized = createWidgetBase.mixin(createI18nMixin);
-let localized: Widget<WidgetProperties & I18nProperties> & I18nWidget<any, I18nProperties>;
+class Localized extends I18nMixin(WidgetBase) {}
+
+let localized: Localized;
 
 registerSuite({
-	name: 'mixins/createI18nMixin',
+	name: 'mixins/I18nMixin',
 
 	afterEach() {
 		return switchLocale(systemLocale).then(() => {
@@ -26,7 +26,7 @@ registerSuite({
 	},
 
 	api() {
-		const localized = createLocalized();
+		const localized = new Localized({});
 		assert(localized);
 		assert.isFunction(localized.localizeBundle);
 	},
@@ -34,7 +34,7 @@ registerSuite({
 	'.localizeBundle()': {
 		'Returns default messages when locale bundle not loaded'() {
 			return switchLocale('fr').then(() => {
-				localized = createLocalized();
+				localized = new Localized({});
 				const messages = localized.localizeBundle(bundle);
 
 				assert.strictEqual(messages.hello, 'Hello');
@@ -43,7 +43,7 @@ registerSuite({
 		},
 
 		'Uses `properties.locale` when available'() {
-			localized = createLocalized({
+			localized = new Localized({
 				properties: {
 					locale: 'fr'
 				}
@@ -57,7 +57,7 @@ registerSuite({
 
 		'Uses default locale when no locale is set'() {
 			return switchLocale('fr').then(() => {
-				localized = createLocalized();
+				localized = new Localized({});
 				return i18n(bundle, 'fr').then(() => {
 					const messages = localized.localizeBundle(bundle);
 					assert.strictEqual(messages.hello, 'Bonjour');
@@ -67,7 +67,7 @@ registerSuite({
 		},
 
 		'Returns an object with a `format` method'() {
-			localized = createLocalized();
+			localized = new Localized({});
 			let messages = localized.localizeBundle(bundle);
 
 			assert.isFunction(messages.format);
@@ -84,7 +84,7 @@ registerSuite({
 
 	'root locale switching': {
 		'Updates when no `locale` property is set'() {
-			localized = createLocalized();
+			localized = new Localized({});
 			sinon.spy(localized, 'invalidate');
 
 			return switchLocale('fr').then(() => {
@@ -93,7 +93,7 @@ registerSuite({
 		},
 
 		'Does not update when `locale` property is set'() {
-			localized = createLocalized({
+			localized = new Localized({
 				properties: {
 					locale: 'en'
 				}
@@ -106,13 +106,13 @@ registerSuite({
 		}
 	},
 	'does not decorate properties for wNode'() {
-		const createExtendedLocalized = createLocalized.override({
+		class LocalizedExtended extends Localized {
 			render() {
-				return w(createLocalized, {});
+				return w(Localized, {});
 			}
-		});
+		}
 
-		localized = createExtendedLocalized({
+		localized = new LocalizedExtended({
 			properties: { locale: 'ar-JO' }
 		});
 
@@ -125,7 +125,7 @@ registerSuite({
 	},
 	'`properties.locale` updates the widget node\'s `data-locale` property': {
 		'when non-empty'() {
-			localized = createLocalized({
+			localized = new Localized({
 				properties: { locale: 'ar-JO' }
 			});
 
@@ -138,7 +138,7 @@ registerSuite({
 		},
 
 		'when empty'() {
-			localized = createLocalized();
+			localized = new Localized({});
 
 			const result = localized.render();
 			assert.isOk(result);
@@ -151,7 +151,7 @@ registerSuite({
 
 	'`properties.rtl`': {
 		'The `dir` attribute is "rtl" when true'() {
-			localized = createLocalized({
+			localized = new Localized({
 				properties: { rtl: true }
 			});
 
@@ -164,7 +164,7 @@ registerSuite({
 		},
 
 		'The `dir` attribute is "ltr" when false'() {
-			localized = createLocalized({
+			localized = new Localized({
 				properties: { rtl: false }
 			});
 
@@ -177,7 +177,7 @@ registerSuite({
 		},
 
 		'The `dir` attribute is not set when not a boolean.'() {
-			localized = createLocalized();
+			localized = new Localized({});
 
 			const result = localized.render();
 			assert.isOk(result);

@@ -6,10 +6,9 @@ import {
 	DNode,
 	HNode,
 	WNode,
-	Widget,
-	WidgetProperties,
-	WidgetFactory
-} from './interfaces';
+	WidgetBaseConstructor,
+	WidgetProperties
+} from './WidgetBase';
 import FactoryRegistry from './FactoryRegistry';
 
 /**
@@ -64,9 +63,9 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
 
 export const registry = new FactoryRegistry();
 
-export function w<P extends WidgetProperties>(factory: WidgetFactory<Widget<P>, P> | string, properties: P): WNode;
-export function w<P extends WidgetProperties>(factory: WidgetFactory<Widget<P>, P> | string, properties: P, children?: DNode[]): WNode;
-export function w<P extends WidgetProperties>(factory: WidgetFactory<Widget<P>, P> | string, properties: P, children: DNode[] = []): WNode {
+export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P): WNode;
+export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P, children?: DNode[]): WNode;
+export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P, children: DNode[] = []): WNode {
 
 	return {
 		children,

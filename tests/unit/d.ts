@@ -1,8 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { assign } from '@dojo/core/lang';
-import { WidgetProperties, WNode, DNode, HNode } from './../../src/interfaces';
-import createWidgetBase from '../../src/createWidgetBase';
+import { WidgetBase, WidgetProperties, DNode, HNode, WNode } from '../../src/WidgetBase';
 import { v, w, decorate, registry, WNODE, HNODE, isWNode, isHNode } from '../../src/d';
 import FactoryRegistry from './../../src/FactoryRegistry';
 
@@ -12,7 +11,7 @@ class TestFactoryRegistry extends FactoryRegistry {
 	}
 }
 
-const createTestWidget = createWidgetBase.override({
+class TestWidget extends WidgetBase<WidgetProperties> {
 	render() {
 		return v('outernode', { type: 'mytype' }, [
 			v('child-one'),
@@ -21,11 +20,11 @@ const createTestWidget = createWidgetBase.override({
 			v('child-four'),
 			'my text',
 			null,
-			w(createWidgetBase, { myProperty: true }),
-			w(createWidgetBase, { myProperty: true })
+			w(WidgetBase, { myProperty: true }),
+			w(WidgetBase, { myProperty: true })
 		]);
 	}
-});
+};
 
 registerSuite({
 	name: 'd',
@@ -35,15 +34,15 @@ registerSuite({
 	w: {
 		'create WNode wrapper'() {
 			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
-			const dNode = w(createWidgetBase, properties);
-			assert.deepEqual(dNode.factory, createWidgetBase);
+			const dNode = w(WidgetBase, properties);
+			assert.deepEqual(dNode.factory, WidgetBase);
 			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
 			assert.equal(dNode.type, WNODE);
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
 		},
 		'create WNode wrapper using a factory label'() {
-			registry.define('my-widget', createWidgetBase);
+			registry.define('my-widget', WidgetBase);
 			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
 			const dNode = w('my-widget', properties);
 			assert.deepEqual(dNode.factory, 'my-widget');
@@ -54,8 +53,8 @@ registerSuite({
 		},
 		'create WNode wrapper with children'() {
 			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
-			const dNode = w(createWidgetBase, properties, [ w(createWidgetBase, properties) ]);
-			assert.deepEqual(dNode.factory, createWidgetBase);
+			const dNode = w(WidgetBase, properties, [ w(WidgetBase, properties) ]);
+			assert.deepEqual(dNode.factory, WidgetBase);
 			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.lengthOf(dNode.children, 1);
 			assert.equal(dNode.type, WNODE);
@@ -110,7 +109,7 @@ registerSuite({
 	},
 	decorator: {
 		'modifies only nodes that match predicate'() {
-			const testWidget = createTestWidget();
+			const testWidget = new TestWidget();
 			const predicate = (node: DNode): boolean => {
 				return isWNode(node);
 			};
@@ -135,7 +134,7 @@ registerSuite({
 			}
 		},
 		'modifies no node when predicate not matched'() {
-			const testWidget = createTestWidget();
+			const testWidget = new TestWidget();
 			const predicate = (node: DNode): boolean => {
 				return false;
 			};
@@ -160,7 +159,7 @@ registerSuite({
 			}
 		},
 		'applies modifier to all nodes when no predicate supplied'() {
-			const testWidget = createTestWidget();
+			const testWidget = new TestWidget();
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
 					node.properties['decorated'] = true;
@@ -184,7 +183,7 @@ registerSuite({
 			}
 		},
 		'cannot replace or modify actual node'() {
-			const testWidget = createTestWidget();
+			const testWidget = new TestWidget();
 			const magicNode = v('magic');
 			const modifier = (node: DNode): void => {
 				if (node === null) {

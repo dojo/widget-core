@@ -1,12 +1,24 @@
-import { isComposeFactory } from '@dojo/compose/compose';
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
-import {
-	WidgetBaseFactory,
-	FactoryRegistryInterface,
-	FactoryRegistryItem,
-	WidgetFactoryFunction
-} from './interfaces';
+
+import { WidgetBase, WidgetBaseConstructor, WidgetProperties } from './WidgetBase';
+
+export type WidgetFactoryFunction = () => Promise<WidgetBaseConstructor<WidgetProperties>>
+
+export type FactoryRegistryItem = WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetFactoryFunction
+
+export interface FactoryRegistryInterface {
+
+	define(factoryLabel: string, registryItem: FactoryRegistryItem): void;
+
+	get(factoryLabel: string): WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | null;
+
+	has(factoryLabel: string): boolean;
+}
+
+export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructor<WidgetProperties> {
+	return WidgetBase.isPrototypeOf(item) || item === WidgetBase;
+}
 
 export default class FactoryRegistry implements FactoryRegistryInterface {
 	protected registry: Map<string, FactoryRegistryItem>;
@@ -26,18 +38,19 @@ export default class FactoryRegistry implements FactoryRegistryInterface {
 		this.registry.set(factoryLabel, registryItem);
 	}
 
-	get(factoryLabel: string): WidgetBaseFactory | Promise<WidgetBaseFactory> | null {
+	get(factoryLabel: string): WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | null {
 		if (!this.has(factoryLabel)) {
 			return null;
 		}
 
 		const item = this.registry.get(factoryLabel);
 
-		if (isComposeFactory(item) || item instanceof Promise) {
+		if (item instanceof Promise || isWidgetBaseConstructor(item)) {
 			return item;
 		}
 
 		const promise = (<WidgetFactoryFunction> item)();
+
 		this.registry.set(factoryLabel, promise);
 
 		return promise.then((factory) => {
