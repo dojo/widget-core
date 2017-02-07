@@ -120,8 +120,7 @@ export function FormLabelMixin(base: WidgetBaseConstructor<WidgetProperties>) {
 
 		type: string;
 
-		render(): DNode {
-			let result = super.render();
+		renderDecoratorFormLabel(result: DNode): DNode {
 			const labelNodeAttributes: any = {};
 			if (isHNode(result)) {
 				assign(result.properties, this.getFormFieldA11yAttributes());

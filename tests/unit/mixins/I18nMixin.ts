@@ -2,14 +2,15 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import i18n, { invalidate, switchLocale, systemLocale } from '@dojo/i18n/i18n';
 import * as sinon from 'sinon';
+import { VNode } from '@dojo/interfaces/vdom';
 import { I18nMixin } from '../../../src/mixins/I18nMixin';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { w, isHNode, isWNode } from './../../../src/d';
+import { w } from './../../../src/d';
 import bundle from '../../support/nls/greetings';
 
 class Localized extends I18nMixin(WidgetBase) {}
 
-let localized: Localized;
+let localized: any;
 
 registerSuite({
 	name: 'mixins/I18nMixin',
@@ -116,12 +117,9 @@ registerSuite({
 			properties: { locale: 'ar-JO' }
 		});
 
-		const result = localized.render();
+		const result = <VNode> localized.__render__();
 		assert.isOk(result);
-		assert.isTrue(isWNode(result));
-		if (isWNode(result)) {
-			assert.isUndefined(result.properties['data-locale']);
-		}
+		assert.isNull(result.properties!['data-locale']);
 	},
 	'`properties.locale` updates the widget node\'s `data-locale` property': {
 		'when non-empty'() {
@@ -129,23 +127,17 @@ registerSuite({
 				properties: { locale: 'ar-JO' }
 			});
 
-			const result = localized.render();
+			const result = <VNode> localized.__render__();
 			assert.isOk(result);
-			assert.isTrue(isHNode(result));
-			if (isHNode(result)) {
-				assert.strictEqual(result.properties['data-locale'], 'ar-JO');
-			}
+			assert.strictEqual(result.properties!['data-locale'], 'ar-JO');
 		},
 
 		'when empty'() {
 			localized = new Localized({});
 
-			const result = localized.render();
+			const result = localized.__render__();
 			assert.isOk(result);
-			assert.isTrue(isHNode(result));
-			if (isHNode(result)) {
-				assert.isNull(result.properties['data-locale']);
-			}
+			assert.isNull(result.properties!['data-locale']);
 		}
 	},
 
@@ -155,12 +147,9 @@ registerSuite({
 				properties: { rtl: true }
 			});
 
-			const result = localized.render();
+			const result = localized.__render__();
 			assert.isOk(result);
-			assert.isTrue(isHNode(result));
-			if (isHNode(result)) {
-				assert.strictEqual(result.properties['dir'], 'rtl');
-			}
+			assert.strictEqual(result.properties!['dir'], 'rtl');
 		},
 
 		'The `dir` attribute is "ltr" when false'() {
@@ -168,23 +157,17 @@ registerSuite({
 				properties: { rtl: false }
 			});
 
-			const result = localized.render();
+			const result = localized.__render__();
 			assert.isOk(result);
-			assert.isTrue(isHNode(result));
-			if (isHNode(result)) {
-				assert.strictEqual(result.properties['dir'], 'ltr');
-			}
+			assert.strictEqual(result.properties!['dir'], 'ltr');
 		},
 
 		'The `dir` attribute is not set when not a boolean.'() {
 			localized = new Localized({});
 
-			const result = localized.render();
+			const result = localized.__render__();
 			assert.isOk(result);
-			assert.isTrue(isHNode(result));
-			if (isHNode(result)) {
-				assert.isNull(result.properties['dir']);
-			}
+			assert.isNull(result.properties!['dir']);
 		}
 	}
 });

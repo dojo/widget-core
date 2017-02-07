@@ -82,6 +82,7 @@ export type DNode = HNode | WNode | string | null;
 export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase<P>
 
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
+const decoratorFunctionNameRegex = /^renderDecorator.*/;
 
 export class WidgetBase<P extends WidgetProperties> extends Evented {
 
@@ -93,6 +94,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 	private initializedFactoryMap: Map<string, Promise<WidgetBaseConstructor<P>>>;
 	private cachedChildrenMap: Map<string | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetBaseConstructor<WidgetProperties>, WidgetCacheWrapper[]>;
 	private diffPropertyFunctionMap: Map<string, string>;
+	private renderDecorators: Set<string>;
 	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
 
 	protected registry: FactoryRegistry | undefined;
@@ -107,13 +109,20 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 		this.initializedFactoryMap = new Map<string, Promise<WidgetBaseConstructor<P>>>();
 		this.cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetBaseConstructor<WidgetProperties>, WidgetCacheWrapper[]>();
 		this.diffPropertyFunctionMap = new Map<string, string>();
+		this.renderDecorators = new Set<string>();
 		this.bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
 		const self: { [index: string]: any } = this;
 		for (let property in this) {
-			const match = property.match(propertyFunctionNameRegex);
+			let match = property.match(propertyFunctionNameRegex);
 			if (match && (typeof self[match[0]] === 'function')) {
 				this.diffPropertyFunctionMap.set(match[0], `${match[1].slice(0, 1).toLowerCase()}${match[1].slice(1)}`);
+				continue;
+			}
+			match = property.match(decoratorFunctionNameRegex);
+			if (match && (typeof self[match[0]] === 'function')) {
+				this.renderDecorators.add(match[0]);
+				continue;
 			}
 		};
 
@@ -201,7 +210,12 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 
 	protected __render__(): VNode | string | null {
 		if (this.dirty || !this.cachedVNode) {
-			const widget = this.dNodeToVNode(this.render());
+			let dNode = this.render();
+			this.renderDecorators.forEach((decoratorFunctionName: string) => {
+				const self: { [index: string]: any } = this;
+				dNode = self[decoratorFunctionName](dNode);
+			});
+			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
 			if (widget) {
 				this.cachedVNode = widget;

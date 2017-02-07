@@ -81,8 +81,7 @@ export function I18nMixin(base: WidgetBaseConstructor<I18nProperties>) {
 			}), messages);
 		}
 
-		public render(): DNode {
-			const result = super.render();
+		renderDecoratorI18n(result: DNode): DNode {
 			if (isHNode(result)) {
 				const { locale, rtl } = this.properties;
 				const vNodeProperties: I18nVNodeProperties = {
