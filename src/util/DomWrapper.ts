@@ -7,33 +7,35 @@ export interface DomWrapperProperties extends WidgetProperties {
 	domNode: Node;
 }
 
-function handleDomInsertion(instance: DomWrapper, newNode: Node | null | undefined) {
-	let notNullNode = newNode;
+export class DomWrapper extends WidgetBase {
 
-	if (!notNullNode) {
-		notNullNode = document.createElement('div'); // placeholder element
-	}
-
-	if (instance.vNode) {
-		// replace the vNode domElement with our new element...
-		if (instance.vNode.domNode && instance.vNode.domNode.parentNode) {
-			instance.vNode.domNode.parentNode.replaceChild(notNullNode, instance.vNode.domNode);
-		}
-
-		// and update the reference to our vnode
-		instance.vNode.domNode = notNullNode;
-	}
-}
-
-export class DomWrapper extends WidgetBase<DomWrapperProperties> {
-	vNode: VNode | undefined;
+	public propertes: DomWrapperProperties;
+	private vNode: VNode | undefined;
 
 	afterCreate() {
-		handleDomInsertion(this, this.properties.domNode);
+		this.handleDomInsertion(this.properties.domNode);
 	}
 
 	afterUpdate() {
-		handleDomInsertion(this, this.properties.domNode);
+		this.handleDomInsertion(this.properties.domNode);
+	}
+
+	private handleDomInsertion(newNode: Node | null | undefined) {
+		let notNullNode = newNode;
+
+		if (!notNullNode) {
+			notNullNode = document.createElement('div'); // placeholder element
+		}
+
+		if (this.vNode) {
+			// replace the vNode domElement with our new element...
+			if (this.vNode.domNode && this.vNode.domNode.parentNode) {
+				this.vNode.domNode.parentNode.replaceChild(notNullNode, this.vNode.domNode);
+			}
+
+			// and update the reference to our vnode
+			this.vNode.domNode = notNullNode;
+		}
 	}
 
 	render() {

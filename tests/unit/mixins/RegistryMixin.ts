@@ -2,7 +2,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { RegistryMixin } from '../../../src/mixins/RegistryMixin';
 import FactoryRegistry from '../../../src/FactoryRegistry';
-import { WidgetBase, WidgetProperties } from '../../../src/WidgetBase';
+import { WidgetBase } from '../../../src/WidgetBase';
 import { w, v } from '../../../src/d';
 import { VNode } from '@dojo/interfaces/vdom';
 
@@ -63,12 +63,12 @@ registerSuite({
 					]);
 				}
 			}
-			class Header extends WidgetBase<WidgetProperties> {
+			class Header extends WidgetBase {
 				render() {
 					return v('header');
 				}
 			}
-			class Span extends WidgetBase<WidgetProperties> {
+			class Span extends WidgetBase {
 				render() {
 					return v('span');
 				}

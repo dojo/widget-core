@@ -1,4 +1,4 @@
-import { WidgetBaseConstructor, WidgetProperties, WidgetOptions } from './../WidgetBase';
+import { WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { includes } from '@dojo/shim/array';
 import { PropertiesChangeEvent } from './../interfaces';
 import { assign } from '@dojo/core/lang';
@@ -55,24 +55,20 @@ export interface ClassesFunctionChain {
 
 type BaseClasses = { [key: string]: string; };
 
-export interface ThemableOptions<P extends WidgetProperties> extends WidgetOptions<P> {
-
-	baseClasses: {};
-}
-
 const THEME_KEY = ' _key';
 
-export function Themeable(base: WidgetBaseConstructor<ThemeableProperties>) {
+export function Themeable<T extends WidgetConstructor>(base: T) {
 	return class extends base {
 
+		properties: ThemeableProperties;
 		private allClasses: ClassNameFlags;
 		private baseClassesReverseLookup: ClassNames;
 		private generatedClassName: ClassNameFlagsMap;
 		public baseClasses: {};
 
-		constructor(options: ThemableOptions<ThemeableProperties>) {
-			super(options);
-
+		constructor(...args: any[]) {
+			super(...args);
+			const [ options ] = args;
 			this.baseClasses = options.baseClasses;
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, ThemeableProperties>) => {
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);

@@ -24,7 +24,7 @@ export interface WidgetProperties {
 }
 
 interface WidgetCacheWrapper {
-	child: WidgetBase<WidgetProperties>;
+	child: WidgetBase;
 	factory: WidgetBaseConstructor<WidgetProperties>;
 	used: boolean;
 }
@@ -79,19 +79,20 @@ export interface WNode {
 
 export type DNode = HNode | WNode | string | null;
 
-export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase<P>
+export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase
+export type WidgetConstructor = new (...args: any[]) => WidgetBase;
 
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 const decoratorFunctionNameRegex = /^renderDecorator.*/;
 
-export class WidgetBase<P extends WidgetProperties> extends Evented {
+export class WidgetBase extends Evented {
 
 	private  _children: DNode[];
 	private dirty: boolean;
 	private cachedVNode?: VNode | string;
-	private  _properties: P;
-	private previousProperties: P;
-	private initializedFactoryMap: Map<string, Promise<WidgetBaseConstructor<P>>>;
+	private  _properties: WidgetProperties;
+	private previousProperties: WidgetProperties;
+	private initializedFactoryMap: Map<string, Promise<WidgetBaseConstructor<WidgetProperties>>>;
 	private cachedChildrenMap: Map<string | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetBaseConstructor<WidgetProperties>, WidgetCacheWrapper[]>;
 	private diffPropertyFunctionMap: Map<string, string>;
 	private renderDecorators: Set<string>;
@@ -99,14 +100,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 
 	protected registry: FactoryRegistry | undefined;
 
-	constructor(options: WidgetOptions<P> = {}) {
+	constructor(options: WidgetOptions<WidgetProperties> = {}) {
 		super(options);
-		const { properties = <P> {} } = options;
+		const { properties = <WidgetProperties> {} } = options;
 
 		this._children = [];
-		this._properties = <P> {};
-		this.previousProperties = <P> {};
-		this.initializedFactoryMap = new Map<string, Promise<WidgetBaseConstructor<P>>>();
+		this._properties = <WidgetProperties> {};
+		this.previousProperties = <WidgetProperties> {};
+		this.initializedFactoryMap = new Map<string, Promise<WidgetBaseConstructor<WidgetProperties>>>();
 		this.cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetBaseConstructor<WidgetProperties>, WidgetCacheWrapper[]>();
 		this.diffPropertyFunctionMap = new Map<string, string>();
 		this.renderDecorators = new Set<string>();
@@ -126,7 +127,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 			}
 		};
 
-		this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<WidgetBase<WidgetProperties>, WidgetProperties>) => {
+		this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<WidgetBase, WidgetProperties>) => {
 			this.invalidate();
 		}));
 
@@ -137,11 +138,11 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 		return this._properties.id;
 	}
 
-	public get properties(): Readonly<P> {
+	public get properties(): Readonly<WidgetProperties> {
 		return this._properties;
 	}
 
-	setProperties(this: WidgetBase<P>, properties: P) {
+	setProperties(this: WidgetBase, properties: WidgetProperties) {
 		const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 		const diffPropertyChangedKeys: string[] = [];
 
@@ -193,7 +194,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 		});
 	}
 
-	public diffProperties(previousProperties: P, newProperties: P): PropertiesChangeRecord<P> {
+	public diffProperties(previousProperties: WidgetProperties, newProperties: WidgetProperties): PropertiesChangeRecord<WidgetProperties> {
 		const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
 			if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
 				changedPropertyKeys.push(propertyKey);
@@ -208,7 +209,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 		return v('div', {}, this.children);
 	}
 
-	protected __render__(): VNode | string | null {
+	__render__(): VNode | string | null {
 		if (this.dirty || !this.cachedVNode) {
 			let dNode = this.render();
 			this.renderDecorators.forEach((decoratorFunctionName: string) => {
@@ -234,7 +235,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 		});
 	}
 
-	private bindFunctionProperties(properties: P): void {
+	private bindFunctionProperties(properties: WidgetProperties): void {
 		Object.keys(properties).forEach((propertyKey) => {
 			const property = properties[propertyKey];
 			const bind = properties.bind;
@@ -270,7 +271,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented {
 			const { key } = properties;
 
 			let { factory } = dNode;
-			let child: WidgetBase<WidgetProperties>;
+			let child: WidgetBase;
 
 			if (typeof factory === 'string') {
 				const item = this.getFromRegistry(factory);

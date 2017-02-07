@@ -72,11 +72,10 @@ registerSuite({
 
 			initializeElement(element);
 
-			assert.deepEqual(element.getWidgetInstance().properties, {
-				'a': '1',
-				'b': '2',
-				'convert': 8
-			});
+			const result = element.getWidgetInstance().properties;
+			assert.strictEqual(result.a, '1');
+			assert.strictEqual(result.b, '2');
+			assert.strictEqual(result.convert, 8);
 		},
 
 		'attributes also create properties'() {

@@ -116,8 +116,8 @@ export interface CustomElementDescriptor {
 export interface CustomElement extends HTMLElement {
 	getWidgetFactory(): WidgetBaseConstructor<WidgetProperties>;
 	getDescriptor(): CustomElementDescriptor;
-	getWidgetInstance(): WidgetBase<WidgetProperties>;
-	setWidgetInstance(instance: WidgetBase<WidgetProperties>): void;
+	getWidgetInstance(): WidgetBase;
+	setWidgetInstance(instance: WidgetBase): void;
 }
 
 function getWidgetPropertyFromAttribute(attributeName: string, attributeValue: string | null, descriptor: CustomElementAttributeDescriptor): [ string, any ] {
@@ -241,8 +241,7 @@ export function initializeElement(element: CustomElement) {
 	const projector = ProjectorMixin(element.getWidgetFactory());
 
 	const widgetInstance = new projector({
-		root: element,
-		properties: initialProperties
+		properties: assign(initialProperties, { root: element })
 	});
 	widgetInstance.setChildren(children);
 	element.setWidgetInstance(widgetInstance);

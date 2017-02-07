@@ -1,9 +1,7 @@
 import global from '@dojo/core/global';
-import { WidgetBaseConstructor, WidgetBase, WidgetOptions, WidgetProperties } from './../WidgetBase';
+import { WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import { EventTargettedObject, Handle } from '@dojo/interfaces/core';
-
-export type Constructable = new (...args: any[]) => WidgetBase<WidgetProperties>;
 
 /**
  * Represents the state of the projector
@@ -31,16 +29,17 @@ export interface AttachOptions {
 	type: AttachType;
 }
 
-export interface ProjectorOptions<P extends WidgetProperties> extends WidgetOptions<P> {
+export interface ProjectorProperties extends WidgetProperties {
 
 	root?: Element;
 
 	cssTransitions?: boolean;
 }
 
-export function ProjectorMixin<P extends WidgetProperties>(base: WidgetBaseConstructor<P>) {
+export function ProjectorMixin<T extends WidgetConstructor>(base: T) {
 	return class extends base {
 
+		public properties: ProjectorProperties;
 		public projectorState: ProjectorState;
 		private readonly projector: MaquetteProjector;
 
@@ -49,9 +48,10 @@ export function ProjectorMixin<P extends WidgetProperties>(base: WidgetBaseConst
 		private attachHandle: Handle;
 		private afterCreate: () => void;
 
-		constructor(options: ProjectorOptions<P>) {
-			super(options);
-			const { root = document.body, cssTransitions = false } = options;
+		constructor(...args: any[]) {
+			super(...args);
+			const [ options ] = args;
+			const { properties: { root = document.body, cssTransitions = false } = {} }  = options;
 			const maquetteProjectorOptions: { transitions?: any } = {};
 
 			if (cssTransitions) {

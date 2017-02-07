@@ -2,8 +2,7 @@ import { assign } from '@dojo/core/lang';
 import { v, isHNode } from '../d';
 import {
 	DNode,
-	WidgetBaseConstructor,
-	WidgetProperties
+	WidgetConstructor
 } from '../WidgetBase';
 
 /**
@@ -115,7 +114,7 @@ const labelDefaults = {
  */
 const allowedFormFieldAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
 
-export function FormLabelMixin(base: WidgetBaseConstructor<WidgetProperties>) {
+export function FormLabelMixin<T extends WidgetConstructor>(base: T) {
 	return class extends base {
 
 		type: string;

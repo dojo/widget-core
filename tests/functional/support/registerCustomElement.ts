@@ -8,21 +8,23 @@ interface TestButtonProperties extends WidgetProperties {
 	onClick: () => void;
 }
 
-class TestButton extends WidgetBase<TestButtonProperties> {
-		onClick(this: TestButton) {
-			this.properties.onClick && this.properties.onClick();
-		}
+class TestButton extends WidgetBase {
+	properties: TestButtonProperties;
 
-		render(this: TestButton) {
-			const { onClick : onclick } = this;
-			const { label = '', suffix = '' } = this.properties;
+	onClick(this: TestButton) {
+		this.properties.onClick && this.properties.onClick();
+	}
 
-			return v('button', {
-				onclick
-			}, [
-				label + ((suffix !== '') ? (' ' + suffix) : '')
-			]);
-		}
+	render(this: TestButton) {
+		const { onClick : onclick } = this;
+		const { label = '', suffix = '' } = this.properties;
+
+		return v('button', {
+			onclick
+		}, [
+			label + ((suffix !== '') ? (' ' + suffix) : '')
+		]);
+	}
 }
 
 registerCustomElement(function () {

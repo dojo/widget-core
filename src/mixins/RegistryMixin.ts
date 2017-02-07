@@ -2,22 +2,20 @@ import { includes } from '@dojo/shim/array';
 import { PropertiesChangeEvent, PropertyChangeRecord } from './../interfaces';
 import FactoryRegistry from '../FactoryRegistry';
 import {
-	WidgetBaseConstructor,
-	WidgetOptions,
+	WidgetConstructor,
 	WidgetProperties
 } from '../WidgetBase';
 
-/**
- * Properties required for the RegistryMixin
- */
 export interface RegistryMixinProperties extends WidgetProperties {
 	registry?: FactoryRegistry;
 }
 
-export function RegistryMixin(base: WidgetBaseConstructor<RegistryMixinProperties>) {
+export function RegistryMixin<T extends WidgetConstructor>(base: T) {
 	return class extends base {
-		constructor(options: WidgetOptions<RegistryMixinProperties>) {
-			super(options);
+		properties: RegistryMixinProperties;
+
+		constructor(...args: any[]) {
+			super(...args);
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, RegistryMixinProperties>) => {
 				if (includes(evt.changedPropertyKeys, 'registry')) {
 					this.registry = evt.properties.registry;

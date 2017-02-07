@@ -4,7 +4,7 @@ import { isHNode } from '../../../src/d';
 import { WidgetBase, HNode } from './../../../src/WidgetBase';
 import { DomWrapper } from '../../../src/util/DomWrapper';
 
-function callCreate(widget: WidgetBase<any>, includeUpdate = false) {
+function callCreate(widget: WidgetBase, includeUpdate = false) {
 	const hNode: HNode = <HNode> widget.render();
 
 	assert.isTrue(isHNode(hNode));

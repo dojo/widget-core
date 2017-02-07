@@ -4,8 +4,7 @@ import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import {
 	DNode,
-	WidgetBaseConstructor,
-	WidgetOptions,
+	WidgetConstructor,
 	WidgetProperties
 } from '../WidgetBase';
 import { isHNode } from '../d';
@@ -51,11 +50,12 @@ export type LocalizedMessages<T extends Messages> = T & {
 	format(key: string, options?: any): string;
 }
 
-export function I18nMixin(base: WidgetBaseConstructor<I18nProperties>) {
+export function I18nMixin<T extends WidgetConstructor>(base: T) {
 	return class extends base {
+		properties: I18nProperties;
 
-		constructor(options: WidgetOptions<I18nProperties>) {
-			super(options);
+		constructor(...args: any[]) {
+			super(...args);
 			const subscription = observeLocale({
 				next: () => {
 					if (!this.properties.locale) {

@@ -38,7 +38,11 @@ const overrideClasses2 = {
 	class1: 'override2Class1'
 };
 
-class Test extends Themeable(WidgetBase) {}
+class Test extends Themeable(WidgetBase) {
+	constructor(options: any) {
+		super(options);
+	}
+}
 
 let themeableInstance: Test;
 let consoleStub: SinonStub;

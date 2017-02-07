@@ -14,7 +14,7 @@ registerSuite({
 	'construct projector with css transitions'() {
 		global.cssTransitions = {};
 		try {
-			new TestWidget({ cssTransitions: true });
+			new TestWidget({ properties: { cssTransitions: true } });
 		}
 		catch (err) {
 			assert.fail(null, null, 'Projector should be created without throwing an error');
@@ -24,7 +24,7 @@ registerSuite({
 	'construting projector configured for css transitions throws when css-transitions script is not loaded.'() {
 		global.cssTransitions = undefined;
 		try {
-			new TestWidget({ cssTransitions: true });
+			new TestWidget({ properties: { cssTransitions: true } });
 			assert.fail();
 		}
 		catch (err) {
@@ -65,17 +65,19 @@ registerSuite({
 		}
 	},
 	'render does not attach after create when there are no properties'() {
+		/* tslint:disable:variable-name */
 		const projector = new class extends TestWidget {
 			render() {
 				return v('div', <any> null);
 			}
 
-			__render__() {
+			__render__: any = () => {
 				const results: any = super.__render__();
 				results.properties = undefined;
 				return results;
 			}
 		}({});
+		/* tslint:enable:variable-name */
 
 		const vnode  = <any> projector.__render__();
 		assert.isUndefined(vnode.properties);
@@ -128,9 +130,7 @@ registerSuite({
 	'attach event'() {
 		const root = document.createElement('div');
 		document.body.appendChild(root);
-		const projector = new TestWidget({
-			root
-		});
+		const projector = new TestWidget({ properties: { root } });
 
 		projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
@@ -225,7 +225,7 @@ registerSuite({
 	},
 	'reattach'() {
 		const root = document.createElement('div');
-		const projector = new TestWidget({ root });
+		const projector = new TestWidget({ properties: { root } });
 		const promise = projector.append();
 		assert.strictEqual(promise, projector.append(), 'same promise should be returned');
 	},

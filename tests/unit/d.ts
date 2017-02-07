@@ -11,7 +11,7 @@ class TestFactoryRegistry extends FactoryRegistry {
 	}
 }
 
-class TestWidget extends WidgetBase<WidgetProperties> {
+class TestWidget extends WidgetBase {
 	render() {
 		return v('outernode', { type: 'mytype' }, [
 			v('child-one'),

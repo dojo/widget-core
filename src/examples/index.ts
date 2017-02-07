@@ -1,10 +1,17 @@
 import { WidgetBase } from './../WidgetBase';
 import { ProjectorMixin } from './../mixins/ProjectorMixin';
-import { Themeable } from './../mixins/ThemeableMixin';
+import { Themeable, ThemeableProperties } from './../mixins/ThemeableMixin';
+import { Stateful } from './../mixins/StatefulMixin';
 import { v } from './../d';
 import * as css from './styles/button.css';
 
-class Button extends Themeable(WidgetBase) {
+interface ButtonProperties extends ThemeableProperties {
+	myProperty: string;
+}
+
+class Button extends Stateful(Themeable(WidgetBase)) {
+
+	properties: ButtonProperties;
 
 	constructor(options: any) {
 		options.baseClasses = css;

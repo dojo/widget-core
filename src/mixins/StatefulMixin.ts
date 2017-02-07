@@ -1,5 +1,5 @@
 import { deepAssign } from '@dojo/core/lang';
-import { WidgetBaseConstructor, WidgetProperties, WidgetOptions } from './../WidgetBase';
+import { WidgetConstructor } from './../WidgetBase';
 
 export interface State {
 	[key: string]: any;
@@ -7,24 +7,24 @@ export interface State {
 
 const stateChangedEventType = 'state:changed';
 
-export function Stateful<S extends State>(base: WidgetBaseConstructor<WidgetProperties>) {
+export function Stateful<T extends WidgetConstructor>(base: T) {
 	return class extends base {
 
-		private _state: S;
+		private _state: State;
 
-		constructor(options: WidgetOptions<WidgetProperties>) {
-			super(options);
+		constructor(...args: any[]) {
+			super(...args);
 			this._state = Object.create(null);
 			this.own(this.on('state:changed', () => {
 				this.invalidate();
 			}));
 		}
 
-		get state(): S {
+		get state(): State {
 			return this._state;
 		}
 
-		setState(state: Partial<S>) {
+		setState(state: Partial<State>) {
 			this._state = deepAssign({}, this._state, state);
 			const eventObject = {
 				type: stateChangedEventType,
