@@ -265,7 +265,7 @@ export interface MouseEventHandler {
 export type BlurEventHandler = FocusEventHandler;
 export type ChangeEventHandler = EventHandler;
 export type ClickEventHandler = MouseEventHandler;
-export type DoubleClicEventHandler = MouseEventHandler;
+export type DoubleClickEventHandler = MouseEventHandler;
 export type InputEventHandler = EventHandler;
 export type KeyDownEventHandler = KeyboardEventHandler;
 export type KeyPressEventHandler = KeyboardEventHandler;
