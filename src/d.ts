@@ -6,8 +6,9 @@ import {
 	DNode,
 	HNode,
 	WNode,
-	WidgetBaseConstructor,
-	WidgetProperties
+	WidgetProperties,
+	WidgetBase,
+	WidgetOptions
 } from './WidgetBase';
 import FactoryRegistry from './FactoryRegistry';
 
@@ -36,6 +37,11 @@ export function isHNode(child: DNode): child is HNode {
 }
 
 /**
+ * Widget Base Constructor type with a generic for Widget Properties
+ */
+export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase
+
+/**
  * Generic decorate function for DNodes. The nodes are modified in place based on the provided predicate
  * and modifier functions.
  *
@@ -61,8 +67,14 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
 	return dNodes;
 }
 
+/**
+ * Global factory registry instance
+ */
 export const registry = new FactoryRegistry();
 
+/**
+ * Wrapper function for calls to create a widget.
+ */
 export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P): WNode;
 export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P, children?: DNode[]): WNode;
 export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> | string, properties: P, children: DNode[] = []): WNode {
@@ -75,6 +87,9 @@ export function w<P extends WidgetProperties>(factory: WidgetBaseConstructor<P> 
 	};
 }
 
+/**
+ * Wrapper function for calls to create hyperscript, lazily executes the hyperscript creation
+ */
 export function v(tag: string, properties: VNodeProperties, children?: DNode[]): HNode;
 export function v(tag: string, children: DNode[]): HNode;
 export function v(tag: string): HNode;

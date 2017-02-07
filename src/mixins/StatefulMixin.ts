@@ -1,15 +1,36 @@
 import { deepAssign } from '@dojo/core/lang';
-import { Constructor, WidgetConstructor } from './../WidgetBase';
+import { WidgetConstructor } from './../WidgetBase';
+import { Constructor } from './../interfaces';
 
+/**
+ * State
+ */
 export interface State {
 	[key: string]: any;
 }
 
+/**
+ * Stateful interface
+ */
 export interface Statful {
+
+	/**
+	 * state property
+	 */
 	readonly state: State;
+
+	/**
+	 * Set the inernal state. Accepts a partial and mixes on top of existing.
+	 * To clear a key it needs to be specifically set to undefined.
+	 *
+	 * @param state state to mix over the stored state
+	 */
 	setState(state: Partial<State>): void;
 }
 
+/**
+ * State change event type
+ */
 const stateChangedEventType = 'state:changed';
 
 export function StatefulMixin<T extends WidgetConstructor>(base: T): T & Constructor<Statful> {

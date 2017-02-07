@@ -1,7 +1,7 @@
-import { Constructor, WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { includes } from '@dojo/shim/array';
-import { PropertiesChangeEvent } from './../interfaces';
 import { assign } from '@dojo/core/lang';
+import { PropertiesChangeEvent, WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { Constructor } from './../interfaces';
 
 /**
  * A representation of the css class names to be applied and
@@ -57,19 +57,55 @@ type BaseClasses = { [key: string]: string; };
 
 const THEME_KEY = ' _key';
 
+/**
+ * Interface for the ThemeableMixin
+ */
 export interface ThemeablMixin {
+
+	/**
+	 * Processes all the possible classes for the instance with setting the passed class names to
+	 * true.
+	 *
+	 * @param ...classNames an array of class names
+	 * @returns a function chain to `get` or process more classes using `fixed`
+	 */
 	classes(...classNames: string[]): ClassesFunctionChain;
 }
 
+/**
+ * Function for returns a class decoratied with with Themeable functionality
+ */
 export function Themeable<T extends WidgetConstructor>(base: T): Constructor<ThemeablMixin> & T {
 	return class extends base {
 
-		properties: ThemeableProperties;
-		private allClasses: ClassNameFlags;
-		private baseClassesReverseLookup: ClassNames;
-		private generatedClassName: ClassNameFlagsMap;
+		/**
+		 * Properties for Themeable functionality
+		 */
+		public properties: ThemeableProperties;
+
+		/**
+		 * The Themeable baseClasses
+		 */
 		public baseClasses: {};
 
+		/**
+		 * All classes ever seen by the instance
+		 */
+		private allClasses: ClassNameFlags;
+
+		/**
+		 * Reverse lookup of the base classes
+		 */
+		private baseClassesReverseLookup: ClassNames;
+
+		/**
+		 * Generated class name map
+		 */
+		private generatedClassName: ClassNameFlagsMap;
+
+		/**
+		 * @constructor
+		 */
 		constructor(...args: any[]) {
 			super(...args);
 			const [ options ] = args;
@@ -113,11 +149,23 @@ export function Themeable<T extends WidgetConstructor>(base: T): Constructor<The
 			return classesResponseChain;
 		}
 
-		private appendToAllClassNames(classNames: string[]) {
+		/**
+		 * Adds classes to the internal allClasses property
+		 *
+		 * @param classNames an array of string class names
+		 */
+		private appendToAllClassNames(classNames: string[]): void {
 			const negativeClassFlags = this.createClassNameObject(classNames, false);
 			this.allClasses = assign({}, this.allClasses, negativeClassFlags);
 		}
 
+		/**
+		 * Returns the class object map based on the class names and whether they are
+		 * active.
+		 *
+		 * @param className an array of string class names
+		 * @param applied indicates is the class is applied
+		 */
 		private createClassNameObject(classNames: string[], applied: boolean) {
 			return classNames.reduce((flaggedClassNames: ClassNameFlags, className) => {
 				flaggedClassNames[className] = applied;

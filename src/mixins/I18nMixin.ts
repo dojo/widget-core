@@ -2,13 +2,9 @@
 import { assign } from '@dojo/core/lang';
 import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import {
-	DNode,
-	WidgetConstructor,
-	Constructor,
-	WidgetProperties
-} from '../WidgetBase';
-import { isHNode } from '../d';
+import { DNode, WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { Constructor } from './../interfaces';
+import { isHNode } from './../d';
 
 export interface I18nProperties extends WidgetProperties {
 	/**
@@ -51,7 +47,21 @@ export type LocalizedMessages<T extends Messages> = T & {
 	format(key: string, options?: any): string;
 }
 
+/**
+ * interface for I18n functionality
+ */
 export interface I18n {
+	/**
+	 * Return the cached messages for the specified bundle for the current locale, assuming they have already
+	 * benn loaded. If the locale-specific messages have not been loaded, they are fetched and the widget state
+	 * is updated.
+	 *
+	 * @param bundle
+	 * The required bundle object for which available locale messages should be loaded.
+	 *
+	 * @return
+	 * The localized messages, along with a `format` method for formatting ICU-formatted templates.
+	 */
 	localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T>;
 }
 

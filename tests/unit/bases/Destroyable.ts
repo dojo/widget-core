@@ -1,6 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import Destroyable from '../../../src/bases/Destroyable';
+import { Destroyable } from '../../../src/bases/Destroyable';
 
 registerSuite({
 	name: 'bases/Destroyable',

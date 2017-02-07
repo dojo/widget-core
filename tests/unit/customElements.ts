@@ -1,19 +1,18 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { initializeElement, handleAttributeChanged, CustomElementDescriptor } from '../../src/customElements';
-import { Widget } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 
 function createFakeElement(attributes: any, descriptor: CustomElementDescriptor): any {
-	let widgetInstance: Widget<any> | null;
+	let widgetInstance: WidgetBase | null;
 	let events: Event[] = [];
 	let removedChildren: any[] = [];
 
 	return {
 		getWidgetInstance: () => widgetInstance!,
-		setWidgetInstance(instance: Widget<any>) {
+		setWidgetInstance(instance: WidgetBase) {
 			widgetInstance = instance;
 		},
 		getWidgetFactory: () => WidgetBase,

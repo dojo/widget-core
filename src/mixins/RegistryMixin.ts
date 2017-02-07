@@ -1,7 +1,8 @@
 import { includes } from '@dojo/shim/array';
-import { PropertiesChangeEvent, PropertyChangeRecord } from './../interfaces';
 import FactoryRegistry from '../FactoryRegistry';
 import {
+	PropertyChangeRecord,
+	PropertiesChangeEvent,
 	WidgetConstructor,
 	WidgetProperties
 } from '../WidgetBase';

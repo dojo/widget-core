@@ -6,7 +6,7 @@ import { v, w, decorate, registry, WNODE, HNODE, isWNode, isHNode } from '../../
 import FactoryRegistry from './../../src/FactoryRegistry';
 
 class TestFactoryRegistry extends FactoryRegistry {
-	clear() {
+	clear(this: any) {
 		this.registry.clear();
 	}
 }

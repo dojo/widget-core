@@ -1,27 +1,66 @@
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
+import { WidgetBase, WidgetConstructor } from './WidgetBase';
 
-import { WidgetBase, WidgetBaseConstructor, WidgetProperties } from './WidgetBase';
+/**
+ * A function the returns a Promise<WidgetConstructor>
+ */
+export type WidgetFactoryFunction = () => Promise<WidgetConstructor>
 
-export type WidgetFactoryFunction = () => Promise<WidgetBaseConstructor<WidgetProperties>>
+/**
+ * Factory Registry Item - Either WidgetConsructor, Promise for a WidgetConstructor or WidgetFactoryFunction
+ */
+export type FactoryRegistryItem = WidgetConstructor | Promise<WidgetConstructor> | WidgetFactoryFunction
 
-export type FactoryRegistryItem = WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | WidgetFactoryFunction
-
+/**
+ * Factory Registry Interface
+ */
 export interface FactoryRegistryInterface {
 
+	/**
+	 * define a FactoryRegistryItem for a specified label
+	 *
+	 * @param factoryLabel The label of the factory to register
+	 * @param registryItem The registry item to define
+	 */
 	define(factoryLabel: string, registryItem: FactoryRegistryItem): void;
 
-	get(factoryLabel: string): WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | null;
+	/**
+	 * Return a Factory or promise for a factory for the given label, null if an entry doesn't exist
+	 *
+	 * @param factoryLabel The label of the factory to return
+	 * @returns The Factory or Promise for the label, `null` if no entry exists
+	 */
+	get(factoryLabel: string): WidgetConstructor | Promise<WidgetConstructor> | null;
 
+	/**
+	 * Returns a boolean if an entry for the label exists
+	 *
+	 * @param factoryLabel The label to search for
+	 * @returns boolean indicating if a factory exists
+	 */
 	has(factoryLabel: string): boolean;
 }
 
-export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructor<WidgetProperties> {
+/**
+ * Checks is the item is a subclass of WidgetBase (or a WidgetBase)
+ *
+ * @param item the item to check
+ * @returns true/false indicating is the item is a WidgetConstructor
+ */
+export function isWidgetBaseConstructor(item: any): item is WidgetConstructor {
 	return WidgetBase.isPrototypeOf(item) || item === WidgetBase;
 }
 
+/**
+ * The FactoryRegistry implementation
+ */
 export default class FactoryRegistry implements FactoryRegistryInterface {
-	protected registry: Map<string, FactoryRegistryItem>;
+
+	/**
+	 * internal map of labels and FactoryRegistryItem
+	 */
+	private registry: Map<string, FactoryRegistryItem>;
 
 	constructor() {
 		this.registry = new Map<string, FactoryRegistryItem>();
@@ -38,7 +77,7 @@ export default class FactoryRegistry implements FactoryRegistryInterface {
 		this.registry.set(factoryLabel, registryItem);
 	}
 
-	get(factoryLabel: string): WidgetBaseConstructor<WidgetProperties> | Promise<WidgetBaseConstructor<WidgetProperties>> | null {
+	get(factoryLabel: string): WidgetConstructor | Promise<WidgetConstructor> | null {
 		if (!this.has(factoryLabel)) {
 			return null;
 		}
