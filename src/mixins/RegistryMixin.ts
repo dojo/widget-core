@@ -10,7 +10,7 @@ export interface RegistryMixinProperties extends WidgetProperties {
 	registry?: FactoryRegistry;
 }
 
-export function RegistryMixin<T extends WidgetConstructor>(base: T) {
+export function RegistryMixin<T extends WidgetConstructor>(base: T): T {
 	return class extends base {
 		properties: RegistryMixinProperties;
 

@@ -1,15 +1,16 @@
 import { WidgetBase } from './../WidgetBase';
 import { ProjectorMixin } from './../mixins/ProjectorMixin';
 import { Themeable, ThemeableProperties } from './../mixins/ThemeableMixin';
+import { I18nMixin, I18nProperties } from './../mixins/I18nMixin';
 import { Stateful } from './../mixins/StatefulMixin';
 import { v } from './../d';
 import * as css from './styles/button.css';
 
-interface ButtonProperties extends ThemeableProperties {
+interface ButtonProperties extends ThemeableProperties, I18nProperties {
 	myProperty: string;
 }
 
-class Button extends Stateful(Themeable(WidgetBase)) {
+export class Button extends Stateful(I18nMixin(Themeable(WidgetBase))) {
 
 	properties: ButtonProperties;
 
@@ -18,8 +19,25 @@ class Button extends Stateful(Themeable(WidgetBase)) {
 		super(options);
 	}
 
+	onClick() {
+		let { state: { counter } = { counter: 0 } }  = this;
+		counter++;
+		this.setState({ counter });
+	}
+
 	render() {
-		return v('button', { type: 'button', classes: this.classes(css.myClass).get() });
+		const { state: { counter } = { counter: 0 } }  = this;
+		const messages = this.localizeBundle({
+			bundlePath: '',
+			messages: {
+				click: 'Click Me'
+			}
+		});
+
+		return v('div', [
+			v('button', { type: 'button', innerHTML: messages.click, classes: this.classes(css.myClass).get() }),
+			v('span', { innerHTML: counter, classes: this.classes(css.myClass).get() })
+		]);
 	}
 }
 

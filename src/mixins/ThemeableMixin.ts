@@ -1,4 +1,4 @@
-import { WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { Constructor, WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { includes } from '@dojo/shim/array';
 import { PropertiesChangeEvent } from './../interfaces';
 import { assign } from '@dojo/core/lang';
@@ -57,7 +57,11 @@ type BaseClasses = { [key: string]: string; };
 
 const THEME_KEY = ' _key';
 
-export function Themeable<T extends WidgetConstructor>(base: T) {
+export interface ThemeablMixin {
+	classes(...classNames: string[]): ClassesFunctionChain;
+}
+
+export function Themeable<T extends WidgetConstructor>(base: T): Constructor<ThemeablMixin> & T {
 	return class extends base {
 
 		properties: ThemeableProperties;
@@ -77,7 +81,7 @@ export function Themeable<T extends WidgetConstructor>(base: T) {
 			this.baseClassesReverseLookup = this.createBaseClassesLookup(this.baseClasses);
 		}
 
-		public classes(...classNames: string[]) {
+		public classes(...classNames: string[]): ClassesFunctionChain {
 
 			const appliedClasses = classNames.reduce((currentCSSModuleClassNames, className) => {
 				const classNameKey = this.baseClassesReverseLookup[className];

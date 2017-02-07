@@ -1,4 +1,4 @@
-import { WidgetBase, WidgetProperties } from './../WidgetBase';
+import { DNode, WidgetBase, WidgetProperties } from './../WidgetBase';
 import { isHNode } from '../d';
 import { assign } from '@dojo/core/lang';
 import { VNode } from '@dojo/interfaces/vdom';
@@ -38,7 +38,7 @@ export class DomWrapper extends WidgetBase {
 		}
 	}
 
-	render() {
+	render(): DNode {
 		const dNode = super.render();
 		if (isHNode(dNode)) {
 			const { afterCreate, afterUpdate } = this;

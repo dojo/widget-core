@@ -82,6 +82,7 @@ export type DNode = HNode | WNode | string | null;
 
 export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase
 export type WidgetConstructor = new (...args: any[]) => WidgetBase;
+export type Constructor<T> = new (...args: any[]) => T;
 
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 const decoratorFunctionNameRegex = /^renderDecorator.*/;

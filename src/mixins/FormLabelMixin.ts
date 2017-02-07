@@ -114,7 +114,7 @@ const labelDefaults = {
  */
 const allowedFormFieldAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'type', 'value'];
 
-export function FormLabelMixin<T extends WidgetConstructor>(base: T) {
+export function FormLabelMixin<T extends WidgetConstructor>(base: T): T {
 	return class extends base {
 
 		type: string;

@@ -5,6 +5,7 @@ import { VNodeProperties } from '@dojo/interfaces/vdom';
 import {
 	DNode,
 	WidgetConstructor,
+	Constructor,
 	WidgetProperties
 } from '../WidgetBase';
 import { isHNode } from '../d';
@@ -50,7 +51,11 @@ export type LocalizedMessages<T extends Messages> = T & {
 	format(key: string, options?: any): string;
 }
 
-export function I18nMixin<T extends WidgetConstructor>(base: T) {
+export interface I18n {
+	localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T>;
+}
+
+export function I18nMixin<T extends WidgetConstructor>(base: T): T & Constructor<I18n> {
 	return class extends base {
 		properties: I18nProperties;
 
@@ -70,7 +75,7 @@ export function I18nMixin<T extends WidgetConstructor>(base: T) {
 			});
 		}
 
-		public localizeBundle(bundle: Bundle<Messages>): LocalizedMessages<Messages> {
+		public localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T> {
 			const { locale } = this.properties;
 			const messages = this.getLocaleMessages(bundle) || bundle.messages;
 
@@ -78,7 +83,7 @@ export function I18nMixin<T extends WidgetConstructor>(base: T) {
 				format(key: string, options?: any) {
 					return formatMessage(bundle.bundlePath, key, options, locale);
 				}
-			}), messages);
+			}), messages) as LocalizedMessages<T>;
 		}
 
 		renderDecoratorI18n(result: DNode): DNode {

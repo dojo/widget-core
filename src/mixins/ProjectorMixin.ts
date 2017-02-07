@@ -1,6 +1,6 @@
 import global from '@dojo/core/global';
 import Promise from '@dojo/shim/Promise';
-import { WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { Constructor, WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import { EventTargettedObject, Handle } from '@dojo/interfaces/core';
 
@@ -37,7 +37,35 @@ export interface ProjectorProperties extends WidgetProperties {
 	cssTransitions?: boolean;
 }
 
-export function ProjectorMixin<T extends WidgetConstructor>(base: T) {
+export interface Projector {
+
+	/**
+	 * Append the projector to the root.
+	 */
+	append(): Promise<Handle>;
+
+	/**
+	 * Merge the projector onto the root.
+	 */
+	merge(): Promise<Handle>;
+
+	/**
+	 * Replace the root with the projector node.
+	 */
+	replace(): Promise<Handle>;
+
+	/**
+	 * Root element to attach the projector
+	 */
+	root: Element;
+
+	/**
+	 * The status of the projector
+	 */
+	readonly projectorState: ProjectorState;
+}
+
+export function ProjectorMixin<T extends WidgetConstructor>(base: T): T & Constructor<Projector> {
 	return class extends base {
 
 		public properties: ProjectorProperties;
