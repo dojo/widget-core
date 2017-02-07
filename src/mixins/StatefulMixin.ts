@@ -6,6 +6,7 @@ export interface State {
 }
 
 export interface Statful {
+	readonly state: State;
 	setState(state: Partial<State>): void;
 }
 

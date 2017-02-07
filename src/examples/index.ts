@@ -2,7 +2,7 @@ import { WidgetBase } from './../WidgetBase';
 import { ProjectorMixin } from './../mixins/ProjectorMixin';
 import { Themeable, ThemeableProperties } from './../mixins/ThemeableMixin';
 import { I18nMixin, I18nProperties } from './../mixins/I18nMixin';
-import { Stateful } from './../mixins/StatefulMixin';
+import { StatefulMixin } from './../mixins/StatefulMixin';
 import { v } from './../d';
 import * as css from './styles/button.css';
 
@@ -10,7 +10,7 @@ interface ButtonProperties extends ThemeableProperties, I18nProperties {
 	myProperty: string;
 }
 
-export class Button extends Stateful(I18nMixin(Themeable(WidgetBase))) {
+export class Button extends StatefulMixin(I18nMixin(Themeable(WidgetBase))) {
 
 	properties: ButtonProperties;
 
