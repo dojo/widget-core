@@ -65,19 +65,17 @@ registerSuite({
 		}
 	},
 	'render does not attach after create when there are no properties'() {
-		/* tslint:disable:variable-name */
 		const projector = new class extends TestWidget {
 			render() {
 				return v('div', <any> null);
 			}
 
-			__render__: any = () => {
+			__render__() {
 				const results: any = super.__render__();
 				results.properties = undefined;
 				return results;
 			}
 		}({});
-		/* tslint:enable:variable-name */
 
 		const vnode  = <any> projector.__render__();
 		assert.isUndefined(vnode.properties);
