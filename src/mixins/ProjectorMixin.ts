@@ -1,4 +1,5 @@
 import global from '@dojo/core/global';
+import Promise from '@dojo/shim/Promise';
 import { WidgetConstructor, WidgetProperties } from './../WidgetBase';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
 import { EventTargettedObject, Handle } from '@dojo/interfaces/core';

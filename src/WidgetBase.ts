@@ -5,6 +5,7 @@ import { assign } from '@dojo/core/lang';
 import WeakMap from '@dojo/shim/WeakMap';
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
+import Set from '@dojo/shim/Set';
 import {
 	PropertyChangeRecord,
 	PropertiesChangeEvent,
