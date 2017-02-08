@@ -1,4 +1,3 @@
-import global from '@dojo/core/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy } from 'sinon';
@@ -11,27 +10,6 @@ class TestWidget extends ProjectorMixin(WidgetBase)<ProjectorProperties> {}
 registerSuite({
 	name: 'mixins/projectorMixin',
 
-	'construct projector with css transitions'() {
-		global.cssTransitions = {};
-		try {
-			new TestWidget({ cssTransitions: true });
-		}
-		catch (err) {
-			assert.fail(null, null, 'Projector should be created without throwing an error');
-		}
-
-	},
-	'construting projector configured for css transitions throws when css-transitions script is not loaded.'() {
-		global.cssTransitions = undefined;
-		try {
-			new TestWidget({ cssTransitions: true });
-			assert.fail();
-		}
-		catch (err) {
-			assert.isTrue(err instanceof Error);
-			assert.equal(err.message, 'Unable to create projector with css transitions enabled. Is the \'css-transition.js\' script loaded in the page?');
-		}
-	},
 	'render throws an error for null result'() {
 		const projector = new class extends TestWidget {
 			render() {
