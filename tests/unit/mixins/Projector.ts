@@ -2,11 +2,11 @@ import global from '@dojo/core/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy } from 'sinon';
-import { ProjectorMixin, ProjectorState } from '../../../src/mixins/Projector';
+import { ProjectorMixin, ProjectorState, ProjectorProperties } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 
-class TestWidget extends ProjectorMixin(WidgetBase)<any> {}
+class TestWidget extends ProjectorMixin(WidgetBase)<ProjectorProperties> {}
 
 registerSuite({
 	name: 'mixins/projectorMixin',
@@ -14,7 +14,7 @@ registerSuite({
 	'construct projector with css transitions'() {
 		global.cssTransitions = {};
 		try {
-			new TestWidget({ properties: { cssTransitions: true } });
+			new TestWidget({ cssTransitions: true });
 		}
 		catch (err) {
 			assert.fail(null, null, 'Projector should be created without throwing an error');
@@ -24,7 +24,7 @@ registerSuite({
 	'construting projector configured for css transitions throws when css-transitions script is not loaded.'() {
 		global.cssTransitions = undefined;
 		try {
-			new TestWidget({ properties: { cssTransitions: true } });
+			new TestWidget({ cssTransitions: true });
 			assert.fail();
 		}
 		catch (err) {
@@ -128,7 +128,7 @@ registerSuite({
 	'attach event'() {
 		const root = document.createElement('div');
 		document.body.appendChild(root);
-		const projector = new TestWidget({ properties: { root } });
+		const projector = new TestWidget({ root });
 
 		projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
@@ -223,7 +223,7 @@ registerSuite({
 	},
 	'reattach'() {
 		const root = document.createElement('div');
-		const projector = new TestWidget({ properties: { root } });
+		const projector = new TestWidget({ root });
 		const promise = projector.append();
 		assert.strictEqual(promise, projector.append(), 'same promise should be returned');
 	},
