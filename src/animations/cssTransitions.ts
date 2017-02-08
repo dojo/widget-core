@@ -11,11 +11,7 @@ function determineBrowserStyleNames(element: HTMLElement) {
 		browserSpecificTransitionEndEventName = 'webkitTransitionEnd';
 		browserSpecificAnimationEndEventName = 'webkitAnimationEnd';
 	}
-	else if ('transition' in element.style) {
-		browserSpecificTransitionEndEventName = 'transitionend';
-		browserSpecificAnimationEndEventName = 'animationend';
-	}
-	else if ('MozTransition' in element.style) {
+	else if (('transition' in element.style) || ('MozTransition' in element.style)) {
 		browserSpecificTransitionEndEventName = 'transitionend';
 		browserSpecificAnimationEndEventName = 'animationend';
 	}
