@@ -3,12 +3,12 @@ import * as assert from 'intern/chai!assert';
 import i18n, { invalidate, switchLocale, systemLocale } from '@dojo/i18n/i18n';
 import * as sinon from 'sinon';
 import { VNode } from '@dojo/interfaces/vdom';
-import { I18nMixin } from '../../../src/mixins/I18nMixin';
+import { I18nMixin, I18nProperties } from '../../../src/mixins/I18n';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { w } from './../../../src/d';
 import bundle from '../../support/nls/greetings';
 
-class Localized extends I18nMixin(WidgetBase) {}
+class Localized extends I18nMixin(WidgetBase)<I18nProperties> {}
 
 let localized: any;
 
@@ -44,11 +44,7 @@ registerSuite({
 		},
 
 		'Uses `properties.locale` when available'() {
-			localized = new Localized({
-				properties: {
-					locale: 'fr'
-				}
-			});
+			localized = new Localized({ locale: 'fr' });
 			return i18n(bundle, 'fr').then(() => {
 				const messages = localized.localizeBundle(bundle);
 				assert.strictEqual(messages.hello, 'Bonjour');
@@ -95,9 +91,7 @@ registerSuite({
 
 		'Does not update when `locale` property is set'() {
 			localized = new Localized({
-				properties: {
 					locale: 'en'
-				}
 			});
 			sinon.spy(localized, 'invalidate');
 
@@ -113,9 +107,7 @@ registerSuite({
 			}
 		}
 
-		localized = new LocalizedExtended({
-			properties: { locale: 'ar-JO' }
-		});
+		localized = new LocalizedExtended({locale: 'ar-JO'});
 
 		const result = <VNode> localized.__render__();
 		assert.isOk(result);
@@ -123,9 +115,7 @@ registerSuite({
 	},
 	'`properties.locale` updates the widget node\'s `data-locale` property': {
 		'when non-empty'() {
-			localized = new Localized({
-				properties: { locale: 'ar-JO' }
-			});
+			localized = new Localized({locale: 'ar-JO'});
 
 			const result = <VNode> localized.__render__();
 			assert.isOk(result);
@@ -143,9 +133,7 @@ registerSuite({
 
 	'`properties.rtl`': {
 		'The `dir` attribute is "rtl" when true'() {
-			localized = new Localized({
-				properties: { rtl: true }
-			});
+			localized = new Localized({ rtl: true });
 
 			const result = localized.__render__();
 			assert.isOk(result);
@@ -153,9 +141,7 @@ registerSuite({
 		},
 
 		'The `dir` attribute is "ltr" when false'() {
-			localized = new Localized({
-				properties: { rtl: false }
-			});
+			localized = new Localized({ rtl: false });
 
 			const result = localized.__render__();
 			assert.isOk(result);

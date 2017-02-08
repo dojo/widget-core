@@ -7,8 +7,7 @@ import {
 	HNode,
 	WNode,
 	WidgetProperties,
-	WidgetBase,
-	WidgetOptions
+	WidgetBase
 } from './WidgetBase';
 import FactoryRegistry from './FactoryRegistry';
 
@@ -39,7 +38,7 @@ export function isHNode(child: DNode): child is HNode {
 /**
  * Widget Base Constructor type with a generic for Widget Properties
  */
-export type WidgetBaseConstructor<P extends WidgetProperties> = new (options: WidgetOptions<P>) => WidgetBase
+export type WidgetBaseConstructor<P extends WidgetProperties> = new (properties: P) => WidgetBase<P>
 
 /**
  * Generic decorate function for DNodes. The nodes are modified in place based on the provided predicate

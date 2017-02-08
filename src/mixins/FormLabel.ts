@@ -20,11 +20,6 @@ export interface LabelProperties {
 export interface FormLabelMixinProperties {
 
 	/**
-	 * Index type
-	 */
-	[index: string]: any;
-
-	/**
 	 * The form widget's name
 	 */
 	name?: string;
@@ -117,6 +112,8 @@ const allowedFormFieldAttributes = ['checked', 'describedBy', 'disabled', 'inval
 export function FormLabelMixin<T extends WidgetConstructor>(base: T): T {
 	return class extends base {
 
+		properties: FormLabelMixinProperties;
+
 		type: string;
 
 		renderDecoratorFormLabel(result: DNode): DNode {
@@ -190,7 +187,7 @@ export function FormLabelMixin<T extends WidgetConstructor>(base: T): T {
 					nodeAttributes[key.toLowerCase()] = '' + properties[key];
 				}
 				else {
-					nodeAttributes[key.toLowerCase()] = properties[key];
+					nodeAttributes[key.toLowerCase()] = (<any> properties)[key];
 				}
 			}
 

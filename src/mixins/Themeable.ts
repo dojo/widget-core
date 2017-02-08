@@ -84,7 +84,7 @@ export function theme (theme: {}) {
 /**
  * Function for returns a class decoratied with with Themeable functionality
  */
-export function Themeable<T extends WidgetConstructor>(base: T): Constructor<ThemeablMixin> & T {
+export function ThemeableMixin<T extends WidgetConstructor>(base: T): Constructor<ThemeablMixin> & T {
 	return class extends base {
 
 		/**

@@ -5,29 +5,14 @@ import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import Set from '@dojo/shim/Set';
 import { EventTypedObject } from '@dojo/interfaces/core';
-import { Evented, EventedOptions } from './bases/Evented';
+import { Evented } from './bases/Evented';
 import { v, registry, isWNode } from './d';
 import FactoryRegistry from './FactoryRegistry';
-
-/**
- * options for WidgetBase constructor
- */
-export interface WidgetOptions<P extends WidgetProperties> extends EventedOptions {
-
-	/**
-	 * Widget properties
-	 */
-	properties?: P;
-}
 
 /**
  * Base widget properties
  */
 export interface WidgetProperties {
-	/**
-	 * Index type
-	 */
-	[index: string]: any;
 
 	/**
 	 * id for a widget
@@ -142,13 +127,13 @@ export interface PropertiesChangeRecord<P extends WidgetProperties> {
 /**
  * WidgetBase constructor type
  */
-export type WidgetConstructor = new (...args: any[]) => WidgetBase;
+export type WidgetConstructor = new (...args: any[]) => WidgetBase<WidgetProperties>;
 
 /**
  * Widget cache wrapper for instance management
  */
 interface WidgetCacheWrapper {
-	child: WidgetBase;
+	child: WidgetBase<WidgetProperties>;
 	factory: WidgetConstructor;
 	used: boolean;
 }
@@ -166,7 +151,7 @@ const decoratorFunctionNameRegex = /^renderDecorator.*/;
 /**
  * Main widget base for all widgets to extend
  */
-export class WidgetBase extends Evented {
+export class WidgetBase<P extends WidgetProperties> extends Evented {
 
 	/**
 	 * children array
@@ -186,12 +171,12 @@ export class WidgetBase extends Evented {
 	/**
 	 * internal widget properties
 	 */
-	private  _properties: WidgetProperties;
+	private  _properties: P;
 
 	/**
 	 * properties from the previous render
 	 */
-	private previousProperties: WidgetProperties;
+	private previousProperties: P & { [index: string]: any };
 
 	/**
 	 * Map of factory promises
@@ -227,13 +212,12 @@ export class WidgetBase extends Evented {
 	 * @constructor
 	 * @param options widget options for construction
 	 */
-	constructor(options: WidgetOptions<WidgetProperties> = {}) {
-		super(options);
-		const { properties = <WidgetProperties> {} } = options;
+	constructor(properties: P) {
+		super({});
 
 		this._children = [];
-		this._properties = <WidgetProperties> {};
-		this.previousProperties = <WidgetProperties> {};
+		this._properties = <P> {};
+		this.previousProperties = <P> {};
 		this.initializedFactoryMap = new Map<string, Promise<WidgetConstructor>>();
 		this.cachedChildrenMap = new Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>();
 		this.diffPropertyFunctionMap = new Map<string, string>();
@@ -254,7 +238,7 @@ export class WidgetBase extends Evented {
 			}
 		};
 
-		this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<WidgetBase, WidgetProperties>) => {
+		this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<WidgetBase<WidgetProperties>, WidgetProperties>) => {
 			this.invalidate();
 		}));
 
@@ -271,7 +255,7 @@ export class WidgetBase extends Evented {
 	/**
 	 * Return readonly widget properties
 	 */
-	public get properties(): Readonly<WidgetProperties> {
+	public get properties(): Readonly<P> {
 		return this._properties;
 	}
 
@@ -283,7 +267,7 @@ export class WidgetBase extends Evented {
 	 *
 	 * @param properties The new widget properties
 	 */
-	public setProperties(properties: WidgetProperties): void {
+	public setProperties(properties: P & { [index: string]: any }): void {
 		const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 		const diffPropertyChangedKeys: string[] = [];
 
@@ -348,7 +332,7 @@ export class WidgetBase extends Evented {
 	 * @param newProperties The widgets new properties
 	 * @returns A properties change record for the the diff
 	 */
-	public diffProperties(previousProperties: WidgetProperties, newProperties: WidgetProperties): PropertiesChangeRecord<WidgetProperties> {
+	public diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P> {
 		const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
 			if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
 				changedPropertyKeys.push(propertyKey);
@@ -405,7 +389,7 @@ export class WidgetBase extends Evented {
 	 *
 	 * @param properties properties to check for functions
 	 */
-	private bindFunctionProperties(properties: WidgetProperties): void {
+	private bindFunctionProperties(properties: P & { [index: string]: any }): void {
 		Object.keys(properties).forEach((propertyKey) => {
 			const property = properties[propertyKey];
 			const bind = properties.bind;
@@ -453,7 +437,7 @@ export class WidgetBase extends Evented {
 			const { key } = properties;
 
 			let { factory } = dNode;
-			let child: WidgetBase;
+			let child: WidgetBase<WidgetProperties>;
 
 			if (typeof factory === 'string') {
 				const item = this.getFromRegistry(factory);
@@ -495,7 +479,7 @@ export class WidgetBase extends Evented {
 				cachedChild.used = true;
 			}
 			else {
-				child = new factory({ properties });
+				child = new factory(properties);
 				child.own(child.on('invalidated', () => {
 					this.invalidate();
 				}));

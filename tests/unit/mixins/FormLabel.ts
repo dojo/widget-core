@@ -3,9 +3,9 @@ import * as assert from 'intern/chai!assert';
 import { VNode } from '@dojo/interfaces/vdom';
 import { v, w } from './../../../src/d';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { FormLabelMixin } from '../../../src/mixins/FormLabelMixin';
+import { FormLabelMixin, FormLabelMixinProperties } from '../../../src/mixins/FormLabel';
 
-class FormLabelWidget extends FormLabelMixin(WidgetBase) { }
+class FormLabelWidget extends FormLabelMixin(WidgetBase)<FormLabelMixinProperties> { }
 
 registerSuite({
 	name: 'mixins/createFormLabelMixin',
@@ -16,12 +16,10 @@ registerSuite({
 	},
 	getFormFieldNodeAttributes: {
 		'for HNode'() {
-			const formField: any = new FormLabelWidget({
-				properties: {
-					value: 'foo',
-					maxLength: 100,
-					randomProp: 'qux'
-				}
+			const formField: any = new FormLabelWidget(<any> {
+				value: 'foo',
+				maxLength: 100,
+				randomProp: 'qux'
 			});
 
 			let vnode = <VNode> formField.__render__();
@@ -61,12 +59,10 @@ registerSuite({
 				}
 			};
 
-			const formField: any = new ExtendedFormField({
-				properties: {
-					value: 'foo',
-					maxLength: 100,
-					randomProp: 'qux'
-				}
+			const formField: any = new ExtendedFormField(<any> {
+				value: 'foo',
+				maxLength: 100,
+				randomProp: 'qux'
 			});
 
 			let vnode = <VNode> formField.__render__();
@@ -78,18 +74,15 @@ registerSuite({
 		'label properties'() {
 			class ExtendedFormField extends FormLabelWidget {
 				render() {
-					return v('input', { classes: this.properties.classes });
+					return v('input', { classes: { 'qux': true } });
 				}
 			};
 
 			const formField: any = new ExtendedFormField({
-				properties: {
-					label: 'foo',
-					value: 'bar',
-					maxLength: 100,
-					formId: 'baz',
-					classes: { 'qux': true }
-				}
+				label: 'foo',
+				value: 'bar',
+				maxLength: 100,
+				formId: 'baz'
 			});
 			let vnode = <VNode> formField.__render__();
 
@@ -110,9 +103,7 @@ registerSuite({
 	'label': {
 		'string label'() {
 			const formField: any = new FormLabelWidget({
-				properties: {
-					label: 'bar'
-				}
+				label: 'bar'
 			});
 			const vnode = <VNode> formField.__render__();
 
@@ -122,12 +113,10 @@ registerSuite({
 		},
 		'label options'() {
 			const formField: any = new FormLabelWidget({
-				properties: {
-					label: {
-						content: 'bar',
-						position: 'before',
-						hidden: true
-					}
+				label: {
+					content: 'bar',
+					position: 'before',
+					hidden: true
 				}
 			});
 			let vnode = <VNode> formField.__render__();

@@ -8,7 +8,7 @@ import {
 } from '../WidgetBase';
 
 export interface RegistryMixinProperties extends WidgetProperties {
-	registry?: FactoryRegistry;
+	registry: FactoryRegistry;
 }
 
 export function RegistryMixin<T extends WidgetConstructor>(base: T): T {

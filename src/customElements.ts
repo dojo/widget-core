@@ -1,6 +1,6 @@
 import { w } from './d';
 import { WidgetProperties, WidgetConstructor, WidgetBase, DNode } from './WidgetBase';
-import { ProjectorMixin } from './mixins/ProjectorMixin';
+import { ProjectorMixin } from './mixins/Projector';
 import { DomWrapper } from './util/DomWrapper';
 import { assign } from '@dojo/core/lang';
 import { from as arrayFrom } from '@dojo/shim/array';
@@ -116,8 +116,8 @@ export interface CustomElementDescriptor {
 export interface CustomElement extends HTMLElement {
 	getWidgetFactory(): WidgetConstructor;
 	getDescriptor(): CustomElementDescriptor;
-	getWidgetInstance(): WidgetBase;
-	setWidgetInstance(instance: WidgetBase): void;
+	getWidgetInstance(): WidgetBase<any>;
+	setWidgetInstance(instance: WidgetBase<any>): void;
 }
 
 function getWidgetPropertyFromAttribute(attributeName: string, attributeValue: string | null, descriptor: CustomElementAttributeDescriptor): [ string, any ] {
@@ -240,9 +240,7 @@ export function initializeElement(element: CustomElement) {
 
 	const projector = ProjectorMixin(element.getWidgetFactory());
 
-	const widgetInstance = new projector({
-		properties: assign(initialProperties, { root: element })
-	});
+	const widgetInstance = new projector(assign(initialProperties, { root: element }));
 	widgetInstance.setChildren(children);
 	element.setWidgetInstance(widgetInstance);
 

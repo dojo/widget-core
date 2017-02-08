@@ -1,9 +1,9 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { StatefulMixin } from './../../../src/mixins/StatefulMixin';
+import { StatefulMixin } from './../../../src/mixins/Stateful';
 import { WidgetBase } from './../../../src/WidgetBase';
 
-class Test extends StatefulMixin(WidgetBase) { }
+class Test extends StatefulMixin(WidgetBase)<any> { }
 
 registerSuite({
 	name: 'mixins/StatefulMixin',

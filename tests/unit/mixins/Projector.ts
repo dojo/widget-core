@@ -2,11 +2,11 @@ import global from '@dojo/core/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy } from 'sinon';
-import { ProjectorMixin, ProjectorState } from '../../../src/mixins/ProjectorMixin';
+import { ProjectorMixin, ProjectorState } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 
-class TestWidget extends ProjectorMixin(WidgetBase) {}
+class TestWidget extends ProjectorMixin(WidgetBase)<any> {}
 
 registerSuite({
 	name: 'mixins/projectorMixin',

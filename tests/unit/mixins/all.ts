@@ -1,6 +1,6 @@
-import './ThemeableMixin';
-import './FormLabelMixin';
-import './ProjectorMixin';
-import './StatefulMixin';
-import './RegistryMixin';
-import './I18nMixin';
+import './Themeable';
+import './FormLabel';
+import './Projector';
+import './Stateful';
+import './Registry';
+import './I18n';

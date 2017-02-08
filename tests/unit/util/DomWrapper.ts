@@ -4,7 +4,7 @@ import { isHNode } from '../../../src/d';
 import { WidgetBase, HNode } from './../../../src/WidgetBase';
 import { DomWrapper } from '../../../src/util/DomWrapper';
 
-function callCreate(widget: WidgetBase, includeUpdate = false) {
+function callCreate(widget: WidgetBase<any>, includeUpdate = false) {
 	const hNode: HNode = <HNode> widget.render();
 
 	assert.isTrue(isHNode(hNode));
@@ -38,11 +38,8 @@ registerSuite({
 			}
 		};
 
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> mock });
 
-		domWrapper.setProperties({
-			domNode: <any> mock
-		});
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: parentNode
@@ -63,11 +60,8 @@ registerSuite({
 			}
 		};
 
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> 'test' });
 
-		domWrapper.setProperties({
-			domNode: <any> 'test'
-		});
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: null
@@ -77,11 +71,8 @@ registerSuite({
 	},
 
 	'Nothing bad happens if there if node is a string'() {
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> 'test' });
 
-		domWrapper.setProperties({
-			domNode: <any> 'test'
-		});
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: 'test'
@@ -91,7 +82,7 @@ registerSuite({
 	},
 
 	'updates with no renders don\'t do anything'() {
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> undefined });
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: null
@@ -109,7 +100,7 @@ registerSuite({
 			}
 		};
 
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> undefined });
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: parentNode
@@ -119,7 +110,7 @@ registerSuite({
 	},
 
 	'render aspect is ok if we dont return an hnode'() {
-		let domWrapper: any = new DomWrapper();
+		let domWrapper: any = new DomWrapper({ domNode: <any> undefined });
 		domWrapper.dirty = false;
 		domWrapper.cachedVNode = {
 			domNode: 'test'

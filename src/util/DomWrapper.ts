@@ -7,9 +7,8 @@ export interface DomWrapperProperties extends WidgetProperties {
 	domNode: Node;
 }
 
-export class DomWrapper extends WidgetBase {
+export class DomWrapper extends WidgetBase<DomWrapperProperties> {
 
-	public propertes: DomWrapperProperties;
 	private vNode: VNode | undefined;
 
 	afterCreate() {

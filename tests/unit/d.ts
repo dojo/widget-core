@@ -1,7 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { assign } from '@dojo/core/lang';
-import { WidgetBase, WidgetProperties, DNode, HNode, WNode } from '../../src/WidgetBase';
+import { WidgetBase, DNode, HNode } from '../../src/WidgetBase';
 import { v, w, decorate, registry, WNODE, HNODE, isWNode, isHNode } from '../../src/d';
 import FactoryRegistry from './../../src/FactoryRegistry';
 
@@ -11,7 +11,7 @@ class TestFactoryRegistry extends FactoryRegistry {
 	}
 }
 
-class TestWidget extends WidgetBase {
+class TestWidget extends WidgetBase<any> {
 	render() {
 		return v('outernode', { type: 'mytype' }, [
 			v('child-one'),
@@ -33,7 +33,7 @@ registerSuite({
 	},
 	w: {
 		'create WNode wrapper'() {
-			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
+			const properties: any = { id: 'id', classes: [ 'world' ] };
 			const dNode = w(WidgetBase, properties);
 			assert.deepEqual(dNode.factory, WidgetBase);
 			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
@@ -43,7 +43,7 @@ registerSuite({
 		},
 		'create WNode wrapper using a factory label'() {
 			registry.define('my-widget', WidgetBase);
-			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
+			const properties: any = { id: 'id', classes: [ 'world' ] };
 			const dNode = w('my-widget', properties);
 			assert.deepEqual(dNode.factory, 'my-widget');
 			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
@@ -52,7 +52,7 @@ registerSuite({
 			assert.isFalse(isHNode(dNode));
 		},
 		'create WNode wrapper with children'() {
-			const properties: WidgetProperties = { id: 'id', classes: [ 'world' ] };
+			const properties: any = { id: 'id', classes: [ 'world' ] };
 			const dNode = w(WidgetBase, properties, [ w(WidgetBase, properties) ]);
 			assert.deepEqual(dNode.factory, WidgetBase);
 			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
@@ -109,20 +109,20 @@ registerSuite({
 	},
 	decorator: {
 		'modifies only nodes that match predicate'() {
-			const testWidget = new TestWidget();
+			const testWidget = new TestWidget({});
 			const predicate = (node: DNode): boolean => {
 				return isWNode(node);
 			};
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					node.properties['decorated'] = true;
+					(<any> node.properties)['decorated'] = true;
 				}
 			};
 			const node = <HNode> testWidget.render();
 			assert.isOk(node);
 			decorate(node, modifier, predicate);
 			if (node) {
-				const children = <(WNode|HNode)[]> node.children;
+				const children = <any[]> node.children;
 				assert.isUndefined(children![0].properties['decorated']);
 				assert.isUndefined(children![1].properties['decorated']);
 				assert.isUndefined(children![2].properties['decorated']);
@@ -134,20 +134,20 @@ registerSuite({
 			}
 		},
 		'modifies no node when predicate not matched'() {
-			const testWidget = new TestWidget();
+			const testWidget = new TestWidget({});
 			const predicate = (node: DNode): boolean => {
 				return false;
 			};
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					node.properties['decorated'] = true;
+					(<any> node.properties)['decorated'] = true;
 				}
 			};
 			const node = <HNode> testWidget.render();
 			assert.isOk(node);
 			decorate(node, modifier, predicate);
 			if (node) {
-				const children = <(WNode|HNode)[]> node.children;
+				const children = <any[]> node.children;
 				assert.isUndefined(children![0].properties['decorated']);
 				assert.isUndefined(children![1].properties['decorated']);
 				assert.isUndefined(children![2].properties['decorated']);
@@ -159,10 +159,10 @@ registerSuite({
 			}
 		},
 		'applies modifier to all nodes when no predicate supplied'() {
-			const testWidget = new TestWidget();
+			const testWidget = new TestWidget({});
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					node.properties['decorated'] = true;
+					(<any> node.properties)['decorated'] = true;
 				}
 				else if (isHNode(node)) {
 					assign(node.properties, { id: 'id' });
@@ -183,7 +183,7 @@ registerSuite({
 			}
 		},
 		'cannot replace or modify actual node'() {
-			const testWidget = new TestWidget();
+			const testWidget = new TestWidget({});
 			const magicNode = v('magic');
 			const modifier = (node: DNode): void => {
 				if (node === null) {

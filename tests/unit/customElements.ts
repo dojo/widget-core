@@ -6,13 +6,13 @@ import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 
 function createFakeElement(attributes: any, descriptor: CustomElementDescriptor): any {
-	let widgetInstance: WidgetBase | null;
+	let widgetInstance: WidgetBase<any> | null;
 	let events: Event[] = [];
 	let removedChildren: any[] = [];
 
 	return {
 		getWidgetInstance: () => widgetInstance!,
-		setWidgetInstance(instance: WidgetBase) {
+		setWidgetInstance(instance: WidgetBase<any>) {
 			widgetInstance = instance;
 		},
 		getWidgetFactory: () => WidgetBase,

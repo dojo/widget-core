@@ -8,7 +8,7 @@ interface TestButtonProperties extends WidgetProperties {
 	onClick: () => void;
 }
 
-class TestButton extends WidgetBase {
+class TestButton extends WidgetBase<any> {
 	properties: TestButtonProperties;
 
 	onClick(this: TestButton) {
