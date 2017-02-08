@@ -80,8 +80,8 @@ export function ProjectorMixin<T extends WidgetConstructor>(base: T): T & Constr
 
 		constructor(...args: any[]) {
 			super(...args);
-			const [ options ] = args;
-			const { properties: { root = document.body, cssTransitions = false } = {} }  = options;
+			const [ properties ] = args;
+			const { root = document.body, cssTransitions = false }  = properties;
 			const maquetteProjectorOptions: { transitions?: any } = {};
 
 			if (cssTransitions) {
