@@ -73,6 +73,15 @@ export interface ThemeablMixin {
 }
 
 /**
+ * Decorator for base css classes
+ */
+export function theme (theme: {}) {
+	return function(constructor: Function) {
+		constructor.prototype.baseClasses = theme;
+	};
+}
+
+/**
  * Function for returns a class decoratied with with Themeable functionality
  */
 export function Themeable<T extends WidgetConstructor>(base: T): Constructor<ThemeablMixin> & T {
@@ -108,8 +117,6 @@ export function Themeable<T extends WidgetConstructor>(base: T): Constructor<The
 		 */
 		constructor(...args: any[]) {
 			super(...args);
-			const [ options ] = args;
-			this.baseClasses = options.baseClasses;
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, ThemeableProperties>) => {
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
