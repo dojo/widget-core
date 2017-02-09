@@ -47,33 +47,36 @@ function runAndCleanUp(element: HTMLElement, startAnimation: () => void, finishA
 	element.addEventListener(browserSpecificTransitionEndEventName, transitionEnd);
 }
 
-export namespace cssTransitions {
-	export function exit(node: HTMLElement, properties: VNodeProperties, exitAnimation: string, removeNode: () => void) {
-		const activeClass = properties.exitAnimationActive || `${exitAnimation}-active`;
+function exit(node: HTMLElement, properties: VNodeProperties, exitAnimation: string, removeNode: () => void) {
+	const activeClass = properties.exitAnimationActive || `${exitAnimation}-active`;
 
-		runAndCleanUp(node, () => {
-			node.classList.add(exitAnimation);
+	runAndCleanUp(node, () => {
+		node.classList.add(exitAnimation);
 
-			requestAnimationFrame(function () {
-				node.classList.add(activeClass);
-			});
-		}, () => {
-			removeNode();
+		requestAnimationFrame(function () {
+			node.classList.add(activeClass);
 		});
-	}
-
-	export function enter(node: HTMLElement, properties: VNodeProperties, enterAnimation: string) {
-		const activeClass = properties.enterAnimationActive || `${enterAnimation}-active`;
-
-		runAndCleanUp(node, () => {
-			node.classList.add(enterAnimation);
-
-			requestAnimationFrame(function () {
-				node.classList.add(activeClass);
-			});
-		}, () => {
-			node.classList.remove(enterAnimation);
-			node.classList.remove(activeClass);
-		});
-	}
+	}, () => {
+		removeNode();
+	});
 }
+
+function enter(node: HTMLElement, properties: VNodeProperties, enterAnimation: string) {
+	const activeClass = properties.enterAnimationActive || `${enterAnimation}-active`;
+
+	runAndCleanUp(node, () => {
+		node.classList.add(enterAnimation);
+
+		requestAnimationFrame(function () {
+			node.classList.add(activeClass);
+		});
+	}, () => {
+		node.classList.remove(enterAnimation);
+		node.classList.remove(activeClass);
+	});
+}
+
+export default {
+	enter,
+	exit
+};

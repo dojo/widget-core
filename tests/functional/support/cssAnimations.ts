@@ -1,6 +1,6 @@
-import createProjector from '../../../src/createProjector';
+import { ProjectorMixin } from '../../../src/mixins/Projector';
+import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
-import { DNode } from '../../../src/interfaces';
 
 interface AppProperties {
 	enter?: string;
@@ -10,17 +10,17 @@ interface AppProperties {
 export function setup(properties: AppProperties = {}) {
 	const { enter: enterAnimationActive, exit: exitAnimationActive } = properties;
 
-	let children: DNode[] = [];
+	let children: any[] = [];
 
-	let projector = createProjector.mixin({
-		mixin: {
-			getChildrenNodes(): DNode[] {
-				return children;
-			}
+	class TestProjector extends ProjectorMixin(WidgetBase)<{}> {
+		root = document.getElementById('projector')!;
+
+		render() {
+			return v('div', {}, children);
 		}
-	})({
-		root: document.getElementById('projector')!
-	});
+	}
+
+	const projector = new TestProjector({});
 
 	setTimeout(function () {
 		children.push(v('div', {
