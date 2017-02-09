@@ -5,6 +5,7 @@ import { spy } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorState, ProjectorProperties } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
+import '@dojo/shim/Promise';
 
 class TestWidget extends ProjectorMixin(WidgetBase)<ProjectorProperties> {}
 
