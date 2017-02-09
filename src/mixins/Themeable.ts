@@ -98,7 +98,7 @@ export function ThemeableMixin<T extends WidgetConstructor>(base: T): Constructo
 		public baseClasses: {};
 
 		/**
-		 * All classes ever seen by the instance3
+		 * All classes ever seen by the instance
 		 */
 		private allClasses: ClassNameFlags;
 
