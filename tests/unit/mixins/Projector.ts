@@ -1,11 +1,36 @@
+import has from '@dojo/has/has';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy } from 'sinon';
+import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorState, ProjectorProperties } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { v } from '../../../src/d';
 
 class TestWidget extends ProjectorMixin(WidgetBase)<ProjectorProperties> {}
+
+async function waitFor(callback: () => boolean, message: string = 'timed out waiting for something to happen', timeout = 1000) {
+	const startTime = (new Date()).valueOf() / 1000;
+
+	return new Promise((resolve, reject) => {
+		function check() {
+			const now = (new Date().valueOf()) / 1000;
+
+			if (now - startTime > timeout) {
+				reject(new Error(message));
+				return;
+			}
+
+			if (callback()) {
+				resolve();
+			}
+			else {
+				setTimeout(check, 10);
+			}
+		}
+
+		check();
+	});
+}
 
 registerSuite({
 	name: 'mixins/projectorMixin',
@@ -214,5 +239,160 @@ registerSuite({
 				projector.root = document.body;
 			}, Error, 'already attached');
 		});
+	},
+	async '-active gets appended to enter/exit animations by default'(this: any) {
+		if (!has('host-browser')) {
+			this.skip('This test can only be run in a browser');
+		}
+
+		let children: any[] = [];
+
+		class TestProjector extends ProjectorMixin(WidgetBase)<{}> {
+			root = document.body;
+
+			render() {
+				return v('div', {}, children);
+			}
+		}
+
+		const projector = new TestProjector({});
+
+		await projector.append();
+
+		children.push(v('div', {
+			id: 'test-element',
+			enterAnimation: 'fade-in',
+			exitAnimation: 'fade-out'
+		}));
+
+		projector.invalidate();
+
+		await waitFor(() => {
+			return document.getElementById('test-element') !== null;
+		}, 'Element was never added');
+
+		const domNode = document.getElementById('test-element')!;
+
+		await waitFor(() => {
+			return domNode.classList.contains('fade-in') && domNode.classList.contains('fade-in-active');
+		}, 'fade-in classes never got added to element');
+
+		// manually fire the transition end events
+		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
+		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
+		domNode.dispatchEvent(new CustomEvent('transitionend'));
+		domNode.dispatchEvent(new CustomEvent('animationend'));
+
+		children = [];
+		projector.invalidate();
+
+		await waitFor(() => {
+			return domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active');
+		}, 'fade-out classes never got added to element');
+
+		domNode.parentElement!.removeChild(domNode);
+	},
+	async 'active/exit classes can be customized'(this: any) {
+		if (!has('host-browser')) {
+			this.skip('This test can only be run in a browser');
+		}
+
+		let children: any[] = [];
+
+		class TestProjector extends ProjectorMixin(WidgetBase)<{}> {
+			root = document.body;
+
+			render() {
+				return v('div', {}, children);
+			}
+		}
+
+		const projector = new TestProjector({});
+
+		await projector.append();
+
+		children.push(v('div', {
+			id: 'test-element',
+			enterAnimation: 'fade-in',
+			enterAnimationActive: 'active-fade-in',
+			exitAnimation: 'fade-out',
+			exitAnimationActive: 'active-fade-out'
+		}));
+
+		projector.invalidate();
+
+		await waitFor(() => {
+			return document.getElementById('test-element') !== null;
+		}, 'Element was never added');
+
+		const domNode = document.getElementById('test-element')!;
+
+		await waitFor(() => {
+			return domNode.classList.contains('fade-in') && domNode.classList.contains('active-fade-in');
+		}, 'fade-in classes never got added to element');
+
+		// manually fire the transition end events
+		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
+		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
+		domNode.dispatchEvent(new CustomEvent('transitionend'));
+		domNode.dispatchEvent(new CustomEvent('animationend'));
+
+		children = [];
+		projector.invalidate();
+
+		await waitFor(() => {
+			return domNode.classList.contains('fade-out') && domNode.classList.contains('active-fade-out');
+		}, 'fade-out classes never got added to element');
+
+		domNode.parentElement!.removeChild(domNode);
+	},
+
+	async 'dom nodes get removed after exit animations'(this: any) {
+		if (!has('host-browser')) {
+			this.skip('This test can only be run in a browser');
+		}
+
+		let children: any[] = [
+			v('div', {
+				id: 'test-element',
+				enterAnimation: 'fade-in',
+				exitAnimation: 'fade-out'
+			})
+		];
+
+		class TestProjector extends ProjectorMixin(WidgetBase)<{}> {
+			root = document.body;
+
+			render() {
+				return v('div', {}, children);
+			}
+		}
+
+		const projector = new TestProjector({});
+
+		await projector.append();
+
+		await waitFor(() => {
+			return document.getElementById('test-element') !== null;
+		}, 'Element was never added');
+
+		const domNode = document.getElementById('test-element')!;
+
+		children = [];
+		projector.invalidate();
+
+		await waitFor(() => {
+			return domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active');
+		}, 'fade-out classes never got added to element');
+
+		// manually fire the transition end events
+		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
+		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
+		domNode.dispatchEvent(new CustomEvent('transitionend'));
+		domNode.dispatchEvent(new CustomEvent('animationend'));
+
+		await waitFor(() => {
+			return document.getElementById('test-element') === null;
+		}, 'Element never got removed');
 	}
 });
