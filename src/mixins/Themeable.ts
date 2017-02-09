@@ -239,3 +239,5 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		}
 	};
 }
+
+export default ThemeablMixin;
