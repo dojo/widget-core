@@ -1,3 +1,4 @@
+import '@dojo/shim/Promise';
 import has from '@dojo/has/has';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
@@ -5,9 +6,26 @@ import { spy } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorState, ProjectorProperties } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
-import '@dojo/shim/Promise';
 
 class TestWidget extends ProjectorMixin(WidgetBase)<ProjectorProperties> {}
+
+function dispatchEvent(element: Element, eventType: string) {
+	try {
+		element.dispatchEvent(new CustomEvent(eventType));
+	}
+	catch (e) {
+		const event = document.createEvent('CustomEvent');
+		event.initCustomEvent(eventType, false, false, {});
+		element.dispatchEvent(event);
+	}
+}
+
+function sendAnimationEndEvents(element: Element) {
+	dispatchEvent(element, 'webkitTransitionEnd');
+	dispatchEvent(element, 'webkitAnimationEnd');
+	dispatchEvent(element, 'transitionend');
+	dispatchEvent(element, 'animationend');
+}
 
 async function waitFor(callback: () => boolean, message: string = 'timed out waiting for something to happen', timeout = 1000) {
 	const startTime = (new Date()).valueOf() / 1000;
@@ -279,10 +297,7 @@ registerSuite({
 		}, 'fade-in classes never got added to element');
 
 		// manually fire the transition end events
-		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
-		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
-		domNode.dispatchEvent(new CustomEvent('transitionend'));
-		domNode.dispatchEvent(new CustomEvent('animationend'));
+		sendAnimationEndEvents(domNode);
 
 		children = [];
 		projector.invalidate();
@@ -333,10 +348,7 @@ registerSuite({
 		}, 'fade-in classes never got added to element');
 
 		// manually fire the transition end events
-		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
-		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
-		domNode.dispatchEvent(new CustomEvent('transitionend'));
-		domNode.dispatchEvent(new CustomEvent('animationend'));
+		sendAnimationEndEvents(domNode);
 
 		children = [];
 		projector.invalidate();
@@ -387,10 +399,7 @@ registerSuite({
 		}, 'fade-out classes never got added to element');
 
 		// manually fire the transition end events
-		domNode.dispatchEvent(new CustomEvent('webkitTransitionEnd'));
-		domNode.dispatchEvent(new CustomEvent('webkitAnimationEnd'));
-		domNode.dispatchEvent(new CustomEvent('transitionend'));
-		domNode.dispatchEvent(new CustomEvent('animationend'));
+		sendAnimationEndEvents(domNode);
 
 		await waitFor(() => {
 			return document.getElementById('test-element') === null;
