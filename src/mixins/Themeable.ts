@@ -81,6 +81,39 @@ export function theme (theme: {}) {
 	};
 }
 
+function splitClassStrings(classes: string[]): string[] {
+	return classes.reduce((splitClasses: string[], className) => {
+		if (className.indexOf(' ') > -1) {
+			splitClasses.push(...className.split(' '));
+		}
+		else {
+			splitClasses.push(className);
+		}
+		return splitClasses;
+	}, []);
+}
+
+/**
+ * Returns the class object map based on the class names and whether they are
+ * active.
+ *
+ * @param className an array of string class names
+ * @param applied indicates is the class is applied
+ */
+function createClassNameObject(classNames: string[], applied: boolean) {
+	return classNames.reduce((flaggedClassNames: ClassNameFlags, className) => {
+		flaggedClassNames[className] = applied;
+		return flaggedClassNames;
+	}, {});
+}
+
+function createBaseClassesLookup(classes: BaseClasses): ClassNames {
+	return Object.keys(classes).reduce((currentClassNames, key: string) => {
+		currentClassNames[classes[key]] = key;
+		return currentClassNames;
+	}, <ClassNames> {});
+}
+
 /**
  * Function for returns a class decoratied with with Themeable functionality
  */
@@ -121,7 +154,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
 			this.onPropertiesChanged(this.properties, [ 'theme' ]);
-			this.baseClassesReverseLookup = this.createBaseClassesLookup(this.baseClasses);
+			this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
 		}
 
 		public classes(...classNames: (string | null)[]): ClassesFunctionChain {
@@ -145,8 +178,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 				classes: responseClasses,
 				fixed(this: ClassesFunctionChain, ...classNames: (string | null)[]) {
 					const filteredClassNames = <string[]> classNames.filter((className) => className !== null);
-					const splitClasses = themeable.splitClassStrings(filteredClassNames);
-					assign(this.classes, themeable.createClassNameObject(splitClasses, true));
+					const splitClasses = splitClassStrings(filteredClassNames);
+					assign(this.classes, createClassNameObject(splitClasses, true));
 					themeable.appendToAllClassNames(splitClasses);
 					return this;
 				},
@@ -164,22 +197,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		 * @param classNames an array of string class names
 		 */
 		private appendToAllClassNames(classNames: string[]): void {
-			const negativeClassFlags = this.createClassNameObject(classNames, false);
+			const negativeClassFlags = createClassNameObject(classNames, false);
 			this.allClasses = assign({}, this.allClasses, negativeClassFlags);
-		}
-
-		/**
-		 * Returns the class object map based on the class names and whether they are
-		 * active.
-		 *
-		 * @param className an array of string class names
-		 * @param applied indicates is the class is applied
-		 */
-		private createClassNameObject(classNames: string[], applied: boolean) {
-			return classNames.reduce((flaggedClassNames: ClassNameFlags, className) => {
-				flaggedClassNames[className] = applied;
-				return flaggedClassNames;
-			}, {});
 		}
 
 		private generateThemeClasses(baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}) {
@@ -200,7 +219,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 
 				allClasses = [...allClasses, ...cssClassNames];
 
-				newAppliedClassNames[className] = this.createClassNameObject(cssClassNames, true);
+				newAppliedClassNames[className] = createClassNameObject(cssClassNames, true);
 
 				return newAppliedClassNames;
 			}, <ClassNameFlagsMap> {});
@@ -217,25 +236,6 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			if (themeChanged || overrideClassesChanged) {
 				this.generatedClassName = this.generateThemeClasses(this.baseClasses, theme, overrideClasses);
 			}
-		}
-
-		private createBaseClassesLookup(classes: BaseClasses): ClassNames {
-			return Object.keys(classes).reduce((currentClassNames, key: string) => {
-				currentClassNames[classes[key]] = key;
-				return currentClassNames;
-			}, <ClassNames> {});
-		}
-
-		private splitClassStrings(classes: string[]): string[] {
-			return classes.reduce((splitClasses: string[], className) => {
-				if (className.indexOf(' ') > -1) {
-					splitClasses.push(...className.split(' '));
-				}
-				else {
-					splitClasses.push(className);
-				}
-				return splitClasses;
-			}, []);
 		}
 	};
 }
