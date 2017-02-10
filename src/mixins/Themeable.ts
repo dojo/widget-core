@@ -81,6 +81,13 @@ export function theme (theme: {}) {
 	};
 }
 
+/**
+ * Split class strings containing spaces into separate array entries.
+ * ie. ['class1 class2', 'class3] -> ['class1', 'class2', 'class3'];
+ *
+ * @param classes The array of class strings to split.
+ * @return the complete classes array including any split classes.
+ */
 function splitClassStrings(classes: string[]): string[] {
 	return classes.reduce((splitClasses: string[], className) => {
 		if (className.indexOf(' ') > -1) {
@@ -149,7 +156,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		/**
 		 * Generated class name map
 		 */
-		private generatedClassName: ClassNameFlagsMap;
+		private generatedClassNames: ClassNameFlagsMap;
 
 		/**
 		 * @constructor
@@ -179,8 +186,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 				.filter((className) => className !== null)
 				.reduce((currentCSSModuleClassNames, className: string) => {
 					const classNameKey = this.baseClassesReverseLookup[className];
-					if (this.generatedClassName.hasOwnProperty(classNameKey)) {
-						assign(currentCSSModuleClassNames, this.generatedClassName[classNameKey]);
+					if (this.generatedClassNames.hasOwnProperty(classNameKey)) {
+						assign(currentCSSModuleClassNames, this.generatedClassNames[classNameKey]);
 					}
 					else {
 						console.warn(`Class name: ${className} and lookup key: ${classNameKey} not from baseClasses, use chained 'fixed' method instead`);
@@ -218,7 +225,15 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			this.allClasses = assign({}, this.allClasses, negativeClassFlags);
 		}
 
-		private generateThemeClasses(baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}) {
+		/**
+		 * Function to generare theme classes, triggered when theme or overrideClasses properties are changed.
+		 *
+		 * @param baseClassses the baseClasses object passed in via the @theme decorator.
+		 * @param theme The current theme
+		 * @param overrideClasses Any override classes that may have been set
+		 * @returns An object containing a complete set of class names with boolean values.
+		 */
+		private generateThemeClasses(baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}): ClassNameFlagsMap {
 			let allClasses: string[] = [];
 			const themeKey = baseClasses[THEME_KEY];
 			const sourceThemeClasses = themeKey && theme.hasOwnProperty(themeKey) ? assign({}, baseClasses, theme[themeKey]) : baseClasses;
@@ -246,12 +261,19 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			return themeClasses;
 		}
 
+		/**
+		 * Function fired when properties are changed on the widget.
+		 *
+		 * @param theme The theme property
+		 * @param overrideClasses The overrideClasses property
+		 * @param changedPropertyKeys Array of properties that have changed
+		 */
 		private onPropertiesChanged({ theme, overrideClasses }: ThemeableProperties, changedPropertyKeys: string[]) {
 			const themeChanged = includes(changedPropertyKeys, 'theme');
 			const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 			if (themeChanged || overrideClassesChanged) {
-				this.generatedClassName = this.generateThemeClasses(this.baseClasses, theme, overrideClasses);
+				this.generatedClassNames = this.generateThemeClasses(this.baseClasses, theme, overrideClasses);
 			}
 		}
 	};
