@@ -156,7 +156,7 @@ export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends Ev
 }
 
 /**
- * Propeerty Change record for specific property diff functions
+ * Property Change record for specific property diff functions
  */
 export interface PropertyChangeRecord {
 	changed: boolean;
@@ -197,7 +197,7 @@ export interface WidgetBaseInterface<P extends WidgetProperties> extends Evented
 	readonly id: string | undefined;
 
 	/**
-	 * Returns the widgets children
+	 * Returns the widget's children
 	 */
 	readonly children: DNode[];
 
@@ -205,28 +205,28 @@ export interface WidgetBaseInterface<P extends WidgetProperties> extends Evented
 	 * Sets the properties for the widget. Responsible for calling the diffing functions for the properties against the
 	 * previous properties. Runs though any registered specific property diff functions collecting the results and then
 	 * runs the remainder through the catch all diff function. The aggregate of the two sets of the results is then
-	 * set as the widgets properties
+	 * set as the widget's properties
 	 *
 	 * @param properties The new widget properties
 	 */
 	setProperties(properties: P & { [index: string]: any }): void;
 
 	/**
-	 * Sets the widgets children
+	 * Sets the widget's children
 	 */
 	setChildren(children: DNode[]): void;
 
 	/**
 	 * The default diff function for properties, also responsible for cloning the properties.
 	 *
-	 * @param previousProperties The widgets previous properties
-	 * @param newProperties The widgets new properties
+	 * @param previousProperties The widget's previous properties
+	 * @param newProperties The widget's new properties
 	 * @returns A properties change record for the the diff
 	 */
 	diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P>;
 
 	/**
-	 * Default render, returns a `div` with widgets children
+	 * Default render, returns a `div` with widget's children
 	 *
 	 * @returns the DNode for the widget
 	 */
