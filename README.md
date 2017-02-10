@@ -81,7 +81,7 @@ This code renders a `h1` element onto the page, that says "Hello, Dojo!".
 All widgets in Dojo 2 are designed using key reactive architecture concepts.
 These concepts include unidirectional data flow, inversion of control and property passing.
 
-Dojo 2's widget-core is built with Typescript leveraging Class mixins to construct and manipulate traits and mixins.
+Dojo 2's widget-core is built with Typescript, leveraging Class mixins to construct and manipulate traits and mixins.
 
 We also make use of a VirtualDOM (VDOM) in Dojo 2.
 In order to interact with our VDOM, you need to pass it [HyperScript](https://github.com/dominictarr/hyperscript).
