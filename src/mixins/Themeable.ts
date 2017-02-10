@@ -107,6 +107,12 @@ function createClassNameObject(classNames: string[], applied: boolean) {
 	}, {});
 }
 
+/**
+ * Creates a reverse lookup for the classes passed in via the `theme` function.
+ *
+ * @param classes The baseClasses object
+ * @requires
+ */
 function createBaseClassesLookup(classes: BaseClasses): ClassNames {
 	return Object.keys(classes).reduce((currentClassNames, key: string) => {
 		currentClassNames[classes[key]] = key;
@@ -157,6 +163,17 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
 		}
 
+		/**
+		 * Function used to add themeable classes to a widget. Returns a chained function 'fixed'
+		 * that can be used to pass non-themeable classes to a widget. Filters out any null
+		 * values passed.
+		 *
+		 * @param classNames the classes to be added to the domNode. These classes must come from
+		 * the baseClasses passed into the @theme decorator.
+		 * @return A function chain continaing the 'fixed' function and a 'get' finaliser function.
+		 * Class names passed to the 'fixed' function can be any string.
+		 *
+		 */
 		public classes(...classNames: (string | null)[]): ClassesFunctionChain {
 			const appliedClasses = classNames
 				.filter((className) => className !== null)
