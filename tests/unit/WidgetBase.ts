@@ -343,13 +343,14 @@ registerSuite({
 		class ExtendedTestWidget extends TestWidget {
 			@afterRender
 			thirdAfterRender(result: DNode): DNode {
-				assert.strictEqual(afterRenderCount++, 3);
+				assert.strictEqual(afterRenderCount, 3);
 				return result;
 			}
 		}
 
 		const widget = new ExtendedTestWidget({});
-		widget.render();
+		widget.__render__();
+		assert.strictEqual(afterRenderCount, 3);
 	},
 	render: {
 		'render with non widget children'() {
