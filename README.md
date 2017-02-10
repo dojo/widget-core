@@ -407,7 +407,7 @@ To apply baseClasses a widget must use `ThemeableMixin` and the `theme` decorato
 ```typescript
 import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import { WidgetBase } from '@dojo/widget-core/WidgetBase';
-import { ThemeableMixin, theme } from '@dojo/widget-core/mixins/Themable';
+import { ThemeableMixin, theme } from '@dojo/widget-core/mixins/Themeable';
 import * as baseClasses from './styles/tabpanel.css';
 
 @theme(baseClasses)
@@ -421,7 +421,7 @@ Basic usage:
 ``` typescript
 import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import { WidgetBase } from '@dojo/widget-core/WidgetBase';
-import { ThemeableMixin, ThemeableMixinProperties, theme } from '@dojo/widget-core/mixins/Themable';
+import { ThemeableMixin, ThemeableMixinProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import * as baseClasses from './styles/tabpanel.css';
 
 interface MyThemeableWidgetProperties extends WidgetProperties, ThemeableMixinProperties;
@@ -501,7 +501,7 @@ The `this.classes` function returns a chained `fixed` function that can be used 
 ``` typescript
 import { WidgetProperties } from '@dojo/widget-core/interfaces';
 import { WidgetBase } from '@dojo/widget-core/WidgetBase';
-import { ThemeableMixin, ThemeableMixinProperties, theme } from '@dojo/widget-core/mixins/Themable';
+import { ThemeableMixin, ThemeableMixinProperties, theme } from '@dojo/widget-core/mixins/Themeable';
 import * as baseClasses from './styles/tabpanel.css';
 
 interface MyThemeableWidgetProperties extends WidgetProperties, ThemeableMixinProperties;
