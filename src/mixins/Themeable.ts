@@ -226,7 +226,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		}
 
 		/**
-		 * Function to generare theme classes, triggered when theme or overrideClasses properties are changed.
+		 * Function to generate theme classes, triggered when theme or overrideClasses properties are changed.
 		 *
 		 * @param baseClassses the baseClasses object passed in via the @theme decorator.
 		 * @param theme The current theme
