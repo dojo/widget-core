@@ -97,6 +97,11 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
 
 	/**
+	 * A generic bag for decorator attributes to be added to.
+	 */
+	private _decoratorAttributes: any;
+
+	/**
 	 * Internal factory registry
 	 */
 	protected registry: FactoryRegistry | undefined;
@@ -237,6 +242,26 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			type: 'invalidated',
 			target: this
 		});
+	}
+
+	/**
+	 * setter used by decorators to add an attribute to the bag
+	 */
+	protected setDecoratorAttr(name: string, value: any): void {
+		if (!this._decoratorAttributes) {
+			this._decoratorAttributes = {};
+		}
+		this._decoratorAttributes[name] = value;
+	}
+
+	/**
+	 * getter used by decorators to get an attribute from the bag
+	 */
+	protected getDecoratorAttr(name: string): any {
+		if (!this._decoratorAttributes) {
+			return null;
+		}
+		return this._decoratorAttributes[name];
 	}
 
 	/**
