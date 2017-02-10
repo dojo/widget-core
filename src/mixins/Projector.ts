@@ -1,8 +1,7 @@
 import { EventTargettedObject, Handle } from '@dojo/interfaces/core';
 import Promise from '@dojo/shim/Promise';
 import { createProjector as createMaquetteProjector, Projector as MaquetteProjector } from 'maquette';
-import { EventTargettedObject, Handle } from '@dojo/interfaces/core';
-import { WidgetProperties } from './../WidgetBase';
+import { WidgetBase } from './../WidgetBase';
 import { Constructor, WidgetProperties } from './../interfaces';
 import cssTransitions from '../animations/cssTransitions';
 
