@@ -77,7 +77,7 @@ export interface ThemeableMixinInterface {
  */
 export function theme (theme: {}) {
 	return function(constructor: Function) {
-		constructor.prototype.baseClasses = theme;
+		constructor.prototype.setDecoratorAttr('baseClasses', theme);
 	};
 }
 
@@ -163,6 +163,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		 */
 		constructor(...args: any[]) {
 			super(...args);
+			this.baseClasses = this.getDecoratorAttr('baseClasses') || {};
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, ThemeableProperties>) => {
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
