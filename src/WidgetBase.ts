@@ -138,28 +138,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.setProperties(properties);
 	}
 
-	/**
-	 * return the widget's id from properties
-	 */
 	public get id(): string | undefined {
 		return this._properties.id;
 	}
 
-	/**
-	 * Return readonly widget properties
-	 */
 	public get properties(): Readonly<P> {
 		return this._properties;
 	}
 
-	/**
-	 * Sets the properties for the widget. Responsible for calling the diffing functions for the properties against the
-	 * previous properties. Runs though any registered specific property diff functions collecting the results and then
-	 * runs the remainder through the catch all diff function. The aggregate of the two sets of the results is then
-	 * set as the widgets properties
-	 *
-	 * @param properties The new widget properties
-	 */
 	public setProperties(properties: P & { [index: string]: any }): void {
 		const diffPropertyResults: { [index: string]: PropertyChangeRecord } = {};
 		const diffPropertyChangedKeys: string[] = [];
@@ -200,16 +186,10 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.previousProperties = this.properties;
 	}
 
-	/**
-	 * Returns the widgets children
-	 */
 	public get children(): DNode[] {
 		return this._children;
 	}
 
-	/**
-	 * Sets the widgets children
-	 */
 	public setChildren(children: DNode[]): void {
 		this._children = children;
 		this.emit({
@@ -218,13 +198,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		});
 	}
 
-	/**
-	 * The default diff function for properties, also responsible for cloning the properties.
-	 *
-	 * @param previousProperties The widgets previous properties
-	 * @param newProperties The widgets new properties
-	 * @returns A properties change record for the the diff
-	 */
 	public diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P> {
 		const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
 			if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
@@ -236,18 +209,10 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		return { changedKeys, properties: assign({}, newProperties) };
 	}
 
-	/**
-	 * Default render, returns a `div` with widgets children
-	 *
-	 * @returns the DNode for the widget
-	 */
 	public render(): DNode {
 		return v('div', {}, this.children);
 	}
 
-	/**
-	 * Main internal function for dealing with widget rendering
-	 */
 	public __render__(): VNode | string | null {
 		if (this.dirty || !this.cachedVNode) {
 			let dNode = this.render();
@@ -266,9 +231,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		return this.cachedVNode;
 	}
 
-	/**
-	 * invalidate the widget
-	 */
 	public invalidate(): void {
 		this.dirty = true;
 		this.emit({
