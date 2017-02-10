@@ -27,14 +27,28 @@ interface WidgetCacheWrapper {
 }
 
 /**
- * Regular expression to find specific property diff functions
+ * decorator that can be used to register functions to run after a widgets render
  */
-const propertyFunctionNameRegex = /^diffProperty(.*)/;
+export function afterRender(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+	const afterRenderArray = target.getDecoratorAttr('afterRender') || [];
+	const targetFunction = target[propertyKey];
+
+	afterRenderArray.push(targetFunction);
+	target.setDecoratorAttr('afterRender', afterRenderArray);
+}
 
 /**
- * Regular express to find render decorator functions
+ * decorator that can be used to register functions to for specific property diffs
  */
-const decoratorFunctionNameRegex = /^renderDecorator.*/;
+export function diffProperty(propertyName: string) {
+	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+		const diffPropertyMap = target.getDecoratorAttr('diffProperty') || new Map<string, Function>();
+		const targetFunction = target[propertyKey];
+
+		diffPropertyMap.set(propertyName, targetFunction);
+		target.setDecoratorAttr('diffProperty', diffPropertyMap);
+	};
+}
 
 /**
  * Main widget base for all widgets to extend
@@ -122,20 +136,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.renderDecorators = new Set<string>();
 		this.bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
-		const self: { [index: string]: any } = this;
-		for (let property in this) {
-			let match = property.match(propertyFunctionNameRegex);
-			if (match && (typeof self[match[0]] === 'function')) {
-				this.diffPropertyFunctionMap.set(match[0], `${match[1].slice(0, 1).toLowerCase()}${match[1].slice(1)}`);
-				continue;
-			}
-			match = property.match(decoratorFunctionNameRegex);
-			if (match && (typeof self[match[0]] === 'function')) {
-				this.renderDecorators.add(match[0]);
-				continue;
-			}
-		};
-
 		this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<WidgetBase<WidgetProperties>, WidgetProperties>) => {
 			this.invalidate();
 		}));
@@ -157,23 +157,26 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 		this.bindFunctionProperties(properties);
 
-		this.diffPropertyFunctionMap.forEach((property: string, diffFunctionName: string) => {
-			const previousProperty = this.previousProperties[property];
-			const newProperty = properties[property];
-			const self: { [index: string]: any } = this;
-			const result: PropertyChangeRecord = self[diffFunctionName](previousProperty, newProperty);
+		const diffPropertyMap = this.getDecoratorAttr('diffProperty');
 
-			if (!result) {
-				return;
-			}
+		if (diffPropertyMap) {
+			diffPropertyMap.forEach((diffFunction: Function, property: string) => {
+				const previousProperty = this.previousProperties[property];
+				const newProperty = properties[property];
+				const result: PropertyChangeRecord = diffFunction(previousProperty, newProperty);
 
-			if (result.changed) {
-				diffPropertyChangedKeys.push(property);
-			}
-			delete properties[property];
-			delete this.previousProperties[property];
-			diffPropertyResults[property] = result.value;
-		});
+				if (!result) {
+					return;
+				}
+
+				if (result.changed) {
+					diffPropertyChangedKeys.push(property);
+				}
+				delete properties[property];
+				delete this.previousProperties[property];
+				diffPropertyResults[property] = result.value;
+			});
+		}
 
 		const diffPropertiesResult = this.diffProperties(this.previousProperties, properties);
 		this._properties = assign(diffPropertiesResult.properties, diffPropertyResults);
@@ -221,9 +224,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	public __render__(): VNode | string | null {
 		if (this.dirty || !this.cachedVNode) {
 			let dNode = this.render();
-			this.renderDecorators.forEach((decoratorFunctionName: string) => {
-				const self: { [index: string]: any } = this;
-				dNode = self[decoratorFunctionName](dNode);
+			const afterRenders = this.getDecoratorAttr('afterRender') || [];
+			afterRenders.forEach((afterRenderFunction: Function) => {
+				dNode = afterRenderFunction.call(this, dNode);
 			});
 			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
