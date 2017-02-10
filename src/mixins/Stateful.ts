@@ -1,5 +1,5 @@
 import { deepAssign } from '@dojo/core/lang';
-import { WidgetConstructor } from './../WidgetBase';
+import { WidgetConstructor } from './../interfaces';
 import { Constructor } from './../interfaces';
 
 /**

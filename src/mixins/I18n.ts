@@ -2,7 +2,7 @@
 import { assign } from '@dojo/core/lang';
 import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { DNode, WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { DNode, WidgetConstructor, WidgetProperties } from './../interfaces';
 import { Constructor } from './../interfaces';
 import { isHNode } from './../d';
 

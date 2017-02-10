@@ -1,5 +1,5 @@
 import { w } from './d';
-import { WidgetProperties, WidgetConstructor, WidgetBase, DNode } from './WidgetBase';
+import { WidgetBaseInterface, WidgetProperties, WidgetConstructor, DNode } from './interfaces';
 import { ProjectorMixin } from './mixins/Projector';
 import { DomWrapper } from './util/DomWrapper';
 import { assign } from '@dojo/core/lang';
@@ -116,8 +116,8 @@ export interface CustomElementDescriptor {
 export interface CustomElement extends HTMLElement {
 	getWidgetFactory(): WidgetConstructor;
 	getDescriptor(): CustomElementDescriptor;
-	getWidgetInstance(): WidgetBase<any>;
-	setWidgetInstance(instance: WidgetBase<any>): void;
+	getWidgetInstance(): WidgetBaseInterface<any>;
+	setWidgetInstance(instance: WidgetBaseInterface<any>): void;
 }
 
 function getWidgetPropertyFromAttribute(attributeName: string, attributeValue: string | null, descriptor: CustomElementAttributeDescriptor): [ string, any ] {

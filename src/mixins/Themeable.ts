@@ -1,6 +1,6 @@
 import { includes } from '@dojo/shim/array';
 import { assign } from '@dojo/core/lang';
-import { PropertiesChangeEvent, WidgetConstructor, WidgetProperties } from './../WidgetBase';
+import { PropertiesChangeEvent, WidgetConstructor, WidgetProperties } from './../interfaces';
 import { Constructor } from './../interfaces';
 
 /**

@@ -5,7 +5,7 @@ import {
 	PropertiesChangeEvent,
 	WidgetConstructor,
 	WidgetProperties
-} from '../WidgetBase';
+} from '../interfaces';
 
 export interface RegistryMixinProperties extends WidgetProperties {
 	registry: FactoryRegistry;
@@ -14,6 +14,8 @@ export interface RegistryMixinProperties extends WidgetProperties {
 export function RegistryMixin<T extends WidgetConstructor>(base: T): T {
 	return class extends base {
 		properties: RegistryMixinProperties;
+
+		protected registry: FactoryRegistry;
 
 		constructor(...args: any[]) {
 			super(...args);

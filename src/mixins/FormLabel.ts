@@ -3,7 +3,7 @@ import { v, isHNode } from '../d';
 import {
 	DNode,
 	WidgetConstructor
-} from '../WidgetBase';
+} from '../interfaces';
 
 /**
  * Label settings for form label text content, position (before or after), and visibility
