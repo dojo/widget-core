@@ -12,7 +12,7 @@ export interface State {
 /**
  * Stateful interface
  */
-export interface StatfulMixin {
+export interface StatefulMixin {
 
 	/**
 	 * state property
@@ -33,7 +33,7 @@ export interface StatfulMixin {
  */
 const stateChangedEventType = 'state:changed';
 
-export function StatefulMixin<T extends Constructor<WidgetBase<WidgetProperties>>>(base: T): T & Constructor<StatfulMixin> {
+export function StatefulMixin<T extends Constructor<WidgetBase<WidgetProperties>>>(base: T): T & Constructor<StatefulMixin> {
 	return class extends base {
 
 		private _state: State;
