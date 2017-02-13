@@ -27,7 +27,7 @@ interface WidgetCacheWrapper {
 }
 
 /**
- * decorator that can be used to register functions to run after a widgets render
+ * Decorator that can be used to register a function to run as an aspect to `render`
  */
 export function afterRender(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 	const afterRenderArray = target.getDecoratorAttr('afterRender') || [];
@@ -38,7 +38,9 @@ export function afterRender(target: any, propertyKey: string, descriptor: Proper
 }
 
 /**
- * decorator that can be used to register functions to for specific property diffs
+ * Decorator that can be used to register a function as specific property diff
+ *
+ * @param propertyName the name of the property that the diff function is for
  */
 export function diffProperty(propertyName: string) {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -111,7 +113,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
 
 	/**
-	 * A generic bag for decorator attributes to be added to.
+	 * A generic bag for decorator attributes.
 	 */
 	private _decoratorAttributes: any;
 
