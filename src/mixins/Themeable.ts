@@ -159,6 +159,11 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		private generatedClassNames: ClassNameFlagsMap;
 
 		/**
+		 * Indicates if the base classes have been initialised.
+		 */
+		private initialised: boolean;
+
+		/**
 		 * @constructor
 		 */
 		constructor(...args: any[]) {
@@ -166,8 +171,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, ThemeableProperties>) => {
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
-			this.onPropertiesChanged(this.properties, [ 'theme' ]);
-			this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
+			this.initialised = false;
 		}
 
 		/**
@@ -182,6 +186,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		 *
 		 */
 		public classes(...classNames: (string | null)[]): ClassesFunctionChain {
+			this.initiliaseClasses();
+
 			const appliedClasses = classNames
 				.filter((className) => className !== null)
 				.reduce((currentCSSModuleClassNames, className: string) => {
@@ -231,9 +237,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		 * @param baseClassses the baseClasses object passed in via the @theme decorator.
 		 * @param theme The current theme
 		 * @param overrideClasses Any override classes that may have been set
-		 * @returns An object containing a complete set of class names with boolean values.
 		 */
-		private generateThemeClasses(baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}): ClassNameFlagsMap {
+		private generateThemeClasses(baseClasses: BaseClasses, theme: any = {}, overrideClasses: any = {}): void {
 			let allClasses: string[] = [];
 			const themeKey = baseClasses[THEME_KEY];
 			const sourceThemeClasses = themeKey && theme.hasOwnProperty(themeKey) ? assign({}, baseClasses, theme[themeKey]) : baseClasses;
@@ -258,7 +263,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 
 			this.appendToAllClassNames(allClasses);
 
-			return themeClasses;
+			this.generatedClassNames = themeClasses;
 		}
 
 		/**
@@ -273,7 +278,18 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 			if (themeChanged || overrideClassesChanged) {
-				this.generatedClassNames = this.generateThemeClasses(this.baseClasses, theme, overrideClasses);
+				this.initialised ?
+					this.generateThemeClasses(this.baseClasses, theme, overrideClasses) :
+					this.initiliaseClasses();
+			}
+		}
+
+		private initiliaseClasses() {
+			if (!this.initialised) {
+				const { theme, overrideClasses } = this.properties;
+				this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
+				this.generateThemeClasses(this.baseClasses, theme , overrideClasses);
+				this.initialised = true;
 			}
 		}
 	};
