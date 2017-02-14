@@ -285,7 +285,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		}
 
 		/**
-		 * Initialize the reverse loop up map and the generatedThemeClasses.
+		 * Initialize the reverse look up map and the generatedThemeClasses.
 		 */
 		private initializeClasses(): void {
 			if (!this.initialized) {
