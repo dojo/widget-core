@@ -284,7 +284,10 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			}
 		}
 
-		private initializeClasses() {
+		/**
+		 * Initialize the reverse loop up map and the generatedThemeClasses.
+		 */
+		private initializeClasses(): void {
 			if (!this.initialized) {
 				const { theme, overrideClasses } = this.properties;
 				this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
