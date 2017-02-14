@@ -159,9 +159,9 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		private generatedClassNames: ClassNameFlagsMap;
 
 		/**
-		 * Indicates if the base classes have been initialised.
+		 * Indicates if the base classes have been initialized.
 		 */
-		private initialised: boolean;
+		private initialized: boolean;
 
 		/**
 		 * @constructor
@@ -171,7 +171,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			this.own(this.on('properties:changed', (evt: PropertiesChangeEvent<this, ThemeableProperties>) => {
 				this.onPropertiesChanged(evt.properties, evt.changedPropertyKeys);
 			}));
-			this.initialised = false;
+			this.initialized = false;
 		}
 
 		/**
@@ -186,7 +186,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 		 *
 		 */
 		public classes(...classNames: (string | null)[]): ClassesFunctionChain {
-			this.initiliaseClasses();
+			this.initializeClasses();
 
 			const appliedClasses = classNames
 				.filter((className) => className !== null)
@@ -278,18 +278,18 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<WidgetProperties
 			const overrideClassesChanged = includes(changedPropertyKeys, 'overrideClasses');
 
 			if (themeChanged || overrideClassesChanged) {
-				this.initialised ?
+				this.initialized ?
 					this.generateThemeClasses(this.baseClasses, theme, overrideClasses) :
-					this.initiliaseClasses();
+					this.initializeClasses();
 			}
 		}
 
-		private initiliaseClasses() {
-			if (!this.initialised) {
+		private initializeClasses() {
+			if (!this.initialized) {
 				const { theme, overrideClasses } = this.properties;
 				this.baseClassesReverseLookup = createBaseClassesLookup(this.baseClasses);
 				this.generateThemeClasses(this.baseClasses, theme , overrideClasses);
-				this.initialised = true;
+				this.initialized = true;
 			}
 		}
 	};
