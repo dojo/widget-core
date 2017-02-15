@@ -101,18 +101,12 @@ registerSuite({
 			});
 		},
 		'should remove adjoined classes when they are no longer provided'() {
+			const { class1, class2 } = baseClasses;
 			themeableInstance = new Test();
 			themeableInstance.setProperties({ theme: testTheme3 });
-			themeableInstance.emit({
-				type: 'properties:changed',
-				properties: {
-					theme: testTheme1
-				},
-				changedPropertyKeys: [ 'theme' ]
-			});
-
-			const { class1, class2 } = baseClasses;
-			const flaggedClasses = themeableInstance.classes(class1, class2).get();
+			let flaggedClasses = themeableInstance.classes(class1, class2).get();
+			themeableInstance.setProperties({ theme: testTheme1 });
+			flaggedClasses = themeableInstance.classes(class1, class2).get();
 			assert.deepEqual(flaggedClasses, {
 				[ testTheme1.testPath.class1 ]: true,
 				testTheme3Class1: false,
@@ -229,13 +223,8 @@ registerSuite({
 		'should negate old theme class when a new theme is set'() {
 			themeableInstance = new Test();
 			themeableInstance.setProperties({ theme: testTheme1 });
-			themeableInstance.emit({
-				type: 'properties:changed',
-				properties: {
-					theme: testTheme2
-				},
-				changedPropertyKeys: [ 'theme' ]
-			});
+			themeableInstance.classes().get();
+			themeableInstance.setProperties({ theme: testTheme2 });
 
 			const { class1, class2 } = baseClasses;
 			const flaggedClasses = themeableInstance.classes(class1, class2).get();
@@ -277,17 +266,11 @@ registerSuite({
 			});
 		},
 		'should set override classes to false when they are changed'() {
+			const { class1, class2 } = baseClasses;
 			themeableInstance = new Test();
 			themeableInstance.setProperties({ overrideClasses: overrideClasses1 });
-			themeableInstance.emit({
-				type: 'properties:changed',
-				properties: {
-					overrideClasses: overrideClasses2
-				},
-				changedPropertyKeys: [ 'overrideClasses' ]
-			});
-
-			const { class1, class2 } = baseClasses;
+			themeableInstance.classes(class1, class2).get();
+			themeableInstance.setProperties({ overrideClasses: overrideClasses2 });
 			const flaggedClasses = themeableInstance.classes(class1, class2).get();
 			assert.deepEqual(flaggedClasses, {
 				[ baseClasses.class1 ]: true,
