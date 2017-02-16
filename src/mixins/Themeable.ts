@@ -19,14 +19,6 @@ export type ClassNames = {
 }
 
 /**
- * The object returned by getClasses required by maquette for
- * adding / removing classes. They are flagged to true / false.
- */
-export type ClassNameFlagsMap = {
-	[key: string]: ClassNameFlags;
-}
-
-/**
  * Properties required for the themeable mixin
  */
 export interface ThemeableProperties extends WidgetProperties {
