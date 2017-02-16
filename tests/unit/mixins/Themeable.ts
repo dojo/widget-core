@@ -6,37 +6,14 @@ import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { stub, SinonStub } from 'sinon';
 
-const baseClasses = {
-	[' _key']: 'testPath',
-	class1: 'baseClass1',
-	class2: 'baseClass2'
-};
+import * as baseClasses from './../../support/styles/testWidget.css';
+import * as overrideClasses1 from './../../support/styles/overrideClasses1.css';
+import * as overrideClasses2 from './../../support/styles/overrideClasses2.css';
+import testTheme1 from './../../support/styles/theme1.css';
+import testTheme2 from './../../support/styles/theme2.css';
+import testTheme3 from './../../support/styles/theme3.css';
 
-const testTheme1 = {
-	testPath: {
-		class1: 'theme1Class1'
-	}
-};
-
-const testTheme2 = {
-	testPath: {
-		class1: 'theme2Class1'
-	}
-};
-
-const testTheme3 = {
-	testPath: {
-		class1: 'testTheme3Class1 testTheme3AdjoinedClass1'
-	}
-};
-
-const overrideClasses1 = {
-	class1: 'override1Class1'
-};
-
-const overrideClasses2 = {
-	class1: 'override2Class1'
-};
+(<any> baseClasses)[' _key'] = 'testPath';
 
 @theme(baseClasses)
 class Test extends ThemeableMixin(WidgetBase)<ThemeableProperties> { }

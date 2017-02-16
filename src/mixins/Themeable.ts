@@ -30,8 +30,8 @@ export type ClassNameFlagsMap = {
  * Properties required for the themeable mixin
  */
 export interface ThemeableProperties extends WidgetProperties {
-	theme?: { [index: string]: ClassNames };
-	overrideClasses?: ClassNames;
+	theme?: any;
+	overrideClasses?: any;
 }
 
 /**
