@@ -1,3 +1,4 @@
+import Map from '@dojo/shim/Map';
 import { includes } from '@dojo/shim/array';
 import { assign } from '@dojo/core/lang';
 import { Constructor, PropertiesChangeEvent, WidgetProperties } from './../interfaces';
