@@ -42,9 +42,9 @@ export function afterRender(target: any, propertyKey: string, descriptor: Proper
 }
 
 /**
- * Decorator that can be used to register a function as specific property diff
+ * Decorator that can be used to register a function as a specific property diff
  *
- * @param propertyName the name of the property that the diff function is for
+ * @param propertyName The name of the property of which the diff function is applied
  */
 export function diffProperty(propertyName: string) {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -113,7 +113,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
 
 	/**
-	 * A generic bag for decorators
+	 * A generic property bag for decorators
 	 */
 	private _decorators: Map<string, any[]>;
 
