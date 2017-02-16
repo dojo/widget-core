@@ -311,9 +311,8 @@ registerSuite({
 
 		const projector = new Projector();
 		return projector.append().then(() => {
-			const mouseEvent = new global.window.MouseEvent('click', { view: window, bubbles: true });
-			domNode.dispatchEvent(mouseEvent);
-			assert.equal(mouseEvent, domEvent);
+			domNode.click();
+			assert.instanceOf(domEvent, global.window.MouseEvent);
 		});
 	},
 	async '-active gets appended to enter/exit animations by default'(this: any) {
