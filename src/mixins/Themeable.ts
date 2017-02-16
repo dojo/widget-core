@@ -243,7 +243,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		}
 
 		/**
-		 * Recaculate registered classes for current theme.
+		 * Recalculate registered classes for current theme.
 		 */
 		private recalculateThemeClasses() {
 			const { properties: { theme = {} } } = this;
