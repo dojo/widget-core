@@ -69,8 +69,7 @@ registerSuite({
 			const { class1 } = baseClasses;
 			const flaggedClasses = themeableInstance.classes(class1).get();
 			assert.deepEqual(flaggedClasses, {
-				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false
+				[ baseClasses.class1 ]: true
 			});
 
 			assert.isFalse(consoleStub.called);
@@ -82,12 +81,11 @@ registerSuite({
 			const flaggedClasses = themeableInstance.classes(class1, newClassName).get();
 
 			assert.deepEqual(flaggedClasses, {
-				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false
+				[ baseClasses.class1 ]: true
 			});
 
 			assert.isTrue(consoleStub.calledOnce);
-			assert.isTrue(consoleStub.firstCall.args[0].indexOf(newClassName) > -1);
+			assert.strictEqual(consoleStub.firstCall.args[0], `Class name: ${newClassName} is not from baseClasses, use chained 'fixed' method instead`);
 		},
 		'should split adjoined classes into multiple classes'() {
 			themeableInstance = new Test();
@@ -132,8 +130,6 @@ registerSuite({
 			const fixedClassName = 'fixedClassName';
 			const flaggedClasses = themeableInstance.classes().fixed(fixedClassName).get();
 			assert.deepEqual(flaggedClasses, {
-				[ baseClasses.class1 ]: false,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			});
 		},
@@ -144,7 +140,6 @@ registerSuite({
 			const flaggedClasses = themeableInstance.classes(class1).fixed(fixedClassName).get();
 			assert.deepEqual(flaggedClasses, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			});
 		},
@@ -153,8 +148,6 @@ registerSuite({
 			const fixedClassName = 'fixedClassName';
 			const flaggedClasses = themeableInstance.classes().fixed(fixedClassName, null).get();
 			assert.deepEqual(flaggedClasses, {
-				[ baseClasses.class1 ]: false,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			});
 		},
@@ -165,14 +158,12 @@ registerSuite({
 			const flaggedClassesFirstCall = themeableInstance.classes(class1).fixed(fixedClassName).get();
 			assert.deepEqual(flaggedClassesFirstCall, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			}, `${fixedClassName} should be true on first call`);
 
 			const flaggedClassesSecondCall = themeableInstance.classes(class1).get();
 			assert.deepEqual(flaggedClassesSecondCall, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: false
 			}, `${fixedClassName} should be false on second call`);
 		},
@@ -183,27 +174,26 @@ registerSuite({
 			const flaggedClasses = themeableInstance.classes(class1).fixed(adjoinedClassName).get();
 			assert.deepEqual(flaggedClasses, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				'adjoinedClassName1': true,
 				'adjoinedClassName2': true
 			});
 		},
 		'should remove adjoined fixed classes when they are no longer provided'() {
 			themeableInstance = new Test();
-			const { class1 } = baseClasses;
+			const { class1, class2 } = baseClasses;
 			const adjoinedClassName = 'adjoinedClassName1 adjoinedClassName2';
-			const flaggedClassesFirstCall = themeableInstance.classes(class1).fixed(adjoinedClassName).get();
+			const flaggedClassesFirstCall = themeableInstance.classes(class1, class2).fixed(adjoinedClassName).get();
 			assert.deepEqual(flaggedClassesFirstCall, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
+				[ baseClasses.class2 ]: true,
 				'adjoinedClassName1': true,
 				'adjoinedClassName2': true
 			}, 'adjoined classed should both be true on first call');
 
-			const flaggedClassesSecondCall = themeableInstance.classes(class1).get();
+			const flaggedClassesSecondCall = themeableInstance.classes(class1, class2).get();
 			assert.deepEqual(flaggedClassesSecondCall, {
 				[ baseClasses.class1 ]: true,
-				[ baseClasses.class2 ]: false,
+				[ baseClasses.class2 ]: true,
 				'adjoinedClassName1': false,
 				'adjoinedClassName2': false
 			}, `adjoiend class names should be false on second call`);
@@ -221,12 +211,12 @@ registerSuite({
 			});
 		},
 		'should negate old theme class when a new theme is set'() {
+			const { class1, class2 } = baseClasses;
 			themeableInstance = new Test();
 			themeableInstance.setProperties({ theme: testTheme1 });
-			themeableInstance.classes().get();
+			themeableInstance.classes(class1).get();
 			themeableInstance.setProperties({ theme: testTheme2 });
 
-			const { class1, class2 } = baseClasses;
 			const flaggedClasses = themeableInstance.classes(class1, class2).get();
 			assert.deepEqual(flaggedClasses, {
 				[ testTheme1.testPath.class1 ]: false,
@@ -304,7 +294,6 @@ registerSuite({
 			const result = <VNode> themeableWidget.__render__();
 			assert.deepEqual(result.children![0].properties!.classes, {
 				[ testTheme1.testPath.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			});
 
@@ -314,7 +303,6 @@ registerSuite({
 			assert.deepEqual(result2.children![0].properties!.classes, {
 				[ testTheme1.testPath.class1 ]: false,
 				[ testTheme2.testPath.class1 ]: true,
-				[ baseClasses.class2 ]: false,
 				[ fixedClassName ]: true
 			});
 		}
