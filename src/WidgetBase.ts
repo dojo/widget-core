@@ -32,7 +32,7 @@ interface WidgetCacheWrapper {
 const propertyFunctionNameRegex = /^diffProperty(.*)/;
 
 /**
- * Regular express to find render decorator functions
+ * Regular expression to find render decorator functions
  */
 const decoratorFunctionNameRegex = /^renderDecorator.*/;
 
