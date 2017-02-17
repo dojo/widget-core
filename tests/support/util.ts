@@ -6,6 +6,7 @@ import { systemLocale } from '@dojo/i18n/i18n';
  */
 export function fetchCldrData(): Promise<void[]> {
 	return Promise.all([
+		// this weird dummy load is needed by i18n right now
 		loadCldrData({
 			main: {
 				[systemLocale]: {}
