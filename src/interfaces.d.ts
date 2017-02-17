@@ -127,9 +127,8 @@ export interface VirtualDomProperties {
 	readonly key?: Object;
 	/**
 	 * An object literal like `{important:true}` which allows css classes, like `important` to be added and removed
-	 * dynamically.
+	 * dynamically. Can also take a function, that must return an object literal.
 	 */
-	/*readonly classes?: { [index: string]: boolean | null | undefined };*/
 	readonly classes?: {
 		[index: string]: boolean | null | undefined;
 	} | ClassesFunction;
