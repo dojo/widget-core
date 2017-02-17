@@ -148,7 +148,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			this.invalidate();
 
 			const propertiesChangedListeners = this.getDecorator('onPropertiesChanged') || [];
-			propertiesChangedListeners.forEach((propertiesChangedFunction, index) => {
+			propertiesChangedListeners.forEach((propertiesChangedFunction) => {
 				propertiesChangedFunction.call(this, evt);
 			});
 		}));
