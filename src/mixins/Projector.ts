@@ -1,8 +1,6 @@
 import { Handle } from '@dojo/interfaces/core';
 import global from '@dojo/core/global';
 import Promise from '@dojo/shim/Promise';
-import WeakMap from '@dojo/shim/WeakMap';
-import Map from '@dojo/shim/Map';
 import { dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
 import { WidgetBase } from './../WidgetBase';
 import { Constructor, WidgetProperties } from './../interfaces';
@@ -82,11 +80,6 @@ export interface ProjectorMixin {
 	readonly projectorState: ProjectorAttachState;
 }
 
-export interface EventIntercepterItem {
-	handler: Function;
-	properties: VNodeProperties;
-}
-
 export function ProjectorMixin<T extends Constructor<WidgetBase<WidgetProperties>>>(base: T): T & Constructor<ProjectorMixin> {
 	return class extends base {
 
@@ -103,12 +96,10 @@ export function ProjectorMixin<T extends Constructor<WidgetBase<WidgetProperties
 		private paused: boolean;
 		private boundDoRender: FrameRequestCallback;
 		private boundRender: Function;
-		private eventIntercepterNodeMap: WeakMap<Node, Map<string, EventIntercepterItem>>;
 
 		constructor(...args: any[]) {
 			super(...args);
 
-			this.eventIntercepterNodeMap = new WeakMap<Node, Map<string, EventIntercepterItem>>();
 			this.projectionOptions = {
 				transitions: cssTransitions,
 				eventHandlerInterceptor: this.eventHandlerInterceptor.bind(this)
@@ -202,23 +193,10 @@ export function ProjectorMixin<T extends Constructor<WidgetBase<WidgetProperties
 			return result;
 		}
 
-		private eventHandlerInterceptor(propertyName: string, callback: Function, domNode: Node, properties: VNodeProperties) {
-			const eventName = propertyName.substr(2);
-			let eventMap = this.eventIntercepterNodeMap.get(domNode);
-
-			if (!eventMap) {
-				eventMap = new Map<string, EventIntercepterItem>();
-			}
-
-			const eventItem = eventMap.get(eventName);
-
-			if (!eventItem) {
-				domNode.addEventListener(eventName, (evt: Event) => {
-					return callback.apply(properties.bind || properties, [ evt ]);
-				});
-			}
-
-			eventMap.set(eventName, { handler: callback, properties });
+		private eventHandlerInterceptor(propertyName: string, eventHandler: Function, domNode: Node, properties: VNodeProperties) {
+			return function(this: Node, ...args: any[]) {
+				return eventHandler.apply(properties.bind || this, args);
+			};
 		}
 
 		private doRender() {
