@@ -279,7 +279,7 @@ registerSuite({
 				render() {
 					const { class1 } = baseClasses;
 					return v('div', [
-						v('div', { classes: this.classes(class1).fixed(fixedClassName)() })
+						v('div', { classes: this.classes(class1).fixed(fixedClassName) })
 					]);
 				}
 			}
