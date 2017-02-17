@@ -56,7 +56,7 @@ export type MouseWheelEventHandler = (event?: MouseWheelEvent | WheelEvent) => E
 export type ScrollEventHandler = (event?: UIEvent) => EventHandlerResult;
 export type SubmitEventHandler = EventHandler;
 
-type ClassesFunction = () => {
+export type ClassesFunction = () => {
 	[index: string]: boolean | null | undefined;
 }
 
