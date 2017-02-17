@@ -1,5 +1,6 @@
 import loadCldrData from '@dojo/i18n/cldr/load';
 import { systemLocale } from '@dojo/i18n/i18n';
+import likelySubtags from './likelySubtags';
 
 /**
  * Load into Globalize.js all CLDR data for the specified locales.
@@ -12,6 +13,6 @@ export function fetchCldrData(): Promise<void[]> {
 				[systemLocale]: {}
 			}
 		}),
-		loadCldrData([ 'cldr-data/supplemental/likelySubtags.json' ])
+		loadCldrData(likelySubtags)
 	]);
 }
