@@ -74,7 +74,7 @@ export interface VirtualDomProperties {
 	 * The animation to perform when this node is removed while its parent remains.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the projector using [[createProjector]].
 	 * {@link http://maquettejs.org/docs/animations.html|More about animations}.
-	 * @param element - Element that ought to be removed from to the DOM.
+	 * @param element - Element that ought to be removed from the DOM.
 	 * @param removeElement - Function that removes the element from the DOM.
 	 * This argument is provided purely for convenience.
 	 * You may use this function to remove the element when the animation is done.
@@ -91,10 +91,10 @@ export interface VirtualDomProperties {
 	 */
 	updateAnimation?: (element: Element, properties?: VNodeProperties, previousProperties?: VNodeProperties) => void;
 	/**
-	 * Callback that is executed after this node is added to the DOM. Childnodes and properties have
+	 * Callback that is executed after this node is added to the DOM. Child nodes and properties have
 	 * already been applied.
 	 * @param element - The element that was added to the DOM.
-	 * @param projectionOptions - The projection options that were used see [[createProjector]].
+	 * @param projectionOptions - The projection options that were used, see [[createProjector]].
 	 * @param vnodeSelector - The selector passed to the [[h]] function.
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children that were created.
@@ -102,10 +102,10 @@ export interface VirtualDomProperties {
 	afterCreate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties,
 	children: VNode[]): void;
 	/**
-	 * Callback that is executed every time this node may have been updated. Childnodes and properties
+	 * Callback that is executed every time this node may have been updated. Child nodes and properties
 	 * have already been updated.
 	 * @param element - The element that may have been updated in the DOM.
-	 * @param projectionOptions - The projection options that were used see [[createProjector]].
+	 * @param projectionOptions - The projection options that were used, see [[createProjector]].
 	 * @param vnodeSelector - The selector passed to the [[h]] function.
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children for this node.
@@ -188,7 +188,7 @@ export interface VirtualDomProperties {
 	readonly alt?: string;
 	readonly srcset?: string;
 	/**
-	 * Puts a non-interactive piece of html inside the DOM node.
+	 * Puts a non-interactive string of html inside the DOM node.
 	 *
 	 * Note: if you use innerHTML, maquette cannot protect you from XSS vulnerabilities and you must make sure that the innerHTML value is safe.
 	 */
