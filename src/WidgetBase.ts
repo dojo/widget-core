@@ -212,13 +212,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	public diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P> {
-		const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
-			if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
-				changedPropertyKeys.push(propertyKey);
-			}
-			return changedPropertyKeys;
-		}, []);
+		const changedKeys: string[] = [];
+		const propertyKeys = Object.keys(newProperties);
 
+		for (let i = 0; i < propertyKeys.length; i++) {
+			if (previousProperties[propertyKeys[i]] !== newProperties[propertyKeys[i]]) {
+				changedKeys.push(propertyKeys[i]);
+			}
+		}
 		return { changedKeys, properties: assign({}, newProperties) };
 	}
 
@@ -258,8 +259,10 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * @param properties properties to check for functions
 	 */
 	private bindFunctionProperties(properties: P & { [index: string]: any }): void {
-		Object.keys(properties).forEach((propertyKey) => {
-			const property = properties[propertyKey];
+		const propertyKeys = Object.keys(properties);
+
+		for (let i = 0; i < propertyKeys.length; i++) {
+			const property = properties[propertyKeys[i]];
 			const bind = properties.bind;
 
 			if (typeof property === 'function') {
@@ -270,9 +273,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 					boundFunc = property.bind(bind);
 					this.bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
 				}
-				properties[propertyKey] = boundFunc;
+				properties[propertyKeys[i]] = boundFunc;
 			}
-		});
+		}
 	}
 
 	/**
@@ -359,13 +362,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			const childrenMapKey = key || factory;
 			let cachedChildren = this.cachedChildrenMap.get(childrenMapKey) || [];
 			let cachedChild: WidgetCacheWrapper | undefined;
-			cachedChildren.some((cachedChildWrapper) => {
+
+			for (let i = 0; i < cachedChildren.length; i++) {
+				const cachedChildWrapper = cachedChildren[i];
 				if (cachedChildWrapper.factory === factory && !cachedChildWrapper.used) {
 					cachedChild = cachedChildWrapper;
-					return true;
+					break;
 				}
-				return false;
-			});
+			}
 
 			if (!properties.hasOwnProperty('bind')) {
 				properties.bind = this;
@@ -396,11 +400,13 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			return child.__render__();
 		}
 
-		dNode.vNodes = dNode.children
-		.filter((child) => child !== null)
-		.map((child: DNode) => {
-			return this.dNodeToVNode(child);
-		});
+		dNode.vNodes = [];
+		for (let i = 0; i < dNode.children.length; i++) {
+			const child = dNode.children[i];
+			if (child !== null) {
+				dNode.vNodes.push(this.dNodeToVNode(child));
+			}
+		}
 
 		return dNode.render({ bind: this });
 	}
@@ -410,14 +416,15 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	private manageDetachedChildren(): void {
 		this.cachedChildrenMap.forEach((cachedChildren, key) => {
-			const filterCachedChildren = cachedChildren.filter((cachedChild) => {
-				if (cachedChild.used) {
-					cachedChild.used = false;
-					return true;
+			const filterCachedChildren: WidgetCacheWrapper[] = [];
+			for (let i = 0; i < cachedChildren.length; i++) {
+				if (!cachedChildren[i].used) {
+					cachedChildren[i].child.destroy();
+					break;
 				}
-				cachedChild.child.destroy();
-				return false;
-			});
+				cachedChildren[i].used = false;
+				filterCachedChildren.push(cachedChildren[i]);
+			}
 			this.cachedChildrenMap.set(key, filterCachedChildren);
 		});
 	}
