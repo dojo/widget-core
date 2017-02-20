@@ -148,9 +148,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			this.invalidate();
 
 			const propertiesChangedListeners = this.getDecorator('onPropertiesChanged') || [];
-			propertiesChangedListeners.forEach((propertiesChangedFunction) => {
-				propertiesChangedFunction.call(this, evt);
-			});
+			for (let i = 0; i < propertiesChangedListeners.length; i++) {
+				propertiesChangedListeners[i].call(this, evt);
+			}
 		}));
 	}
 
@@ -166,7 +166,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 		const registeredDiffPropertyConfigs: DiffPropertyConfig[] = this.getDecorator('diffProperty') || [];
 
-		registeredDiffPropertyConfigs.forEach(({ propertyName, diffFunction }) => {
+		for (let i = 0; i < registeredDiffPropertyConfigs.length; i++) {
+			const { propertyName, diffFunction } = registeredDiffPropertyConfigs[i];
 			const previousProperty = this.previousProperties[propertyName];
 			const newProperty = (<any> properties)[propertyName];
 			const result: PropertyChangeRecord = diffFunction(previousProperty, newProperty);
@@ -181,7 +182,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			delete (<any> properties)[propertyName];
 			delete this.previousProperties[propertyName];
 			diffPropertyResults[propertyName] = result.value;
-		});
+		}
 
 		const diffPropertiesResult = this.diffProperties(this.previousProperties, properties);
 		this._properties = assign(diffPropertiesResult.properties, diffPropertyResults);
@@ -231,9 +232,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		if (this.dirty || !this.cachedVNode) {
 			let dNode = this.render();
 			const afterRenders = this.getDecorator('afterRender') || [];
-			afterRenders.forEach((afterRenderFunction: Function) => {
-				dNode = afterRenderFunction.call(this, dNode);
-			});
+			for (let i = 0; i < afterRenders.length; i++) {
+				dNode = afterRenders[i].call(this, dNode);
+			}
 			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
 			if (widget) {
