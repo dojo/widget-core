@@ -1,12 +1,13 @@
+import { before } from '@dojo/core/aspect';
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
-import { VNode } from '@dojo/interfaces/vdom';
+import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 import Promise from '@dojo/shim/Promise';
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
-import { v, registry, isWNode } from './d';
+import { v, registry, isWNode, decorate, isHNode } from './d';
 import FactoryRegistry, { WIDGET_BASE_TYPE } from './FactoryRegistry';
 import {
 	DNode,
@@ -15,7 +16,8 @@ import {
 	WidgetBaseInterface,
 	PropertyChangeRecord,
 	PropertiesChangeRecord,
-	PropertiesChangeEvent
+	PropertiesChangeEvent,
+	HNode
 } from './interfaces';
 import { Handle } from '@dojo/interfaces/core';
 
@@ -63,6 +65,10 @@ export function diffProperty(propertyName: string) {
  */
 export function onPropertiesChanged(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 	target.addDecorator('onPropertiesChanged', target[propertyKey]);
+}
+
+function isHNodeWithKey(node: DNode): boolean {
+	return isHNode(node) && node.properties.key != null;
 }
 
 /**
@@ -160,6 +166,44 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				propertiesChangedListeners[i].call(this, evt);
 			}
 		}));
+
+		// Add a render decorator that will register callbacks for the v-node 'afterCreate' and
+		// 'afterUpdate' lifecycle methods to call the widget lifecycle methods onElementCreated
+		// and onElementUpdated
+		this.addDecorator('afterRender', (node: DNode) => {
+			decorate(node, (node: HNode) => {
+				before(node.properties, 'afterCreate', this.nodeChange.bind(this, 'onElementCreated'));
+			}, isHNodeWithKey);
+
+			decorate(node, (node: HNode) => {
+				before(node.properties, 'afterUpdate', this.nodeChange.bind(this, 'onElementUpdated'));
+			}, isHNodeWithKey);
+		});
+	}
+
+	private nodeChange(type: string, element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+						properties: VNodeProperties): void {
+		(<any> this)[type].call(this, element, properties && properties.key);
+	}
+
+	/**
+	 * Widget lifecycle method that is called whenever a vdom node is created.
+	 * Override this method to access the dom nodes that were inserted into the dom.
+	 * @param element The dom node represented by the vdom node.
+	 * @param key The vdom node's key.
+	 */
+	protected onElementCreated(element: Element, key: string): void {
+		// Do nothing by default.
+	}
+
+	/**
+	 * Widget lifecycle method that is called whenever a vdom node is updated.
+	 * Override this method to access the dom nodes that were updated in the dom.
+	 * @param element The dom node represented by the vdom node.
+	 * @param key The vdom node's key.
+	 */
+	protected onElementUpdated(element: Element, key: string): void {
+		// Do nothing by default.
 	}
 
 	public get properties(): Readonly<P> {
