@@ -68,7 +68,7 @@ export function onPropertiesChanged(target: any, propertyKey: string, descriptor
 }
 
 function isHNodeWithKey(node: DNode): boolean {
-	return isHNode(node) && node.properties.key != null;
+	return isHNode(node) && node.properties && node.properties.key != null;
 }
 
 /**
