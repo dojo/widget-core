@@ -178,6 +178,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			decorate(node, (node: HNode) => {
 				before(node.properties, 'afterUpdate', this.nodeChange.bind(this, 'onElementUpdated'));
 			}, isHNodeWithKey);
+			return node;
 		});
 	}
 
