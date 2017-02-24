@@ -1,7 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { WidgetBase } from '../../src/WidgetBase';
-import { v, decorate } from '../../src/d';
+import { v } from '../../src/d';
 import { ProjectorMixin } from '../../src/mixins/Projector';
 import { WidgetProperties, HNode } from '../../src/interfaces';
 import { waitFor } from './waitFor';
@@ -10,7 +10,7 @@ class TesterWidget extends WidgetBase<WidgetProperties> {
 	public lifeCycleCreated: Array<{key: string, element: Element}> = [];
 	public lifeCycleUpdated: Array<{key: string, element: Element}> = [];
 
-	protected vnode:HNode;
+	protected vnode: HNode;
 	public modify: boolean = false;
 
 	protected onElementCreated(element: Element, key: string): void {
@@ -40,7 +40,7 @@ class WidgetA extends TesterWidget {
 			if (this.modify) {
 				let child = <HNode>vnode.children[0]!;
 				child = <HNode>child.children[0]!;
-				child.children!.push(v('span', { key: 'addition', id: 'addition'}, [' Modified!']));
+				child.children!.push(v('span', {key: 'addition', id: 'addition'}, [' Modified!']));
 			}
 		} else {
 			this.vnode = vnode = v('div', {
@@ -234,5 +234,25 @@ registerSuite({
 
 		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
 		assert.strictEqual(projector.lifeCycleUpdated.length, 0, 'Unexpected number of updated nodes.');
+	},
+
+	'key reuse'() {
+		// Test using the same key name in different child lists.
+		class DuplicateKeys extends TesterWidget {
+			public render(): HNode {
+				return v('div', { key: 'aDiv' }, [
+					v('span', { key: 'aDiv' }, ['Testing...'])
+				]);
+			}
+		}
+
+		const Projector = ProjectorMixin(DuplicateKeys);
+		const projector = new Projector();
+		return projector.append(root).then((handle) => {
+			assert.strictEqual(projector.lifeCycleCreated.length, 2, 'Unexpected number of created nodes.');
+			assert.strictEqual(projector.lifeCycleCreated[0].element.tagName, 'span');
+			assert.strictEqual(projector.lifeCycleCreated[1].element.tagName, 'div');
+			handle.destroy();
+		});
 	}
 });
