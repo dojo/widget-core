@@ -60,17 +60,18 @@ class WidgetA extends TesterWidget {
 /**
  * Test widget that adds afterCreate and afterUpdate callbacks to each vnode.
  */
+let afterCreateCounter = 0;
+let afterUpdateCounter = 0;
+function incrementCreateCounter(): void {
+	afterCreateCounter++;
+}
+
+function incrementUpdateCounter(): void {
+	afterUpdateCounter++;
+}
 class WidgetB extends TesterWidget {
-	public afterCreateCounter = 0;
-	public afterUpdateCounter = 0;
 
-	private incrementCreateCounter(): void {
-		this.afterCreateCounter++;
-	}
 
-	private incrementUpdateCounter(): void {
-		this.afterUpdateCounter++;
-	}
 
 	public render(): HNode {
 		let vnode = this.vnode;
@@ -80,24 +81,24 @@ class WidgetB extends TesterWidget {
 				vnode.children.push(v('div', {
 					key: 'addition',
 					id: 'addition',
-					afterCreate: this.incrementCreateCounter.bind(this),
-					afterUpdate: this.incrementUpdateCounter.bind(this)
+					afterCreate: incrementCreateCounter.bind(this),
+					afterUpdate: incrementUpdateCounter.bind(this)
 				}, ['Modified']))
 			}
 		} else {
 			this.vnode = vnode = v('div', {
 				key: 'div1',
-				afterCreate: this.incrementCreateCounter.bind(this),
-				afterUpdate: this.incrementUpdateCounter.bind(this)
+				afterCreate: incrementCreateCounter.bind(this),
+				afterUpdate: incrementUpdateCounter.bind(this)
 			}, [
 				v('div', {
-					afterCreate: this.incrementCreateCounter.bind(this),
-					afterUpdate: this.incrementUpdateCounter.bind(this)
+					afterCreate: incrementCreateCounter.bind(this),
+					afterUpdate: incrementUpdateCounter.bind(this)
 				}, [
 					v('div', {
 						key: 'div2',
-						afterCreate: this.incrementCreateCounter.bind(this),
-						afterUpdate: this.incrementUpdateCounter.bind(this)
+						afterCreate: incrementCreateCounter.bind(this),
+						afterUpdate: incrementUpdateCounter.bind(this)
 					}, ['This is a test'])
 				])
 			]);
@@ -132,6 +133,8 @@ registerSuite({
 	name: 'WidgetBase Node Lifecycle',
 
 	beforeEach() {
+		afterCreateCounter = 0;
+		afterUpdateCounter = 0;
 		root = document.createElement('div');
 		document.body.appendChild(root);
 	},
@@ -168,8 +171,8 @@ registerSuite({
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
 			assert.strictEqual(projector.lifeCycleCreated.length, 2);
-			assert.strictEqual(projector.afterCreateCounter, 3);
-			assert.strictEqual(projector.afterUpdateCounter, 0);
+			assert.strictEqual(afterCreateCounter, 3);
+			assert.strictEqual(afterUpdateCounter, 0);
 			assert.strictEqual(projector.lifeCycleUpdated.length, 0);
 			handle.destroy();
 		});
@@ -201,7 +204,7 @@ registerSuite({
 		await projector.append(root);
 
 		projector.lifeCycleCreated = [];
-		projector.afterCreateCounter = 0;
+		afterCreateCounter = 0;
 
 		projector.modify = true;
 		projector.invalidate();
@@ -212,8 +215,8 @@ registerSuite({
 
 		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
 		assert.strictEqual(projector.lifeCycleUpdated.length, 2, 'Unexpected number of updated nodes.');
-		assert.strictEqual(projector.afterCreateCounter, 1);
-		assert.strictEqual(projector.afterUpdateCounter, 3);
+		assert.strictEqual(afterCreateCounter, 1);
+		assert.strictEqual(afterUpdateCounter, 3);
 	},
 
 	async 'basic widget that always rerenders'() {
@@ -233,7 +236,7 @@ registerSuite({
 		}, 'DOM update did not occur', 10);
 
 		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
-		assert.strictEqual(projector.lifeCycleUpdated.length, 0, 'Unexpected number of updated nodes.');
+		assert.strictEqual(projector.lifeCycleUpdated.length, 1, 'Unexpected number of updated nodes.');
 	},
 
 	'key reuse'() {
@@ -250,8 +253,8 @@ registerSuite({
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
 			assert.strictEqual(projector.lifeCycleCreated.length, 2, 'Unexpected number of created nodes.');
-			assert.strictEqual(projector.lifeCycleCreated[0].element.tagName, 'span');
-			assert.strictEqual(projector.lifeCycleCreated[1].element.tagName, 'div');
+			assert.strictEqual(projector.lifeCycleCreated[0].element.tagName, 'SPAN');
+			assert.strictEqual(projector.lifeCycleCreated[1].element.tagName, 'DIV');
 			handle.destroy();
 		});
 	}
