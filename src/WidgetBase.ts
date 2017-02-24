@@ -70,9 +70,6 @@ function vnodeAfterCreate(element: Element, projectionOptions: ProjectionOptions
 	properties: VNodeProperties, children: VNode[]): void {
 
 	const lifecycleProperties = properties._lifecycleProperties;
-	if (!lifecycleProperties) {
-		return;
-	}
 	const key = String(properties.key);
 	const callback = lifecycleProperties.afterCreate;
 	callback && callback(element, projectionOptions, vnodeSelector, properties, children);
@@ -83,9 +80,6 @@ function vnodeAfterUpdate(element: Element, projectionOptions: ProjectionOptions
 	properties: VNodeProperties, children: VNode[]): void {
 
 	const lifecycleProperties = properties._lifecycleProperties;
-	if (!lifecycleProperties) {
-		return;
-	}
 	const key = String(properties.key);
 	const callback = lifecycleProperties.afterUpdate;
 	callback && callback(element, projectionOptions, vnodeSelector, properties, children);
@@ -221,7 +215,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			};
 		}
 		if (!lsProps.hasOwnProperty(callbackKey)) {
-			lsProps[callbackKey] = properties[callbackKey]
+			lsProps[callbackKey] = properties[callbackKey];
 		}
 	}
 

@@ -38,8 +38,8 @@ class WidgetA extends TesterWidget {
 
 		if (vnode) {
 			if (this.modify) {
-				let child = <HNode>vnode.children[0]!;
-				child = <HNode>child.children[0]!;
+				let child = <HNode> vnode.children[0]!;
+				child = <HNode> child.children[0]!;
 				child.children!.push(v('span', {key: 'addition', id: 'addition'}, [' Modified!']));
 			}
 		} else {
@@ -71,8 +71,6 @@ function incrementUpdateCounter(): void {
 }
 class WidgetB extends TesterWidget {
 
-
-
 	public render(): HNode {
 		let vnode = this.vnode;
 
@@ -83,7 +81,7 @@ class WidgetB extends TesterWidget {
 					id: 'addition',
 					afterCreate: incrementCreateCounter.bind(this),
 					afterUpdate: incrementUpdateCounter.bind(this)
-				}, ['Modified']))
+				}, ['Modified']));
 			}
 		} else {
 			this.vnode = vnode = v('div', {
@@ -119,8 +117,8 @@ class WidgetC extends TesterWidget {
 		if (this.modify) {
 			vnode.children.push(v('span', {
 				key: 'addition',
-				id: 'addition',
-			}, [' Modified.']))
+				id: 'addition'
+			}, [' Modified.']));
 		}
 
 		return vnode;
