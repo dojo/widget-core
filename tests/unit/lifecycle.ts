@@ -1,54 +1,59 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { WidgetBase } from '../../src/WidgetBase';
-import { v } from '../../src/d';
+import { v, decorate } from '../../src/d';
 import { ProjectorMixin } from '../../src/mixins/Projector';
 import { WidgetProperties, HNode } from '../../src/interfaces';
-import { VNode } from '@dojo/interfaces/vdom';
 import { waitFor } from './waitFor';
 
 class TesterWidget extends WidgetBase<WidgetProperties> {
-	public created: Array<{key: string, element: Element}> = [];
-	public updated: Array<{key: string, element: Element}> = [];
+	public lifeCycleCreated: Array<{key: string, element: Element}> = [];
+	public lifeCycleUpdated: Array<{key: string, element: Element}> = [];
+
+	protected vnode:HNode;
+	public modify: boolean = false;
 
 	protected onElementCreated(element: Element, key: string): void {
-		this.created.push({
+		this.lifeCycleCreated.push({
 			key: key,
 			element: element
 		});
 	}
 
 	protected onElementUpdated(element: Element, key: string): void {
-		this.updated.push({
+		this.lifeCycleUpdated.push({
 			key: key,
 			element: element
 		});
 	}
-
-	public addExtra: boolean = false;
 }
 
 /**
  * Test widget that records the calls to the lifecycle methods.
  */
 class WidgetA extends TesterWidget {
+
 	public render(): HNode {
-		const root: HNode = v('div', {
-			key: 'div1'
-		}, [
-			v('div', {}, [
-				v('div', {
-					key: 'div2'
-				}, ['This is a test'])
-			])
-		]);
-		// if (this.addExtra) {
-		// 	root.children.push(v('div', {
-		// 		key: 'extra',
-		// 		id: 'extra'
-		// 	}))
-		// }
-		return root;
+		let vnode = this.vnode;
+
+		if (vnode) {
+			if (this.modify) {
+				let child = <HNode>vnode.children[0]!;
+				child = <HNode>child.children[0]!;
+				child.children!.push(v('span', { key: 'addition', id: 'addition'}, [' Modified!']));
+			}
+		} else {
+			this.vnode = vnode = v('div', {
+				key: 'div1'
+			}, [
+				v('div', {}, [
+					v('div', {
+						key: 'div2'
+					}, ['This is a test.'])
+				])
+			]);
+		}
+		return vnode;
 	}
 }
 
@@ -64,26 +69,41 @@ class WidgetB extends TesterWidget {
 	}
 
 	private incrementUpdateCounter(): void {
-		this.afterCreateCounter++;
+		this.afterUpdateCounter++;
 	}
 
 	public render(): HNode {
-		return v('div', {
-			key: 'div1',
-			afterCreate: this.incrementCreateCounter.bind(this),
-			afterUpdate: this.incrementUpdateCounter.bind(this)
-		}, [
-			v('div', {
+		let vnode = this.vnode;
+
+		if (vnode) {
+			if (this.modify) {
+				vnode.children.push(v('div', {
+					key: 'addition',
+					id: 'addition',
+					afterCreate: this.incrementCreateCounter.bind(this),
+					afterUpdate: this.incrementUpdateCounter.bind(this)
+				}, ['Modified']))
+			}
+		} else {
+			this.vnode = vnode = v('div', {
+				key: 'div1',
 				afterCreate: this.incrementCreateCounter.bind(this),
 				afterUpdate: this.incrementUpdateCounter.bind(this)
 			}, [
 				v('div', {
-					key: 'div2',
 					afterCreate: this.incrementCreateCounter.bind(this),
 					afterUpdate: this.incrementUpdateCounter.bind(this)
-				}, ['This is a test'])
-			])
-		]);
+				}, [
+					v('div', {
+						key: 'div2',
+						afterCreate: this.incrementCreateCounter.bind(this),
+						afterUpdate: this.incrementUpdateCounter.bind(this)
+					}, ['This is a test'])
+				])
+			]);
+		}
+
+		return vnode;
 	}
 }
 
@@ -94,6 +114,7 @@ registerSuite({
 
 	beforeEach() {
 		root = document.createElement('div');
+		document.body.appendChild(root);
 	},
 
 	afterEach() {
@@ -107,8 +128,8 @@ registerSuite({
 		const Projector = ProjectorMixin(WidgetA);
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
-			assert.strictEqual(projector.created.length, 2);
-			assert.strictEqual(projector.updated.length, 0);
+			assert.strictEqual(projector.lifeCycleCreated.length, 2);
+			assert.strictEqual(projector.lifeCycleUpdated.length, 0);
 			handle.destroy();
 		});
 	},
@@ -117,8 +138,8 @@ registerSuite({
 		const Projector = ProjectorMixin(WidgetA);
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
-			assert.strictEqual(projector.created[0].key, 'div2');
-			assert.strictEqual(projector.created[1].key, 'div1');
+			assert.strictEqual(projector.lifeCycleCreated[0].key, 'div2');
+			assert.strictEqual(projector.lifeCycleCreated[1].key, 'div1');
 			handle.destroy();
 		});
 	},
@@ -127,27 +148,52 @@ registerSuite({
 		const Projector = ProjectorMixin(WidgetB);
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
-			assert.strictEqual(projector.created.length, 2);
+			assert.strictEqual(projector.lifeCycleCreated.length, 2);
 			assert.strictEqual(projector.afterCreateCounter, 3);
 			assert.strictEqual(projector.afterUpdateCounter, 0);
-			assert.strictEqual(projector.updated.length, 0);
+			assert.strictEqual(projector.lifeCycleUpdated.length, 0);
 			handle.destroy();
 		});
 	},
 
 	async 'on update'() {
+		// Render WidgetA and then modify it.  Look for calls to the updated lifecycle method.
 		const Projector = ProjectorMixin(WidgetA);
 		const projector = new Projector();
 		await projector.append(root);
 
-		projector.addExtra = true;
+		projector.lifeCycleCreated = [];
+
+		projector.modify = true;
 		projector.invalidate();
 
 		await waitFor((): boolean => {
-			return document.getElementById('extra') != null;
-		}, 'DOM update did not occur');
+			return document.getElementById('addition') != null;
+		}, 'DOM update did not occur', 10);
 
-		assert.strictEqual(projector.created.length, 2);
-		assert.strictEqual(projector.updated.length, 2);
+		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
+		assert.strictEqual(projector.lifeCycleUpdated.length, 2, 'Unexpected number of updated nodes.');
+	},
+
+	async 'on update with afterUpdate'() {
+		// Render WidgetB and then modify it.
+		const Projector = ProjectorMixin(WidgetB);
+		const projector = new Projector();
+		await projector.append(root);
+
+		projector.lifeCycleCreated = [];
+		projector.afterCreateCounter = 0;
+
+		projector.modify = true;
+		projector.invalidate();
+
+		await waitFor((): boolean => {
+			return document.getElementById('addition') != null;
+		}, 'DOM update did not occur', 10);
+
+		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
+		assert.strictEqual(projector.lifeCycleUpdated.length, 2, 'Unexpected number of updated nodes.');
+		assert.strictEqual(projector.afterCreateCounter, 1);
+		assert.strictEqual(projector.afterUpdateCounter, 3);
 	}
 });

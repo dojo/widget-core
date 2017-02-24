@@ -1,4 +1,3 @@
-import { before } from '@dojo/core/aspect';
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
@@ -38,6 +37,11 @@ interface DiffPropertyConfig {
 	diffFunction: Function;
 }
 
+interface VNodeCallback {
+	(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+		properties: VNodeProperties, children: VNode[]): void
+}
+
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
 	(type: 'properties:changed', handler: EventedListenerOrArray<WidgetBase<P>, PropertiesChangeEvent<WidgetBase<P>, P>>): Handle;
 }
@@ -65,10 +69,6 @@ export function diffProperty(propertyName: string) {
  */
 export function onPropertiesChanged(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 	target.addDecorator('onPropertiesChanged', target[propertyKey]);
-}
-
-function isHNodeWithKey(node: DNode): boolean {
-	return isHNode(node) && node.properties && node.properties.key != null;
 }
 
 /**
@@ -144,6 +144,16 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	protected registry: FactoryRegistry | undefined;
 
 	/**
+	 * Map of afterCreate callbacks that were set outside of WidgetBase.
+	 */
+	private afterCreateCallbacks: { [key: string]: VNodeCallback | undefined; } = {};
+
+	/**
+	 * Map of afterUpdate callbacks that were set outside of WidgetBase.
+	 */
+	private afterUpdateCallbacks: { [key: string]: VNodeCallback | undefined; } = {};
+
+	/**
 	 * @constructor
 	 */
 	constructor() {
@@ -171,20 +181,47 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		// 'afterUpdate' lifecycle methods to call the widget lifecycle methods onElementCreated
 		// and onElementUpdated
 		this.addDecorator('afterRender', (node: DNode) => {
+			// Cannot use @dojo/core/aspect because the vnode callback functions cannot change on each
+			// call to render.
 			decorate(node, (node: HNode) => {
-				before(node.properties, 'afterCreate', this.nodeChange.bind(this, 'onElementCreated'));
-			}, isHNodeWithKey);
+				const { key, afterCreate } = node.properties;
+				if (key != null) {
+					if (!this.afterCreateCallbacks.hasOwnProperty(String(key))) {
+						this.afterCreateCallbacks[String(key)] = afterCreate;
+						node.properties.afterCreate = this.vnodeAfterCreate.bind(this);
+					}
+				}
+			}, isHNode);
 
 			decorate(node, (node: HNode) => {
-				before(node.properties, 'afterUpdate', this.nodeChange.bind(this, 'onElementUpdated'));
-			}, isHNodeWithKey);
+				const { key, afterUpdate } = node.properties;
+				if (key != null) {
+					if (!this.afterUpdateCallbacks.hasOwnProperty(String(key))) {
+						this.afterUpdateCallbacks[String(key)] = afterUpdate;
+						node.properties.afterUpdate = this.vnodeAfterUpdate.bind(this);
+					}
+				}
+			}, isHNode);
 			return node;
 		});
 	}
 
-	private nodeChange(type: string, element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
-						properties: VNodeProperties): void {
-		(<any> this)[type].call(this, element, properties && properties.key);
+	private vnodeAfterCreate(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+		properties: VNodeProperties, children: VNode[]): void {
+
+		const key = String(properties.key);
+		this.onElementCreated(element, key);
+		const callback = this.afterCreateCallbacks[key];
+		callback && callback(element, projectionOptions, vnodeSelector, properties, children);
+	}
+
+	private vnodeAfterUpdate(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+		properties: VNodeProperties, children: VNode[]): void {
+
+		const key = String(properties.key);
+		this.onElementUpdated(element, key);
+		const callback = this.afterUpdateCallbacks[key];
+		callback && callback(element, projectionOptions, vnodeSelector, properties, children);
 	}
 
 	/**
