@@ -107,6 +107,25 @@ class WidgetB extends TesterWidget {
 	}
 }
 
+class WidgetC extends TesterWidget {
+
+	public render(): HNode {
+		// Always creates a new vnode.
+		const vnode = v('div', {
+			key: 'div1'
+		}, ['Simple Widget']);
+
+		if (this.modify) {
+			vnode.children.push(v('span', {
+				key: 'addition',
+				id: 'addition',
+			}, [' Modified.']))
+		}
+
+		return vnode;
+	}
+}
+
 let root: Element | undefined;
 
 registerSuite({
@@ -195,5 +214,25 @@ registerSuite({
 		assert.strictEqual(projector.lifeCycleUpdated.length, 2, 'Unexpected number of updated nodes.');
 		assert.strictEqual(projector.afterCreateCounter, 1);
 		assert.strictEqual(projector.afterUpdateCounter, 3);
+	},
+
+	async 'basic widget that always rerenders'() {
+		const Projector = ProjectorMixin(WidgetC);
+		const projector = new Projector();
+		await projector.append(root);
+
+		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
+		assert.strictEqual(projector.lifeCycleUpdated.length, 0, 'Unexpected number of updated nodes.');
+
+		projector.lifeCycleCreated = [];
+		projector.modify = true;
+		projector.invalidate();
+
+		await waitFor((): boolean => {
+			return document.getElementById('addition') != null;
+		}, 'DOM update did not occur', 10);
+
+		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
+		assert.strictEqual(projector.lifeCycleUpdated.length, 0, 'Unexpected number of updated nodes.');
 	}
 });
