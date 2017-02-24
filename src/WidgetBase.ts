@@ -184,8 +184,12 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			// Cannot use @dojo/core/aspect because the vnode callback functions cannot change on each
 			// call to render.
 			decorate(node, (node: HNode) => {
+				if (!node.properties) {
+					return;
+				}
 				const { key, afterCreate } = node.properties;
 				if (key != null) {
+					// Add the after create callback one time only.
 					if (!this.afterCreateCallbacks.hasOwnProperty(String(key))) {
 						this.afterCreateCallbacks[String(key)] = afterCreate;
 						node.properties.afterCreate = this.vnodeAfterCreate.bind(this);
@@ -194,8 +198,12 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			}, isHNode);
 
 			decorate(node, (node: HNode) => {
+				if (!node.properties) {
+					return;
+				}
 				const { key, afterUpdate } = node.properties;
 				if (key != null) {
+					// Add the after update callback one time only.
 					if (!this.afterUpdateCallbacks.hasOwnProperty(String(key))) {
 						this.afterUpdateCallbacks[String(key)] = afterUpdate;
 						node.properties.afterUpdate = this.vnodeAfterUpdate.bind(this);
