@@ -66,7 +66,10 @@ export function onPropertiesChanged(target: any, propertyKey: string, descriptor
 	target.addDecorator('onPropertiesChanged', target[propertyKey]);
 }
 
-export function isHNodeWithKey(node: DNode): node is HNode {
+/**
+ * Function that identifies DNodes that are HNodes with key properties.
+ */
+function isHNodeWithKey(node: DNode): node is HNode {
 	return isHNode(node) && node && (node.properties != null) && (node.properties.key != null);
 }
 
@@ -157,6 +160,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.renderDecorators = new Set<string>();
 		this.bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
+		// Create Maquette afterCreate and afterUpdate callback functions that will be set on vnodes
+		// that have keys.
 		const afterCreateCallback = (element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 			properties: VNodeProperties, children: VNode[]): void => {
 			this.onElementCreated(element, String(properties.key));
@@ -180,8 +185,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		// 'afterUpdate' lifecycle methods to call the widget lifecycle methods onElementCreated
 		// and onElementUpdated
 		this.addDecorator('afterRender', (node: DNode) => {
-			// Cannot use @dojo/core/aspect because the vnode callback functions cannot change on each
-			// call to render.
+			// Using callback functions that were bound outside of this render call to make sure
+			// the functions don't change.
 			decorate(node, (node: HNode) => {
 				node.properties.afterCreate = afterCreateCallback;
 			}, isHNodeWithKey);
@@ -194,7 +199,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	/**
-	 * Widget lifecycle method that is called whenever a vdom node is created.
+	 * Widget lifecycle method that is called whenever a dom node is created for a vnode.
 	 * Override this method to access the dom nodes that were inserted into the dom.
 	 * @param element The dom node represented by the vdom node.
 	 * @param key The vdom node's key.
@@ -204,8 +209,10 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	/**
-	 * Widget lifecycle method that is called whenever a vdom node is updated.
-	 * Override this method to access the dom nodes that were updated in the dom.
+	 * Widget lifecycle method that is called whenever a dom node that is associated with a vnode is updated.
+	 * Note: this method is dependant on the Maquette afterUpdate callback which is called if a dom
+	 * node might have been updated.  Maquette does not guarantee the dom node was updated.
+	 * Override this method to access the dom node.
 	 * @param element The dom node represented by the vdom node.
 	 * @param key The vdom node's key.
 	 */
