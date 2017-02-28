@@ -16,7 +16,7 @@ import {
 	PropertyChangeRecord,
 	PropertiesChangeRecord,
 	PropertiesChangeEvent,
-	HNode, VirtualDomProperties
+	HNode
 } from './interfaces';
 import { Handle } from '@dojo/interfaces/core';
 
@@ -66,24 +66,8 @@ export function onPropertiesChanged(target: any, propertyKey: string, descriptor
 	target.addDecorator('onPropertiesChanged', target[propertyKey]);
 }
 
-function vnodeAfterCreate(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
-	properties: VNodeProperties, children: VNode[]): void {
-
-	const lifecycleProperties = properties._lifecycleProperties;
-	const key = String(properties.key);
-	const callback = lifecycleProperties.afterCreate;
-	callback && callback(element, projectionOptions, vnodeSelector, properties, children);
-	lifecycleProperties.widget.onElementCreated(element, key);
-}
-
-function vnodeAfterUpdate(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
-	properties: VNodeProperties, children: VNode[]): void {
-
-	const lifecycleProperties = properties._lifecycleProperties;
-	const key = String(properties.key);
-	const callback = lifecycleProperties.afterUpdate;
-	callback && callback(element, projectionOptions, vnodeSelector, properties, children);
-	lifecycleProperties.widget.onElementUpdated(element, key);
+export function isHNodeWithKey(node: DNode): node is HNode {
+	return isHNode(node) && node && (node.properties != null) && (node.properties.key != null);
 }
 
 /**
@@ -173,6 +157,16 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.renderDecorators = new Set<string>();
 		this.bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
+		const afterCreateCallback = (element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+			properties: VNodeProperties, children: VNode[]): void => {
+			this.onElementCreated(element, String(properties.key));
+		};
+
+		const afterUpdateCallback = (element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+			properties: VNodeProperties, children: VNode[]): void => {
+			this.onElementUpdated(element, String(properties.key));
+		};
+
 		this.own(this.on('properties:changed', (evt) => {
 			this.invalidate();
 
@@ -189,34 +183,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			// Cannot use @dojo/core/aspect because the vnode callback functions cannot change on each
 			// call to render.
 			decorate(node, (node: HNode) => {
-				const key = node.properties && node.properties.key;
-				if (key != null) {
-					this.setLifecycleProperties(node.properties, 'afterCreate');
-					node.properties.afterCreate = vnodeAfterCreate;
-				}
-			}, isHNode);
+				node.properties.afterCreate = afterCreateCallback;
+			}, isHNodeWithKey);
 
 			decorate(node, (node: HNode) => {
-				const key = node.properties && node.properties.key;
-				if (key != null) {
-					this.setLifecycleProperties(node.properties, 'afterUpdate');
-					node.properties.afterUpdate = vnodeAfterUpdate;
-				}
-			}, isHNode);
+				node.properties.afterUpdate = afterUpdateCallback;
+			}, isHNodeWithKey);
 			return node;
 		});
-	}
-
-	private setLifecycleProperties(properties: VirtualDomProperties, callbackKey: string) {
-		let lsProps = properties._lifecycleProperties;
-		if (!lsProps) {
-			properties._lifecycleProperties = lsProps = {
-				widget: this
-			};
-		}
-		if (!lsProps.hasOwnProperty(callbackKey)) {
-			lsProps[callbackKey] = properties[callbackKey];
-		}
 	}
 
 	/**

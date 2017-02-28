@@ -169,7 +169,9 @@ registerSuite({
 		const projector = new Projector();
 		return projector.append(root).then((handle) => {
 			assert.strictEqual(projector.lifeCycleCreated.length, 2);
-			assert.strictEqual(afterCreateCounter, 3);
+			// afterCreateCounter will be 1 because the other two afterCreate callbacks will be replaced in
+			// WidgetBase.
+			assert.strictEqual(afterCreateCounter, 1);
 			assert.strictEqual(afterUpdateCounter, 0);
 			assert.strictEqual(projector.lifeCycleUpdated.length, 0);
 			handle.destroy();
@@ -213,8 +215,8 @@ registerSuite({
 
 		assert.strictEqual(projector.lifeCycleCreated.length, 1, 'Unexpected number of created nodes.');
 		assert.strictEqual(projector.lifeCycleUpdated.length, 2, 'Unexpected number of updated nodes.');
-		assert.strictEqual(afterCreateCounter, 1);
-		assert.strictEqual(afterUpdateCounter, 3);
+		assert.strictEqual(afterCreateCounter, 0);  // afterCreate callback is replaced in WidgetBase.
+		assert.strictEqual(afterUpdateCounter, 1);  // afterUpdate callback is replaced in WidgetBase.
 	},
 
 	async 'basic widget that always rerenders'() {
