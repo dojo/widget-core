@@ -966,5 +966,36 @@ registerSuite({
 		childInvalidate();
 		assert.isTrue(childInvalidateCalled);
 		assert.isTrue(parentInvalidateCalled);
+	},
+	'setting children invalidate enclosing widget'() {
+		class FooWidget extends WidgetBase<any> {
+			render() {
+				return v('div', [ `${this.properties.foo}` ]);
+			}
+		}
+
+		class ContainerWidget extends WidgetBase<any> {
+			render() {
+				return v('div', {}, this.children);
+			}
+		}
+
+		class TestWidget extends WidgetBase<any> {
+			private foo = 0;
+
+			render() {
+				this.foo++;
+				return w(ContainerWidget, {}, [
+					w(FooWidget, { foo: this.foo })
+				]);
+			}
+		}
+
+		const widget: any = new TestWidget();
+		const firstRender = <any> widget.__render__();
+		assert.equal(firstRender.children[0].text, '1');
+		widget.invalidate();
+		const secondRender = <any> widget.__render__();
+		assert.equal(secondRender.children[0].text, '2');
 	}
 });

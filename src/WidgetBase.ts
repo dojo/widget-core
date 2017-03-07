@@ -212,6 +212,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	public setChildren(children: DNode[]): void {
+		this.dirty = true;
 		this._children = children;
 		this.emit({
 			type: 'widget:children',
@@ -400,7 +401,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				this.emit({ type: 'error', target: this, error: new Error(errorMsg) });
 			}
 
-			child.setChildren(children);
+			if (Array.isArray(children)) {
+				child.setChildren(children);
+			}
 			return child.__render__();
 		}
 
