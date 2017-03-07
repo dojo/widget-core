@@ -968,9 +968,11 @@ registerSuite({
 		assert.isTrue(parentInvalidateCalled);
 	},
 	'setting children invalidate enclosing widget'() {
+		let foo = 0;
 		class FooWidget extends WidgetBase<any> {
 			render() {
-				return v('div', [ `${this.properties.foo}` ]);
+				foo = this.properties.foo;
+				return v('div', []);
 			}
 		}
 
@@ -992,10 +994,10 @@ registerSuite({
 		}
 
 		const widget: any = new TestWidget();
-		const firstRender = <any> widget.__render__();
-		assert.equal(firstRender.children[0].text, '1');
+		widget.__render__();
+		assert.equal(foo, 1);
 		widget.invalidate();
-		const secondRender = <any> widget.__render__();
-		assert.equal(secondRender.children[0].text, '2');
+		widget.__render__();
+		assert.equal(foo, 2);
 	}
 });
