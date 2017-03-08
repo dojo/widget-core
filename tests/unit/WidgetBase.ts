@@ -426,29 +426,26 @@ registerSuite({
 		decorator() {
 			let onPropertiesChangedCount = 1;
 			class TestWidget extends WidgetBase<any> {
-				invalidate() {
+				@onPropertiesChanged
+				firstOnPropertiesChanged() {
 					assert.strictEqual(onPropertiesChangedCount++, 1);
 				}
 				@onPropertiesChanged
-				firstOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 2);
-				}
-				@onPropertiesChanged
 				secondOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 3);
+					assert.strictEqual(onPropertiesChangedCount++, 2);
 				}
 			}
 
 			class ExtendedTestWidget extends TestWidget {
 				@onPropertiesChanged
 				thirdOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount, 4);
+					assert.strictEqual(onPropertiesChangedCount, 3);
 				}
 			}
 
 			const widget = new ExtendedTestWidget();
 			widget.emit({ type: 'properties:changed' });
-			assert.strictEqual(onPropertiesChangedCount, 4);
+			assert.strictEqual(onPropertiesChangedCount, 3);
 		},
 		'non decorator'() {
 
@@ -459,14 +456,11 @@ registerSuite({
 					this.addDecorator('onPropertiesChanged', this.firstOnPropertiesChanged);
 					this.addDecorator('onPropertiesChanged', this.secondOnPropertiesChanged);
 				}
-				invalidate() {
+				firstOnPropertiesChanged() {
 					assert.strictEqual(onPropertiesChangedCount++, 1);
 				}
-				firstOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 2);
-				}
 				secondOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 3);
+					assert.strictEqual(onPropertiesChangedCount++, 2);
 				}
 			}
 
@@ -476,13 +470,13 @@ registerSuite({
 					this.addDecorator('onPropertiesChanged', this.thirdOnPropertiesChanged);
 				}
 				thirdOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount, 4);
+					assert.strictEqual(onPropertiesChangedCount, 3);
 				}
 			}
 
 			const widget = new ExtendedTestWidget();
 			widget.emit({ type: 'properties:changed' });
-			assert.strictEqual(onPropertiesChangedCount, 4);
+			assert.strictEqual(onPropertiesChangedCount, 3);
 		}
 	},
 	render: {
