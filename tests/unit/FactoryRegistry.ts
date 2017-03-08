@@ -39,7 +39,7 @@ registerSuite({
 			}
 			catch (error) {
 				assert.isTrue(error instanceof Error);
-				assert.equal(error.message, 'factory has already been registered for \'my-widget\'');
+				assert.equal(error.message, 'widget has already been registered for \'my-widget\'');
 			}
 		}
 	},

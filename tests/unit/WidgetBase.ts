@@ -595,7 +595,7 @@ registerSuite({
 			let result = <VNode> myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			assert.isTrue(consoleStub.calledOnce);
-			assert.isTrue(consoleStub.calledWith(`Unable to render unknown widget factory ${factory}`));
+			assert.isTrue(consoleStub.calledWith(`Unable to render unknown widget constructor ${factory}`));
 			consoleStub.restore();
 		},
 		'render using scoped factory registry'() {
@@ -776,7 +776,7 @@ registerSuite({
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
-			const warnMsg = 'It is recommended to provide a unique `key` property when using the same widget factory multiple times';
+			const warnMsg = 'It is recommended to provide a unique `key` property when using the same widget multiple times';
 			class TestWidgetOne extends WidgetBase<any> {}
 			class TestWidgetTwo extends WidgetBase<any> {}
 
