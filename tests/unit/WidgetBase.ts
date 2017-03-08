@@ -5,7 +5,7 @@ import { DNode } from '../../src/interfaces';
 import { WidgetBase, diffProperty, afterRender, onPropertiesChanged } from '../../src/WidgetBase';
 import { VNode } from '@dojo/interfaces/vdom';
 import { v, w, registry } from '../../src/d';
-import { stub } from 'sinon';
+import { stub, spy } from 'sinon';
 import FactoryRegistry from './../../src/FactoryRegistry';
 
 registerSuite({
@@ -961,7 +961,7 @@ registerSuite({
 		assert.isTrue(childInvalidateCalled);
 		assert.isTrue(parentInvalidateCalled);
 	},
-	'setting children invalidate enclosing widget'() {
+	'setting children should mark the enclosing widget as dirty'() {
 		let foo = 0;
 		class FooWidget extends WidgetBase<any> {
 			render() {
@@ -993,5 +993,33 @@ registerSuite({
 		widget.invalidate();
 		widget.__render__();
 		assert.equal(foo, 2);
+	},
+	'properties:changed should mark as dirty but not invalidate'() {
+		let foo = 0;
+
+		class FooWidget extends WidgetBase<any> {
+			render() {
+				foo = this.properties.foo;
+				return v('div', []);
+			}
+		}
+
+		class TestWidget extends WidgetBase<any> {
+			private foo = 0;
+
+			render() {
+				this.foo++;
+				return w(FooWidget, { foo: this.foo });
+			}
+		}
+
+		const widget: any = new TestWidget();
+		const invalidateSpy = spy(widget, 'invalidate');
+		widget.__render__();
+		assert.equal(foo, 1);
+		widget.invalidate();
+		widget.__render__();
+		assert.equal(foo, 2);
+		assert.equal(invalidateSpy.callCount, 1);
 	}
 });
