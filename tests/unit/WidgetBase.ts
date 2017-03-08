@@ -5,8 +5,8 @@ import * as assert from 'intern/chai!assert';
 import { stub, spy } from 'sinon';
 import { v, w, registry } from '../../src/d';
 import { DNode } from '../../src/interfaces';
-import { WidgetBase, diffProperty, afterRender, onPropertiesChanged } from '../../src/WidgetBase';
 import WidgetRegistry from './../../src/WidgetRegistry';
+import { WidgetBase, diffProperty, DiffType, afterRender, onPropertiesChanged } from '../../src/WidgetBase';
 
 registerSuite({
 	name: 'WidgetBase',
@@ -64,51 +64,209 @@ registerSuite({
 		}
 	},
 	diffProperty: {
-		decorator() {
-			let callCount = 0;
+		'DiffType.IGNORE': {
+			decorator() {
+				let changedPropertyKeys;
+				let properties;
 
-			class TestWidget extends WidgetBase<any> {
-
-				@diffProperty('foo')
-				diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
-					callCount++;
-					assert.equal(newProperty, 'bar');
-					return {
-						changed: false,
-						value: newProperty
-					};
+				@diffProperty('foo', DiffType.IGNORE)
+				@diffProperty('bar', DiffType.IGNORE)
+				class TestWidget extends WidgetBase<any> {
 				}
+
+				const testWidget = new TestWidget();
+				testWidget.on('properties:changed', (evt) => {
+					changedPropertyKeys = evt.changedPropertyKeys;
+					properties = evt.properties;
+				});
+				testWidget.setProperties({ foo: 'foo', bar: 'bar', qux: 'qux' });
+				assert.deepEqual(changedPropertyKeys, [ 'qux' ]);
+				assert.deepEqual(properties, { foo: 'foo', bar: 'bar', qux: 'qux' });
+			},
+			'non-decorator'() {
+				let changedPropertyKeys;
+				let properties;
+
+				class TestWidget extends WidgetBase<any> {
+
+					constructor() {
+						super();
+						this.addDecorator('diffProperty', {
+							propertyName: 'foo',
+							diffType: DiffType.IGNORE
+						});
+						this.addDecorator('diffProperty', {
+							propertyName: 'bar',
+							diffType: DiffType.IGNORE
+						});
+					}
+				}
+
+				const testWidget = new TestWidget();
+				testWidget.on('properties:changed', (evt) => {
+					changedPropertyKeys = evt.changedPropertyKeys;
+					properties = evt.properties;
+				});
+				testWidget.setProperties({ foo: 'foo', bar: 'bar', qux: 'qux' });
+				assert.deepEqual(changedPropertyKeys, [ 'qux' ]);
+				assert.deepEqual(properties, { foo: 'foo', bar: 'bar', qux: 'qux' });
 			}
-
-			const testWidget = new TestWidget();
-			testWidget.setProperties({ foo: 'bar' });
-
-			assert.equal(callCount, 1);
 		},
-		'non decorator'() {
-			let callCount = 0;
+		'DiffType.REFERENCE': {
+			decorator() {
+				let changedPropertyKeys;
+				let properties;
 
-			class TestWidget extends WidgetBase<any> {
-
-				constructor() {
-					super();
-					this.addDecorator('diffProperty', { propertyName: 'foo', diffFunction: this.diffPropertyFoo });
+				@diffProperty('foo', DiffType.REFERENCE)
+				@diffProperty('bar', DiffType.REFERENCE)
+				class TestWidget extends WidgetBase<any> {
+					diffProperties(previousProperties: any, newProperties: any) {
+						return {
+							changedKeys: [],
+							properties: {}
+						};
+					}
 				}
 
-				diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
-					callCount++;
-					assert.equal(newProperty, 'bar');
-					return {
-						changed: false,
-						value: newProperty
-					};
-				}
+				const testWidget = new TestWidget();
+				testWidget.on('properties:changed', (evt) => {
+					changedPropertyKeys = evt.changedPropertyKeys;
+					properties = evt.properties;
+				});
+				testWidget.setProperties({ foo: 'foo', bar: 'bar', qux: 'qux' });
+				assert.deepEqual(changedPropertyKeys, [ 'bar', 'foo' ]);
+				assert.deepEqual(properties, { bar: 'bar', foo: 'foo' });
 			}
+		},
+		'DiffType.SHALLOW': {
+			decorator() {
+				let changedPropertyKeys;
+				let properties;
 
-			const testWidget = new TestWidget();
-			testWidget.setProperties({ foo: 'bar' });
+				@diffProperty('foo', DiffType.SHALLOW)
+				class TestWidget extends WidgetBase<any> {
+				}
 
-			assert.equal(callCount, 1);
+				const testWidget = new TestWidget();
+				testWidget.on('properties:changed', (evt) => {
+					changedPropertyKeys = evt.changedPropertyKeys;
+					properties = evt.properties;
+				});
+				testWidget.setProperties({
+					foo: {
+						label: 'foo'
+					},
+					bar: 'bar'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'bar', 'foo' ]);
+				testWidget.setProperties({
+					foo: {
+						label: 'bar'
+					},
+					bar: 'bar'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'foo' ]);
+				testWidget.setProperties({
+					foo: {
+						label: 'bar'
+					},
+					bar: 'qux'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'bar' ]);
+			},
+			'non-decorator'() {
+				let changedPropertyKeys;
+				let properties;
+
+				class TestWidget extends WidgetBase<any> {
+					constructor() {
+						super();
+						this.addDecorator('diffProperty', {
+							propertyName: 'foo',
+							diffType: DiffType.SHALLOW
+						});
+					}
+				}
+
+				const testWidget = new TestWidget();
+				testWidget.on('properties:changed', (evt) => {
+					changedPropertyKeys = evt.changedPropertyKeys;
+					properties = evt.properties;
+				});
+				testWidget.setProperties({
+					foo: {
+						label: 'foo'
+					},
+					bar: 'bar'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'bar', 'foo' ]);
+				testWidget.setProperties({
+					foo: {
+						label: 'bar'
+					},
+					bar: 'bar'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'foo' ]);
+				testWidget.setProperties({
+					foo: {
+						label: 'bar'
+					},
+					bar: 'qux'
+				});
+				assert.deepEqual(changedPropertyKeys, [ 'bar' ]);
+			}
+		},
+		'default (CUSTOM)': {
+			decorator() {
+				let callCount = 0;
+
+				class TestWidget extends WidgetBase<any> {
+
+					@diffProperty('foo')
+					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+						callCount++;
+						assert.equal(newProperty, 'bar');
+						return {
+							changed: false,
+							value: newProperty
+						};
+					}
+				}
+
+				const testWidget = new TestWidget();
+				testWidget.setProperties({ foo: 'bar' });
+
+				assert.equal(callCount, 1);
+			},
+			'non decorator'() {
+				let callCount = 0;
+
+				class TestWidget extends WidgetBase<any> {
+
+					constructor() {
+						super();
+						this.addDecorator('diffProperty', {
+							propertyName: 'foo',
+							diffType: DiffType.CUSTOM,
+							diffFunction: this.diffPropertyFoo
+						});
+					}
+
+					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+						callCount++;
+						assert.equal(newProperty, 'bar');
+						return {
+							changed: false,
+							value: newProperty
+						};
+					}
+				}
+
+				const testWidget = new TestWidget();
+				testWidget.setProperties({ foo: 'bar' });
+
+				assert.equal(callCount, 1);
+			}
 		}
 	},
 	setProperties: {
@@ -141,24 +299,6 @@ registerSuite({
 			});
 
 			widget.setProperties({ foo: 'bar', baz: 'bar' });
-		},
-		'uses base diff when an individual property diff returns null'() {
-			class TestWidget extends WidgetBase<any> {
-
-				@diffProperty('foo')
-				diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
-					return null;
-				}
-			}
-
-			const widget: any = new TestWidget();
-			widget.setProperties({ foo: 'bar' });
-
-			widget.on('properties:changed', (event: any) => {
-				assert.include(event.changedPropertyKeys, 'foo');
-			});
-
-			widget.setProperties({ foo: 'baz' });
 		},
 		'widgets function properties are bound to the parent by default'() {
 			class TestChildWidget extends WidgetBase<any> {
