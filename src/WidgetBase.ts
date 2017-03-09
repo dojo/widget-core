@@ -321,9 +321,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		let constructor = this.constructor;
 
 		while (constructor) {
-			const decoratorList = decoratorMap.get(constructor);
-			if (decoratorList) {
-				const decorators = decoratorList.get(decoratorKey);
+			const instanceMap = decoratorMap.get(constructor);
+			if (instanceMap) {
+				const decorators = instanceMap.get(decoratorKey);
 
 				if (decorators) {
 					allDecorators.unshift(...decorators);
