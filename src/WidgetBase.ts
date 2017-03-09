@@ -309,19 +309,14 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	/**
-	 * Function to retrieve decorator values
+	 * Function to build the list of decorators from the global decorator map.
 	 *
-	 * @param decoratorKey The key of the decorator
-	 * @returns An array of decorator values or undefined
+	 * @param decoratorKey  The key of the decorator
+	 * @return An array of decorator values
+	 * @private
 	 */
-	protected getDecorator(decoratorKey: string): any[] {
-		let allDecorators = this._decoratorCache.get(decoratorKey);
-
-		if (allDecorators !== undefined) {
-			return allDecorators;
-		}
-
-		allDecorators = [];
+	private _buildDecoratorList(decoratorKey: string): any[] {
+		const allDecorators = [];
 
 		let constructor = this.constructor;
 
@@ -337,6 +332,24 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 			constructor = Object.getPrototypeOf(constructor);
 		}
+
+		return allDecorators;
+	}
+
+	/**
+	 * Function to retrieve decorator values
+	 *
+	 * @param decoratorKey The key of the decorator
+	 * @returns An array of decorator values
+	 */
+	protected getDecorator(decoratorKey: string): any[] {
+		let allDecorators = this._decoratorCache.get(decoratorKey);
+
+		if (allDecorators !== undefined) {
+			return allDecorators;
+		}
+
+		allDecorators = this._buildDecoratorList(decoratorKey);
 
 		this._decoratorCache.set(decoratorKey, allDecorators);
 
