@@ -1048,5 +1048,30 @@ registerSuite({
 
 		// second call is cached
 		assert.equal(decoratorSpy.callCount, 1);
+	},
+	'decorators applied to subclasses are not applied to base classes'() {
+		class TestWidget extends WidgetBase<any> {
+			@afterRender
+			firstRender(result: DNode): DNode {
+				return result;
+			}
+
+			getAfterRenders(): Function[] {
+				return this.getDecorator('afterRender');
+			}
+		}
+
+		class TestWidget2 extends TestWidget {
+			@afterRender
+			secondRender(result: DNode): DNode {
+				return result;
+			}
+		}
+
+		const testWidget = new TestWidget();
+		const testWidget2 = new TestWidget2();
+
+		assert.equal(testWidget.getAfterRenders().length, 1);
+		assert.equal(testWidget2.getAfterRenders().length, 2);
 	}
 });
