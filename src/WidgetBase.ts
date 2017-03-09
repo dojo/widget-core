@@ -7,7 +7,7 @@ import Promise from '@dojo/shim/Promise';
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
 import { v, registry, isWNode } from './d';
-import WidgetRegistry, { WIDGET_BASE_TYPE } from './FactoryRegistry';
+import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 import {
 	DNode,
 	WidgetConstructor,

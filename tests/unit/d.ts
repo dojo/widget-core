@@ -4,9 +4,9 @@ import { assign } from '@dojo/core/lang';
 import { DNode, HNode } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
 import { v, w, decorate, registry, WNODE, HNODE, isWNode, isHNode } from '../../src/d';
-import FactoryRegistry from './../../src/FactoryRegistry';
+import WidgetRegistry from './../../src/WidgetRegistry';
 
-class TestFactoryRegistry extends FactoryRegistry {
+class TestFactoryRegistry extends WidgetRegistry {
 	clear(this: any) {
 		this.registry.clear();
 	}

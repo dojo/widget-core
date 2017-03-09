@@ -1,5 +1,5 @@
 import { includes } from '@dojo/shim/array';
-import WidgetRegistry from '../FactoryRegistry';
+import WidgetRegistry from '../WidgetRegistry';
 import { WidgetBase, onPropertiesChanged, diffProperty } from './../WidgetBase';
 import {
 	PropertyChangeRecord,

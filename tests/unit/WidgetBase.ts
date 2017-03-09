@@ -6,7 +6,7 @@ import { WidgetBase, diffProperty, afterRender, onPropertiesChanged } from '../.
 import { VNode } from '@dojo/interfaces/vdom';
 import { v, w, registry } from '../../src/d';
 import { stub, spy } from 'sinon';
-import FactoryRegistry from './../../src/FactoryRegistry';
+import WidgetRegistry from './../../src/WidgetRegistry';
 
 registerSuite({
 	name: 'WidgetBase',
@@ -605,7 +605,7 @@ registerSuite({
 				}
 			}
 
-			const registry = new FactoryRegistry();
+			const registry = new WidgetRegistry();
 			registry.define('my-header', TestHeaderWidget);
 
 			class TestWidget extends WidgetBase<any> {

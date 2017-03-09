@@ -10,7 +10,7 @@ import {
 	WidgetProperties,
 	WidgetBaseConstructor
 } from './interfaces';
-import WidgetRegistry from './FactoryRegistry';
+import WidgetRegistry from './WidgetRegistry';
 
 /**
  * The symbol identifier for a WNode type
