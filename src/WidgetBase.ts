@@ -338,6 +338,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			constructor = Object.getPrototypeOf(constructor);
 		}
 
+		this._decoratorCache.set(decoratorKey, allDecorators);
+
 		return allDecorators;
 	}
 
