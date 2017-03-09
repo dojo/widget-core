@@ -189,11 +189,9 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			// the functions don't change.
 			decorate(node, (node: HNode) => {
 				node.properties.afterCreate = afterCreateCallback;
-			}, isHNodeWithKey);
-
-			decorate(node, (node: HNode) => {
 				node.properties.afterUpdate = afterUpdateCallback;
 			}, isHNodeWithKey);
+			
 			return node;
 		});
 	}
