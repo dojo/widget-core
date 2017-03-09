@@ -1,13 +1,13 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
+import { Handle } from '@dojo/interfaces/core';
 import { VNode } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 import Promise from '@dojo/shim/Promise';
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
 import { v, registry, isWNode } from './d';
-import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 import {
 	DNode,
 	WidgetConstructor,
@@ -17,7 +17,7 @@ import {
 	PropertiesChangeRecord,
 	PropertiesChangeEvent
 } from './interfaces';
-import { Handle } from '@dojo/interfaces/core';
+import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 
 /**
  * Widget cache wrapper for instance management
@@ -119,6 +119,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	private diffPropertyFunctionMap: Map<string, string>;
 
+	private _decoratorCache: Map<string, any[]>;
+
 	/**
 	 * set of render decorators
 	 */
@@ -141,6 +143,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		super({});
 
 		this._children = [];
+		this._decoratorCache = new Map<string, any[]>();
 		this._properties = <P> {};
 		this.previousProperties = <P> {};
 		this.initializedConstructorMap = new Map<string, Promise<WidgetConstructor>>();
@@ -312,7 +315,13 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * @returns An array of decorator values or undefined
 	 */
 	protected getDecorator(decoratorKey: string): any[] {
-		const allDecorators: any[] = [];
+		let allDecorators = this._decoratorCache.get(decoratorKey);
+
+		if (allDecorators !== undefined) {
+			return allDecorators;
+		}
+
+		allDecorators = [];
 
 		let constructor = this.constructor;
 
