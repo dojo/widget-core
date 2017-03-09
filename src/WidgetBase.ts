@@ -40,6 +40,8 @@ export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEvente
 	(type: 'properties:changed', handler: EventedListenerOrArray<WidgetBase<P>, PropertiesChangeEvent<WidgetBase<P>, P>>): Handle;
 }
 
+const decoratorMap = new Map<Function, Map<string, any[]>>();
+
 /**
  * Decorator that can be used to register a function to run as an aspect to `render`
  */
@@ -126,11 +128,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * Map of functions properties for the bound function
 	 */
 	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
-
-	/**
-	 * A generic property bag for decorators
-	 */
-	private _decorators: Map<string, any[]>;
 
 	/**
 	 * Internal widget registry
@@ -292,12 +289,20 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	protected addDecorator(decoratorKey: string, value: any): void {
 		value = Array.isArray(value) ? value : [ value ];
-		if (!this._decorators) {
-			this._decorators = new Map<string, any[]>();
+
+		let decoratorList = decoratorMap.get(this.constructor);
+		if (!decoratorList) {
+			decoratorList = new Map<string, any[]>();
+			decoratorMap.set(this.constructor, decoratorList);
 		}
 
-		const currentValue = this._decorators.get(decoratorKey) || [];
-		this._decorators.set(decoratorKey, [ ...currentValue, ...value ]);
+		let specificDecoratorList = decoratorList.get(decoratorKey);
+		if (!specificDecoratorList) {
+			specificDecoratorList = [];
+			decoratorList.set(decoratorKey, specificDecoratorList);
+		}
+
+		specificDecoratorList.push(...value);
 	}
 
 	/**
@@ -306,11 +311,25 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * @param decoratorKey The key of the decorator
 	 * @returns An array of decorator values or undefined
 	 */
-	protected getDecorator(decoratorKey: string): any[] | undefined {
-		if (this._decorators) {
-			return this._decorators.get(decoratorKey);
+	protected getDecorator(decoratorKey: string): any[] {
+		const allDecorators: any[] = [];
+
+		let constructor = this.constructor;
+
+		while (constructor) {
+			const decoratorList = decoratorMap.get(constructor);
+			if (decoratorList) {
+				const decorators = decoratorList.get(decoratorKey);
+
+				if (decorators) {
+					allDecorators.unshift(...decorators);
+				}
+			}
+
+			constructor = Object.getPrototypeOf(constructor);
 		}
-		return undefined;
+
+		return allDecorators;
 	}
 
 	/**
