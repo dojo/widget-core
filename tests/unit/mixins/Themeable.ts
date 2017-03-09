@@ -1,16 +1,18 @@
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
+import { stub, SinonStub } from 'sinon';
+import { v, w } from '../../../src/d';
 import { ThemeableMixin, theme, ThemeableProperties } from '../../../src/mixins/Themeable';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { v } from '../../../src/d';
-import { stub, SinonStub } from 'sinon';
 
 import * as baseThemeClasses1 from './../../support/styles/testWidget1.css';
 import * as baseThemeClasses2 from './../../support/styles/testWidget2.css';
 import * as baseThemeClasses3 from './../../support/styles/baseTheme3.css';
 import * as overrideClasses1 from './../../support/styles/overrideClasses1.css';
 import * as overrideClasses2 from './../../support/styles/overrideClasses2.css';
+
+import * as baseClasses from './../../support/styles/testWidget.css';
 import testTheme1 from './../../support/styles/theme1.css';
 import testTheme2 from './../../support/styles/theme2.css';
 import testTheme3 from './../../support/styles/theme3.css';
@@ -424,5 +426,30 @@ registerSuite({
 				[ fixedClassName ]: true
 			});
 		}
+	},
+	'should propagate theme to children'() {
+		let childTheme = '';
+
+		class ChildWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties> {
+			render() {
+				childTheme = this.properties.theme;
+				return v('div');
+			}
+		}
+
+		class ParentWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties> {
+			render() {
+				return w(ChildWidget, {});
+			}
+		}
+
+		const widget = new ParentWidget();
+		widget.setProperties({
+			theme: 'test-theme'
+		});
+
+		widget.__render__();
+
+		assert.equal(childTheme, 'test-theme');
 	}
 });

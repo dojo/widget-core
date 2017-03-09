@@ -7,7 +7,6 @@ import { I18nMixin, I18nProperties } from '../../../src/mixins/I18n';
 import { WidgetBase } from '../../../src/WidgetBase';
 import bundle from '../../support/nls/greetings';
 import { fetchCldrData } from '../../support/util';
-import { w } from './../../../src/d';
 
 class Localized extends I18nMixin(WidgetBase)<I18nProperties> {}
 
@@ -103,20 +102,6 @@ registerSuite({
 
 			assert.isFalse((<any> localized).invalidate.called, 'Widget not invalidated.');
 		}
-	},
-	'does not decorate properties for wNode'() {
-		class LocalizedExtended extends Localized {
-			render() {
-				return w(Localized, {});
-			}
-		}
-
-		localized = new LocalizedExtended();
-		localized.setProperties({locale: 'ar-JO'});
-
-		const result = <VNode> localized.__render__();
-		assert.isOk(result);
-		assert.isNull(result.properties!['lang']);
 	},
 	'`properties.locale` updates the widget node\'s `lang` property': {
 		'when non-empty'() {

@@ -110,6 +110,12 @@ function isHNodeWithKey(node: DNode): node is HNode {
 	return isHNode(node) && (node.properties != null) && (node.properties.key != null);
 }
 
+export function propagateProperty(propertyName: string) {
+	return function (target: any) {
+		target.prototype.addDecorator('propagateProperty', propertyName);
+	};
+}
+
 /**
  * Main widget base for all widgets to extend
  */
@@ -494,6 +500,13 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		if (isWNode(dNode)) {
 			const { children, properties = {} } = dNode;
 			const { key } = properties;
+
+			const propagatedPropertyNames = this.getDecorator('propagateProperty');
+			propagatedPropertyNames.forEach(propertyName => {
+				if (!(propertyName in properties) && (propertyName in this.properties)) {
+					(<any> properties)[ propertyName ] = this.properties[ propertyName ];
+				}
+			});
 
 			let { widgetConstructor } = dNode;
 			let child: WidgetBaseInterface<WidgetProperties>;
