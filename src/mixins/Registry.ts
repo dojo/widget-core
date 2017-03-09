@@ -1,6 +1,6 @@
 import { includes } from '@dojo/shim/array';
 import WidgetRegistry from '../WidgetRegistry';
-import { WidgetBase, onPropertiesChanged, diffProperty } from './../WidgetBase';
+import { WidgetBase, onPropertiesChanged, diffProperty, propagateProperty } from './../WidgetBase';
 import {
 	PropertyChangeRecord,
 	PropertiesChangeEvent,
@@ -13,6 +13,7 @@ export interface RegistryMixinProperties extends WidgetProperties {
 }
 
 export function RegistryMixin<T extends Constructor<WidgetBase<RegistryMixinProperties>>>(base: T): T {
+	@propagateProperty('registry')
 	class Registry extends base {
 
 		@diffProperty('registry')
