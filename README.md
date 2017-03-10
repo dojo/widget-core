@@ -21,6 +21,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [The 'properties' lifecycle](#the-properties-lifecycle)
             - [Custom property diff control](#custom-property-diff-control)
             - [The `properties:changed` event](#the-propertieschanged-event)
+            - [Propagating properties to children](#propagating-properties-to-children)
         - [Projector](#projector)
         - [Event Handling](#event-handling)
         - [Widget Registry](#widget-registry)
@@ -297,6 +298,38 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 Finally once all the attached events have been processed, the properties lifecycle is complete and the finalized widget properties are available during the render cycle functions.
 
 <!-- TODO: render lifecycle goes here -->
+
+##### Propagating properties to children
+
+At times it is convenient to _implicitly_ pass properties from a widget to its children rather than _explicitly_ pass them. For example, the `ThemeMixin` automatically passes the `theme` property of the current node to each of the widget's children widgets.
+
+You can specify properties to automatically propagate to children using the `propagateProperty` decorator:
+
+```typescript
+@propagateProperty('foo')
+class FooWidget {
+	render() {
+		// foo property is automatically passed to BarWidget
+		return w(BarWidget, {
+			bar: true
+		});
+	}
+}
+```
+
+Is equivalent to:
+
+```typescript
+class FooWidget {
+	render() {
+		// foo property is explicitly passed to BarWidget
+		return w(BarWidget, {
+			bar: true,
+			foo: this.properties.foo pass
+		});
+	}
+}
+```
 
 ##### AfterRender
 
