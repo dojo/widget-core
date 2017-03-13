@@ -325,12 +325,7 @@ registerSuite({
 
 		const projector = new Projector();
 		return projector.append().then(() => {
-			const event = new Event('input', {
-				'bubbles': true,
-				'cancelable': true
-			});
-
-			domNode.dispatchEvent(event);
+			dispatchEvent(domNode, 'input');
 			assert.instanceOf(domEvent, Event);
 		});
 	},
@@ -351,12 +346,7 @@ registerSuite({
 
 		const projector = new Projector();
 		return projector.append().then(() => {
-			const event = new Event('pointermove', {
-				'bubbles': true,
-				'cancelable': true
-			});
-
-			domNode.dispatchEvent(event);
+			dispatchEvent(domNode, 'pointermove');
 			assert.instanceOf(domEvent, Event);
 		});
 	},
