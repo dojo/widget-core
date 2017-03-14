@@ -1,13 +1,13 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
+import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 import Promise from '@dojo/shim/Promise';
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
-import { v, registry, isWNode, decorate, isHNode } from './d';
-import FactoryRegistry, { WIDGET_BASE_TYPE } from './FactoryRegistry';
+import { v, registry, isWNode, isHNode, decorate } from './d';
 import {
 	DNode,
 	WidgetConstructor,
@@ -18,14 +18,14 @@ import {
 	PropertiesChangeEvent,
 	HNode
 } from './interfaces';
-import { Handle } from '@dojo/interfaces/core';
+import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 
 /**
  * Widget cache wrapper for instance management
  */
 interface WidgetCacheWrapper {
 	child: WidgetBaseInterface<WidgetProperties>;
-	factory: WidgetConstructor;
+	widgetConstructor: WidgetConstructor;
 	used: boolean;
 }
 
@@ -40,6 +40,8 @@ interface DiffPropertyConfig {
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
 	(type: 'properties:changed', handler: EventedListenerOrArray<WidgetBase<P>, PropertiesChangeEvent<WidgetBase<P>, P>>): Handle;
 }
+
+const decoratorMap = new Map<Function, Map<string, any[]>>();
 
 /**
  * Decorator that can be used to register a function to run as an aspect to `render`
@@ -70,7 +72,7 @@ export function onPropertiesChanged(target: any, propertyKey: string, descriptor
  * Function that identifies DNodes that are HNodes with key properties.
  */
 function isHNodeWithKey(node: DNode): node is HNode {
-	return isHNode(node) && node && (node.properties != null) && (node.properties.key != null);
+	return isHNode(node) && (node.properties != null) && (node.properties.key != null);
 }
 
 /**
@@ -84,21 +86,29 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	static _type: symbol = WIDGET_BASE_TYPE;
 
 	/**
+	 * on for the events defined for widget base
+	 */
+	public on: WidgetBaseEvents<P>;
+
+	/**
+	 * Internal widget registry
+	 */
+	protected registry: WidgetRegistry | undefined;
+
+	/**
 	 * children array
 	 */
-	private  _children: DNode[];
+	private _children: DNode[];
 
 	/**
 	 * marker indicating if the widget requires a render
 	 */
-	private dirty: boolean;
+	private _dirty: boolean;
 
 	/**
 	 * cachedVNode from previous render
 	 */
-	private cachedVNode?: VNode | string;
-
-	on: WidgetBaseEvents<P>;
+	private _cachedVNode?: VNode | string;
 
 	/**
 	 * internal widget properties
@@ -108,42 +118,34 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	/**
 	 * properties from the previous render
 	 */
-	private previousProperties: P & { [index: string]: any };
+	private _previousProperties: P & { [index: string]: any };
 
 	/**
-	 * Map of factory promises
+	 * Map constructor labels to widget constructor
 	 */
-	private initializedFactoryMap: Map<string, Promise<WidgetConstructor>>;
+	private _initializedConstructorMap: Map<string, Promise<WidgetConstructor>>;
 
 	/**
 	 * cached chldren map for instance management
 	 */
-	private cachedChildrenMap: Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>;
+	private _cachedChildrenMap: Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>;
 
 	/**
 	 * map of specific property diff functions
 	 */
-	private diffPropertyFunctionMap: Map<string, string>;
+	private _diffPropertyFunctionMap: Map<string, string>;
+
+	private _decoratorCache: Map<string, any[]>;
 
 	/**
 	 * set of render decorators
 	 */
-	private renderDecorators: Set<string>;
+	private _renderDecorators: Set<string>;
 
 	/**
 	 * Map of functions properties for the bound function
 	 */
-	private bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
-
-	/**
-	 * A generic property bag for decorators
-	 */
-	private _decorators: Map<string, any[]>;
-
-	/**
-	 * Internal factory registry
-	 */
-	protected registry: FactoryRegistry | undefined;
+	private _bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
 
 	/**
 	 * @constructor
@@ -152,48 +154,56 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		super({});
 
 		this._children = [];
+		this._decoratorCache = new Map<string, any[]>();
 		this._properties = <P> {};
-		this.previousProperties = <P> {};
-		this.initializedFactoryMap = new Map<string, Promise<WidgetConstructor>>();
-		this.cachedChildrenMap = new Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>();
-		this.diffPropertyFunctionMap = new Map<string, string>();
-		this.renderDecorators = new Set<string>();
-		this.bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
-
-		// Create Maquette afterCreate and afterUpdate callback functions that will be set on vnodes
-		// that have keys.
-		const afterCreateCallback = (element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
-			properties: VNodeProperties, children: VNode[]): void => {
-			this.onElementCreated(element, String(properties.key));
-		};
-
-		const afterUpdateCallback = (element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
-			properties: VNodeProperties, children: VNode[]): void => {
-			this.onElementUpdated(element, String(properties.key));
-		};
+		this._previousProperties = <P> {};
+		this._initializedConstructorMap = new Map<string, Promise<WidgetConstructor>>();
+		this._cachedChildrenMap = new Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>();
+		this._diffPropertyFunctionMap = new Map<string, string>();
+		this._renderDecorators = new Set<string>();
+		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
 		this.own(this.on('properties:changed', (evt) => {
-			this.invalidate();
+			this._dirty = true;
 
 			const propertiesChangedListeners = this.getDecorator('onPropertiesChanged') || [];
-			for (let i = 0; i < propertiesChangedListeners.length; i++) {
-				propertiesChangedListeners[i].call(this, evt);
-			}
+			propertiesChangedListeners.forEach((propertiesChangedFunction) => {
+				propertiesChangedFunction.call(this, evt);
+			});
 		}));
+	}
 
-		// Add a render decorator that will register callbacks for the v-node 'afterCreate' and
-		// 'afterUpdate' lifecycle methods to call the widget lifecycle methods onElementCreated
-		// and onElementUpdated
-		this.addDecorator('afterRender', (node: DNode) => {
-			// Using callback functions that were bound outside of this render call to make sure
-			// the functions don't change.
-			decorate(node, (node: HNode) => {
-				node.properties.afterCreate = afterCreateCallback;
-				node.properties.afterUpdate = afterUpdateCallback;
-			}, isHNodeWithKey);
-			
-			return node;
-		});
+	/**
+	 * A render decorator that registers vnode callbacks for 'afterCreate' and
+	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
+	 */
+	@afterRender
+	protected attachLifecycleCallbacks (node: DNode) {
+		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
+		// with "key" properties.
+
+		decorate(node, (node: HNode) => {
+			node.properties.afterCreate = this.afterCreateCallback;
+			node.properties.afterUpdate = this.afterUpdateCallback;
+		}, isHNodeWithKey);
+
+		return node;
+	}
+
+	/**
+	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
+	 */
+	private afterCreateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+		properties: VNodeProperties, children: VNode[]): void {
+		this.onElementCreated(element, String(properties.key));
+	}
+
+	/**
+	 * vnode afterUpdate callback that calls the onElementUpdated lifecycle method.
+	 */
+	private afterUpdateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
+		properties: VNodeProperties, children: VNode[]): void {
+		this.onElementUpdated(element, String(properties.key));
 	}
 
 	/**
@@ -230,9 +240,8 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 		const registeredDiffPropertyConfigs: DiffPropertyConfig[] = this.getDecorator('diffProperty') || [];
 
-		for (let i = 0; i < registeredDiffPropertyConfigs.length; i++) {
-			const { propertyName, diffFunction } = registeredDiffPropertyConfigs[i];
-			const previousProperty = this.previousProperties[propertyName];
+		registeredDiffPropertyConfigs.forEach(({ propertyName, diffFunction }) => {
+			const previousProperty = this._previousProperties[propertyName];
 			const newProperty = (<any> properties)[propertyName];
 			const result: PropertyChangeRecord = diffFunction(previousProperty, newProperty);
 
@@ -244,11 +253,11 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				diffPropertyChangedKeys.push(propertyName);
 			}
 			delete (<any> properties)[propertyName];
-			delete this.previousProperties[propertyName];
+			delete this._previousProperties[propertyName];
 			diffPropertyResults[propertyName] = result.value;
-		}
+		});
 
-		const diffPropertiesResult = this.diffProperties(this.previousProperties, properties);
+		const diffPropertiesResult = this.diffProperties(this._previousProperties, properties);
 		this._properties = assign(diffPropertiesResult.properties, diffPropertyResults);
 
 		const changedPropertyKeys = [...diffPropertiesResult.changedKeys, ...diffPropertyChangedKeys];
@@ -261,7 +270,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				changedPropertyKeys
 			});
 		}
-		this.previousProperties = this.properties;
+		this._previousProperties = this.properties;
 	}
 
 	public get children(): DNode[] {
@@ -269,6 +278,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	public setChildren(children: DNode[]): void {
+		this._dirty = true;
 		this._children = children;
 		this.emit({
 			type: 'widget:children',
@@ -277,70 +287,44 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	}
 
 	public diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P> {
-		const changedKeys: string[] = [];
-		const propertyKeys = Object.keys(newProperties);
-
-		for (let i = 0; i < propertyKeys.length; i++) {
-			if (previousProperties[propertyKeys[i]] !== newProperties[propertyKeys[i]]) {
-				changedKeys.push(propertyKeys[i]);
+		const changedKeys = Object.keys(newProperties).reduce((changedPropertyKeys: string[], propertyKey: string): string[] => {
+			if (previousProperties[propertyKey] !== newProperties[propertyKey]) {
+				changedPropertyKeys.push(propertyKey);
 			}
-		}
+			return changedPropertyKeys;
+		}, []);
+
 		return { changedKeys, properties: assign({}, newProperties) };
 	}
 
-	public render(): DNode {
-		return v('div', {}, this.children);
-	}
-
 	public __render__(): VNode | string | null {
-		if (this.dirty || !this.cachedVNode) {
+		if (this._dirty || !this._cachedVNode) {
+			this._dirty = false;
 			let dNode = this.render();
 			const afterRenders = this.getDecorator('afterRender') || [];
-			for (let i = 0; i < afterRenders.length; i++) {
-				dNode = afterRenders[i].call(this, dNode);
-			}
+			afterRenders.forEach((afterRenderFunction: Function) => {
+				dNode = afterRenderFunction.call(this, dNode);
+			});
 			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
 			if (widget) {
-				this.cachedVNode = widget;
+				this._cachedVNode = widget;
 			}
-			this.dirty = false;
 			return widget;
 		}
-		return this.cachedVNode;
+		return this._cachedVNode;
 	}
 
 	public invalidate(): void {
-		this.dirty = true;
+		this._dirty = true;
 		this.emit({
 			type: 'invalidated',
 			target: this
 		});
 	}
 
-	/**
-	 * Binds unbound property functions to the specified `bind` property
-	 *
-	 * @param properties properties to check for functions
-	 */
-	private bindFunctionProperties(properties: P & { [index: string]: any }): void {
-		const propertyKeys = Object.keys(properties);
-
-		for (let i = 0; i < propertyKeys.length; i++) {
-			const property = properties[propertyKeys[i]];
-			const bind = properties.bind;
-
-			if (typeof property === 'function') {
-				const bindInfo = this.bindFunctionPropertyMap.get(property) || {};
-				let { boundFunc, scope } = bindInfo;
-
-				if (!boundFunc || scope !== bind) {
-					boundFunc = property.bind(bind);
-					this.bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
-				}
-				properties[propertyKeys[i]] = boundFunc;
-			}
-		}
+	protected render(): DNode {
+		return v('div', {}, this.children);
 	}
 
 	/**
@@ -351,38 +335,104 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	protected addDecorator(decoratorKey: string, value: any): void {
 		value = Array.isArray(value) ? value : [ value ];
-		if (!this._decorators) {
-			this._decorators = new Map<string, any[]>();
+
+		let decoratorList = decoratorMap.get(this.constructor);
+		if (!decoratorList) {
+			decoratorList = new Map<string, any[]>();
+			decoratorMap.set(this.constructor, decoratorList);
 		}
 
-		const currentValue = this._decorators.get(decoratorKey) || [];
-		this._decorators.set(decoratorKey, [ ...currentValue, ...value ]);
+		let specificDecoratorList = decoratorList.get(decoratorKey);
+		if (!specificDecoratorList) {
+			specificDecoratorList = [];
+			decoratorList.set(decoratorKey, specificDecoratorList);
+		}
+
+		specificDecoratorList.push(...value);
+	}
+
+	/**
+	 * Function to build the list of decorators from the global decorator map.
+	 *
+	 * @param decoratorKey  The key of the decorator
+	 * @return An array of decorator values
+	 * @private
+	 */
+	private _buildDecoratorList(decoratorKey: string): any[] {
+		const allDecorators = [];
+
+		let constructor = this.constructor;
+
+		while (constructor) {
+			const instanceMap = decoratorMap.get(constructor);
+			if (instanceMap) {
+				const decorators = instanceMap.get(decoratorKey);
+
+				if (decorators) {
+					allDecorators.unshift(...decorators);
+				}
+			}
+
+			constructor = Object.getPrototypeOf(constructor);
+		}
+
+		return allDecorators;
 	}
 
 	/**
 	 * Function to retrieve decorator values
 	 *
 	 * @param decoratorKey The key of the decorator
-	 * @returns An array of decorator values or undefined
+	 * @returns An array of decorator values
 	 */
-	protected getDecorator(decoratorKey: string): any[] | undefined {
-		if (this._decorators) {
-			return this._decorators.get(decoratorKey);
+	protected getDecorator(decoratorKey: string): any[] {
+		let allDecorators = this._decoratorCache.get(decoratorKey);
+
+		if (allDecorators !== undefined) {
+			return allDecorators;
 		}
-		return undefined;
+
+		allDecorators = this._buildDecoratorList(decoratorKey);
+
+		this._decoratorCache.set(decoratorKey, allDecorators);
+
+		return allDecorators;
 	}
 
 	/**
-	 * Returns the factory from the registry for the specified label. First checks a local registry passed via
-	 * properties, if no local registry or the factory is not found fallback to the global registry
+	 * Binds unbound property functions to the specified `bind` property
 	 *
-	 * @param factoryLabel the label to look up in the registry
+	 * @param properties properties to check for functions
 	 */
-	private getFromRegistry(factoryLabel: string): Promise<WidgetConstructor> | WidgetConstructor | null {
-		if (this.registry && this.registry.has(factoryLabel)) {
-			return this.registry.get(factoryLabel);
+	private bindFunctionProperties(properties: P & { [index: string]: any }): void {
+		Object.keys(properties).forEach((propertyKey) => {
+			const property = properties[propertyKey];
+			const bind = properties.bind;
+
+			if (typeof property === 'function') {
+				const bindInfo = this._bindFunctionPropertyMap.get(property) || {};
+				let { boundFunc, scope } = bindInfo;
+
+				if (!boundFunc || scope !== bind) {
+					boundFunc = property.bind(bind);
+					this._bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
+				}
+				properties[propertyKey] = boundFunc;
+			}
+		});
+	}
+
+	/**
+	 * Returns the constructor from the registry for the specified label. First checks a local registry passed via
+	 * properties, if no local registry or the constructor is not found fallback to the global registry
+	 *
+	 * @param widgetLabel the label to look up in the registry
+	 */
+	private getFromRegistry(widgetLabel: string): Promise<WidgetConstructor> | WidgetConstructor | null {
+		if (this.registry && this.registry.has(widgetLabel)) {
+			return this.registry.get(widgetLabel);
 		}
-		return registry.get(factoryLabel);
+		return registry.get(widgetLabel);
 	}
 
 	/**
@@ -401,40 +451,39 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			const { children, properties = {} } = dNode;
 			const { key } = properties;
 
-			let { factory } = dNode;
+			let { widgetConstructor } = dNode;
 			let child: WidgetBaseInterface<WidgetProperties>;
 
-			if (typeof factory === 'string') {
-				const item = this.getFromRegistry(factory);
+			if (typeof widgetConstructor === 'string') {
+				const item = this.getFromRegistry(widgetConstructor);
 
 				if (item instanceof Promise) {
-					if (item && !this.initializedFactoryMap.has(factory)) {
-						const promise = item.then((factory) => {
+					if (item && !this._initializedConstructorMap.has(widgetConstructor)) {
+						const promise = item.then((ctor) => {
 							this.invalidate();
-							return factory;
+							return ctor;
 						});
-						this.initializedFactoryMap.set(factory, promise);
+						this._initializedConstructorMap.set(widgetConstructor, promise);
 					}
 					return null;
 				}
 				else if (item === null) {
-					console.warn(`Unable to render unknown widget factory ${factory}`);
+					console.warn(`Unable to render unknown widget constructor ${widgetConstructor}`);
 					return null;
 				}
-				factory = item;
+				widgetConstructor = item;
 			}
 
-			const childrenMapKey = key || factory;
-			let cachedChildren = this.cachedChildrenMap.get(childrenMapKey) || [];
+			const childrenMapKey = key || widgetConstructor;
+			let cachedChildren = this._cachedChildrenMap.get(childrenMapKey) || [];
 			let cachedChild: WidgetCacheWrapper | undefined;
-
-			for (let i = 0; i < cachedChildren.length; i++) {
-				const cachedChildWrapper = cachedChildren[i];
-				if (cachedChildWrapper.factory === factory && !cachedChildWrapper.used) {
+			cachedChildren.some((cachedChildWrapper) => {
+				if (cachedChildWrapper.widgetConstructor === widgetConstructor && !cachedChildWrapper.used) {
 					cachedChild = cachedChildWrapper;
-					break;
+					return true;
 				}
-			}
+				return false;
+			});
 
 			if (!properties.hasOwnProperty('bind')) {
 				properties.bind = this;
@@ -446,32 +495,32 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				cachedChild.used = true;
 			}
 			else {
-				child = new factory();
+				child = new widgetConstructor();
 				child.setProperties(properties);
 				child.own(child.on('invalidated', () => {
 					this.invalidate();
 				}));
-				cachedChildren = [...cachedChildren, { child, factory, used: true }];
-				this.cachedChildrenMap.set(childrenMapKey, cachedChildren);
+				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
+				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
 				this.own(child);
 			}
 			if (!key && cachedChildren.length > 1) {
-				const errorMsg = 'It is recommended to provide a unique `key` property when using the same widget factory multiple times';
+				const errorMsg = 'It is recommended to provide a unique `key` property when using the same widget multiple times';
 				console.warn(errorMsg);
 				this.emit({ type: 'error', target: this, error: new Error(errorMsg) });
 			}
 
-			child.setChildren(children);
+			if (Array.isArray(children)) {
+				child.setChildren(children);
+			}
 			return child.__render__();
 		}
 
-		dNode.vNodes = [];
-		for (let i = 0; i < dNode.children.length; i++) {
-			const child = dNode.children[i];
-			if (child !== null) {
-				dNode.vNodes.push(this.dNodeToVNode(child));
-			}
-		}
+		dNode.vNodes = dNode.children
+		.filter((child) => child !== null)
+		.map((child: DNode) => {
+			return this.dNodeToVNode(child);
+		});
 
 		return dNode.render({ bind: this });
 	}
@@ -480,17 +529,16 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * Manage widget instances after render processing
 	 */
 	private manageDetachedChildren(): void {
-		this.cachedChildrenMap.forEach((cachedChildren, key) => {
-			const filterCachedChildren: WidgetCacheWrapper[] = [];
-			for (let i = 0; i < cachedChildren.length; i++) {
-				if (!cachedChildren[i].used) {
-					cachedChildren[i].child.destroy();
-					break;
+		this._cachedChildrenMap.forEach((cachedChildren, key) => {
+			const filterCachedChildren = cachedChildren.filter((cachedChild) => {
+				if (cachedChild.used) {
+					cachedChild.used = false;
+					return true;
 				}
-				cachedChildren[i].used = false;
-				filterCachedChildren.push(cachedChildren[i]);
-			}
-			this.cachedChildrenMap.set(key, filterCachedChildren);
+				cachedChild.child.destroy();
+				return false;
+			});
+			this._cachedChildrenMap.set(key, filterCachedChildren);
 		});
 	}
 }

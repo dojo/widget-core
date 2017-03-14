@@ -19,7 +19,7 @@ export interface LabelProperties {
 /**
  * Form Label Properties
  */
-export interface FormLabelMixinProperties {
+export interface FormLabelMixinProperties extends WidgetProperties {
 
 	/**
 	 * The form widget's name
@@ -106,13 +106,11 @@ const labelDefaults = {
  */
 const allowedFormFieldAttributes = ['checked', 'describedBy', 'disabled', 'invalid', 'maxLength', 'minLength', 'multiple', 'name', 'placeholder', 'readOnly', 'required', 'value'];
 
-export function FormLabelMixin<T extends Constructor<WidgetBase<WidgetProperties>>>(base: T): T {
+export function FormLabelMixin<T extends Constructor<WidgetBase<FormLabelMixinProperties>>>(base: T): T {
 	class FormLabel extends base {
 
-		properties: FormLabelMixinProperties;
-
 		@afterRender
-		renderDecorator(result: DNode): DNode {
+		protected renderDecorator(result: DNode): DNode {
 			const labelNodeAttributes: any = {};
 			if (isHNode(result)) {
 				assign(result.properties, this.getFormFieldA11yAttributes());
@@ -172,7 +170,7 @@ export function FormLabelMixin<T extends Constructor<WidgetBase<WidgetProperties
 				else if (key === 'describedBy') {
 					nodeAttributes['aria-describedby'] = properties.describedBy;
 				}
-				else if ((key === 'maxLength' || key === 'minLength' || key === 'checked') && typeof properties[key] !== 'string') {
+				else if ((key === 'maxLength' || key === 'minLength') && typeof properties[key] !== 'string') {
 					nodeAttributes[key.toLowerCase()] = '' + properties[key];
 				}
 				else {

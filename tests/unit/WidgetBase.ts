@@ -1,19 +1,20 @@
+import { VNode } from '@dojo/interfaces/vdom';
+import Promise from '@dojo/shim/Promise';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import Promise from '@dojo/shim/Promise';
+import { stub, spy } from 'sinon';
+import { v, w, registry } from '../../src/d';
 import { DNode } from '../../src/interfaces';
 import { WidgetBase, diffProperty, afterRender, onPropertiesChanged } from '../../src/WidgetBase';
-import { VNode } from '@dojo/interfaces/vdom';
-import { v, w, registry } from '../../src/d';
-import { stub } from 'sinon';
-import FactoryRegistry from './../../src/FactoryRegistry';
+import WidgetRegistry from './../../src/WidgetRegistry';
 
 registerSuite({
 	name: 'WidgetBase',
 	api() {
 		const widgetBase = new WidgetBase();
 		assert(widgetBase);
-		assert.isFunction(widgetBase.render);
+		assert.isFunction(widgetBase.__render__);
+		assert.isFunction(widgetBase.diffProperties);
 		assert.isFunction(widgetBase.invalidate);
 	},
 	children() {
@@ -426,29 +427,26 @@ registerSuite({
 		decorator() {
 			let onPropertiesChangedCount = 1;
 			class TestWidget extends WidgetBase<any> {
-				invalidate() {
+				@onPropertiesChanged
+				firstOnPropertiesChanged() {
 					assert.strictEqual(onPropertiesChangedCount++, 1);
 				}
 				@onPropertiesChanged
-				firstOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 2);
-				}
-				@onPropertiesChanged
 				secondOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 3);
+					assert.strictEqual(onPropertiesChangedCount++, 2);
 				}
 			}
 
 			class ExtendedTestWidget extends TestWidget {
 				@onPropertiesChanged
 				thirdOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount, 4);
+					assert.strictEqual(onPropertiesChangedCount, 3);
 				}
 			}
 
 			const widget = new ExtendedTestWidget();
 			widget.emit({ type: 'properties:changed' });
-			assert.strictEqual(onPropertiesChangedCount, 4);
+			assert.strictEqual(onPropertiesChangedCount, 3);
 		},
 		'non decorator'() {
 
@@ -459,14 +457,11 @@ registerSuite({
 					this.addDecorator('onPropertiesChanged', this.firstOnPropertiesChanged);
 					this.addDecorator('onPropertiesChanged', this.secondOnPropertiesChanged);
 				}
-				invalidate() {
+				firstOnPropertiesChanged() {
 					assert.strictEqual(onPropertiesChangedCount++, 1);
 				}
-				firstOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 2);
-				}
 				secondOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount++, 3);
+					assert.strictEqual(onPropertiesChangedCount++, 2);
 				}
 			}
 
@@ -476,13 +471,13 @@ registerSuite({
 					this.addDecorator('onPropertiesChanged', this.thirdOnPropertiesChanged);
 				}
 				thirdOnPropertiesChanged() {
-					assert.strictEqual(onPropertiesChangedCount, 4);
+					assert.strictEqual(onPropertiesChangedCount, 3);
 				}
 			}
 
 			const widget = new ExtendedTestWidget();
 			widget.emit({ type: 'properties:changed' });
-			assert.strictEqual(onPropertiesChangedCount, 4);
+			assert.strictEqual(onPropertiesChangedCount, 3);
 		}
 	},
 	render: {
@@ -601,7 +596,7 @@ registerSuite({
 			let result = <VNode> myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			assert.isTrue(consoleStub.calledOnce);
-			assert.isTrue(consoleStub.calledWith(`Unable to render unknown widget factory ${factory}`));
+			assert.isTrue(consoleStub.calledWith(`Unable to render unknown widget constructor ${factory}`));
 			consoleStub.restore();
 		},
 		'render using scoped factory registry'() {
@@ -611,7 +606,7 @@ registerSuite({
 				}
 			}
 
-			const registry = new FactoryRegistry();
+			const registry = new WidgetRegistry();
 			registry.define('my-header', TestHeaderWidget);
 
 			class TestWidget extends WidgetBase<any> {
@@ -738,6 +733,9 @@ registerSuite({
 					const properties = this.properties.classes ? { classes: this.properties.classes } : {};
 
 					return v('div', [
+						this.properties.hide ? null : w(TestChildWidget, properties),
+						this.properties.hide ? null : w(TestChildWidget, properties),
+						this.properties.hide ? null : w(TestChildWidget, properties),
 						this.properties.hide ? null : w(TestChildWidget, properties)
 					]);
 				}
@@ -745,18 +743,18 @@ registerSuite({
 
 			const widget: any = new TestWidget();
 			const firstRenderResult = <VNode> widget.__render__();
-			assert.strictEqual(countWidgetCreated, 1);
+			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
-			assert.lengthOf(firstRenderResult.children, 1);
+			assert.lengthOf(firstRenderResult.children, 4);
 			const firstRenderChild: any = firstRenderResult.children && firstRenderResult.children[0];
 			assert.strictEqual(firstRenderChild.vnodeSelector, 'footer');
 
 			widget.invalidate();
 
 			const secondRenderResult = <VNode> widget.__render__();
-			assert.strictEqual(countWidgetCreated, 1);
+			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
-			assert.lengthOf(secondRenderResult.children, 1);
+			assert.lengthOf(secondRenderResult.children, 4);
 			const secondRenderChild: any = secondRenderResult.children && secondRenderResult.children[0];
 			assert.strictEqual(secondRenderChild.vnodeSelector, 'footer');
 
@@ -764,22 +762,22 @@ registerSuite({
 			widget.invalidate();
 
 			const thirdRenderResult = <VNode> widget.__render__();
-			assert.strictEqual(countWidgetCreated, 1);
-			assert.strictEqual(countWidgetDestroyed, 1);
+			assert.strictEqual(countWidgetCreated, 4);
+			assert.strictEqual(countWidgetDestroyed, 4);
 			assert.lengthOf(thirdRenderResult.children, 0);
 
 			widget.setProperties(<any> { hide: false });
 			widget.invalidate();
 
 			const lastRenderResult = <VNode> widget.__render__();
-			assert.strictEqual(countWidgetCreated, 2);
-			assert.strictEqual(countWidgetDestroyed, 1);
-			assert.lengthOf(lastRenderResult.children, 1);
+			assert.strictEqual(countWidgetCreated, 8);
+			assert.strictEqual(countWidgetDestroyed, 4);
+			assert.lengthOf(lastRenderResult.children, 4);
 			const lastRenderChild: any = lastRenderResult.children && lastRenderResult.children[0];
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
-			const warnMsg = 'It is recommended to provide a unique `key` property when using the same widget factory multiple times';
+			const warnMsg = 'It is recommended to provide a unique `key` property when using the same widget multiple times';
 			class TestWidgetOne extends WidgetBase<any> {}
 			class TestWidgetTwo extends WidgetBase<any> {}
 
@@ -963,5 +961,118 @@ registerSuite({
 		childInvalidate();
 		assert.isTrue(childInvalidateCalled);
 		assert.isTrue(parentInvalidateCalled);
+	},
+	'setting children should mark the enclosing widget as dirty'() {
+		let foo = 0;
+		class FooWidget extends WidgetBase<any> {
+			render() {
+				foo = this.properties.foo;
+				return v('div', []);
+			}
+		}
+
+		class ContainerWidget extends WidgetBase<any> {
+			render() {
+				return v('div', {}, this.children);
+			}
+		}
+
+		class TestWidget extends WidgetBase<any> {
+			private foo = 0;
+
+			render() {
+				this.foo++;
+				return w(ContainerWidget, {}, [
+					w(FooWidget, { foo: this.foo })
+				]);
+			}
+		}
+
+		const widget: any = new TestWidget();
+		widget.__render__();
+		assert.equal(foo, 1);
+		widget.invalidate();
+		widget.__render__();
+		assert.equal(foo, 2);
+	},
+	'properties:changed should mark as dirty but not invalidate'() {
+		let foo = 0;
+
+		class FooWidget extends WidgetBase<any> {
+			render() {
+				foo = this.properties.foo;
+				return v('div', []);
+			}
+		}
+
+		class TestWidget extends WidgetBase<any> {
+			private foo = 0;
+
+			render() {
+				this.foo++;
+				return w(FooWidget, { foo: this.foo });
+			}
+		}
+
+		const widget: any = new TestWidget();
+		const invalidateSpy = spy(widget, 'invalidate');
+		widget.__render__();
+		assert.equal(foo, 1);
+		widget.invalidate();
+		widget.__render__();
+		assert.equal(foo, 2);
+		assert.equal(invalidateSpy.callCount, 1);
+	},
+	'decorators are cached'() {
+		class TestWidget extends WidgetBase<any> {
+			@afterRender
+			running(result: DNode): DNode {
+				return result;
+			}
+
+			render() {
+				return v('div');
+			}
+		}
+
+		const widget = new TestWidget();
+		const decoratorSpy = spy(widget, '_buildDecoratorList');
+
+		widget.__render__();
+
+		// first call calls the method
+		assert.equal(decoratorSpy.callCount, 1);
+
+		widget.invalidate();
+
+		widget.__render__();
+
+		// second call is cached
+		assert.equal(decoratorSpy.callCount, 1);
+	},
+	'decorators applied to subclasses are not applied to base classes'() {
+		class TestWidget extends WidgetBase<any> {
+			@afterRender
+			firstRender(result: DNode): DNode {
+				return result;
+			}
+
+			getAfterRenders(): Function[] {
+				return this.getDecorator('afterRender');
+			}
+		}
+
+		class TestWidget2 extends TestWidget {
+			@afterRender
+			secondRender(result: DNode): DNode {
+				return result;
+			}
+		}
+
+		const testWidget = new TestWidget();
+		const testWidget2 = new TestWidget2();
+
+		assert.equal(testWidget.getAfterRenders().length, 2);
+		assert.equal(testWidget2.getAfterRenders().length, 3);
 	}
 });

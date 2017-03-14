@@ -137,6 +137,17 @@ export interface VirtualDomProperties {
 	 */
 	readonly styles?: { [index: string]: string | null | undefined };
 
+	// Pointer Events
+	onpointermove?(ev?: PointerEvent): boolean | void;
+	onpointerdown?(ev?: PointerEvent): boolean | void;
+	onpointerup?(ev?: PointerEvent): boolean | void;
+	onpointerover?(ev?: PointerEvent): boolean | void;
+	onpointerout?(ev?: PointerEvent): boolean | void;
+	onpointerenter?(ev?: PointerEvent): boolean | void;
+	onpointerleave?(ev?: PointerEvent): boolean | void;
+	onpointercancel?(ev?: PointerEvent): boolean | void;
+	// For Pointer Event Polyfill see: https://github.com/jquery/PEP
+	readonly 'touch-action'?: string;
 	// From Element
 	ontouchcancel?(ev?: TouchEvent): boolean | void;
 	ontouchend?(ev?: TouchEvent): boolean | void;
@@ -251,19 +262,19 @@ export interface HNode {
  */
 export interface WNode {
 	/**
-	 * Factory to create a widget
+	 * Constructor to create a widget or string constructor label
 	 */
-	factory: WidgetConstructor | string;
+	widgetConstructor: WidgetConstructor | string;
 
 	/**
-	 * Options used to create factory a widget
+	 * Properties to set against a widget instance
 	 */
 	properties: WidgetProperties;
 
 	/**
 	 * DNode children
 	 */
-	children: DNode[];
+	children?: DNode[];
 
 	/**
 	 * The type of node
@@ -358,13 +369,6 @@ export interface WidgetBaseInterface<P extends WidgetProperties> extends Evented
 	 * @returns A properties change record for the the diff
 	 */
 	diffProperties(previousProperties: P & { [index: string]: any }, newProperties: P & { [index: string]: any }): PropertiesChangeRecord<P>;
-
-	/**
-	 * Default render, returns a `div` with widget's children
-	 *
-	 * @returns the DNode for the widget
-	 */
-	render(): DNode;
 
 	/**
 	 * Main internal function for dealing with widget rendering
