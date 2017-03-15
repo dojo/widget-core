@@ -64,12 +64,16 @@ registerSuite({
 			assert.equal(result.value, bar);
 			assert.isTrue(result.changed);
 
-			const qux = {
+			const baz = {
 				bar: 'bar',
-				qux: 'qux'
+				baz: 'baz'
 			};
-			result = diff(DiffType.SHALLOW, foo, qux);
-			assert.equal(result.value, qux);
+			result = diff(DiffType.SHALLOW, foo, baz);
+			assert.equal(result.value, baz);
+			assert.isTrue(result.changed);
+
+			result = diff(DiffType.SHALLOW, 'foo', baz);
+			assert.equal(result.value, baz);
 			assert.isTrue(result.changed);
 		},
 		'array'() {
