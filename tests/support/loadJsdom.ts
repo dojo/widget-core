@@ -1,6 +1,12 @@
 import * as jsdom from 'jsdom';
 import global from '@dojo/core/global';
 
+declare global {
+	interface Window {
+		CustomEvent: typeof CustomEvent;
+	}
+}
+
 /* In order to have the tests work under Node.js, we need to load JSDom and polyfill
  * requestAnimationFrame */
 
