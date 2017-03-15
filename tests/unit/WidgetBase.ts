@@ -64,57 +64,79 @@ registerSuite({
 		}
 	},
 	diffProperty: {
-		'default (CUSTOM)': {
-			decorator() {
+		'custom diff function at class level'() {
 				let callCount = 0;
+				let value;
 
+				@diffProperty('foo', DiffType.CUSTOM, (previousProperty: any, newProperty: any) => {
+					callCount++;
+					return {
+						changed: true,
+						value: 'new-value'
+					};
+				})
 				class TestWidget extends WidgetBase<any> {
-
-					@diffProperty('foo')
-					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
-						callCount++;
-						assert.equal(newProperty, 'bar');
-						return {
-							changed: false,
-							value: newProperty
-						};
+					render() {
+						value = this.properties.foo;
+						return 'foo';
 					}
 				}
 
 				const testWidget = new TestWidget();
 				testWidget.setProperties({ foo: 'bar' });
-
+				testWidget.__render__();
 				assert.equal(callCount, 1);
-			},
-			'non decorator'() {
-				let callCount = 0;
+				assert.equal(value, 'new-value');
+		},
+		decorator() {
+			let callCount = 0;
 
-				class TestWidget extends WidgetBase<any> {
+			class TestWidget extends WidgetBase<any> {
 
-					constructor() {
-						super();
-						this.addDecorator('diffProperty', {
-							propertyName: 'foo',
-							diffType: DiffType.CUSTOM,
-							diffFunction: this.diffPropertyFoo
-						});
-					}
-
-					diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
-						callCount++;
-						assert.equal(newProperty, 'bar');
-						return {
-							changed: false,
-							value: newProperty
-						};
-					}
+				@diffProperty('foo')
+				diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+					callCount++;
+					assert.equal(newProperty, 'bar');
+					return {
+						changed: false,
+						value: newProperty
+					};
 				}
-
-				const testWidget = new TestWidget();
-				testWidget.setProperties({ foo: 'bar' });
-
-				assert.equal(callCount, 1);
 			}
+
+			const testWidget = new TestWidget();
+			testWidget.setProperties({ foo: 'bar' });
+
+			assert.equal(callCount, 1);
+		},
+		'non decorator'() {
+			let callCount = 0;
+
+			class TestWidget extends WidgetBase<any> {
+
+				constructor() {
+					super();
+					this.addDecorator('diffProperty', {
+						propertyName: 'foo',
+						diffType: DiffType.CUSTOM,
+						diffFunction: this.diffPropertyFoo
+					});
+				}
+
+				diffPropertyFoo(this: any, previousProperty: any, newProperty: any): any {
+					callCount++;
+					assert.equal(newProperty, 'bar');
+					return {
+						changed: false,
+						value: newProperty
+					};
+				}
+			}
+
+			const testWidget = new TestWidget();
+			testWidget.setProperties({ foo: 'bar' });
+
+			assert.equal(callCount, 1);
 		}
 	},
 	setProperties: {

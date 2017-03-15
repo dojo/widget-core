@@ -59,13 +59,13 @@ export function afterRender(target: any, propertyKey: string, descriptor: Proper
  *
  * @param propertyName The name of the property of which the diff function is applied
  */
-export function diffProperty(propertyName: string, diffType = DiffType.CUSTOM) {
+export function diffProperty(propertyName: string, diffType = DiffType.CUSTOM, diffFunction?: Function) {
 	return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
 		if (diffType === DiffType.CUSTOM && propertyKey && descriptor) {
 			target.addDecorator('diffProperty', { propertyName, diffType, diffFunction: target[propertyKey] });
 		}
 		else if (diffType && !propertyKey && !descriptor) {
-			target.prototype.addDecorator('diffProperty', { propertyName, diffType });
+			target.prototype.addDecorator('diffProperty', { propertyName, diffType, diffFunction });
 		}
 	};
 }
