@@ -123,13 +123,13 @@ registerSuite({
 			result = diff(DiffType.AUTO, foo, bar);
 			assert.equal(result.value, bar);
 			assert.isTrue(result.changed);
-		},
-		'fall-thru'() {
-			const NONTYPE = 20;
-			const foo = {};
-			const result = diff(NONTYPE, foo, foo);
-			assert.equal(result.value, foo);
-			assert.isTrue(result.changed);
 		}
+	},
+	'fall-thru'() {
+		const NONTYPE = 20;
+		const foo = {};
+		const result = diff(NONTYPE, foo, foo);
+		assert.equal(result.value, foo);
+		assert.isTrue(result.changed);
 	}
 });
