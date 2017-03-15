@@ -1,5 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
+import dispatchSyntheticEvent from '../../support/dispatchSyntheticEvent';
 import cssTransistions from '../../../src/animations/cssTransitions';
 
 registerSuite({
@@ -17,14 +18,10 @@ registerSuite({
 				assert.lengthOf(div.classList, 2);
 				assert.isTrue(div.classList.contains('foo-active'));
 
-				const evt = new window.CustomEvent('transitionend', {
-					bubbles: true,
-					cancelable: true
-				});
-				div.dispatchEvent(evt);
+				dispatchSyntheticEvent(div, 'transitionend', { bubbles: true, cancelable: true });
 
 				assert.lengthOf(div.classList, 0);
-			}), 10);
+			}), 20);
 		},
 
 		'animationend'(this: any) {
@@ -38,14 +35,10 @@ registerSuite({
 				assert.lengthOf(div.classList, 2);
 				assert.isTrue(div.classList.contains('foo-active'));
 
-				const evt = new window.CustomEvent('animationend', {
-					bubbles: true,
-					cancelable: false
-				});
-				div.dispatchEvent(evt);
+				dispatchSyntheticEvent(div, 'animationend', { bubbles: true, cancelable: false });
 
 				assert.lengthOf(div.classList, 0);
-			}), 10);
+			}), 20);
 		}
 	},
 
@@ -65,12 +58,8 @@ registerSuite({
 				assert.lengthOf(div.classList, 2);
 				assert.isTrue(div.classList.contains('foo-active'));
 
-				const evt = new window.CustomEvent('transitionend', {
-					bubbles: true,
-					cancelable: true
-				});
-				div.dispatchEvent(evt);
-			}, 10);
+				dispatchSyntheticEvent(div, 'transitionend', { bubbles: true, cancelable: true });
+			}, 20);
 		},
 
 		'animationend'(this: any) {
@@ -88,12 +77,8 @@ registerSuite({
 				assert.lengthOf(div.classList, 2);
 				assert.isTrue(div.classList.contains('foo-active'));
 
-				const evt = new window.CustomEvent('animationend', {
-					bubbles: true,
-					cancelable: false
-				});
-				div.dispatchEvent(evt);
-			}, 10);
+				dispatchSyntheticEvent(div, 'animationend', { bubbles: true, cancelable: false });
+			}, 20);
 		}
 	}
 });

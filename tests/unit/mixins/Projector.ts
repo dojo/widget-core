@@ -8,27 +8,17 @@ import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projec
 import { WidgetBase } from '../../../src/WidgetBase';
 import global from '@dojo/core/global';
 import { waitFor } from '../waitFor';
+import dispatchSyntheticEvent from '../../support/dispatchSyntheticEvent';
 
 const Event = global.window.Event;
 
 class TestWidget extends ProjectorMixin(WidgetBase)<any> {}
 
-function dispatchEvent(element: Element, eventType: string) {
-	try {
-		element.dispatchEvent(new CustomEvent(eventType));
-	}
-	catch (e) {
-		const event = document.createEvent('CustomEvent');
-		event.initCustomEvent(eventType, false, false, {});
-		element.dispatchEvent(event);
-	}
-}
-
 function sendAnimationEndEvents(element: Element) {
-	dispatchEvent(element, 'webkitTransitionEnd');
-	dispatchEvent(element, 'webkitAnimationEnd');
-	dispatchEvent(element, 'transitionend');
-	dispatchEvent(element, 'animationend');
+	dispatchSyntheticEvent(element, 'webkitTransitionEnd', { bubbles: true, cancelable: true });
+	dispatchSyntheticEvent(element, 'webkitAnimationEnd', { bubbles: true, cancelable: false });
+	dispatchSyntheticEvent(element, 'transitionend', { bubbles: true, cancelable: true });
+	dispatchSyntheticEvent(element, 'animationend', { bubbles: true, cancelable: false });
 }
 
 let rafSpy: any;
@@ -302,7 +292,7 @@ registerSuite({
 
 		const projector = new Projector();
 		return projector.append().then(() => {
-			dispatchEvent(domNode, 'input');
+			dispatchSyntheticEvent(domNode, 'input');
 			assert.instanceOf(domEvent, Event);
 		});
 	},
@@ -323,7 +313,7 @@ registerSuite({
 
 		const projector = new Projector();
 		return projector.append().then(() => {
-			dispatchEvent(domNode, 'pointermove');
+			dispatchSyntheticEvent(domNode, 'pointermove');
 			assert.instanceOf(domEvent, Event);
 		});
 	},
