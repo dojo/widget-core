@@ -85,8 +85,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	static _type: symbol = WIDGET_BASE_TYPE;
 
-	private _constructed: boolean = true;
-
 	/**
 	 * on for the events defined for widget base
 	 */
@@ -337,7 +335,11 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 */
 	protected addDecorator(decoratorKey: string, value: any): void {
 		value = Array.isArray(value) ? value : [ value ];
-		if (!this._constructed) {
+		if (this._properties) {
+			const decorators = this._decoratorCache.get(decoratorKey) || [];
+			this._decoratorCache.set(decoratorKey, [ ...decorators, ...value ]);
+		}
+		else {
 			let decoratorList = decoratorMap.get(this.constructor);
 			if (!decoratorList) {
 				decoratorList = new Map<string, any[]>();
@@ -350,10 +352,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				decoratorList.set(decoratorKey, specificDecoratorList);
 			}
 			specificDecoratorList.push(...value);
-		}
-		else {
-			const decorators = this._decoratorCache.get(decoratorKey) || [];
-			this._decoratorCache.set(decoratorKey, [ ...decorators, ...value ]);
 		}
 	}
 
