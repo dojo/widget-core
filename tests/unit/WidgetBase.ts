@@ -64,7 +64,7 @@ registerSuite({
 		}
 	},
 	diffProperty: {
-		'custom diff function at class level'() {
+		'decorator at class level'() {
 				let callCount = 0;
 				let value;
 
