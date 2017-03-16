@@ -8,7 +8,7 @@ export interface VNodeProperties {
 	exitAnimationActive?: string;
 }
 
-hasAdd('css-transitions', has('host-node') || 'transition' in document.createElement('div').style);
+hasAdd('css-transitions', 'transition' in document.createElement('div').style);
 
 function runAndCleanUp(element: HTMLElement, startAnimation: () => void, finishAnimation: () => void) {
 	/* istanbul ignore if */

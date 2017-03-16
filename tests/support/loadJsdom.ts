@@ -28,6 +28,13 @@ global.window = doc.defaultView;
 /* Needed for Pointer Event Polyfill's incorrect Element detection */
 global.Element = function() {};
 
+/* Patch feature detection of CSS Animations */
+Object.defineProperty(
+	(<any> window).CSSStyleDeclaration.prototype,
+	'transition',
+	Object.getOwnPropertyDescriptor((<any> window).CSSStyleDeclaration.prototype, 'webkitTransition')
+);
+
 /* Polyfill requestAnimationFrame - this can never be called an *actual* polyfill */
 global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
 	setImmediate(cb);
