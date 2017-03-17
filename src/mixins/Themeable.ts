@@ -300,8 +300,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		 * Search for classname in other base themes
 		 */
 		private isDuplicate(key: string, originatingBaseTheme: ThemeClasses): boolean {
+			let duplicate = false;
 			if (key !== THEME_KEY) {
-				let duplicate = false;
 				for (let i = 0; i < this._registeredBaseThemes.length; i++) {
 					if (originatingBaseTheme === this._registeredBaseThemes[i]) {
 						continue;
@@ -314,7 +314,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 				}
 				return duplicate;
 			}
-			return false;
+			return duplicate;
 		}
 	};
 
