@@ -38,7 +38,7 @@ interface WidgetCacheWrapper {
 interface DiffPropertyConfig {
 	propertyName: string;
 	diffType: DiffType;
-	diffFunction?: Function;
+	diffFunction?<P>(previousProperty: P, newProperty: P): PropertyChangeRecord;
 }
 
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
