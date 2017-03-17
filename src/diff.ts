@@ -2,6 +2,7 @@ import { PropertyChangeRecord } from './interfaces';
 
 export const enum DiffType {
 	CUSTOM = 1,
+	ALWAYS,
 	IGNORE,
 	REFERENCE,
 	SHALLOW,
@@ -10,6 +11,13 @@ export const enum DiffType {
 
 function isObjectOrArray(value: any): boolean {
 	return Object.prototype.toString.call(value) === '[object Object]' || Array.isArray(value);
+}
+
+function always(previousProperty: any, newProperty: any): PropertyChangeRecord {
+	return {
+		changed: true,
+		value: newProperty
+	};
 }
 
 function ignore(previousProperty: any, newProperty: any): PropertyChangeRecord {
@@ -67,11 +75,14 @@ function shallow(previousProperty: any, newProperty: any): PropertyChangeRecord 
 	};
 }
 
-export default function diff(diffDiffType: DiffType, previousProperty: any, newProperty: any, meta?: any) {
+export default function diff(propertyName: string, diffDiffType: DiffType, previousProperty: any, newProperty: any, meta?: any) {
 	let result;
 	switch (diffDiffType) {
 		case DiffType.CUSTOM:
 			result = custom(previousProperty, newProperty, meta);
+		break;
+		case DiffType.ALWAYS:
+			result = always(previousProperty, newProperty);
 		break;
 		case DiffType.IGNORE:
 			result = ignore(previousProperty, newProperty);
@@ -94,10 +105,8 @@ export default function diff(diffDiffType: DiffType, previousProperty: any, newP
 			}
 		break;
 		default:
-			result = {
-				changed: true,
-				value: newProperty
-			};
+			console.warn(`no valid DiffType provided, will mark property '${propertyName}' as changed`);
+			result = always(previousProperty, newProperty);
 	}
 	return result;
 }

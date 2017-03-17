@@ -258,7 +258,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 				scope: this
 			};
 
-			const result = diff(diffType, previousProperty, newProperty, meta);
+			const result = diff(propertyName, diffType, previousProperty, newProperty, meta);
 
 			diffPropertyResults[propertyName] = result.value;
 
