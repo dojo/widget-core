@@ -118,7 +118,6 @@ function createThemeClassesLookup(classes: ThemeClasses[]): ClassNames {
 	return classes.reduce((currentClassNames, baseClass) => {
 		Object.keys(baseClass).forEach((key: string) => {
 			currentClassNames[baseClass[key]] = key;
-			return currentClassNames;
 		});
 		return currentClassNames;
 	}, <ClassNames> {});
