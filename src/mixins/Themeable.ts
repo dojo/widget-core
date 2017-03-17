@@ -289,7 +289,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		 * Return the registered base themes. Warns for duplicate base theme classes.
 		 */
 		private getRegisteredBaseThemes(): ThemeClasses[] {
-			const registeredBaseThemes = this.getDecorator('baseThemeClasses').reverse();
+			const registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ].reverse();
 			registeredBaseThemes.forEach((registeredBaseThemeClasses, index) => {
 				Object.keys(registeredBaseThemeClasses).some((key) => {
 					if (key !== THEME_KEY) {
