@@ -258,7 +258,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		private recalculateThemeClasses() {
 			const { properties: { theme = {} } } = this;
 			if (!this._registeredBaseThemes) {
-				this._registeredBaseThemes = this.getRegisteredBaseThemes();
+				this._registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ].reverse();
+				this.checkForDuplicates();
 			}
 			const registeredBaseThemeKeys = this._registeredBaseThemes.map((registeredBaseThemeClasses) => {
 				return registeredBaseThemeClasses[THEME_KEY];
@@ -286,30 +287,35 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		}
 
 		/**
-		 * Return the registered base themes. Warns for duplicate base theme classes.
+		 * Check for duplicates across the registered base themes.
 		 */
-		private getRegisteredBaseThemes(): ThemeClasses[] {
-			const registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ].reverse();
-			registeredBaseThemes.forEach((registeredBaseThemeClasses, index) => {
+		private checkForDuplicates(): void {
+			this._registeredBaseThemes.forEach((registeredBaseThemeClasses, index) => {
 				Object.keys(registeredBaseThemeClasses).some((key) => {
-					if (key !== THEME_KEY) {
-						let duplicate = false;
-						for (let i = 0; i < registeredBaseThemes.length; i++) {
-							if (index === i) {
-								continue;
-							}
-							if (registeredBaseThemes[i][key]) {
-								console.warn(`Duplicate base theme class key '${key}' detected, this could cause unexpected results`);
-								duplicate = true;
-								break;
-							}
-						}
-						return duplicate;
-					}
-					return false;
+					return this.isDuplicate(key, registeredBaseThemeClasses);
 				});
 			});
-			return registeredBaseThemes;
+		}
+
+		/**
+		 * Search for classname in other base themes
+		 */
+		private isDuplicate(key: string, originatingBaseTheme: ThemeClasses): boolean {
+			if (key !== THEME_KEY) {
+				let duplicate = false;
+				for (let i = 0; i < this._registeredBaseThemes.length; i++) {
+					if (originatingBaseTheme === this._registeredBaseThemes[i]) {
+						continue;
+					}
+					if (this._registeredBaseThemes[i][key]) {
+						console.warn(`Duplicate base theme class key '${key}' detected, this could cause unexpected results`);
+						duplicate = true;
+						break;
+					}
+				}
+				return duplicate;
+			}
+			return false;
 		}
 	};
 
