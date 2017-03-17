@@ -107,7 +107,7 @@ registerSuite({
 			});
 
 			assert.isTrue(consoleStub.calledOnce);
-			assert.strictEqual(consoleStub.firstCall.args[0], `Class name: ${newClassName} is not from 'registeredBaseThemeClasses', use chained 'fixed' method instead`);
+			assert.strictEqual(consoleStub.firstCall.args[0], `Class name: ${newClassName} not found, use chained 'fixed' method instead`);
 		},
 		'should split adjoined classes into multiple classes'() {
 			themeableInstance = new TestWidget();

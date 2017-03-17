@@ -180,7 +180,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 				.filter((className) => className !== null)
 				.reduce((appliedClasses: {}, className: string) => {
 					if (!this._baseThemeClassesReverseLookup[className]) {
-						console.warn(`Class name: ${className} is not from 'registeredBaseThemeClasses', use chained 'fixed' method instead`);
+						console.warn(`Class name: ${className} not found, use chained 'fixed' method instead`);
 						return appliedClasses;
 					}
 					className = this._baseThemeClassesReverseLookup[className];
