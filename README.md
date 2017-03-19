@@ -816,7 +816,7 @@ These are some of the **important** principles to keep in mind when creating and
 
 1. The widget *`__render__`* function should **never** be overridden
 2. Except for projectors, you should **never** need to deal directly with widget instances
-3. Hyperscript should **always** be written using the @dojo/widget-core `v` and `w` helper functions
+3. Hyperscript should **always** be written using the @dojo/widget-core `v` helper function
 4. **Never** set state outside of a widget instance
 5. **Never** update `properties` within a widget instance
 
