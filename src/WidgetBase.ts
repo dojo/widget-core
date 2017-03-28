@@ -50,22 +50,65 @@ const decoratorMap = new Map<Function, Map<string, any[]>>();
 /**
  * Decorator that can be used to register a function to run as an aspect to `render`
  */
-export function afterRender(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-	target.addDecorator('afterRender', target[propertyKey]);
+export function afterRender(method: Function): (target: any) => void;
+export function afterRender(): (target: any, propertyKey: string) => void;
+export function afterRender(method?: Function) {
+	return function (target: any, propertyKey: any) {
+		if (typeof target === 'function') {
+			if (!method) {
+				throw new Error('method cannot be blank');
+			}
+
+			target.prototype.addDecorator('afterRender', method);
+		}
+		else {
+			if (propertyKey) {
+				target.addDecorator('afterRender', target[propertyKey]);
+			}
+			else {
+				if (!method) {
+					throw new Error('method cannot be blank');
+				}
+
+				target.addDecorator('afterRender', method);
+			}
+		}
+	};
 }
 
 /**
  * Decorator that can be used to register a function as a specific property diff
  *
- * @param propertyName The name of the property of which the diff function is applied
+ * @param propertyName  The name of the property of which the diff function is applied
+ * @param diffType      The diff type, default is DiffType.AUTO.
+ * @param diffFunction  A diff function to run if diffType if DiffType.CUSTOM
  */
-export function diffProperty(propertyName: string, diffType = DiffType.CUSTOM, diffFunction?: Function) {
+export function diffProperty(propertyName: string, diffType = DiffType.AUTO, diffFunction?: Function) {
 	return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
-		if (diffType === DiffType.CUSTOM && propertyKey && descriptor) {
-			target.addDecorator('diffProperty', { propertyName, diffType, diffFunction: target[propertyKey] });
+		if (typeof target === 'function') {
+			// class level decorator
+			target.prototype.addDecorator('diffProperty', {
+				propertyName,
+				diffType,
+				diffFunction
+			});
 		}
-		else if (diffType && !propertyKey && !descriptor) {
-			target.prototype.addDecorator('diffProperty', { propertyName, diffType, diffFunction });
+		else {
+			if (propertyKey) {
+				// method level decorator
+				target.addDecorator('diffProperty', {
+					propertyName,
+					diffType: DiffType.CUSTOM,
+					diffFunction: target[propertyKey]
+				});
+			}
+			else {
+				target.addDecorator('diffProperty', {
+					propertyName,
+					diffType,
+					diffFunction
+				});
+			}
 		}
 	};
 }
@@ -73,8 +116,30 @@ export function diffProperty(propertyName: string, diffType = DiffType.CUSTOM, d
 /**
  * Decorator used to register listeners to the `properties:changed` event.
  */
-export function onPropertiesChanged(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-	target.addDecorator('onPropertiesChanged', target[propertyKey]);
+export function onPropertiesChanged(method: Function): (target: any) => void;
+export function onPropertiesChanged(): (target: any, propertyKey: any) => void;
+export function onPropertiesChanged(method?: Function) {
+	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+		if (typeof target === 'function') {
+			if (!method) {
+				throw new Error('method cannot be blank');
+			}
+
+			target.prototype.addDecorator('onPropertiesChanged', method);
+		}
+		else {
+			if (propertyKey) {
+				target.addDecorator('onPropertiesChanged', target[propertyKey]);
+			}
+			else {
+				if (!method) {
+					throw new Error('method cannot be blank');
+				}
+
+				target.addDecorator('onPropertiesChanged', method);
+			}
+		}
+	};
 }
 
 /**
@@ -186,7 +251,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * A render decorator that registers vnode callbacks for 'afterCreate' and
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
 	 */
-	@afterRender
+	@afterRender()
 	protected attachLifecycleCallbacks (node: DNode) {
 		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
 		// with "key" properties.
