@@ -560,6 +560,27 @@ registerSuite({
 				test: true
 			});
 			assert.strictEqual(called, 1);
+		},
+
+		'extendable'() {
+			let called = false;
+
+function PropertyLogger() {
+	return onPropertiesChanged(function() {
+		called = true;
+	});
+}
+
+@PropertyLogger()
+class TestWidget extends WidgetBase<any> {
+}
+
+const widget = new TestWidget();
+widget.setProperties({
+	test: true
+});
+
+			assert.strictEqual(called, true);
 		}
 	},
 	render: {

@@ -53,19 +53,9 @@ const decoratorMap = new Map<Function, Map<string, any[]>>();
 export function afterRender(method: Function): (target: any) => void;
 export function afterRender(): (target: any, propertyKey: string) => void;
 export function afterRender(method?: Function) {
-	return function (target: any, propertyKey: any) {
-		if (typeof target === 'function') {
-			target.prototype.addDecorator('afterRender', method);
-		}
-		else {
-			if (propertyKey) {
-				target.addDecorator('afterRender', target[propertyKey]);
-			}
-			else {
-				target.addDecorator('afterRender', method);
-			}
-		}
-	};
+	return handleDecorator((target, propertyKey) => {
+		target.addDecorator('afterRender', propertyKey ? target[propertyKey] : method);
+	});
 }
 
 /**
@@ -76,33 +66,13 @@ export function afterRender(method?: Function) {
  * @param diffFunction  A diff function to run if diffType if DiffType.CUSTOM
  */
 export function diffProperty(propertyName: string, diffType = DiffType.AUTO, diffFunction?: Function) {
-	return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
-		if (typeof target === 'function') {
-			// class level decorator
-			target.prototype.addDecorator('diffProperty', {
-				propertyName,
-				diffType,
-				diffFunction
-			});
-		}
-		else {
-			if (propertyKey) {
-				// method level decorator
-				target.addDecorator('diffProperty', {
-					propertyName,
-					diffType: DiffType.CUSTOM,
-					diffFunction: target[propertyKey]
-				});
-			}
-			else {
-				target.addDecorator('diffProperty', {
-					propertyName,
-					diffType,
-					diffFunction
-				});
-			}
-		}
-	};
+	return handleDecorator((target, propertyKey) => {
+		target.addDecorator('diffProperty', {
+			propertyName,
+			diffType: propertyKey ? DiffType.CUSTOM : diffType,
+			diffFunction: propertyKey ? target[propertyKey] : diffFunction
+		});
+	});
 }
 
 /**
@@ -111,17 +81,24 @@ export function diffProperty(propertyName: string, diffType = DiffType.AUTO, dif
 export function onPropertiesChanged(method: Function): (target: any) => void;
 export function onPropertiesChanged(): (target: any, propertyKey: any) => void;
 export function onPropertiesChanged(method?: Function) {
-	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+	return handleDecorator((target, propertyKey) => {
+		target.addDecorator('onPropertiesChanged', propertyKey ? target[propertyKey] : method);
+	});
+}
+
+/**
+ * Generic decorator handler to take care of whether or not the decorator was called at the class level
+ * or the method level.
+ *
+ * @param handler
+ */
+export function handleDecorator(handler: (target: any, propertyKey?: string) => void) {
+	return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
 		if (typeof target === 'function') {
-			target.prototype.addDecorator('onPropertiesChanged', method);
+			handler(target.prototype, undefined);
 		}
 		else {
-			if (propertyKey) {
-				target.addDecorator('onPropertiesChanged', target[propertyKey]);
-			}
-			else {
-				target.addDecorator('onPropertiesChanged', method);
-			}
+			handler(target, propertyKey);
 		}
 	};
 }

@@ -2,7 +2,7 @@ import { assign } from '@dojo/core/lang';
 import { includes, find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
 import { Constructor, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
-import { WidgetBase, onPropertiesChanged } from './../WidgetBase';
+import { WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
 
 /**
  * A representation of the css class names to be applied and
@@ -70,14 +70,9 @@ export interface ThemeableMixin {
  * Decorator for base css classes
  */
 export function theme (theme: {}) {
-	return function (constructor: any) {
-		if (typeof constructor === 'function') {
-			constructor.prototype.addDecorator('baseThemeClasses', theme);
-		}
-		else {
-			constructor.addDecorator('baseThemeClasses', theme);
-		}
-	};
+	return handleDecorator((target) => {
+		target.addDecorator('baseThemeClasses', theme);
+	});
 }
 
 /**
