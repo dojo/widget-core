@@ -467,7 +467,6 @@ registerSuite({
 			widget.__render__();
 			assert.strictEqual(afterRenderCount, 1);
 		},
-
 		'class level without decorator'() {
 			let afterRenderCount = 0;
 
@@ -545,6 +544,22 @@ registerSuite({
 			const widget = new ExtendedTestWidget();
 			widget.emit({ type: 'properties:changed' });
 			assert.strictEqual(onPropertiesChangedCount, 3);
+		},
+
+		'class level decorator'() {
+			let called = 0;
+
+			@onPropertiesChanged(function () {
+				called++;
+			})
+			class TestWidget extends WidgetBase<any> {
+			}
+
+			const widget = new TestWidget();
+			widget.setProperties({
+				test: true
+			});
+			assert.strictEqual(called, 1);
 		}
 	},
 	render: {

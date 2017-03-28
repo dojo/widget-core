@@ -55,10 +55,6 @@ export function afterRender(): (target: any, propertyKey: string) => void;
 export function afterRender(method?: Function) {
 	return function (target: any, propertyKey: any) {
 		if (typeof target === 'function') {
-			if (!method) {
-				throw new Error('method cannot be blank');
-			}
-
 			target.prototype.addDecorator('afterRender', method);
 		}
 		else {
@@ -66,10 +62,6 @@ export function afterRender(method?: Function) {
 				target.addDecorator('afterRender', target[propertyKey]);
 			}
 			else {
-				if (!method) {
-					throw new Error('method cannot be blank');
-				}
-
 				target.addDecorator('afterRender', method);
 			}
 		}
@@ -121,10 +113,6 @@ export function onPropertiesChanged(): (target: any, propertyKey: any) => void;
 export function onPropertiesChanged(method?: Function) {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		if (typeof target === 'function') {
-			if (!method) {
-				throw new Error('method cannot be blank');
-			}
-
 			target.prototype.addDecorator('onPropertiesChanged', method);
 		}
 		else {
@@ -132,10 +120,6 @@ export function onPropertiesChanged(method?: Function) {
 				target.addDecorator('onPropertiesChanged', target[propertyKey]);
 			}
 			else {
-				if (!method) {
-					throw new Error('method cannot be blank');
-				}
-
 				target.addDecorator('onPropertiesChanged', method);
 			}
 		}
