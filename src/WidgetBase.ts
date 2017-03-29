@@ -352,22 +352,17 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			if (widget) {
 				this._cachedVNode = widget;
 			}
-
-			this.emit({
-				type: 'render:rendered',
-				result: widget,
-				target: this
-			});
-
-			return widget;
 		}
+
+		const result = this._cachedVNode || null;
 
 		this.emit({
 			type: 'render:rendered',
-			result: this._cachedVNode,
+			result,
 			target: this
 		});
-		return this._cachedVNode;
+
+		return result;
 	}
 
 	public invalidate(): void {
