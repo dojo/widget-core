@@ -12,7 +12,6 @@ import * as baseThemeClasses3 from './../../support/styles/baseTheme3.css';
 import * as overrideClasses1 from './../../support/styles/overrideClasses1.css';
 import * as overrideClasses2 from './../../support/styles/overrideClasses2.css';
 
-import * as baseClasses from './../../support/styles/testWidget.css';
 import testTheme1 from './../../support/styles/theme1.css';
 import testTheme2 from './../../support/styles/theme2.css';
 import testTheme3 from './../../support/styles/theme3.css';
