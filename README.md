@@ -172,6 +172,16 @@ w('my-widget', properties, children);
 The example above that uses a string for the `widgetConstructor `, is taking advantage of our [widget registry](#widget-registry) functionality.
 The widget registry allows for the lazy instantiation of widgets.
 
+### Responding to Render Events
+
+Sometimes you may want to be notified when a widget is rendered. Widgets will emit a `render:rendered` event with the result of the render operation.
+
+```typescript
+widget.on('render:rendered', event => {
+    // handle render event
+});
+```
+
 ### Writing Custom Widgets
 
 The `WidgetBase` class provides the functionality needed to create Custom Widgets.
