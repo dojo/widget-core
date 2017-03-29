@@ -1,6 +1,6 @@
-import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
-import { EventTypedObject } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
+import { EventTypedObject } from '@dojo/interfaces/core';
+import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
 
 /**
  * Generic constructor type
@@ -304,6 +304,20 @@ export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends Ev
 	 * the changed properties between setProperty calls
 	 */
 	changedPropertyKeys: string[];
+	/**
+	 * the target (this)
+	 */
+	target: T;
+}
+
+/**
+ * The event emitted on render:rendered
+ */
+export interface RenderRenderedEvent<T, P extends WidgetProperties> extends EventTypedObject<'render:rendered'> {
+	/**
+	 * The result of the render operation
+	 */
+	result: VNode | string | undefined;
 	/**
 	 * the target (this)
 	 */

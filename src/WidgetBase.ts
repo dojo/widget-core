@@ -17,7 +17,8 @@ import {
 	PropertyChangeRecord,
 	PropertiesChangeRecord,
 	PropertiesChangeEvent,
-	HNode
+	HNode,
+	RenderRenderedEvent
 } from './interfaces';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 
@@ -43,6 +44,7 @@ interface DiffPropertyConfig {
 
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
 	(type: 'properties:changed', handler: EventedListenerOrArray<WidgetBase<P>, PropertiesChangeEvent<WidgetBase<P>, P>>): Handle;
+	(type: 'render:rendered', handler: EventedListenerOrArray<WidgetBase<P>, RenderRenderedEvent<WidgetBase<P>, P>>): Handle;
 }
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
@@ -350,8 +352,21 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			if (widget) {
 				this._cachedVNode = widget;
 			}
+
+			this.emit({
+				type: 'render:rendered',
+				result: widget,
+				target: this
+			});
+
 			return widget;
 		}
+
+		this.emit({
+			type: 'render:rendered',
+			result: this._cachedVNode,
+			target: this
+		});
 		return this._cachedVNode;
 	}
 
