@@ -103,17 +103,17 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 	};
 }
 
+export function propagateProperty(propertyName: string) {
+	return handleDecorator(target => {
+		target.addDecorator('propagateProperty', propertyName);
+	});
+}
+
 /**
  * Function that identifies DNodes that are HNodes with key properties.
  */
 function isHNodeWithKey(node: DNode): node is HNode {
 	return isHNode(node) && (node.properties != null) && (node.properties.key != null);
-}
-
-export function propagateProperty(propertyName: string) {
-	return function (target: any) {
-		target.prototype.addDecorator('propagateProperty', propertyName);
-	};
 }
 
 /**

@@ -6,7 +6,14 @@ import * as assert from 'intern/chai!assert';
 import { stub, spy } from 'sinon';
 import { v, w, registry } from '../../src/d';
 import { DNode } from '../../src/interfaces';
-import { WidgetBase, diffProperty, DiffType, afterRender, onPropertiesChanged, propagateProperty } from '../../src/WidgetBase';
+import {
+	WidgetBase,
+	diffProperty,
+	DiffType,
+	afterRender,
+	onPropertiesChanged,
+	propagateProperty
+} from '../../src/WidgetBase';
 import WidgetRegistry from './../../src/WidgetRegistry';
 
 registerSuite({
@@ -1201,6 +1208,22 @@ widget.setProperties({
 		assert.equal(widget.getPropagatedProperties().length, 1, 'Expecting a single propagated property');
 		assert.equal(widget2.getPropagatedProperties().length, 1, 'Expecting a single propagated property');
 		assert.equal(widget3.getPropagatedProperties().length, 2, 'Expecting a two propagated properties');
+	},
+	'propagateProperty works as non decorator'() {
+		class TestWidget extends WidgetBase<any> {
+			constructor() {
+				super();
+
+				propagateProperty('theme')(this);
+			}
+
+			getPropagatedProperties() {
+				return this.getDecorator('propagateProperty');
+			}
+		}
+
+		const widget = new TestWidget();
+		assert.deepEqual(widget.getPropagatedProperties(), ['theme']);
 	},
 	'propagateProperty propagates properties to child widgets'() {
 		interface TestProperties {
