@@ -274,7 +274,20 @@ If a property has a custom diff function then that property is excluded from the
 ##### The 'properties:changed' event
 
 When `diffProperties` has completed, the results are used to update the properties on the widget instance.
-If any properties were changed, then the `properties:changed` event is emitted.
+If any properties were changed, then the `properties:changed` event is emitted. If the new properties do **not** contain keys from the previous properties, the properties are marked as changed.
+
+```typescript
+// set the initial properties
+$widget->setProperties({
+	foo: true,
+	bar: true
+});
+
+// properties:changed will include the "bar" property
+$widget->setProperties({
+	foo: true
+});
+```
 
 Attaching a listener to the event is exposed via a decorator `@onPropertiesChanged`.
 
