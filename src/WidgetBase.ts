@@ -103,9 +103,31 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 	};
 }
 
+function createPropertyPropagator(widget: WidgetBase<any>) {
+	return function (node: DNode) {
+		const propagatedProperties = (<any> widget).getDecorator('propagateProperty');
+
+		if (isWNode(node)) {
+			(node.children || []).forEach(child => {
+				if (isWNode(child)) {
+				}
+			});
+		}
+
+		return node;
+	};
+}
+
+const propagateInstanceMap = new WeakMap<WidgetBase<any>, boolean>();
+
 export function propagateProperty(propertyName: string) {
 	return handleDecorator(target => {
 		target.addDecorator('propagateProperty', propertyName);
+
+		if (!propagateInstanceMap.has(target)) {
+			afterRender(createPropertyPropagator(target));
+			propagateInstanceMap.set(target, true);
+		}
 	});
 }
 
@@ -500,13 +522,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		if (isWNode(dNode)) {
 			const { children, properties = {} } = dNode;
 			const { key } = properties;
-
-			const propagatedPropertyNames = this.getDecorator('propagateProperty');
-			propagatedPropertyNames.forEach(propertyName => {
-				if (!(propertyName in properties) && (propertyName in this.properties)) {
-					(<any> properties)[ propertyName ] = this.properties[ propertyName ];
-				}
-			});
 
 			let { widgetConstructor } = dNode;
 			let child: WidgetBaseInterface<WidgetProperties>;
