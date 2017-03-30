@@ -1,8 +1,9 @@
 import { assign } from '@dojo/core/lang';
 import { includes, find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
+import { propagateProperty } from '../decorators/propagateProperty';
 import { Constructor, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
-import { WidgetBase, onPropertiesChanged, handleDecorator, propagateProperty } from './../WidgetBase';
+import { WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
 
 /**
  * A representation of the css class names to be applied and

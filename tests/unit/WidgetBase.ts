@@ -5,15 +5,9 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub, spy } from 'sinon';
 import { v, w, registry } from '../../src/d';
+import { propagateProperty } from '../../src/decorators/propagateProperty';
 import { DNode } from '../../src/interfaces';
-import {
-	WidgetBase,
-	diffProperty,
-	DiffType,
-	afterRender,
-	onPropertiesChanged,
-	propagateProperty
-} from '../../src/WidgetBase';
+import { WidgetBase, diffProperty, DiffType, afterRender, onPropertiesChanged } from '../../src/WidgetBase';
 import WidgetRegistry from './../../src/WidgetRegistry';
 
 registerSuite({

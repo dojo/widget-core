@@ -2,9 +2,10 @@
 import { assign } from '@dojo/core/lang';
 import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
-import { Constructor, DNode, WidgetProperties } from './../interfaces';
-import { WidgetBase, afterRender, propagateProperty } from './../WidgetBase';
+import { propagateProperty } from '../decorators/propagateProperty';
 import { isHNode } from './../d';
+import { Constructor, DNode, WidgetProperties } from './../interfaces';
+import { WidgetBase, afterRender } from './../WidgetBase';
 
 export interface I18nProperties extends WidgetProperties {
 	/**
