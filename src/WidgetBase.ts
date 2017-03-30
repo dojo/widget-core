@@ -373,7 +373,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * @param decoratorKey The key of the decorator
 	 * @param value The value of the decorator
 	 */
-	protected addDecorator(decoratorKey: string, value: any): void {
+	protected addDecorator(decoratorKey: string, value: any): () => any[] {
 		value = Array.isArray(value) ? value : [ value ];
 		if (this.hasOwnProperty('constructor')) {
 			let decoratorList = decoratorMap.get(this.constructor);
@@ -393,6 +393,10 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			const decorators = this._decoratorCache.get(decoratorKey) || [];
 			this._decoratorCache.set(decoratorKey, [ ...decorators, ...value ]);
 		}
+
+		return function(this: WidgetBase<any>) {
+			return this.getDecorator(decoratorKey);
+		};
 	}
 
 	/**
