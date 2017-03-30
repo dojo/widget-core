@@ -11,13 +11,14 @@ import { v, registry, isWNode, isHNode, decorate } from './d';
 import diff, { DiffType } from './diff';
 import {
 	DNode,
+	HNode,
+	PropertiesChangeEvent,
+	PropertiesChangeRecord,
+	PropertyChangeRecord,
+	WidgetBaseInterface,
 	WidgetConstructor,
 	WidgetProperties,
-	WidgetBaseInterface,
-	PropertyChangeRecord,
-	PropertiesChangeRecord,
-	PropertiesChangeEvent,
-	HNode
+	WNode
 } from './interfaces';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 
@@ -104,22 +105,17 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 }
 
 function propertyPropagator(this: WidgetBase<any>, node: DNode) {
-	const propagatedProperties = (<any> this).getDecorator('propagateProperty');
-	const widget = this;
+	const propagatedProperties: string[] = (<any> this).getDecorator('propagateProperty').filter((propertyName: string) => {
+		return propertyName in this.properties;
+	});
 
-	function applyProperties(node: any) {
-		if (isWNode(node)) {
-			propagatedProperties.forEach((propertyName: string) => {
-				if (!(propertyName in node.properties) && propertyName in widget.properties) {
-					(<any> node.properties)[propertyName] = widget.properties[propertyName];
-				}
+	decorate(node, (wNode: WNode) => {
+		propagatedProperties
+			.filter(propertyName => !(propertyName in wNode.properties))
+			.forEach(propertyName => {
+				(<any> wNode.properties)[propertyName] = this.properties[propertyName];
 			});
-
-			(node.children || []).forEach(child => applyProperties(child));
-		}
-	}
-
-	applyProperties(node);
+	}, isWNode);
 
 	return node;
 }
