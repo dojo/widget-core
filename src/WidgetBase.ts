@@ -5,7 +5,6 @@ import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 import Promise from '@dojo/shim/Promise';
-import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
 import { v, registry, isWNode, isHNode, decorate } from './d';
 import diff, { DiffType } from './diff';
@@ -46,6 +45,7 @@ export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEvente
 }
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
+const decoratorGetterCache = new Map<string, (widget: WidgetBase<any>) => any[]>();
 
 /**
  * Decorator that can be used to register a function to run as an aspect to `render`
@@ -173,11 +173,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	private _decoratorCache: Map<string, any[]>;
 
 	/**
-	 * set of render decorators
-	 */
-	private _renderDecorators: Set<string>;
-
-	/**
 	 * Map of functions properties for the bound function
 	 */
 	private _bindFunctionPropertyMap: WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>;
@@ -195,7 +190,6 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this._initializedConstructorMap = new Map<string, Promise<WidgetConstructor>>();
 		this._cachedChildrenMap = new Map<string | Promise<WidgetConstructor> | WidgetConstructor, WidgetCacheWrapper[]>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
-		this._renderDecorators = new Set<string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 
 		this.own(this.on('properties:changed', (evt) => {
@@ -373,7 +367,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	 * @param decoratorKey The key of the decorator
 	 * @param value The value of the decorator
 	 */
-	protected addDecorator(decoratorKey: string, value: any): () => any[] {
+	protected addDecorator(decoratorKey: string, value: any): (widget: WidgetBase<any>) => any[] {
 		value = Array.isArray(value) ? value : [ value ];
 		if (this.hasOwnProperty('constructor')) {
 			let decoratorList = decoratorMap.get(this.constructor);
@@ -394,9 +388,16 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			this._decoratorCache.set(decoratorKey, [ ...decorators, ...value ]);
 		}
 
-		return function(this: WidgetBase<any>) {
-			return this.getDecorator(decoratorKey);
-		};
+		let getter = decoratorGetterCache.get(decoratorKey);
+
+		if (!getter) {
+			getter = function (widget: WidgetBase<any>) {
+				return widget.getDecorator(decoratorKey);
+			};
+			decoratorGetterCache.set(decoratorKey, getter);
+		}
+
+		return getter;
 	}
 
 	/**

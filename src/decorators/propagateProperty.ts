@@ -11,7 +11,7 @@ export function propagateProperty(propertyName: string) {
 
 		if (!propagateInstanceMap.has(target)) {
 			afterRender(function (this: WidgetBase<any>, node: DNode) {
-				const propagatedProperties: string[] = getDecorators.bind(this)().filter((propertyName: string) => {
+				const propagatedProperties: string[] = getDecorators(this).filter((propertyName: string) => {
 					return propertyName in this.properties;
 				});
 
