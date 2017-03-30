@@ -148,11 +148,20 @@ registerSuite({
 		assert.equal(projector.root, root);
 	},
 	'pause'() {
-		const projector = new TestWidget();
+
 		let called = false;
-		projector.on('render:scheduled', () => {
-			called = true;
-		});
+
+		class RenderCapturingWidget extends TestWidget {
+			public scheduleRender() {
+				super.scheduleRender();
+
+				if ((<any> this)._scheduled) {
+					called = true;
+				}
+			}
+		}
+
+		const projector = new RenderCapturingWidget();
 
 		projector.append();
 
@@ -223,24 +232,39 @@ registerSuite({
 		assert.isTrue(called);
 	},
 	'invalidate before attached'() {
-		const projector: any = new TestWidget();
+
 		let called = false;
 
-		projector.on('render:scheduled', () => {
-			called = true;
-		});
+		class RenderCapturingWidget extends TestWidget {
+			public scheduleRender() {
+				super.scheduleRender();
+
+				if ((<any> this)._scheduled) {
+					called = true;
+				}
+			}
+		}
+
+		const projector: any = new RenderCapturingWidget();
 
 		projector.invalidate();
 
 		assert.isFalse(called);
 	},
 	'invalidate after attached'() {
-		const projector: any = new TestWidget();
 		let called = false;
 
-		projector.on('render:scheduled', () => {
-			called = true;
-		});
+		class RenderCapturingWidget extends TestWidget {
+			public scheduleRender() {
+				super.scheduleRender();
+
+				if ((<any> this)._scheduled) {
+					called = true;
+				}
+			}
+		}
+
+		const projector: any = new RenderCapturingWidget();
 
 		projector.append();
 		projector.invalidate();
