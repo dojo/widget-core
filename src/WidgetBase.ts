@@ -11,13 +11,13 @@ import { v, registry, isWNode, isHNode, decorate } from './d';
 import diff, { DiffType } from './diff';
 import {
 	DNode,
-	HNode,
-	PropertiesChangeEvent,
-	PropertiesChangeRecord,
-	PropertyChangeRecord,
-	WidgetBaseInterface,
 	WidgetConstructor,
-	WidgetProperties
+	WidgetProperties,
+	WidgetBaseInterface,
+	PropertyChangeRecord,
+	PropertiesChangeRecord,
+	PropertiesChangeEvent,
+	HNode
 } from './interfaces';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './WidgetRegistry';
 
