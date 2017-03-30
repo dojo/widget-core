@@ -103,19 +103,25 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 	};
 }
 
-function createPropertyPropagator(widget: WidgetBase<any>) {
-	return function (node: DNode) {
-		const propagatedProperties = (<any> widget).getDecorator('propagateProperty');
+function propertyPropagator(this: WidgetBase<any>, node: DNode) {
+	const propagatedProperties = (<any> this).getDecorator('propagateProperty');
+	const widget = this;
 
+	function applyProperties(node: any) {
 		if (isWNode(node)) {
-			(node.children || []).forEach(child => {
-				if (isWNode(child)) {
+			propagatedProperties.forEach((propertyName: string) => {
+				if (!(propertyName in node.properties) && propertyName in widget.properties) {
+					(<any> node.properties)[propertyName] = widget.properties[propertyName];
 				}
 			});
-		}
 
-		return node;
-	};
+			(node.children || []).forEach(child => applyProperties(child));
+		}
+	}
+
+	applyProperties(node);
+
+	return node;
 }
 
 const propagateInstanceMap = new WeakMap<WidgetBase<any>, boolean>();
@@ -125,7 +131,7 @@ export function propagateProperty(propertyName: string) {
 		target.addDecorator('propagateProperty', propertyName);
 
 		if (!propagateInstanceMap.has(target)) {
-			afterRender(createPropertyPropagator(target));
+			afterRender(propertyPropagator)(target);
 			propagateInstanceMap.set(target, true);
 		}
 	});
