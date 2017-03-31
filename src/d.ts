@@ -109,7 +109,7 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties = {}, 
 			properties,
 			render<T>(this: { vNodes: VNode[], properties: VirtualDomProperties }, options: { bind?: T } = { }) {
 
-				return h(tag, assign(options, properties), this.vNodes);
+				return h(tag, assign(options, this.properties), this.vNodes);
 			},
 			type: HNODE
 		};
