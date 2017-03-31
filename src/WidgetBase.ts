@@ -59,6 +59,17 @@ export function afterRender(method?: Function) {
 }
 
 /**
+ * Decorator that can be used to register a reducer function to run as an aspect before to `render`
+ */
+export function beforeRender(method: Function): (target: any) => void;
+export function beforeRender(): (target: any, propertyKey: string) => void;
+export function beforeRender(method?: Function) {
+	return handleDecorator((target, propertyKey) => {
+		target.addDecorator('beforeRender', propertyKey ? target[propertyKey] : method);
+	});
+}
+
+/**
  * Decorator that can be used to register a function as a specific property diff
  *
  * @param propertyName  The name of the property of which the diff function is applied
@@ -340,7 +351,11 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	public __render__(): VNode | string | null {
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
-			let dNode = this.render();
+			const beforeRenders = this.getDecorator('beforeRender') || [];
+			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
+				return beforeRenderFunction.call(this, render);
+			}, this.render.bind(this));
+			let dNode = render();
 			const afterRenders = this.getDecorator('afterRender') || [];
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
