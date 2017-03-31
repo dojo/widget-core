@@ -430,6 +430,20 @@ registerSuite({
 			const foo = bar.children[0];
 			assert.equal(foo.vnodeSelector, 'foo');
 			assert.strictEqual(beforeRenderCount, 3);
+		},
+		'class level decorator'() {
+			let beforeRenderCount = 0;
+
+			@beforeRender(function (node: any) {
+				beforeRenderCount++;
+				return node;
+			})
+			class TestWidget extends WidgetBase<any> {
+			}
+
+			const widget = new TestWidget();
+			widget.__render__();
+			assert.strictEqual(beforeRenderCount, 1);
 		}
 	},
 	afterRender: {

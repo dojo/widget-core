@@ -212,7 +212,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 		this.own(this.on('properties:changed', (evt) => {
 			this._dirty = true;
 
-			const propertiesChangedListeners = this.getDecorator('onPropertiesChanged') || [];
+			const propertiesChangedListeners = this.getDecorator('onPropertiesChanged');
 			propertiesChangedListeners.forEach((propertiesChangedFunction) => {
 				propertiesChangedFunction.call(this, evt);
 			});
@@ -284,7 +284,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 		this.bindFunctionProperties(properties);
 
-		const registeredDiffPropertyConfigs: DiffPropertyConfig[] = this.getDecorator('diffProperty') || [];
+		const registeredDiffPropertyConfigs: DiffPropertyConfig[] = this.getDecorator('diffProperty');
 
 		registeredDiffPropertyConfigs.forEach(({ propertyName, diffFunction, diffType }) => {
 
@@ -351,12 +351,12 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 	public __render__(): VNode | string | null {
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
-			const beforeRenders = this.getDecorator('beforeRender') || [];
+			const beforeRenders = this.getDecorator('beforeRender');
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render);
 			}, this.render.bind(this));
 			let dNode = render();
-			const afterRenders = this.getDecorator('afterRender') || [];
+			const afterRenders = this.getDecorator('afterRender');
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
 			});
