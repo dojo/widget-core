@@ -1,6 +1,12 @@
 import * as jsdom from 'jsdom';
 import global from '@dojo/core/global';
 
+declare global {
+	interface Window {
+		CustomEvent: typeof CustomEvent;
+	}
+}
+
 /* In order to have the tests work under Node.js, we need to load JSDom and polyfill
  * requestAnimationFrame */
 
@@ -21,6 +27,13 @@ global.window = doc.defaultView;
 
 /* Needed for Pointer Event Polyfill's incorrect Element detection */
 global.Element = function() {};
+
+/* Patch feature detection of CSS Animations */
+Object.defineProperty(
+	(<any> window).CSSStyleDeclaration.prototype,
+	'transition',
+	Object.getOwnPropertyDescriptor((<any> window).CSSStyleDeclaration.prototype, 'webkitTransition')
+);
 
 /* Polyfill requestAnimationFrame - this can never be called an *actual* polyfill */
 global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {

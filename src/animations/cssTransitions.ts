@@ -1,41 +1,28 @@
-let browserSpecificTransitionEndEventName = '';
-let browserSpecificAnimationEndEventName = '';
+import has, { add as hasAdd } from '@dojo/has/has';
+
+const TRANSISTION_END_EVENT_NAME = 'transitionend';
+const ANIMATION_END_EVENT_NAME = 'animationend';
 
 export interface VNodeProperties {
 	enterAnimationActive?: string;
 	exitAnimationActive?: string;
 }
 
-function determineBrowserStyleNames(element: HTMLElement) {
-	if ('WebkitTransition' in element.style) {
-		browserSpecificTransitionEndEventName = 'webkitTransitionEnd';
-		browserSpecificAnimationEndEventName = 'webkitAnimationEnd';
-	}
-	else if (('transition' in element.style) || ('MozTransition' in element.style)) {
-		browserSpecificTransitionEndEventName = 'transitionend';
-		browserSpecificAnimationEndEventName = 'animationend';
-	}
-	else {
-		throw new Error('Your browser is not supported');
-	}
-}
-
-function initialize(element: HTMLElement) {
-	if (browserSpecificAnimationEndEventName === '') {
-		determineBrowserStyleNames(element);
-	}
-}
+hasAdd('css-transitions', 'transition' in document.createElement('div').style);
 
 function runAndCleanUp(element: HTMLElement, startAnimation: () => void, finishAnimation: () => void) {
-	initialize(element);
+	/* istanbul ignore if */
+	if (!has('css-transitions')) {
+		throw new Error('Environment does not support CSS transistions');
+	}
 
 	let finished = false;
 
 	let transitionEnd = function () {
 		if (!finished) {
 			finished = true;
-			element.removeEventListener(browserSpecificTransitionEndEventName, transitionEnd);
-			element.removeEventListener(browserSpecificAnimationEndEventName, transitionEnd);
+			element.removeEventListener(TRANSISTION_END_EVENT_NAME, transitionEnd);
+			element.removeEventListener(ANIMATION_END_EVENT_NAME, transitionEnd);
 
 			finishAnimation();
 		}
@@ -43,8 +30,8 @@ function runAndCleanUp(element: HTMLElement, startAnimation: () => void, finishA
 
 	startAnimation();
 
-	element.addEventListener(browserSpecificAnimationEndEventName, transitionEnd);
-	element.addEventListener(browserSpecificTransitionEndEventName, transitionEnd);
+	element.addEventListener(ANIMATION_END_EVENT_NAME, transitionEnd);
+	element.addEventListener(TRANSISTION_END_EVENT_NAME, transitionEnd);
 }
 
 function exit(node: HTMLElement, properties: VNodeProperties, exitAnimation: string, removeNode: () => void) {
