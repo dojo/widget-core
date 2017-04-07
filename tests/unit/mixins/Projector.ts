@@ -148,26 +148,13 @@ registerSuite({
 		assert.equal(projector.root, root);
 	},
 	'pause'() {
-
-		let called = false;
-
-		class RenderCapturingWidget extends TestWidget {
-			public scheduleRender() {
-				super.scheduleRender();
-
-				if ((<any> this)._scheduled) {
-					called = true;
-				}
-			}
-		}
-
-		const projector = new RenderCapturingWidget();
+		const projector = new TestWidget();
 
 		projector.append();
 
 		projector.pause();
 		projector.scheduleRender();
-		assert.isFalse(called);
+		assert.isFalse(rafSpy.called);
 	},
 	'pause cancels animation frame if scheduled'() {
 		const projector = new TestWidget();
@@ -232,43 +219,18 @@ registerSuite({
 		assert.isTrue(called);
 	},
 	'invalidate before attached'() {
-
-		let called = false;
-
-		class RenderCapturingWidget extends TestWidget {
-			public scheduleRender() {
-				super.scheduleRender();
-
-				if ((<any> this)._scheduled) {
-					called = true;
-				}
-			}
-		}
-
-		const projector: any = new RenderCapturingWidget();
+		const projector: any = new TestWidget();
 
 		projector.invalidate();
 
-		assert.isFalse(called);
+		assert.isFalse(rafSpy.called);
 	},
 	'invalidate after attached'() {
-		let called = false;
-
-		class RenderCapturingWidget extends TestWidget {
-			public scheduleRender() {
-				super.scheduleRender();
-
-				if ((<any> this)._scheduled) {
-					called = true;
-				}
-			}
-		}
-
-		const projector: any = new RenderCapturingWidget();
+		const projector: any = new TestWidget();
 
 		projector.append();
 		projector.invalidate();
-		assert.isTrue(called);
+		assert.isTrue(rafSpy.called);
 	},
 	'reattach'() {
 		const root = document.createElement('div');
