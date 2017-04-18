@@ -1,6 +1,7 @@
 import { assign } from '@dojo/core/lang';
 import { includes, find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
+import { propagateProperty } from '../decorators/propagateProperty';
 import { Constructor, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
 import { WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
 
@@ -127,6 +128,7 @@ function createThemeClassesLookup(classes: ThemeClasses[]): ClassNames {
  * Function that returns a class decorated with with Themeable functionality
  */
 export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeableProperties>>>(base: T): T & Constructor<ThemeableMixin> {
+	@propagateProperty('theme')
 	class Themeable extends base {
 
 		/**

@@ -2,9 +2,10 @@
 import { assign } from '@dojo/core/lang';
 import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
+import { propagateProperty } from '../decorators/propagateProperty';
+import { isHNode } from './../d';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
 import { WidgetBase, afterRender } from './../WidgetBase';
-import { isHNode } from './../d';
 
 export interface I18nProperties extends WidgetProperties {
 	/**
@@ -65,6 +66,8 @@ export interface I18nMixin {
 }
 
 export function I18nMixin<T extends Constructor<WidgetBase<I18nProperties>>>(base: T): T & Constructor<I18nMixin> {
+	@propagateProperty('locale')
+	@propagateProperty('rtl')
 	class I18n extends base {
 
 		constructor(...args: any[]) {
