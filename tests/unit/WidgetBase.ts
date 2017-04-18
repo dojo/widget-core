@@ -25,7 +25,7 @@ registerSuite({
 		});
 
 		assert.lengthOf(widget.children, 0);
-		widget.setChildren([expectedChild]);
+		widget.__setChildren__([expectedChild]);
 		assert.lengthOf(widget.children, 1);
 		assert.strictEqual(widget.children[0], expectedChild);
 		assert.isTrue(childrenEventEmitted);

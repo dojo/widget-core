@@ -588,7 +588,7 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 			}
 
 			if (Array.isArray(children)) {
-				child.setChildren(children);
+				child.__setChildren__(children);
 			}
 			return child.__render__();
 		}
