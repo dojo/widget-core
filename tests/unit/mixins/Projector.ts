@@ -202,7 +202,7 @@ registerSuite({
 			called = true;
 		});
 
-		projector.setProperties({ foo: 'hello' });
+		projector.__setProperties__({ foo: 'hello' });
 
 		assert.isTrue(called);
 	},

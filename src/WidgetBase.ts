@@ -568,12 +568,12 @@ export class WidgetBase<P extends WidgetProperties> extends Evented implements W
 
 			if (cachedChild) {
 				child = cachedChild.child;
-				child.setProperties(properties);
+				child.__setProperties__(properties);
 				cachedChild.used = true;
 			}
 			else {
 				child = new widgetConstructor();
-				child.setProperties(properties);
+				child.__setProperties__(properties);
 				child.own(child.on('invalidated', () => {
 					this.invalidate();
 				}));
