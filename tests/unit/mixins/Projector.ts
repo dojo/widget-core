@@ -100,7 +100,7 @@ registerSuite({
 			const childNodeLength = document.body.childNodes.length;
 			const projector = new TestWidget();
 
-			projector.__setChildren__([ v('h2', [ 'foo' ] ) ]);
+			projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
 			projector.append();
 
@@ -117,7 +117,7 @@ registerSuite({
 				}
 			}();
 
-			projector.__setChildren__([ v('h2', [ 'foo' ] ) ]);
+			projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
 			projector.replace();
 
@@ -130,7 +130,7 @@ registerSuite({
 			const childNodeLength = document.body.childNodes.length;
 			const projector = new TestWidget();
 
-			projector.__setChildren__([ v('h2', [ 'foo' ] ) ]);
+			projector.setChildren([ v('h2', [ 'foo' ] ) ]);
 
 			projector.merge();
 
@@ -202,7 +202,7 @@ registerSuite({
 			called = true;
 		});
 
-		projector.__setProperties__({ foo: 'hello' });
+		projector.setProperties({ foo: 'hello' });
 
 		assert.isTrue(called);
 	},
@@ -214,7 +214,7 @@ registerSuite({
 			called = true;
 		});
 
-		projector.__setChildren__([ v('div') ]);
+		projector.setChildren([ v('div') ]);
 
 		assert.isTrue(called);
 	},
