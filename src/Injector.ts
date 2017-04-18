@@ -3,28 +3,32 @@ import { WidgetBase } from './WidgetBase';
 import { Constructor, DNode, WidgetProperties } from './interfaces';
 
 export interface GetProperties {
-	<C, W extends WidgetProperties>(inject: C, properties: W): W;
+	<C, P extends WidgetProperties>(inject: C, properties: P): P;
 }
 
 export interface GetChildren {
-	<C, W extends WidgetProperties>(inject: C, children: DNode[]): DNode[];
+	<C>(inject: C, children: DNode[]): DNode[];
 }
 
-export interface InjectorProperties<P extends WidgetProperties> extends WidgetProperties {
+export interface InjectorProperties extends WidgetProperties {
 	render(): DNode;
 	getProperties: GetProperties;
-	properties: P;
+	properties: WidgetProperties;
 	getChildren: GetChildren;
 	children: DNode[];
 }
 
-export class BaseInjector<C> extends WidgetBase<InjectorProperties<C>> {
+export class BaseInjector<C> extends WidgetBase<InjectorProperties> {
 	public toInject(): C {
 		return <C> {};
 	}
 }
 
-export function InjectorMixin<C, T extends Constructor<BaseInjector<C>>>(Base: T, context: C): Constructor<BaseInjector<any>> {
+/**
+ * Mixin that extends the supplied Injector class with the proxy `render` and passing the provded to `context` to the Injector
+ * class via the constructor.
+ */
+export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, context: C): Constructor<BaseInjector<C>> {
 
 	class Injector extends Base {
 
@@ -40,9 +44,12 @@ export function InjectorMixin<C, T extends Constructor<BaseInjector<C>>>(Base: T
 				children,
 				getChildren
 			} = this.properties;
+			const injectedChildren = getChildren(this.toInject, children);
 
 			assign(properties, getProperties(this.toInject(), properties));
-			assign(children, getChildren(this.toInject(), children));
+			if (injectedChildren && injectedChildren.length) {
+				children.push(...getChildren(this.toInject, children));
+			}
 
 			return render();
 		}
@@ -50,3 +57,5 @@ export function InjectorMixin<C, T extends Constructor<BaseInjector<C>>>(Base: T
 	};
 	return Injector;
 }
+
+export default Injector;
