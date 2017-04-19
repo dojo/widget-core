@@ -15,10 +15,10 @@ export interface Mappers {
  * Default noop Mappers for the container.
  */
 const defaultMappers: Mappers = {
-	getProperties<C, P>(inject: C, properties: P): P {
-		return <P> {};
+	getProperties(inject: any, properties: any): any {
+		return {};
 	},
-	getChildren<C>(inject: C, children: DNode[]): DNode[] {
+	getChildren(inject: any, children: DNode[]): DNode[] {
 		return [];
 	}
 };
