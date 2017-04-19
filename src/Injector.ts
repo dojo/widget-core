@@ -23,7 +23,6 @@ export class BaseInjector<C> extends WidgetBase<InjectorProperties> {
 	private _context: C;
 
 	constructor(context: C = <C> {}) {
-		/* istanbul ignore next: disregard transpiled `super`'s "else" block */
 		super();
 		this._context = context;
 	}
@@ -42,7 +41,6 @@ export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, con
 	class Injector extends Base {
 
 		constructor(...args: any[]) {
-			/* istanbul ignore next: disregard transpiled `super`'s "else" block */
 			super(context);
 		}
 
