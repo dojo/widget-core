@@ -336,7 +336,7 @@ The functionality is provided by the `beforeRender` and `afterRender` decorators
 
 ##### BeforeRender
 
-The `beforeRender` call receives the widgets' `render` function, `properties` and `children` and is expected to return a function that satifies the `render` API. The `properties` and `children` are passed to enable them to be manipulated/decorated prior to the `render` is called. 
+The `beforeRender` call receives the widgets' `render` function, `properties` and `children` and is expected to return a function that satifies the `render` API. The `properties` and `children` are passed to enable them to be manipulated or decorated prior to the `render` being called. 
 
 This is the only time in the widget lifecycle that exposes either of these attributes to be manipluted outside of the property system.
 
@@ -372,7 +372,7 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
 
 ##### AfterRender
 
-The `afterRender` call recieves the returned `DNode`s from a widgets' `render` call, so that the nodes can decorated, manipulated or even swapped.
+The `afterRender` call receives the returned `DNode`s from a widgets' `render` call, so that the nodes can decorated, manipulated or even swapped.
 
 ```ts
 class MyBaseClass extends WidgetBase<WidgetProperties> {
@@ -511,7 +511,7 @@ registry.define('my-widget', () => {
 
 #### Injecting State
 
-Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Additionally having to do so often means that widgets are forced to be aware of properties/values that they they don't need, but are required to in order to ensure they are propagated to the children.
+Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Additionally having to do so often means that widgets are forced to be aware of properties/values that they they don't need, but are required to know about in order to ensure they are propagated to the children.
 
 Dojo 2 provides a mechanism to `inject` state directly to parts of the widget structure; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
 
@@ -523,15 +523,14 @@ const myStateContext = {
 };
 
 registry.define('state', Injector(BaseInjector, myStateContext));
-
 ```
 
-To use the injected state, create a `beforeRender` method that returns a reference to the registry item like any other widget and pass the properties required by the `InjectorProperties` interface.
+To use the injected state, create a `beforeRender` method that returns a render function that creates a `w` reference to the registry item like any other widget and pass the properties required by the `InjectorProperties` interface.
 
 ```ts
 beforeRender(renderFunc: () => DNode, properties: any, children: any): DNode {
 	return () => {
-		w('state', {
+		return w('state', {
 			render: renderFunc,
 			getProperties(context: any, properties: any): any {
 				return context;
