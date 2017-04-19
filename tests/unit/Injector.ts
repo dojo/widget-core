@@ -1,9 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { v, registry } from '../../src/d';
-import { WidgetBase } from '../../src/WidgetBase';
 import Injector, { BaseInjector } from './../../src/Injector';
-import { Constructor, DNode } from './../../src/interfaces';
+import { DNode } from './../../src/interfaces';
 
 class TestInjector<C> extends BaseInjector<C> {
 	public render() {
