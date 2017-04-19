@@ -25,7 +25,7 @@ const defaultMappers: Mappers = {
 
 /**
  * Given the registered name of an Injector entry with property and child binding mappers, the
- * container proxies the provided Widget and modifying the properties and children with the
+ * container proxies the provided Widget and modifies the properties and children with the
  * instructions provided by the mappers using the context provided by the registered Injector.
  */
 export function Container<P extends WidgetProperties, T extends Constructor<WidgetBase<P>>>(
