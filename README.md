@@ -511,9 +511,9 @@ registry.define('my-widget', () => {
 
 #### Injecting State
 
-Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Additionally having to do so often means that widgets are forced to be aware of properties/values that they they don't need, but are required to know about in order to ensure they are propagated to the children.
+Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Additionally having to do so often means that widgets are forced to be aware of properties that they they don't need, but are required to know about in order to ensure they are propagated to the children.
 
-Dojo 2 provides a mechanism to `inject` state directly to parts of the widget structure; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
+Dojo 2 provides a mechanism to inject state directly to parts of the widget structure; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
 
 ```ts
 import { Injector, BaseInjector } from '@dojo/widget-core/Injector';
@@ -525,7 +525,7 @@ const myStateContext = {
 registry.define('state', Injector(BaseInjector, myStateContext));
 ```
 
-To use the injected state, create a `beforeRender` method that returns a render function that creates a `w` reference to the registry item like any other widget and pass the properties required by the `InjectorProperties` interface.
+To use the injected state, create a `beforeRender` method that returns a render function which creates a `w` reference to the registry item like any other widget and pass the properties required by the `InjectorProperties` interface.
 
 ```ts
 beforeRender(renderFunc: () => DNode, properties: any, children: any): DNode {
@@ -545,7 +545,9 @@ beforeRender(renderFunc: () => DNode, properties: any, children: any): DNode {
 }
 ```
 
-This will inject the values of `myState` as properties to the widget. For convenience, Dojo 2 provides mixin called `Container` that will decorate a widget with the above `beforeRender` implementation. Using the `Container` mixin enables any view widget to have state injected without coupling the widget to always have state injected. This means the widget can also be used as a normal widget with properties being passed from it's parent.
+This will inject the values of `myState` as properties to the widget, as the returned object from `getProperties` is mixed over the widgets' existing properties. 
+
+For convenience, Dojo 2 provides mixin called `Container` that will decorate a widget with the above `beforeRender` implementation. Using the `Container` mixin enables any view widget to have state injected without coupling the widget to always have state injected. This means the widget can also be used as a normal widget with properties being passed from it's parent.
 
 
 ```ts
