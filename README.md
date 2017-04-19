@@ -513,7 +513,7 @@ registry.define('my-widget', () => {
 
 Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Additionally having to do so often means that widgets are forced to be aware of properties that they they don't need, but are required to know about in order to ensure they are propagated to the children.
 
-Dojo 2 provides a mechanism to inject state directly to parts of the widget structure; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
+Dojo 2 provides a mechanism to inject state directly to parts of the widget tree; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
 
 ```ts
 import { Injector, BaseInjector } from '@dojo/widget-core/Injector';
