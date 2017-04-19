@@ -14,7 +14,7 @@ export interface Mappers {
 /**
  * Default noop Mappers for the container.
  */
-const defautMappers: Mappers = {
+const defaultMappers: Mappers = {
 	getProperties<C, P>(inject: C, properties: P): P {
 		return <P> {};
 	},
@@ -31,7 +31,7 @@ const defautMappers: Mappers = {
 export function Container<P extends WidgetProperties, T extends Constructor<WidgetBase<P>>>(
 	Base: T,
 	name: string,
-	{ getProperties = defautMappers.getProperties, getChildren = defautMappers.getChildren }: any = defautMappers
+	{ getProperties = defaultMappers.getProperties, getChildren = defaultMappers.getChildren }: any = defaultMappers
 ): T {
 
 	class Container extends Base {
