@@ -3,7 +3,7 @@ import { WidgetBase } from './WidgetBase';
 import { Constructor, DNode, WidgetProperties } from './interfaces';
 
 export interface GetProperties {
-	<C, P extends WidgetProperties>(inject: C, properties: P): P;
+	<C, P extends WidgetProperties>(inject: C, properties: P): any;
 }
 
 export interface GetChildren {
@@ -19,20 +19,30 @@ export interface InjectorProperties extends WidgetProperties {
 }
 
 export class BaseInjector<C> extends WidgetBase<InjectorProperties> {
+
+	private _context: C;
+
+	constructor(context: C = <C> {}) {
+		/* istanbul ignore next: disregard transpiled `super`'s "else" block */
+		super();
+		this._context = context;
+	}
+
 	public toInject(): C {
-		return <C> {};
+		return this._context;
 	}
 }
 
 /**
- * Mixin that extends the supplied Injector class with the proxy `render` and passing the provded to `context` to the Injector
+ * Mixin that extends the supplied Injector class with the proxy `render` and passing the provided to `context` to the Injector
  * class via the constructor.
  */
-export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, context: C): Constructor<BaseInjector<C>> {
+export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, context: C): T {
 
 	class Injector extends Base {
 
 		constructor(...args: any[]) {
+			/* istanbul ignore next: disregard transpiled `super`'s "else" block */
 			super(context);
 		}
 
@@ -44,16 +54,15 @@ export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, con
 				children,
 				getChildren
 			} = this.properties;
-			const injectedChildren = getChildren(this.toInject, children);
+			const injectedChildren = getChildren(this.toInject(), children);
 
 			assign(properties, getProperties(this.toInject(), properties));
 			if (injectedChildren && injectedChildren.length) {
-				children.push(...getChildren(this.toInject, children));
+				children.push(...injectedChildren);
 			}
 
 			return render();
 		}
-
 	};
 	return Injector;
 }
