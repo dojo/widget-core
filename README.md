@@ -372,7 +372,7 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
 
 ##### AfterRender
 
-The `afterRender` call recieves the returned `DNode`s from a widgets' `render` cal, so that the nodes can decorated/manipulated or even swapped.
+The `afterRender` call recieves the returned `DNode`s from a widgets' `render` call, so that the nodes can decorated, manipulated or even swapped.
 
 ```ts
 class MyBaseClass extends WidgetBase<WidgetProperties> {
