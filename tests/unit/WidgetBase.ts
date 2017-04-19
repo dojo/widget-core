@@ -539,8 +539,8 @@ registerSuite({
 			}
 
 			const widget = new ExtendedTestWidget();
-			widget.setChildren([v('baz', { baz: 'qux' })]);
-			widget.setProperties({ foo: 'bar' });
+			widget.__setChildren__([v('baz', { baz: 'qux' })]);
+			widget.__setProperties__({ foo: 'bar' });
 			const qux: any = widget.__render__();
 			assert.equal(qux.vnodeSelector, 'qux');
 			assert.deepEqual(qux.properties, { bind: widget, bar: 'foo', foo: 'bar' });

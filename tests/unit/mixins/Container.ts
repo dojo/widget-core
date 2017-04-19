@@ -50,7 +50,7 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state');
 		const widget = new TestWidgetContainer();
-		widget.setProperties({ foo: 'bar' });
+		widget.__setProperties__({ foo: 'bar' });
 		widget.__render__();
 	},
 	'container with no default mappers'() {
@@ -64,8 +64,8 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state', { getProperties, getChildren });
 		const widget = new TestWidgetContainer();
-		widget.setProperties({ foo: 'bar' });
-		widget.setChildren([]);
+		widget.__setProperties__({ foo: 'bar' });
+		widget.__setChildren__([]);
 		widget.__render__();
 	},
 	'container with custom getProperties mapper only'() {
@@ -82,8 +82,8 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state', { getProperties });
 		const widget = new TestWidgetContainer();
-		widget.setProperties({ foo: 'bar' });
-		widget.setChildren([ child ]);
+		widget.__setProperties__({ foo: 'bar' });
+		widget.__setChildren__([ child ]);
 		widget.__render__();
 	},
 	'container with custom getChildren mapper only'() {
@@ -98,7 +98,7 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state', { getChildren });
 		const widget = new TestWidgetContainer();
-		widget.setProperties({ foo: 'bar' });
+		widget.__setProperties__({ foo: 'bar' });
 		widget.__render__();
 	}
 });
