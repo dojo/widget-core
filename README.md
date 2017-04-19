@@ -561,7 +561,7 @@ function getProperties(context: any, properties: any): any {
 const MyViewWidgetContainer = Container(MyViewWidget, 'state', { getProperties });
 ```
 
-**Note:** that both the getProperties and getChildren functions do not need to be provided, if the functions are not defined the default mappers will be used that return an empty object and an empty array respectively.
+**Note:** that both the `getProperties` and `getChildren` functions do not need to be provided, if the functions are not defined the default mappers will be used that return an empty object and an empty array respectively.
 
 There may be times when the default `BaseInjector` doesn't meet the all your needs. For example if the context contains a reference to an eventable instance, you may want to add an event listener in the Injector to perform some logic, perhaps invalidate the widget. 
 
