@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/dojo/widget-core/branch/master/graph/badge.svg)](https://codecov.io/gh/dojo/widget-core)
 [![npm version](https://badge.fury.io/js/%40dojo%2Fwidget-core.svg)](https://badge.fury.io/js/%40dojo%2Fwidget-core)
 
-This repo provides users with the ability to write their own Dojo 2 widgets.
+This repo provides users with the ability to write their own Dojo 2 widgets
 
 We also provide a suite of pre-built widgets to use in your applications: [(@dojo/widgets)](https://github.com/dojo/widgets).
 
