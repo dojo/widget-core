@@ -384,7 +384,7 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
 }
 ```
 
-And using the afterRender function for non decorator environments:
+And using the `afterRender` function for non decorator environments:
 
 ```ts
 class MyBaseClass extends WidgetBase<WidgetProperties> {
@@ -511,9 +511,7 @@ registry.define('my-widget', () => {
 
 #### Injecting State
 
-Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. 
-
-Additionally having to do so often means that widgets are forced to be aware of properties that they they don't need, but are required to know about in order to ensure they are propagated to the children.
+Working with larger widget structures, it can quickly become tiresome and complex to pass all the required properties down the tree. Needing to pass all required properties also means widgets often need to be aware of properties that are only needed for ensuring their propagation to child widgets.
 
 Dojo 2 provides a mechanism to inject state directly to parts of the widget tree; this is done by defining an `Injector` in the `registry` and passing a context object that will source the state that is to be injected.
 
