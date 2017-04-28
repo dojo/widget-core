@@ -25,7 +25,7 @@ export const HNODE = Symbol('Identifier for a HNode.');
 /**
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
-export function isWNode(child: DNode): child is WNode {
+export function isWNode<P extends WidgetProperties, C>(child: DNode<P, C>): child is WNode<P, C> {
 	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
 }
 
@@ -70,19 +70,7 @@ export const registry = new WidgetRegistry();
 /**
  * Wrapper function for calls to create a widget.
  */
-export function w<P extends WidgetProperties>(widgetConstructor: WidgetBaseConstructor<P> | string, properties: P, children?: DNode[]): WNode;
-export function w<P extends WidgetProperties>(widgetConstructor: WidgetBaseConstructor<P> | string, children: DNode[]): WNode;
-export function w<P extends WidgetProperties>(widgetConstructor: WidgetBaseConstructor<P> | string): WNode;
-export function w<P extends WidgetProperties>(widgetConstructor: WidgetBaseConstructor<P> | string, propertiesOrChildren: P | DNode[] = <P> {}, children: DNode[] = []): WNode {
-		let properties: P;
-
-	if (Array.isArray(propertiesOrChildren)) {
-		children = propertiesOrChildren;
-		properties = <P> {};
-	}
-	else {
-		properties = propertiesOrChildren;
-	}
+export function w<P extends WidgetProperties = WidgetProperties, C extends WidgetProperties = WidgetProperties>(widgetConstructor: WidgetBaseConstructor<P, C> | string, properties: WidgetProperties & P, children: DNode<C>[] = []): WNode<P, C> {
 
 	return {
 		children,

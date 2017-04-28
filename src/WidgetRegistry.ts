@@ -2,11 +2,11 @@ import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import Symbol from '@dojo/shim/Symbol';
 import Evented from '@dojo/core/Evented';
-import { WidgetConstructor } from './interfaces';
+import { WidgetBaseConstructor } from './interfaces';
 
-export type WidgetConstructorFunction = () => Promise<WidgetConstructor>;
+export type WidgetConstructorFunction = () => Promise<WidgetBaseConstructor>;
 
-export type WidgetRegistryItem = WidgetConstructor | Promise<WidgetConstructor> | WidgetConstructorFunction;
+export type WidgetRegistryItem = WidgetBaseConstructor | Promise<WidgetBaseConstructor> | WidgetConstructorFunction;
 
 /**
  * Widget base symbol type
@@ -32,7 +32,7 @@ export interface WidgetRegistry {
 	 * @param widgetLabel The label of the widget to return
 	 * @returns The WidgetRegistryItem for the widgetLabel, `null` if no entry exists
 	 */
-	get(widgetLabel: string): WidgetConstructor | null;
+	get(widgetLabel: string): WidgetBaseConstructor | null;
 
 	/**
 	 * Returns a boolean if an entry for the label exists
@@ -49,7 +49,7 @@ export interface WidgetRegistry {
  * @param item the item to check
  * @returns true/false indicating if the item is a WidgetConstructor
  */
-export function isWidgetBaseConstructor(item: any): item is WidgetConstructor {
+export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructor {
 	return Boolean(item && item._type === WIDGET_BASE_TYPE);
 }
 
@@ -92,7 +92,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		}
 	}
 
-	get(widgetLabel: string): WidgetConstructor | null {
+	get(widgetLabel: string): WidgetBaseConstructor | null {
 		if (!this.has(widgetLabel)) {
 			return null;
 		}
