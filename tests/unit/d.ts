@@ -80,17 +80,7 @@ registerSuite({
 			const dNode = w(TestChildWidget, { myChildProperty: '' }, [ v('div') ]);
 
 			assert.equal(dNode.type, WNODE);
-			assert.deepEqual(dNode.widgetConstructor, TestWidget);
-			assert.lengthOf(dNode.children, 1);
-			assert.isTrue(isWNode(dNode));
-			assert.isFalse(isHNode(dNode));
-		},
-		'create WNode wrapper using label with children'() {
-			const properties: any = { id: 'id', classes: [ 'world' ] };
-			const dNode = w('my-widget', [ w(WidgetBase, properties) ]);
-
-			assert.equal(dNode.type, WNODE);
-			assert.deepEqual(dNode.widgetConstructor, 'my-widget');
+			assert.deepEqual(dNode.widgetConstructor, TestChildWidget);
 			assert.lengthOf(dNode.children, 1);
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
