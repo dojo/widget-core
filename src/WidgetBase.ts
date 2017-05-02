@@ -124,7 +124,7 @@ function isHNodeWithKey(node: DNode): node is HNode {
  * Main widget base for all widgets to extend
  */
 @diffProperty('bind', DiffType.REFERENCE)
-export class WidgetBase<P extends WidgetProperties = WidgetProperties, C = any> extends Evented implements WidgetBaseInterface<P, C> {
+export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends WidgetProperties = WidgetProperties> extends Evented implements WidgetBaseInterface<P, C> {
 
 	/**
 	 * static identifier

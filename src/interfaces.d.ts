@@ -290,7 +290,7 @@ export interface WNode<P extends WidgetProperties = WidgetProperties, C extends 
 /**
  * union type for all possible return types from render
  */
-export type DNode<P extends WidgetProperties = WidgetProperties, C = any> = HNode | WNode<P, C> | string | null;
+export type DNode<P extends WidgetProperties = WidgetProperties, C extends WidgetProperties = WidgetProperties> = HNode | WNode<P, C> | string | null;
 
 /**
  * the event emitted on properties:changed
