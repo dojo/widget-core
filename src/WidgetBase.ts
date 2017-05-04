@@ -223,7 +223,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
 	 */
 	@afterRender()
-	protected attachLifecycleCallbacks (node: DNode) {
+	protected attachLifecycleCallbacks (node: DNode): DNode {
 		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
 		// with "key" properties.
 
