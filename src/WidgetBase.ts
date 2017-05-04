@@ -139,7 +139,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	/**
 	 * children array
 	 */
-	private _children: C[];
+	private _children: (C | null)[];
 
 	/**
 	 * marker indicating if the widget requires a render
@@ -350,11 +350,11 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._previousProperties = this.properties;
 	}
 
-	public get children(): C[] {
+	public get children(): (C | null)[] {
 		return this._children;
 	}
 
-	public __setChildren__(children: C[]): void {
+	public __setChildren__(children: (C | null)[]): void {
 		this._dirty = true;
 		this._children = children;
 		this.emit({

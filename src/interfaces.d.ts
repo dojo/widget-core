@@ -350,7 +350,7 @@ export interface WidgetBaseInterface<
 	/**
 	 * Returns the widget's children
 	 */
-	readonly children: C[];
+	readonly children: (C | null)[];
 
 	/**
 	 * Sets the properties for the widget. Responsible for calling the diffing functions for the properties against the
@@ -365,7 +365,7 @@ export interface WidgetBaseInterface<
 	/**
 	 * Sets the widget's children
 	 */
-	__setChildren__(children: C[]): void;
+	__setChildren__(children: (C | null)[]): void;
 
 	/**
 	 * Main internal function for dealing with widget rendering
