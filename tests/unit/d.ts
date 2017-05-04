@@ -4,13 +4,6 @@ import { assign } from '@dojo/core/lang';
 import { DNode, HNode, WNode, WidgetProperties } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
 import { v, w, decorate, registry, WNODE, HNODE, isWNode, isHNode } from '../../src/d';
-import WidgetRegistry from './../../src/WidgetRegistry';
-
-class TestFactoryRegistry extends WidgetRegistry {
-	clear(this: any) {
-		this.registry.clear();
-	}
-}
 
 interface ChildProperties extends WidgetProperties {
 	myChildProperty: string;

@@ -8,8 +8,6 @@ import {
 	HNode,
 	WNode,
 	VirtualDomProperties,
-	WidgetProperties,
-	WidgetBaseConstructor,
 	WidgetBaseInterface,
 	DefaultWidgetBaseInterface
 } from './interfaces';
