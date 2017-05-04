@@ -326,8 +326,6 @@ export interface PropertiesChangeRecord<P extends WidgetProperties> {
 	properties: P;
 }
 
-
-
 /**
  * WidgetBase constructor type
  */

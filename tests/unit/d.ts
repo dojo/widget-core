@@ -39,7 +39,7 @@ class TestWidget extends WidgetBase<TestProperties, WNode<TestChildWidget>> {
 			w(WidgetBase, { myProperty: true })
 		]);
 	}
-};
+}
 
 registerSuite({
 	name: 'd',
