@@ -13,6 +13,8 @@ export type WidgetRegistryItem = WidgetBaseConstructor | Promise<WidgetBaseConst
  */
 export const WIDGET_BASE_TYPE = Symbol('Widget Base');
 
+export type RegistryLabel = string | Symbol;
+
 /**
  * Widget Registry Interface
  */
@@ -24,7 +26,7 @@ export interface WidgetRegistry {
 	 * @param widgetLabel The label of the widget to register
 	 * @param registryItem The registry item to define
 	 */
-	define(widgetLabel: string, registryItem: WidgetRegistryItem): void;
+	define(widgetLabel: RegistryLabel, registryItem: WidgetRegistryItem): void;
 
 	/**
 	 * Return a WidgetRegistryItem for the given label, null if an entry doesn't exist
@@ -32,7 +34,7 @@ export interface WidgetRegistry {
 	 * @param widgetLabel The label of the widget to return
 	 * @returns The WidgetRegistryItem for the widgetLabel, `null` if no entry exists
 	 */
-	get(widgetLabel: string): WidgetBaseConstructor | null;
+	get(widgetLabel: RegistryLabel): WidgetBaseConstructor | null;
 
 	/**
 	 * Returns a boolean if an entry for the label exists
@@ -40,7 +42,7 @@ export interface WidgetRegistry {
 	 * @param widgetLabel The label to search for
 	 * @returns boolean indicating if a widget registry item exists
 	 */
-	has(widgetLabel: string): boolean;
+	has(widgetLabel: RegistryLabel): boolean;
 }
 
 /**
@@ -61,13 +63,13 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 	/**
 	 * internal map of labels and WidgetRegistryItem
 	 */
-	private registry: Map<string, WidgetRegistryItem> = new Map<string, WidgetRegistryItem>();
+	private registry: Map<RegistryLabel, WidgetRegistryItem> = new Map<RegistryLabel, WidgetRegistryItem>();
 
-	has(widgetLabel: string): boolean {
+	has(widgetLabel: RegistryLabel): boolean {
 		return this.registry.has(widgetLabel);
 	}
 
-	define(widgetLabel: string, item: WidgetRegistryItem): void {
+	define(widgetLabel: RegistryLabel, item: WidgetRegistryItem): void {
 		if (this.registry.has(widgetLabel)) {
 			throw new Error(`widget has already been registered for '${widgetLabel}'`);
 		}
@@ -92,7 +94,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		}
 	}
 
-	get(widgetLabel: string): WidgetBaseConstructor | null {
+	get(widgetLabel: RegistryLabel): WidgetBaseConstructor | null {
 		if (!this.has(widgetLabel)) {
 			return null;
 		}

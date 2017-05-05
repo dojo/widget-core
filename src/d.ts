@@ -71,7 +71,7 @@ export const registry = new WidgetRegistry();
 /**
  * Wrapper function for calls to create a widget.
  */
-export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<W> | string, properties: W['properties'], children: W['children'] = []): WNode<W> {
+export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<W> | string | Symbol, properties: W['properties'], children: W['children'] = []): WNode<W> {
 
 	return {
 		children,

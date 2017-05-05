@@ -269,7 +269,7 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	/**
 	 * Constructor to create a widget or string constructor label
 	 */
-	widgetConstructor: Constructor<W> | string;
+	widgetConstructor: Constructor<W> | string | Symbol;
 
 	/**
 	 * Properties to set against a widget instance

@@ -1,6 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
 import { WidgetBaseConstructor } from './interfaces';
-import WidgetRegistry from './WidgetRegistry';
+import WidgetRegistry, { RegistryLabel } from './WidgetRegistry';
 
 export default class RegistryHandler extends Evented {
 	private _registries: { handle?: any, registry: WidgetRegistry }[] = [];
@@ -31,13 +31,13 @@ export default class RegistryHandler extends Evented {
 		});
 	}
 
-	has(widgetLabel: string): boolean {
+	has(widgetLabel: RegistryLabel): boolean {
 		return this._registries.some((registryWrapper) => {
 			return registryWrapper.registry.has(widgetLabel);
 		});
 	}
 
-	get(widgetLabel: string): WidgetBaseConstructor | null {
+	get(widgetLabel: RegistryLabel): WidgetBaseConstructor | null {
 		for (let i = 0; i < this._registries.length; i++) {
 			const registryWrapper = this._registries[i];
 			const item = registryWrapper.registry.get(widgetLabel);
