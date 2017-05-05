@@ -3,8 +3,9 @@ import { Evented } from '@dojo/core/Evented';
 import { includes, find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
 import { Constructor, DNode, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
-import { w } from './../d';
-import { BaseInjector } from './../Injector';
+import { w, registry } from './../d';
+import { WidgetRegistry } from './../WidgetRegistry';
+import { BaseInjector, Injector } from './../Injector';
 import { beforeRender, WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
 
 /**
@@ -132,25 +133,65 @@ function createThemeClassesLookup(classes: ThemeClasses[]): ClassNames {
 	}, <ClassNames> {});
 }
 
+/**
+ * The class for the theme injector context, used to control the theme once the
+ * theme injector has been defined in the registry.
+ */
 export class ThemeInjectorContext extends Evented {
-	theme: any;
 
+	private _theme: any;
+
+	/**
+	 * @param theme optional theme to initialize the context with
+	 */
 	constructor(theme?: any) {
 		super({});
-		this.theme = theme;
+		this._theme = theme;
 	}
 
-	set(theme: any) {
-		this.theme = theme;
+	/**
+	 * @param theme the theme object to set
+	 */
+	public set(theme: any) {
+		this._theme = theme;
 		this.emit({ type: 'invalidate' });
+	}
+
+	/**
+	 * Return the current theme
+	 */
+	public get theme(): any {
+		return this._theme;
 	}
 }
 
+/**
+ * Custom ThemeInjector class that listens to the invalidate event
+ * from the context to `invalidate` any widgets the have had a theme
+ * injected.
+ */
 export class ThemeInjector extends BaseInjector<ThemeInjectorContext> {
 	constructor(context: ThemeInjectorContext) {
 		super(context);
 		this.own(context.on('invalidate', this.invalidate.bind(this)));
 	}
+}
+
+/**
+ * Convience function that given a theme and an optional registry, the theme
+ * injector is defined against the registry and the theme context return.
+ *
+ * @param theme the theme to set
+ * @param themeRegistry registry to define the theme injector against. Defaults
+ * to the global registry
+ *
+ * @returns the theme context instance used to set the theme
+ */
+export function registerThemeInjector(theme: any, themeRegistry: WidgetRegistry = registry): ThemeInjectorContext {
+	const themeInjectorContext = new ThemeInjectorContext(theme);
+	const ThemeInjectorBase = Injector(ThemeInjector, themeInjectorContext);
+	themeRegistry.define(INJECTED_THEME_KEY, ThemeInjectorBase);
+	return themeInjectorContext;
 }
 
 /**
