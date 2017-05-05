@@ -28,7 +28,7 @@ export interface Mappers {
  */
 export const defaultMappers: Mappers = {
 	getProperties(inject: any, properties: any): any {
-		return {};
+		return Object.create(null);
 	},
 	getChildren(inject: any, children: DNode[]): DNode[] {
 		return [];
