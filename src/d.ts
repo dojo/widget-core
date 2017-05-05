@@ -117,22 +117,14 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNod
 		};
 }
 
-export function tsx(tag: any, properties = {}, ...children: any[]) {
-	properties = properties === null ? {} : properties;
-	if (typeof tag === 'string') {
-		return v(tag, properties, children);
-	}
-	else if (tag.type === REGISTRY_ITEM) {
-		const registryItem = new tag();
-		return w(registryItem.name, properties, children);
-	}
-	else {
-		return w(tag, properties, children);
-	}
+export class FromRegistry<P> {
+	static type = REGISTRY_ITEM;
+	properties: P;
+	name: string;
 }
 
-export function fromRegistry<P>(tag: string) {
-	return class {
+export function fromRegistry<P>(tag: string): Constructor<FromRegistry<P>> {
+	return class extends FromRegistry<P> {
 		properties: P;
 		static type = REGISTRY_ITEM;
 		name = tag;
