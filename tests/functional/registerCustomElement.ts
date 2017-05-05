@@ -12,6 +12,7 @@ registerSuite({
 
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
 			.findByCssSelector('test-button > button');
 	},
 	'custom element initial properties are set correctly'(this: any) {
@@ -21,6 +22,7 @@ registerSuite({
 
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
 			.findByCssSelector('test-button > button')
 			.then((element: any) => {
 				return element.getVisibleText();
@@ -36,6 +38,7 @@ registerSuite({
 
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
 			.findByCssSelector('test-button > button')
 			.click()
 			.end()
@@ -51,6 +54,7 @@ registerSuite({
 
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
 			.findByCssSelector('test-button > button')
 			.end()
 			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
@@ -65,6 +69,7 @@ registerSuite({
 
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
 			.findByCssSelector('no-attributes > button')
 			.end()
 			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
