@@ -176,9 +176,9 @@ The widget registry allows for the lazy loading of widgets.
 
 ### tsx
 
-In additional to the programatic functions `v` and `w`, widget-core supports the use of the `jsx` syntax known as [`tsx`](https://www.typescriptlang.org/docs/handbook/jsx.html) in TypeScript.
+In additional to the programatic functions `v` and `w`, widget-core optionally supports the use of the `jsx` syntax known as [`tsx`](https://www.typescriptlang.org/docs/handbook/jsx.html) in TypeScript.
 
-To start to use `jsx` in your project the widgets need to be named with a `.tsx` extension and some configuration is required in the projects `tsconfig.json`:
+To start to use `jsx` in your project the widgets need to be named with a `.tsx` extension and some configuration is required in the project's `tsconfig.json`:
 
 Add the configuration options for `jsx`:
 
@@ -217,7 +217,7 @@ class MyWidgetWithTsx extends WidgetBase<MyProperties> {
 }
 ```
 
-**Note:** Unfortunately `tsx` is not directly used so needs to be ignored by linters.
+**Note:** Unfortunately `tsx` is not directly used within the module so will report as an unused import so would be needed to be ignored by linters.
 
 ### Writing Custom Widgets
 

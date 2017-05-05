@@ -12,7 +12,7 @@ registerSuite({
 		assert.strictEqual((<any> RegistryWrapper).type, REGISTRY_ITEM);
 		const registryWrapper = new RegistryWrapper();
 		assert.strictEqual(registryWrapper.name, 'tag');
-		// These will always be undefined but show the type inference.
+		// These will always be undefined but show the type inference of properties.
 		registryWrapper.properties = {};
 		assert.isUndefined(registryWrapper.properties.key);
 		assert.isUndefined(registryWrapper.properties.bind);
