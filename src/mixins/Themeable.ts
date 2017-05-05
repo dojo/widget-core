@@ -144,7 +144,7 @@ export class ThemeInjectorContext extends Evented {
 		this.theme = theme;
 		this.emit({ type: 'invalidate' });
 	}
-};
+}
 
 export class ThemeInjector extends BaseInjector<ThemeInjectorContext> {
 	constructor(context: ThemeInjectorContext) {

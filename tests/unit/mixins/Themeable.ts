@@ -467,7 +467,6 @@ registerSuite({
 			assert.deepEqual(vNode.children[0].properties.classes, { theme1Class1: true });
 			assert.deepEqual(vNode.children[1].properties.classes, { theme1Class1: true });
 			assert.strictEqual(invalidateCallCount, 0);
-			debugger;
 			themeInjectorContext.set(testTheme2);
 			vNode = testWidget.__render__();
 			assert.lengthOf(vNode.children, 2);
