@@ -1,7 +1,7 @@
-import { v, w, REGISTRY_ITEM } from './d';
-import { DNode } from './interfaces';
-
+import { v, w } from './d';
+import { Constructor, DNode } from './interfaces';
 import { WNode, VirtualDomProperties } from './interfaces';
+
 declare global {
 	namespace JSX {
 		type Element = WNode;
@@ -14,19 +14,33 @@ declare global {
 	}
 }
 
+export const REGISTRY_ITEM = Symbol('Identifier for an item from the Widget Registry.');
+
+export class FromRegistry<P> {
+	static type = REGISTRY_ITEM;
+	properties: P;
+	name: string;
+}
+
+export function fromRegistry<P>(tag: string): Constructor<FromRegistry<P>> {
+	return class extends FromRegistry<P> {
+		properties: P;
+		static type = REGISTRY_ITEM;
+		name = tag;
+	};
+}
+
+function spreadChildren(children: any[], child: any): any[] {
+	if (Array.isArray(child)) {
+		return child.reduce(spreadChildren, children);
+	}
+	else {
+		return [ ...children, child ];
+	}
+}
+
 export function tsx(tag: any, properties = {}, ...children: any[]): DNode {
-
-	children = children.reduce((s, child) => {
-		if (Array.isArray(child)) {
-			return child.reduce((b, c) => {
-				return [...b, c];
-			}, s);
-		}
-		else {
-			return [ ...s, child];
-		}
-	}, []);
-
+	children = children.reduce(spreadChildren, []);
 	properties = properties === null ? {} : properties;
 	if (typeof tag === 'string') {
 		return v(tag, properties, children);
