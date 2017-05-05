@@ -1,8 +1,11 @@
 import { assign } from '@dojo/core/lang';
+import { Evented } from '@dojo/core/Evented';
 import { includes, find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
-import { Constructor, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
-import { WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
+import { Constructor, DNode, WidgetProperties, PropertiesChangeEvent } from './../interfaces';
+import { w } from './../d';
+import { BaseInjector } from './../Injector';
+import { beforeRender, WidgetBase, onPropertiesChanged, handleDecorator } from './../WidgetBase';
 
 /**
  * A representation of the css class names to be applied and
@@ -54,6 +57,8 @@ export interface ClassesFunctionChain {
 type ThemeClasses = { [key: string]: string; };
 
 const THEME_KEY = ' _key';
+
+export const INJECTED_THEME_KEY = 'theme';
 
 /**
  * Interface for the ThemeableMixin
@@ -127,6 +132,27 @@ function createThemeClassesLookup(classes: ThemeClasses[]): ClassNames {
 	}, <ClassNames> {});
 }
 
+export class ThemeInjectorContext extends Evented {
+	theme: any;
+
+	constructor(theme?: any) {
+		super({});
+		this.theme = theme;
+	}
+
+	set(theme: any) {
+		this.theme = theme;
+		this.emit({ type: 'invalidate' });
+	}
+};
+
+export class ThemeInjector extends BaseInjector<ThemeInjectorContext> {
+	constructor(context: ThemeInjectorContext) {
+		super(context);
+		this.own(context.on('invalidate', this.invalidate.bind(this)));
+	}
+}
+
 /**
  * Function that returns a class decorated with with Themeable functionality
  */
@@ -197,6 +223,27 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 			};
 
 			return assign(classesGetter.bind(classesFunctionChain), classesFunctionChain);
+		}
+
+		@beforeRender()
+		protected injectTheme(renderFunc: () => DNode, properties: ThemeableProperties, children: DNode[]): () => DNode {
+			return () => {
+				const hasInjectedTheme = this.registries.has(INJECTED_THEME_KEY);
+				if (hasInjectedTheme) {
+					return w<ThemeInjector>(INJECTED_THEME_KEY, {
+						render: renderFunc,
+						getProperties(inject: ThemeInjectorContext, properties: ThemeableProperties): ThemeableProperties {
+							if (!properties.theme) {
+								return { theme: inject.theme };
+							}
+							return {};
+						},
+						properties,
+						children
+					});
+				}
+				return renderFunc();
+			};
 		}
 
 		/**
