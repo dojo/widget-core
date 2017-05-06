@@ -212,6 +212,11 @@ export interface VirtualDomProperties {
 }
 
 /**
+ * Type of the `WidgetRegistry` label
+ */
+export type RegistryLabel = string | Symbol;
+
+/**
  * Base widget properties
  */
 export interface WidgetProperties {
@@ -269,7 +274,7 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	/**
 	 * Constructor to create a widget or string constructor label
 	 */
-	widgetConstructor: Constructor<W> | string | Symbol;
+	widgetConstructor: Constructor<W> | RegistryLabel;
 
 	/**
 	 * Properties to set against a widget instance

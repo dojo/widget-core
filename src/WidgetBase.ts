@@ -15,9 +15,10 @@ import {
 	WidgetBaseInterface,
 	PropertyChangeRecord,
 	PropertiesChangeEvent,
+	RegistryLabel,
 	HNode
 } from './interfaces';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, RegistryLabel } from './WidgetRegistry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 import RegistryHandler from './RegistryHandler';
 
 export { DiffType };

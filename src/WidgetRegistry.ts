@@ -2,7 +2,7 @@ import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import Symbol from '@dojo/shim/Symbol';
 import Evented from '@dojo/core/Evented';
-import { WidgetBaseConstructor } from './interfaces';
+import { WidgetBaseConstructor, RegistryLabel } from './interfaces';
 
 export type WidgetBaseConstructorFunction = () => Promise<WidgetBaseConstructor>;
 
@@ -12,8 +12,6 @@ export type WidgetRegistryItem = WidgetBaseConstructor | Promise<WidgetBaseConst
  * Widget base symbol type
  */
 export const WIDGET_BASE_TYPE = Symbol('Widget Base');
-
-export type RegistryLabel = string | Symbol;
 
 /**
  * Widget Registry Interface
