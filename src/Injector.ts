@@ -16,7 +16,7 @@ export interface GetChildren {
 }
 
 /**
- * The binding mappers for properties and children
+ * The binding mappers for properties and children.
  */
 export interface Mappers {
 	getProperties: GetProperties;

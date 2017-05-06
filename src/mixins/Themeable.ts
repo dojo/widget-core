@@ -142,7 +142,7 @@ export class ThemeInjectorContext extends Evented {
 	private _theme: any;
 
 	/**
-	 * @param theme optional theme to initialize the context with
+	 * @param theme optional theme to initialize the context
 	 */
 	constructor(theme?: any) {
 		super({});
@@ -166,7 +166,7 @@ export class ThemeInjectorContext extends Evented {
 }
 
 /**
- * Custom ThemeInjector class that listens to the invalidate event
+ * Custom `ThemeInjector` class that listens to the `invalidate` event
  * from the context to `invalidate` any widgets the have had a theme
  * injected.
  */
@@ -178,8 +178,8 @@ export class ThemeInjector extends BaseInjector<ThemeInjectorContext> {
 }
 
 /**
- * Convience function that given a theme and an optional registry, the theme
- * injector is defined against the registry and the theme context return.
+ * Convenience function that is given a theme and an optional registry, the theme
+ * injector is defined against the registry, returning the theme context.
  *
  * @param theme the theme to set
  * @param themeRegistry registry to define the theme injector against. Defaults

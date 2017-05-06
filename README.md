@@ -742,9 +742,9 @@ The theme can be applied to individual widgets or to a project and property pass
 
 ##### Injecting a theme
 
-The theming system supports injecting a theme that is configured outside of the usual property passing down the widget tree. 
+The theming system supports injecting a theme that is configured externally to the usual mechanism of passing properties down the widget tree.
 
-This is done using a `ThemeInjectorContext` instance that is passed to the `Injector` mixin along with the `ThemeInjector` class. Once the theme injector is defined in the registry the `theme` can be changed by called the `ThemeInjectorContext#set(theme: any)` API on the instance of the injector context.
+This is done using a `ThemeInjectorContext` instance that is passed to the `Injector` mixin along with the `ThemeInjector` class. Once the theme injector is defined in the registry, the `theme` can be changed by calling the `ThemeInjectorContext#set(theme: any)` API on the instance of the injector context.
 
 ```ts
 // Create the singleton injector context
@@ -757,9 +757,9 @@ const ThemeInjectorBase = Injector<ThemeInjectorContext, Constructor<ThemeInject
 registry.define(INJECTED_THEME_KEY, ThemeInjectorBase);
 ```
 
-Once this is defined any themeable widgets without an explicit `theme` property will be controlled via the theme set within the `themeInjectorContext`. To change the theme simply call `themeInjectorContext.set(myNewTheme);` and all widgets that are using the injected theme will be updated to the new theme.
+Once this theme injector is defined, any themeable widgets without an explicit `theme` property will be controlled via the theme set within the `themeInjectorContext`. To change the theme simply call `themeInjectorContext.set(myNewTheme);` and all widgets that are using the injected theme will be updated to the new theme.
 
-To make this even easier `Themeable` exports a helper function wraps the behaviour defined above and returns the context, with a parameter for the `theme` and an optional `registry` to that the injector will be defined in. If a `registry` is not provided then the global `registry` is used.
+To make this even easier, `Themeable` exports a helper function wraps the behavior defined above and returns the context, with a parameter for the `theme` and an optional `registry` for the injector to be defined. If a `registry` is not provided then the global `registry` is used.
 
 ```ts
 // Uses global registry
