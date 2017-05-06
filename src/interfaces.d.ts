@@ -214,7 +214,7 @@ export interface VirtualDomProperties {
 /**
  * Type of the `WidgetRegistry` label
  */
-export type RegistryLabel = string | Symbol;
+export type RegistryLabel = string | symbol;
 
 /**
  * Base widget properties

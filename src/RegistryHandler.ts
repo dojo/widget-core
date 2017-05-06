@@ -1,6 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
-import { WidgetBaseConstructor } from './interfaces';
-import WidgetRegistry, { RegistryLabel } from './WidgetRegistry';
+import { WidgetBaseConstructor, RegistryLabel } from './interfaces';
+import WidgetRegistry from './WidgetRegistry';
 
 export default class RegistryHandler extends Evented {
 	private _registries: { handle?: any, registry: WidgetRegistry }[] = [];
