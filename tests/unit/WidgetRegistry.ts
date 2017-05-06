@@ -27,8 +27,11 @@ registerSuite({
 			const factoryRegistry = new WidgetRegistry();
 			factoryRegistry.define('my-widget', WidgetBase);
 			factoryRegistry.define('my-lazy-widget', lazyFactory);
+			const symbolLabel = Symbol();
+			factoryRegistry.define(symbolLabel, lazyFactory);
 			assert.isTrue(factoryRegistry.has('my-widget'));
 			assert.isTrue(factoryRegistry.has('my-lazy-widget'));
+			assert.isTrue(factoryRegistry.has(symbolLabel));
 		},
 		'throw an error using a previously registered factory label'() {
 			const factoryRegistry = new WidgetRegistry();
@@ -48,6 +51,13 @@ registerSuite({
 			const factoryRegistry = new WidgetRegistry();
 			factoryRegistry.define('my-widget', WidgetBase);
 			const factory = factoryRegistry.get('my-widget');
+			assert.strictEqual(factory, WidgetBase);
+		},
+		'get a factory registered with a Symbol'() {
+			const symbolLabel = Symbol();
+			const factoryRegistry = new WidgetRegistry();
+			factoryRegistry.define(symbolLabel, WidgetBase);
+			const factory = factoryRegistry.get(symbolLabel);
 			assert.strictEqual(factory, WidgetBase);
 		},
 		'throws an error if factory has not been registered.'() {
