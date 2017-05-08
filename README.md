@@ -219,6 +219,16 @@ class MyWidgetWithTsx extends WidgetBase<MyProperties> {
 
 **Note:** Unfortunately `tsx` is not directly used within the module so will report as an unused import so would be needed to be ignored by linters.
 
+### Responding to Render Events
+
+Sometimes you may want to be notified when a widget is rendered. Widgets will emit a `render:rendered` event with the result of the render operation.
+
+```typescript
+widget.on('render:rendered', event => {
+    // handle render event
+});
+```
+
 ### Writing Custom Widgets
 
 The `WidgetBase` class provides the functionality needed to create Custom Widgets.

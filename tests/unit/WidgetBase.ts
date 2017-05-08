@@ -1417,5 +1417,29 @@ widget.__setProperties__({
 
 		assert.equal(testWidget.getAfterRenders().length, 2);
 		assert.equal(testWidget2.getAfterRenders().length, 3);
+	},
+
+	'render:rendered'() {
+		const callOrder: string[] = [];
+
+		class TestWidget extends WidgetBase<any> {
+			render() {
+				callOrder.push('render');
+				return 'test';
+			}
+		}
+
+		const widget = new TestWidget();
+
+		widget.on('render:rendered', event => {
+			callOrder.push('render:rendered');
+
+			assert.strictEqual(event.target, widget);
+			assert.strictEqual(event.result, 'test');
+		});
+
+		widget.__render__();
+
+		assert.deepEqual(callOrder, ['render', 'render:rendered']);
 	}
 });

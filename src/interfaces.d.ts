@@ -311,6 +311,20 @@ export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends Ev
 }
 
 /**
+ * The event emitted on render:rendered
+ */
+export interface RenderRenderedEvent<T, P extends WidgetProperties> extends EventTypedObject<'render:rendered'> {
+	/**
+	 * The result of the render operation
+	 */
+	result: VNode | string | undefined;
+	/**
+	 * the target (this)
+	 */
+	target: T;
+}
+
+/**
  * Property Change record for specific property diff functions
  */
 export interface PropertyChangeRecord {
