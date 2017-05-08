@@ -6,7 +6,7 @@ registerSuite({
 	name: 'registerCustomElement',
 
 	'custom elements are registered'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+		if (this.remote.session.capabilities.browser === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
 			this.skip('not compatible with iOS 9.1');
 		}
 
@@ -16,7 +16,7 @@ registerSuite({
 			.findByCssSelector('test-button > button');
 	},
 	'custom element initial properties are set correctly'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+		if (this.remote.session.capabilities.browser === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
 			this.skip('not compatible with iOS 9.1');
 		}
 
@@ -32,7 +32,7 @@ registerSuite({
 			});
 	},
 	'custom element event handlers are registered'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+		if (this.remote.session.capabilities.browser === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
 			this.skip('not compatible with iOS 9.1');
 		}
 
@@ -48,7 +48,7 @@ registerSuite({
 			});
 	},
 	'setting custom element attribute updates properties'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+		if (this.remote.session.capabilities.browser === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
 			this.skip('not compatible with iOS 9.1');
 		}
 
@@ -63,7 +63,7 @@ registerSuite({
 			}, undefined, 1000), undefined);
 	},
 	'setting custom element properties updates widget'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+		if (this.remote.session.capabilities.browser === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
 			this.skip('not compatible with iOS 9.1');
 		}
 
