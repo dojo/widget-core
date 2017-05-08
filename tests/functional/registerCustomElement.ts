@@ -6,8 +6,8 @@ registerSuite({
 	name: 'registerCustomElement',
 
 	'custom elements are registered'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'internet explorer' && this.remote.session.capabilities.version === '10') {
-			this.skip('not compatible with IE 10');
+		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+			this.skip('not compatible with iOS 9.1');
 		}
 
 		return this.remote
@@ -16,8 +16,8 @@ registerSuite({
 			.findByCssSelector('test-button > button');
 	},
 	'custom element initial properties are set correctly'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'internet explorer' && this.remote.session.capabilities.version === '10') {
-			this.skip('not compatible with IE 10');
+		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+			this.skip('not compatible with iOS 9.1');
 		}
 
 		return this.remote
@@ -32,8 +32,8 @@ registerSuite({
 			});
 	},
 	'custom element event handlers are registered'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'internet explorer' && this.remote.session.capabilities.version === '10') {
-			this.skip('not compatible with IE 10');
+		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+			this.skip('not compatible with iOS 9.1');
 		}
 
 		return this.remote
@@ -48,8 +48,8 @@ registerSuite({
 			});
 	},
 	'setting custom element attribute updates properties'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'internet explorer' && this.remote.session.capabilities.version === '10') {
-			this.skip('not compatible with IE 10');
+		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+			this.skip('not compatible with iOS 9.1');
 		}
 
 		return this.remote
@@ -63,8 +63,8 @@ registerSuite({
 			}, undefined, 1000), undefined);
 	},
 	'setting custom element properties updates widget'(this: any) {
-		if (this.remote.session.capabilities.browserName === 'internet explorer' && this.remote.session.capabilities.version === '10') {
-			this.skip('not compatible with IE 10');
+		if (this.remote.session.capabilities.browserName === 'iPhone' && this.remote.session.capabilities.version === '9.1') {
+			this.skip('not compatible with iOS 9.1');
 		}
 
 		return this.remote
