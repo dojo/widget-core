@@ -53,6 +53,13 @@ export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructo
 	return Boolean(item && item._type === WIDGET_BASE_TYPE);
 }
 
+function getEventType(label: RegistryLabel): RegistryLabel {
+	if (typeof label === 'string') {
+		return `loaded:${label}`;
+	}
+	return label;
+}
+
 /**
  * The WidgetRegistry implementation
  */
@@ -69,7 +76,8 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 
 	define(widgetLabel: RegistryLabel, item: WidgetRegistryItem): void {
 		if (this.registry.has(widgetLabel)) {
-			throw new Error(`widget has already been registered for '${widgetLabel}'`);
+			const regsitryLabelDesc = typeof widgetLabel === 'string' ? widgetLabel : widgetLabel.toString();
+			throw new Error(`widget has already been registered for '${regsitryLabelDesc}'`);
 		}
 
 		this.registry.set(widgetLabel, item);
@@ -78,7 +86,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 			item.then((widgetCtor) => {
 				this.registry.set(widgetLabel, widgetCtor);
 				this.emit({
-					type: `loaded:${widgetLabel}`
+					type: getEventType(widgetLabel)
 				});
 				return widgetCtor;
 			}, (error) => {
@@ -87,7 +95,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		}
 		else {
 			this.emit({
-				type: `loaded:${widgetLabel}`
+				type: getEventType(widgetLabel)
 			});
 		}
 	}
@@ -113,7 +121,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		promise.then((widgetCtor) => {
 			this.registry.set(widgetLabel, widgetCtor);
 			this.emit({
-				type: `loaded:${widgetLabel}`
+				type: getEventType(widgetLabel)
 			});
 			return widgetCtor;
 		}, (error) => {
