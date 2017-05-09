@@ -1,6 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
 import { WidgetBaseConstructor, RegistryLabel } from './interfaces';
-import WidgetRegistry, { getLoadedEventType } from './WidgetRegistry';
+import WidgetRegistry, { WidgetRegistryEventObject } from './WidgetRegistry';
 
 export default class RegistryHandler extends Evented {
 	private _registries: { handle?: any, registry: WidgetRegistry }[] = [];
@@ -45,10 +45,12 @@ export default class RegistryHandler extends Evented {
 				return item;
 			}
 			else if (!registryWrapper.handle) {
-				registryWrapper.handle = registryWrapper.registry.on(getLoadedEventType(widgetLabel), () => {
-					this.emit({ type: 'invalidate' });
-					registryWrapper.handle.destroy();
-					registryWrapper.handle = undefined;
+				registryWrapper.handle = registryWrapper.registry.on(widgetLabel, (event: WidgetRegistryEventObject) => {
+					if (event.action === 'loaded') {
+						this.emit({ type: 'invalidate' });
+						registryWrapper.handle.destroy();
+						registryWrapper.handle = undefined;
+					}
 				});
 			}
 		}

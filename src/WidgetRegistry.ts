@@ -1,7 +1,9 @@
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import Symbol from '@dojo/shim/Symbol';
-import Evented from '@dojo/core/Evented';
+import { EventedCallback } from '@dojo/interfaces/bases';
+import { Handle } from '@dojo/interfaces/core';
+import Evented, { EventObject, BaseEventedEvents } from '@dojo/core/Evented';
 import { WidgetBaseConstructor, RegistryLabel } from './interfaces';
 
 export type WidgetBaseConstructorFunction = () => Promise<WidgetBaseConstructor>;
@@ -12,6 +14,14 @@ export type WidgetRegistryItem = WidgetBaseConstructor | Promise<WidgetBaseConst
  * Widget base symbol type
  */
 export const WIDGET_BASE_TYPE = Symbol('Widget Base');
+
+export interface WidgetRegistryEventObject extends EventObject {
+	action: string;
+}
+
+export interface WidgetRegistryEvents extends BaseEventedEvents {
+	(type: RegistryLabel, listener: EventedCallback<WidgetRegistryEventObject> | EventedCallback<WidgetRegistryEventObject>[]): Handle;
+}
 
 /**
  * Widget Registry Interface
@@ -53,22 +63,27 @@ export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructo
 	return Boolean(item && item._type === WIDGET_BASE_TYPE);
 }
 
-export function getLoadedEventType(label: RegistryLabel): RegistryLabel {
-	if (typeof label === 'string') {
-		return `loaded:${label}`;
-	}
-	return label;
-}
-
 /**
  * The WidgetRegistry implementation
  */
 export class WidgetRegistry extends Evented implements WidgetRegistry {
 
+	on: WidgetRegistryEvents;
+
 	/**
 	 * internal map of labels and WidgetRegistryItem
 	 */
 	private registry: Map<RegistryLabel, WidgetRegistryItem> = new Map<RegistryLabel, WidgetRegistryItem>();
+
+	/**
+	 * Emit loaded event for registry label
+	 */
+	private emitLoadedEvent(widgetLabel: RegistryLabel): void {
+		this.emit({
+			type: widgetLabel,
+			action: 'loaded'
+		});
+	}
 
 	has(widgetLabel: RegistryLabel): boolean {
 		return this.registry.has(widgetLabel);
@@ -84,18 +99,14 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		if (item instanceof Promise) {
 			item.then((widgetCtor) => {
 				this.registry.set(widgetLabel, widgetCtor);
-				this.emit({
-					type: getLoadedEventType(widgetLabel)
-				});
+				this.emitLoadedEvent(widgetLabel);
 				return widgetCtor;
 			}, (error) => {
 				throw error;
 			});
 		}
 		else {
-			this.emit({
-				type: getLoadedEventType(widgetLabel)
-			});
+			this.emitLoadedEvent(widgetLabel);
 		}
 	}
 
@@ -119,9 +130,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 
 		promise.then((widgetCtor) => {
 			this.registry.set(widgetLabel, widgetCtor);
-			this.emit({
-				type: getLoadedEventType(widgetLabel)
-			});
+			this.emitLoadedEvent(widgetLabel);
 			return widgetCtor;
 		}, (error) => {
 			throw error;
