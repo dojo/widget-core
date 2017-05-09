@@ -1,6 +1,7 @@
 import global from '@dojo/core/global';
+import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
-import { dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
+import { dom, Projection, ProjectionOptions, VNode, VNodeProperties } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
@@ -35,6 +36,11 @@ export interface AttachOptions {
 	 * Element to attach the projector.
 	 */
 	root?: Element;
+
+	/**
+	 * The virtual DOM node to use as the initial root
+	 */
+	vnode?: VNode;
 }
 
 export interface ProjectorMixin<P extends WidgetProperties> {
@@ -42,17 +48,17 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	/**
 	 * Append the projector to the root.
 	 */
-	append(root?: Element): Handle;
+	append(root?: Element, vnode?: VNode): Handle;
 
 	/**
 	 * Merge the projector onto the root.
 	 */
-	merge(root?: Element): Handle;
+	merge(root?: Element, vnode?: VNode): Handle;
 
 	/**
 	 * Replace the root with the projector node.
 	 */
-	replace(root?: Element): Handle;
+	replace(root?: Element, vnode?: VNode): Handle;
 
 	/**
 	 * Pause the projector.
@@ -68,6 +74,15 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	 * Schedule a render.
 	 */
 	scheduleRender(): void;
+
+	/**
+	 * Serializes the current projection
+	 *
+	 * This is intended to make it easy to accomplish server side rendering, where a projection can be serialized and
+	 * transferred to a different context to be re-hydrated by passing it as an argument to `.append()`, `.merge()`, or
+	 * `.replace()`.
+	 */
+	serialize(): VNode;
 
 	/**
 	 * Sets the properties for the widget. Responsible for calling the diffing functions for the properties against the
@@ -122,12 +137,57 @@ const eventHandlers = [
 	'onsubmit'
 ];
 
+/**
+ * A guard that ensure that the `value` is just a plain object
+ */
+function isPlainObject<T extends object>(value: any): value is T {
+	return Boolean(
+		value &&
+		typeof value === 'object' &&
+		(value.constructor === Object || value.constructor === undefined)
+	);
+}
+
+/**
+ * Take a `VNode` and return a _sanitized_ version which can be moved from one context to another
+ */
+function serializeVNode({ vnodeSelector, properties, children, text }: VNode): VNode {
+	function filter(properties: VNodeProperties): VNodeProperties {
+		const filtered: { [prop: string]: any } = {};
+		Object.keys(properties).forEach((name) => {
+			const propertyValue = properties[name];
+			const typeOfProperty = typeof properties[name];
+			if (typeOfProperty === 'function' || name === 'bind') {
+				return;
+			}
+			if (propertyValue && typeOfProperty === 'object') {
+				if (isPlainObject(propertyValue)) {
+					(<any> filtered)[name] = assign({}, propertyValue);
+				}
+			}
+			else {
+				(<any> filtered)[name] = propertyValue;
+			}
+		});
+		return filtered;
+	}
+
+	return {
+		vnodeSelector,
+		properties: properties ? filter(properties) : undefined,
+		children: children ? children.map(serializeVNode) : undefined,
+		text,
+		domNode: null
+	};
+}
+
 export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T): T & Constructor<ProjectorMixin<P>> {
 	return class extends base {
 
 		public projectorState: ProjectorAttachState;
 
 		private _root: Element;
+		private _rootVNode: VNode;
 		private _attachHandle: Handle;
 		private _projectionOptions: ProjectionOptions;
 		private _projection: Projection | undefined;
@@ -155,28 +215,31 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 			this.projectorState = ProjectorAttachState.Detached;
 		}
 
-		public append(root?: Element) {
+		public append(root?: Element, vnode?: VNode) {
 			const options = {
 				type: AttachType.Append,
-				root
+				root,
+				vnode
 			};
 
 			return this.attach(options);
 		}
 
-		public merge(root?: Element) {
+		public merge(root?: Element, vnode?: VNode) {
 			const options = {
 				type: AttachType.Merge,
-				root
+				root,
+				vnode
 			};
 
 			return this.attach(options);
 		}
 
-		public replace(root?: Element) {
+		public replace(root?: Element, vnode?: VNode) {
 			const options = {
 				type: AttachType.Replace,
-				root
+				root,
+				vnode
 			};
 
 			return this.attach(options);
@@ -210,6 +273,10 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 
 		public get root(): Element {
 			return this._root;
+		}
+
+		public serialize(): VNode {
+			return serializeVNode(this._rootVNode);
 		}
 
 		public setChildren(children: DNode[]): void {
@@ -248,11 +315,11 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 			this._scheduled = undefined;
 
 			if (this._projection) {
-				this._projection.update(this._boundRender());
+				this._projection.update(this._rootVNode = this._boundRender());
 			}
 		}
 
-		private attach({ type, root }: AttachOptions): Handle {
+		private attach({ type, root, vnode }: AttachOptions): Handle {
 			if (root) {
 				this.root = root;
 			}
@@ -274,15 +341,17 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 				}
 			});
 
+			this._rootVNode = vnode || this._boundRender();
+
 			switch (type) {
 				case AttachType.Append:
-					this._projection = dom.append(this.root, this._boundRender(), this._projectionOptions);
+					this._projection = dom.append(this.root, this._rootVNode, this._projectionOptions);
 				break;
 				case AttachType.Merge:
-					this._projection = dom.merge(this.root, this._boundRender(), this._projectionOptions);
+					this._projection = dom.merge(this.root, this._rootVNode, this._projectionOptions);
 				break;
 				case AttachType.Replace:
-					this._projection = dom.replace(this.root, this._boundRender(), this._projectionOptions);
+					this._projection = dom.replace(this.root, this._rootVNode, this._projectionOptions);
 				break;
 			}
 
