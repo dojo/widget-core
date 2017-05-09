@@ -3,8 +3,11 @@ import has from '@dojo/has/has';
 import '@dojo/shim/Promise';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { spy } from 'sinon';
+import { spy, SinonSpy } from 'sinon';
+
+import { VNode } from '@dojo/interfaces/vdom';
 import { v } from '../../../src/d';
+import { DNode } from '../../../src/interfaces';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { waitFor } from '../waitFor';
@@ -463,5 +466,112 @@ registerSuite({
 
 		projector.append();
 		assert.isTrue(afterCreateCalled);
+	},
+
+	'serialization/deserialization': {
+		'.toJSON()'() {
+			const projector = new class extends TestWidget {
+				render() {
+					return v('div', {
+						bind: {
+							onElementCreated() {}
+						},
+						afterCreate() {},
+						onclick() {},
+						key: 'foo',
+						classes: {
+							'foo': true,
+							'bar': false
+						}
+					}, [ v('span', {}, [ 'baz' ]) ]);
+				}
+			};
+
+			const expectedJSON = JSON.stringify({
+				'vnodeSelector': 'div',
+				'properties': {
+					key: 'foo',
+					classes: {
+						foo: true,
+						bar: false
+					}
+				},
+				children: [
+					{ vnodeSelector: 'span', properties: {}, text: 'baz', domNode: null }
+				],
+				'domNode': null
+			});
+
+			const handle = projector.append();
+			assert.strictEqual(JSON.stringify(projector), expectedJSON, 'should have serialized as expected');
+			handle.destroy();
+		},
+
+		'append with vnode'() {
+			const root = document.createElement('div');
+			document.body.appendChild(root);
+			const onclickSpy = spy();
+			const afterCreateSpy = spy();
+			const renderSpy: SinonSpy & (() => DNode) = spy(() => {
+				return v('div', {
+						afterCreate: afterCreateSpy,
+						onclick: onclickSpy,
+						key: 'foo',
+						classes: {
+							'foo': true,
+							'bar': false
+						}
+					}, [ v('span', {}, [ 'baz' ]) ]);
+			});
+
+			const projector = new class extends TestWidget {
+				render() {
+					return renderSpy();
+				}
+			};
+
+			const vnode: VNode = {
+				'vnodeSelector': 'div',
+				'properties': {
+					key: 'foo',
+					classes: {
+						foo: true,
+						bar: false
+					}
+				},
+				children: [
+					{ vnodeSelector: 'span', properties: {}, children: undefined, text: 'baz', domNode: null }
+				],
+				text: undefined,
+				'domNode': null
+			};
+
+			projector.append(root, vnode);
+			assert.strictEqual(root.innerHTML, '<div class="foo"><span>baz</span></div>', 'should have properly rendered vnode');
+			assert.strictEqual(root.firstChild, vnode.domNode, 'should have attached the proper DOM node');
+			assert.strictEqual(root.firstChild!.firstChild, vnode.children![0].domNode, 'should have attached child node');
+			assert.isFalse(renderSpy.called, 'render should not have been called');
+			assert.isFalse(onclickSpy.called, 'onclick has not been called');
+
+			return new Promise((resolve, reject) => {
+					projector.invalidate();
+					setTimeout(() => {
+						try {
+							assert.isTrue(renderSpy.called, 'render has been called');
+							const evt = document.createEvent('CustomEvent');
+							evt.initEvent('click', true, true);
+							root.firstChild!.dispatchEvent(evt);
+							assert.isTrue(onclickSpy.called, 'The onclickSpy has been called');
+							resolve();
+						}
+						catch (e) {
+							reject(e);
+						}
+					}, 50);
+				})
+				.then(() => {
+					document.body.removeChild(root);
+				});
+		}
 	}
 });

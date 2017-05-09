@@ -1,7 +1,8 @@
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
-import { dom, Projection, ProjectionOptions, VNode, VNodeProperties } from 'maquette';
+import { ProjectionOptions, VNode, VNodeProperties } from '@dojo/interfaces/vdom';
+import { dom, Projection } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
