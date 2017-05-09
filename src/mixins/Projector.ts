@@ -1,5 +1,6 @@
 import global from '@dojo/core/global';
 import { Handle } from '@dojo/interfaces/core';
+import { VNode } from '@dojo/interfaces/vdom';
 import { dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
@@ -121,6 +122,19 @@ const eventHandlers = [
 	'onscroll',
 	'onsubmit'
 ];
+
+function setDomNodes(vnode: VNode, root: Node | null = null) {
+	vnode.domNode = root;
+	if (vnode.children && root) {
+		const childNodes: Node[] = [];
+		for (let i = 0; i < root.childNodes.length; i++) {
+			if (root.childNodes[i].nodeType === 1) {
+				childNodes.push(root.childNodes[i]);
+			}
+		}
+		vnode.children.forEach((child, i) => setDomNodes(child, childNodes[i]));
+	}
+}
 
 export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T): T & Constructor<ProjectorMixin<P>> {
 	return class extends base {
@@ -279,7 +293,9 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 					this._projection = dom.append(this.root, this._boundRender(), this._projectionOptions);
 				break;
 				case AttachType.Merge:
-					this._projection = dom.merge(this.root, this._boundRender(), this._projectionOptions);
+					const vnode: VNode = this._boundRender();
+					setDomNodes(vnode, this.root);
+					this._projection = dom.merge(this.root, vnode, this._projectionOptions);
 				break;
 				case AttachType.Replace:
 					this._projection = dom.replace(this.root, this._boundRender(), this._projectionOptions);
