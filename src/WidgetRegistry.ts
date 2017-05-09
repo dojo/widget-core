@@ -76,8 +76,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 
 	define(widgetLabel: RegistryLabel, item: WidgetRegistryItem): void {
 		if (this.registry.has(widgetLabel)) {
-			const regsitryLabelDesc = typeof widgetLabel === 'string' ? widgetLabel : widgetLabel.toString();
-			throw new Error(`widget has already been registered for '${regsitryLabelDesc}'`);
+			throw new Error(`widget has already been registered for '${widgetLabel.toString()}'`);
 		}
 
 		this.registry.set(widgetLabel, item);

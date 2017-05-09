@@ -33,7 +33,7 @@ registerSuite({
 			assert.isTrue(factoryRegistry.has('my-lazy-widget'));
 			assert.isTrue(factoryRegistry.has(symbolLabel));
 		},
-		'throw an error using a previously registered factory label'() {
+		'throw an error using a previously registered factory string label'() {
 			const factoryRegistry = new WidgetRegistry();
 			factoryRegistry.define('my-widget', WidgetBase);
 			try {
@@ -43,6 +43,19 @@ registerSuite({
 			catch (error) {
 				assert.isTrue(error instanceof Error);
 				assert.equal(error.message, 'widget has already been registered for \'my-widget\'');
+			}
+		},
+		'throw an error using a previously registered factory symbol label'() {
+			const myWidget = Symbol('symbol registry label');
+			const factoryRegistry = new WidgetRegistry();
+			factoryRegistry.define(myWidget, WidgetBase);
+			try {
+				factoryRegistry.define(myWidget, WidgetBase);
+				assert.fail();
+			}
+			catch (error) {
+				assert.isTrue(error instanceof Error);
+				assert.equal(error.message, 'widget has already been registered for \'Symbol(symbol registry label)\'');
 			}
 		}
 	},
