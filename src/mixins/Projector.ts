@@ -76,15 +76,6 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	scheduleRender(): void;
 
 	/**
-	 * Serializes the current projection
-	 *
-	 * This is intended to make it easy to accomplish server side rendering, where a projection can be serialized and
-	 * transferred to a different context to be re-hydrated by passing it as an argument to `.append()`, `.merge()`, or
-	 * `.replace()`.
-	 */
-	serialize(): VNode;
-
-	/**
 	 * Sets the properties for the widget. Responsible for calling the diffing functions for the properties against the
 	 * previous properties. Runs though any registered specific property diff functions collecting the results and then
 	 * runs the remainder through the catch all diff function. The aggregate of the two sets of the results is then
@@ -98,6 +89,15 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	 * Sets the widget's children
 	 */
 	setChildren(children: DNode[]): void;
+
+	/**
+	 * Serializes the current projection
+	 *
+	 * This is intended to make it easy to accomplish server side rendering, where a projection can be serialized and
+	 * transferred to a different context to be re-hydrated by passing it as an argument to `.append()`, `.merge()`, or
+	 * `.replace()`.
+	 */
+	toJSON(): VNode;
 
 	/**
 	 * Root element to attach the projector
@@ -275,16 +275,19 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 			return this._root;
 		}
 
-		public serialize(): VNode {
-			return serializeVNode(this._rootVNode);
-		}
-
 		public setChildren(children: DNode[]): void {
 			super.__setChildren__(children);
 		}
 
 		public setProperties(properties: P & { [index: string]: any }): void {
 			super.__setProperties__(properties);
+		}
+
+		public toJSON(): VNode {
+			if (!this._rootVNode) {
+				throw new Error('Projector missing root VNode.');
+			}
+			return serializeVNode(this._rootVNode);
 		}
 
 		public __render__() {
