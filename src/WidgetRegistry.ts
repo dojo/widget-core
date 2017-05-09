@@ -53,7 +53,7 @@ export function isWidgetBaseConstructor(item: any): item is WidgetBaseConstructo
 	return Boolean(item && item._type === WIDGET_BASE_TYPE);
 }
 
-function getEventType(label: RegistryLabel): RegistryLabel {
+export function getLoadedEventType(label: RegistryLabel): RegistryLabel {
 	if (typeof label === 'string') {
 		return `loaded:${label}`;
 	}
@@ -86,7 +86,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 			item.then((widgetCtor) => {
 				this.registry.set(widgetLabel, widgetCtor);
 				this.emit({
-					type: getEventType(widgetLabel)
+					type: getLoadedEventType(widgetLabel)
 				});
 				return widgetCtor;
 			}, (error) => {
@@ -95,7 +95,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		}
 		else {
 			this.emit({
-				type: getEventType(widgetLabel)
+				type: getLoadedEventType(widgetLabel)
 			});
 		}
 	}
@@ -121,7 +121,7 @@ export class WidgetRegistry extends Evented implements WidgetRegistry {
 		promise.then((widgetCtor) => {
 			this.registry.set(widgetLabel, widgetCtor);
 			this.emit({
-				type: getEventType(widgetLabel)
+				type: getLoadedEventType(widgetLabel)
 			});
 			return widgetCtor;
 		}, (error) => {
