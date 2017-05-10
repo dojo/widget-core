@@ -123,16 +123,15 @@ const eventHandlers = [
 	'onsubmit'
 ];
 
-function setDomNodes(vnode: VNode, root: Node | null = null) {
-	vnode.domNode = root;
-	if (vnode.children && root) {
-		const childNodes: Node[] = [];
-		for (let i = 0; i < root.childNodes.length; i++) {
-			if (root.childNodes[i].nodeType === 1) {
-				childNodes.push(root.childNodes[i]);
-			}
-		}
-		vnode.children.forEach((child, i) => setDomNodes(child, childNodes[i]));
+/**
+ * Internal function that maps existing DOM Elements to virtual DOM nodes.
+ * @param vnode The virtual DOM node
+ * @param domNode The Element, if any, to set on the virtual DOM node
+ */
+function setDomNodes(vnode: VNode, domNode: Element | null = null) {
+	vnode.domNode = domNode;
+	if (vnode.children && domNode) {
+		vnode.children.forEach((child, i) => setDomNodes(child, domNode.children[i]));
 	}
 }
 
