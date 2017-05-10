@@ -113,5 +113,25 @@ registerSuite({
 		return promise.then(() => {
 			assert.isTrue(invalidateCalled);
 		});
+	},
+	'noop when event action is not `loaded`'() {
+		const baz = Symbol();
+		let invalidateCalled = false;
+		let promise: Promise<any> = Promise.resolve();
+		const lazyWidget: any = () => {
+			promise = new Promise((resolve) => {
+			});
+			return promise;
+		};
+		const registryHandler = new RegistryHandler();
+		registryHandler.on('invalidate', () => {
+			invalidateCalled = true;
+		});
+
+		registryHandler.add(registry);
+		registry.define(baz, lazyWidget);
+		registryHandler.get(baz);
+		registry.emit({ type: baz, action: 'other' });
+		assert.isFalse(invalidateCalled);
 	}
 });
