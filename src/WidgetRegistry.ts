@@ -1,7 +1,6 @@
 import Promise from '@dojo/shim/Promise';
 import Map from '@dojo/shim/Map';
 import Symbol from '@dojo/shim/Symbol';
-import { EventedCallback } from '@dojo/interfaces/bases';
 import { Handle } from '@dojo/interfaces/core';
 import Evented, { EventObject, BaseEventedEvents } from '@dojo/core/Evented';
 import { WidgetBaseConstructor, RegistryLabel } from './interfaces';
@@ -19,8 +18,12 @@ export interface WidgetRegistryEventObject extends EventObject {
 	action: string;
 }
 
+export interface WidgetRegistryListener {
+	(event: WidgetRegistryEventObject): void;
+}
+
 export interface WidgetRegistryEvents extends BaseEventedEvents {
-	(type: RegistryLabel, listener: EventedCallback<WidgetRegistryEventObject> | EventedCallback<WidgetRegistryEventObject>[]): Handle;
+	(type: RegistryLabel, listener: WidgetRegistryListener | WidgetRegistryListener[]): Handle;
 }
 
 /**
