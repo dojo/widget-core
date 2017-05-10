@@ -59,7 +59,7 @@ type ThemeClasses = { [key: string]: string; };
 
 const THEME_KEY = ' _key';
 
-export const INJECTED_THEME_KEY = 'theme';
+export const INJECTED_THEME_KEY = Symbol('theme');
 
 /**
  * Interface for the ThemeableMixin
