@@ -195,24 +195,24 @@ registerSuite({
 				assert.strictEqual(root.childElementCount, childElementCount, 'should have the same number of children');
 				assert.strictEqual(select, root.childNodes[3], 'should have been reused');
 				assert.strictEqual(button, root.childNodes[5], 'should have been reused');
-				assert.isFalse(select.disabled);
-				assert.isFalse(button.disabled);
+				assert.isFalse(select.disabled, 'select should be enabled');
+				assert.isFalse(button.disabled, 'button shound be enabled');
 
 				assert.strictEqual(select.value, 'foo', 'foo should be selected');
 				assert.strictEqual(select.children.length, 3, 'should have 3 children');
 
-				assert.isFalse(onchangeListener.called);
-				assert.isFalse(onclickListener.called);
+				assert.isFalse(onchangeListener.called, 'onchangeListener should not have been called');
+				assert.isFalse(onclickListener.called, 'onclickListener should not have been called');
 
-				const changeEvent = document.createEvent('CustomEvent');
+				const changeEvent = document.createEvent('Event');
 				changeEvent.initEvent('change', true, true);
-				select.dispatchEvent(changeEvent);
-				assert.isTrue(onchangeListener.called);
+				select.onchange(changeEvent); // firefox doesn't like to dispatch this event
+				assert.isTrue(onchangeListener.called, 'onchangeListener should have been called');
 
 				const clickEvent = document.createEvent('CustomEvent');
 				clickEvent.initEvent('click', true, true);
 				button.dispatchEvent(clickEvent);
-				assert.isTrue(onclickListener.called);
+				assert.isTrue(onclickListener.called, 'onclickListener should have been called');
 
 				document.body.removeChild(iframe);
 			}
