@@ -15,7 +15,7 @@ import { WidgetBase } from '../../../src/WidgetBase';
 import { WidgetRegistry } from '../../../src/WidgetRegistry';
 import { WidgetProperties } from '../../../src/interfaces';
 import { RegistryMixin } from './../../../src/mixins/Registry';
-import { v, w } from '../../../src/d';
+import { v, w, registry } from '../../../src/d';
 import { stub, SinonStub } from 'sinon';
 
 import * as baseThemeClasses1 from './../../support/styles/testWidget1.css';
@@ -475,6 +475,11 @@ registerSuite({
 			assert.deepEqual(vNode.children[0].properties.classes, { theme1Class1: false, theme2Class1: true });
 			assert.deepEqual(vNode.children[1].properties.classes, { theme1Class1: false, theme2Class1: true });
 			assert.strictEqual(invalidateCallCount, 2);
+		},
+		'registerThemeInjector defaults to the global registry'() {
+			assert.isNull(registry.get(INJECTED_THEME_KEY));
+			registerThemeInjector(testTheme1);
+			assert.isOk(registry.get(INJECTED_THEME_KEY));
 		}
 	},
 	'integration': {
