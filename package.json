@@ -45,6 +45,7 @@
     "glob": "^7.0.6",
     "grunt": "^1.0.1",
     "grunt-dojo2": "beta1",
+    "grunt-dojo2-extras": "dojo/grunt-dojo2-extras#latest",
     "grunt-tslint": "^5.0.1",
     "intern": "^3.4.1",
     "istanbul": "^0.4.5",
