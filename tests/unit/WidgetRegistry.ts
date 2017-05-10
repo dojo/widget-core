@@ -55,7 +55,8 @@ registerSuite({
 			}
 			catch (error) {
 				assert.isTrue(error instanceof Error);
-				assert.equal(error.message, 'widget has already been registered for \'Symbol(symbol registry label)\'');
+				assert.include(error.message, 'widget has already been registered for');
+				assert.include(error.message, 'symbol registry label');
 			}
 		}
 	},
