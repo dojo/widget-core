@@ -1,4 +1,5 @@
 import global from '@dojo/core/global';
+import { createHandle } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode } from '@dojo/interfaces/vdom';
 import { dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
@@ -70,6 +71,15 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	resume(): void;
 
 	/**
+	 * Attach the project to a _sandboxed_ document fragment that is not part of the DOM.
+	 *
+	 * When sandboxed, the `Projector` will run in a sync manner, where renders are completed within the same turn.
+	 * The `Projector` creates a `DocumentFragment` which replaces any other `root` that has been set.
+	 * @param doc The `Document` to use, which defaults to the global `document`.
+	 */
+	sandbox(doc?: Document): Handle;
+
+	/**
 	 * Schedule a render.
 	 */
 	scheduleRender(): void;
@@ -88,6 +98,11 @@ export interface ProjectorMixin<P extends WidgetProperties> {
 	 * Sets the widget's children
 	 */
 	setChildren(children: DNode[]): void;
+
+	/**
+	 * Return a `string` that represents the HTML of the current projection.  The projector needs to be attached.
+	 */
+	toHtml(): string;
 
 	/**
 	 * Root element to attach the projector
@@ -149,12 +164,14 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 		public projectorState: ProjectorAttachState;
 
 		private _root: Element;
+		private _async = true;
 		private _attachHandle: Handle;
+		private _attachType: AttachType;
 		private _projectionOptions: ProjectionOptions;
 		private _projection: Projection | undefined;
 		private _scheduled: number | undefined;
 		private _paused: boolean;
-		private _boundDoRender: FrameRequestCallback;
+		private _boundDoRender: () => void;
 		private _boundRender: Function;
 
 		constructor(...args: any[]) {
@@ -220,7 +237,12 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 
 		public scheduleRender() {
 			if (this.projectorState === ProjectorAttachState.Attached && !this._scheduled && !this._paused) {
-				this._scheduled = global.requestAnimationFrame(this._boundDoRender);
+				if (this._async) {
+					this._scheduled = global.requestAnimationFrame(this._boundDoRender);
+				}
+				else {
+					this._boundDoRender();
+				}
 			}
 		}
 
@@ -235,12 +257,37 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 			return this._root;
 		}
 
+		public sandbox(doc: Document = document): Handle {
+			if (this.projectorState === ProjectorAttachState.Attached) {
+				throw new Error('Projector already attached, cannot create sandbox');
+			}
+			this._async = false;
+			const previousRoot = this.root;
+
+			/* free up the document fragment for GC */
+			this.own(createHandle(() => {
+				this._root = previousRoot;
+			}));
+			return this.attach({
+				/* DocumentFragment is not assignable to Element, but provides everything needed to work */
+				root: doc.createDocumentFragment() as any,
+				type: AttachType.Append
+			});
+		}
+
 		public setChildren(children: DNode[]): void {
 			super.__setChildren__(children);
 		}
 
 		public setProperties(properties: P & { [index: string]: any }): void {
 			super.__setProperties__(properties);
+		}
+
+		public toHtml(): string {
+			if (this.projectorState !== ProjectorAttachState.Attached) {
+				throw new Error('Projector is not attached, cannot return an HTML string of projection.');
+			}
+			return this._projection!.domNode.outerHTML;
 		}
 
 		public __render__() {
@@ -296,6 +343,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 					this._attachHandle = { destroy() { } };
 				}
 			});
+			this._attachType = type;
 
 			switch (type) {
 				case AttachType.Append:
