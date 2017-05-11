@@ -577,6 +577,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			}
 			if (!key && cachedChildren.length > 1) {
 				const errorMsg = 'It is recommended to provide a unique `key` property when using the same widget multiple times';
+				if (cachedChildren[0].child) {
+					console.warn(`${cachedChildren[0].child.constructor.name}:`);
+				}
 				console.warn(errorMsg);
 				this.emit({ type: 'error', target: this, error: new Error(errorMsg) });
 			}
