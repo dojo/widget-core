@@ -1,6 +1,14 @@
 import { assign } from '@dojo/core/lang';
-import { WidgetBase } from './WidgetBase';
-import { Constructor, DNode, WidgetProperties } from './interfaces';
+import { afterRender, WidgetBase } from './WidgetBase';
+import { decorate, isHNode, isWNode } from './d';
+import {
+	Constructor,
+	HNode,
+	DNode,
+	DefaultWidgetBaseInterface,
+	WNode,
+	WidgetProperties
+} from './interfaces';
 
 export interface GetProperties {
 	<C, P extends WidgetProperties>(inject: C, properties: P): any;
@@ -11,6 +19,7 @@ export interface GetChildren {
 }
 
 export interface InjectorProperties extends WidgetProperties {
+	bind: any;
 	render(): DNode;
 	getProperties: GetProperties;
 	properties: WidgetProperties;
@@ -42,6 +51,20 @@ export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, con
 
 		constructor(...args: any[]) {
 			super(context);
+		}
+
+		@afterRender()
+		protected decoratateBind(node: DNode) {
+			const { bind } = this.properties;
+			decorate(node, (node: HNode | WNode<DefaultWidgetBaseInterface>) => {
+				const { properties } = node;
+
+				if (!properties.bind) {
+					assign(properties, { bind });
+				}
+			}, (node: DNode) => { return isHNode(node) || isWNode(node); });
+
+			return node;
 		}
 
 		protected render(): DNode {
