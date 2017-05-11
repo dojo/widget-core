@@ -475,6 +475,12 @@ registerSuite({
 			assert.deepEqual(vNode.children[0].properties.classes, { theme1Class1: false, theme2Class1: true });
 			assert.deepEqual(vNode.children[1].properties.classes, { theme1Class1: false, theme2Class1: true });
 			assert.strictEqual(invalidateCallCount, 2);
+			themeInjectorContext.set(testTheme1);
+			vNode = testWidget.__render__();
+			assert.lengthOf(vNode.children, 2);
+			assert.deepEqual(vNode.children[0].properties.classes, { theme2Class1: false, theme1Class1: true });
+			assert.deepEqual(vNode.children[1].properties.classes, { theme2Class1: false, theme1Class1: true });
+			assert.strictEqual(invalidateCallCount, 4);
 		},
 		'registerThemeInjector defaults to the global registry'() {
 			assert.isNull(registry.get(INJECTED_THEME_KEY));

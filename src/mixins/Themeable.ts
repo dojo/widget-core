@@ -27,6 +27,7 @@ export type ClassNames = {
  * Properties required for the themeable mixin
  */
 export interface ThemeableProperties extends WidgetProperties {
+	injectedTheme?: any;
 	theme?: any;
 	extraClasses?: any;
 }
@@ -273,11 +274,11 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 				if (hasInjectedTheme) {
 					return w<ThemeInjector>(INJECTED_THEME_KEY, {
 						render: renderFunc,
-						getProperties(inject: ThemeInjectorContext, properties: ThemeableProperties): ThemeableProperties {
-							if (!properties.theme) {
-								return { theme: inject.theme };
+						getProperties: (inject: ThemeInjectorContext, properties: ThemeableProperties): ThemeableProperties => {
+							if (!properties.theme && this._theme !== properties.injectedTheme) {
+								this._recalculateClasses = true;
 							}
-							return {};
+							return { injectedTheme: inject.theme };
 						},
 						properties,
 						children
@@ -362,7 +363,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 		 * Recalculate registered classes for current theme.
 		 */
 		private recalculateThemeClasses() {
-			const { properties: { theme = {} } } = this;
+			const { properties: { injectedTheme = {}, theme = injectedTheme } } = this;
 			if (!this._registeredBaseThemes) {
 				this._registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ].reverse();
 				this.checkForDuplicates();
