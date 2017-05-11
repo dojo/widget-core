@@ -57,11 +57,8 @@ export function Injector<C, T extends Constructor<BaseInjector<C>>>(Base: T, con
 		protected decoratateBind(node: DNode) {
 			const { bind } = this.properties;
 			decorate(node, (node: HNode | WNode<DefaultWidgetBaseInterface>) => {
-				const { properties } = node;
-
-				if (!properties.bind) {
-					assign(properties, { bind });
-				}
+				const { properties = {} }: { properties: { bind?: any } } = node;
+				properties.bind = bind;
 			}, (node: DNode) => { return isHNode(node) || isWNode(node); });
 
 			return node;
