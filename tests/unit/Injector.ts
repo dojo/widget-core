@@ -40,7 +40,7 @@ registerSuite({
 		const render = (): DNode => { return v('div', {}, [
 				w(TestWidget, { testFunction }),
 				v('span'),
-				v('div', { bind: context })
+				v('div')
 			]);
 		};
 		const InjectorWidget = Injector(TestInjector, context);
@@ -68,7 +68,7 @@ registerSuite({
 		assert.deepEqual(testChildren, [ 'child' ]);
 		assert.deepEqual(renderedNode.properties, { bind });
 		assert.deepEqual(renderedNode.children[1].properties, { bind });
-		assert.deepEqual(renderedNode.children[2].properties, { bind: context });
+		assert.deepEqual(renderedNode.children[2].properties, { bind });
 		renderedNode.children[0].properties.testFunction();
 	},
 	'injector ignores constructor arguments'() {
