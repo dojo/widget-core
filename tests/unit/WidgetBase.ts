@@ -5,7 +5,9 @@ import * as assert from 'intern/chai!assert';
 import { stub, spy, SinonStub } from 'sinon';
 import { v, w, registry } from '../../src/d';
 import { DNode, WidgetProperties } from '../../src/interfaces';
-import { WidgetBase, diffProperty, DiffType, afterRender, beforeRender, onPropertiesChanged } from '../../src/WidgetBase';
+import {
+	WidgetBase, diffProperty, DiffType, afterRender, beforeRender, onPropertiesChanged
+} from '../../src/WidgetBase';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './../../src/WidgetRegistry';
 
 interface TestProperties extends WidgetProperties {
