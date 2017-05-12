@@ -112,7 +112,7 @@ registerSuite({
 				projector.destroy();
 				assert.strictEqual(projector.root, document.body, 'Root should be reverted to document.body');
 			},
-			'operates syncronously'() {
+			'operates synchronously'() {
 				let count = 0;
 				const projector = new class extends TestWidget {
 					render () {
@@ -125,7 +125,7 @@ registerSuite({
 				assert.strictEqual(count, 1, 'render should have been called once');
 				assert.strictEqual(projector.root.firstChild!.textContent, '1', 'should have rendered "1"');
 				projector.invalidate();
-				assert.strictEqual(count, 2, 'render should have been called syncronously');
+				assert.strictEqual(count, 2, 'render should have been called synchronously');
 				assert.strictEqual(projector.root.firstChild!.textContent, '2', 'should have rendered "2"');
 				projector.destroy();
 			},
