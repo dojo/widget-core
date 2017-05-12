@@ -1220,9 +1220,14 @@ widget.__setProperties__({
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
-			const warnMsg = 'It is recommended to provide a unique \'key\' property when using the same widget (TestWidgetTwo) multiple times';
 			class TestWidgetOne extends WidgetBase<any> {}
 			class TestWidgetTwo extends WidgetBase<any> {}
+			const widgetName = (<any> TestWidgetTwo).name;
+			let warnMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times';
+
+			if (widgetName) {
+				warnMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times`;
+			}
 
 			class TestWidget extends WidgetBase<any> {
 				render() {
