@@ -166,7 +166,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 		private _root: Element;
 		private _async = true;
 		private _attachHandle: Handle;
-		private _attachType: AttachType;
 		private _projectionOptions: ProjectionOptions;
 		private _projection: Projection | undefined;
 		private _scheduled: number | undefined;
@@ -343,7 +342,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 					this._attachHandle = { destroy() { } };
 				}
 			});
-			this._attachType = type;
 
 			switch (type) {
 				case AttachType.Append:
