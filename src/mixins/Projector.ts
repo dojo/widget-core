@@ -283,10 +283,10 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 		}
 
 		public toHtml(): string {
-			if (this.projectorState !== ProjectorAttachState.Attached) {
+			if (this.projectorState !== ProjectorAttachState.Attached || !this._projection) {
 				throw new Error('Projector is not attached, cannot return an HTML string of projection.');
 			}
-			return this._projection!.domNode.outerHTML;
+			return this._projection.domNode.outerHTML;
 		}
 
 		public __render__() {
