@@ -260,7 +260,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	protected decorateBind(node: DNode): DNode {
 		decorate(node, (node: InternalWNode | InternalHNode) => {
 			const { properties = {} }: { properties: { bind?: any } } = node;
-			properties.bind = this;
+			if (!properties.bind) {
+				properties.bind = this;
+			}
 		}, (node: DNode) => { return isHNode(node) || isWNode(node); });
 		return node;
 	}
