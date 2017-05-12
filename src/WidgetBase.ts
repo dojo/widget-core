@@ -59,6 +59,18 @@ interface DiffPropertyConfig {
 	diffFunction?<P>(previousProperty: P, newProperty: P): PropertyChangeRecord;
 }
 
+export interface WidgetMetaConstructor<T> {
+	new (properties: WidgetMetaProperties): T;
+}
+
+export interface WidgetMetaProperties {
+	nodes: Map<string, any>;
+}
+
+export interface WidgetMeta {
+	requiresRender?: boolean;
+}
+
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
 	(type: 'properties:changed', handler: EventedListenerOrArray<WidgetBase<P>, PropertiesChangeEvent<WidgetBase<P>, P>>): Handle;
 }
@@ -209,6 +221,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
+	private _metaMap = new WeakMap<any, any>();
+	private _nodeMap = new Map<any, any>();
+
 	/**
 	 * @constructor
 	 */
@@ -241,6 +256,23 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._checkOnElementUsage();
 	}
 
+	protected meta<T extends WidgetMeta>(MetaType: WidgetMetaConstructor<T>): T {
+		let cached = this._metaMap.get(MetaType);
+		if (!cached) {
+			cached = new MetaType({
+				nodes: this._nodeMap
+			});
+
+			this._metaMap.set(MetaType, cached);
+		}
+
+		if (cached.requiresRender && !this._cachedVNode) {
+			this.invalidate(true);
+		}
+
+		return cached;
+	}
+
 	/**
 	 * A render decorator that registers vnode callbacks for 'afterCreate' and
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
@@ -265,7 +297,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			if (!properties.bind) {
 				properties.bind = this;
 			}
-		}, (node: DNode) => { return isHNode(node) || isWNode(node); });
+		}, (node: DNode) => {
+			return isHNode(node) || isWNode(node);
+		});
 		return node;
 	}
 
@@ -274,6 +308,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	private afterCreateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
+		this._setNode(element, projectionOptions, vnodeSelector, properties, children);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -282,6 +317,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	private afterUpdateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
+		this._setNode(element, projectionOptions, vnodeSelector, properties, children);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
@@ -305,6 +341,10 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	protected onElementUpdated(element: Element, key: string): void {
 		// Do nothing by default.
+	}
+
+	private _setNode(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties, children: VNode[]): void {
+		this._nodeMap.set(properties.key, element);
 	}
 
 	public get properties(): Readonly<P> {
@@ -409,6 +449,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render, this._properties, this._children);
 			}, this.render.bind(this));
+
 			let dNode = render();
 			const afterRenders = this.getDecorator('afterRender');
 			afterRenders.forEach((afterRenderFunction: Function) => {
@@ -426,8 +467,8 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		return this._cachedVNode;
 	}
 
-	public invalidate(): void {
-		if (this._renderState === WidgetRenderState.IDLE) {
+	public invalidate(force?: boolean): void {
+		if (this._renderState === WidgetRenderState.IDLE || force) {
 			this._dirty = true;
 			this.emit({
 				type: 'invalidated',
@@ -598,7 +639,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 				child = new widgetConstructor();
 				child.__setProperties__(properties);
 				child.own(child.on('invalidated', () => {
-					this.invalidate();
+					this.invalidate(true);
 				}));
 				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
 				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
