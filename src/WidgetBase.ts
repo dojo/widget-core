@@ -576,7 +576,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 				this.own(child);
 			}
 			if (typeof childrenMapKey !== 'string' && cachedChildren.length > 1) {
-				const errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${childrenMapKey.name}) multiple times`;
+				const errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${(<any> childrenMapKey).name}) multiple times`;
 				console.warn(errorMsg);
 				this.emit({ type: 'error', target: this, error: new Error(errorMsg) });
 			}
