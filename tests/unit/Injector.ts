@@ -85,6 +85,7 @@ registerSuite({
 
 		const injector = new InjectorWidget<any>();
 		injector.__setProperties__({
+			bind: context,
 			render,
 			properties: testProperties,
 			children: testChildren
