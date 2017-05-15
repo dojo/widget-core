@@ -273,6 +273,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<ThemeablePropert
 				const hasInjectedTheme = this.registries.has(INJECTED_THEME_KEY);
 				if (hasInjectedTheme) {
 					return w<ThemeInjector>(INJECTED_THEME_KEY, {
+						bind: this,
 						render: renderFunc,
 						getProperties: (inject: ThemeInjectorContext, properties: ThemeableProperties): ThemeableProperties => {
 							if (!properties.theme && this._theme !== properties.injectedTheme) {
