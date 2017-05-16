@@ -511,7 +511,7 @@ The `WidgetRegistryItem`, can be one of the following types:
 
 1. `WidgetConstructor`
 2. `Promise<WidgetConstructor>`
-3.  `() => Promise<WidgetConstructor>`
+3. `() => Promise<WidgetConstructor>`
 
 A global widget registry is exported from the `d` module.
 
