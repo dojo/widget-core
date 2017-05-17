@@ -9,18 +9,20 @@ export function Container<W extends WidgetBaseInterface>(
 	{ getProperties = defaultMappers.getProperties, getChildren = defaultMappers.getChildren }: any = defaultMappers
 ): Constructor<WidgetBase<W['properties']>> {
 
-		return class extends WidgetBase<any> {
-			protected render(): DNode {
-				const { properties, children } = this;
+	return class extends WidgetBase<any> {
+		protected render(): DNode {
+			const { properties, children } = this;
 
-					return w<BaseInjector<any>>(name, {
-						bind: this,
-						render: () => { return w(component, properties, children); },
-						getProperties,
-						properties,
-						getChildren,
-						children
-					});
-			}
-		};
-	}
+			return w<BaseInjector<any>>(name, {
+				bind: this,
+				render: () => { return w(component, properties, children); },
+				getProperties,
+				properties,
+				getChildren,
+				children
+			});
+		}
+	};
+}
+
+export default Container;
