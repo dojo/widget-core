@@ -14,12 +14,14 @@ let childrenCalled = false;
 let propertiesCalled = false;
 let assertRender = (properties: any) => {};
 
-function getChildren() {
+function getChildren(toInject: any, children: any) {
 	childrenCalled = true;
+	return children;
 }
 
-function getProperties() {
+function getProperties(toInject: any, properties: any) {
 	propertiesCalled = true;
+	return properties;
 }
 
 class StubInjector extends WidgetBase<any> {

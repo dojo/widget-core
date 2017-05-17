@@ -9,7 +9,7 @@ export function Container<W extends WidgetBaseInterface>(
 	{
 		getProperties = defaultMappers.getProperties,
 		getChildren = defaultMappers.getChildren
-	}: Mappers = defaultMappers
+	}: Partial<Mappers> = defaultMappers
 ): Constructor<WidgetBase<W['properties']>> {
 
 	return class extends WidgetBase<any> {
