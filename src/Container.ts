@@ -5,7 +5,7 @@ import { defaultMappers, BaseInjector } from './Injector';
 
 export function Container<W extends WidgetBaseInterface>(
 	component: Constructor<W> | RegistryLabel,
-	name: string,
+	name: RegistryLabel,
 	{ getProperties = defaultMappers.getProperties, getChildren = defaultMappers.getChildren }: any = defaultMappers
 ): Constructor<WidgetBase<W['properties']>> {
 
