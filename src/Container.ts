@@ -18,7 +18,7 @@ export function Container<W extends WidgetBaseInterface>(
 
 			return w<BaseInjector<any>>(name, {
 				bind: this,
-				render: () => { return w(component, properties, children); },
+				render: () => w(component, properties, children),
 				getProperties,
 				properties,
 				getChildren,
