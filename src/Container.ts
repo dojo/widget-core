@@ -1,10 +1,10 @@
 import { WidgetBase } from './WidgetBase';
-import { Constructor, DNode, WidgetBaseInterface } from './interfaces';
+import { Constructor, DNode, WidgetBaseInterface, RegistryLabel } from './interfaces';
 import { w } from './d';
 import { defaultMappers, BaseInjector } from './Injector';
 
 export function Container<W extends WidgetBaseInterface>(
-	component: Constructor<W> | string,
+	component: Constructor<W> | RegistryLabel,
 	name: string,
 	{ getProperties = defaultMappers.getProperties, getChildren = defaultMappers.getChildren }: any = defaultMappers
 ): Constructor<WidgetBase<W['properties']>> {
