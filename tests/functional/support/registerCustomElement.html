@@ -30,6 +30,11 @@
 		});
 
 		document.getElementById('noAttributes').buttonLabel = 'Test';
+
+		var el = document.createElement('test-button');
+		el.id = 'manualButton';
+		el.label = 'manual';
+		document.body.appendChild(el);
 	});
 </script>
 </body>
