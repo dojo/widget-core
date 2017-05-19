@@ -26,7 +26,7 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 
 	customElements.define(descriptor.tagName, class extends HTMLElement {
 		private _isAppended = false;
-		private _appender: Function | null = null;
+		private _appender: Function;
 
 		constructor() {
 			super();
@@ -35,7 +35,7 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 		}
 
 		connectedCallback() {
-			if (!this._isAppended && this._appender) {
+			if (!this._isAppended) {
 				this._appender();
 				this._isAppended = true;
 			}
