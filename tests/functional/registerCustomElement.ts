@@ -105,5 +105,19 @@ registerSuite({
 			.then(pollUntil<any>(function () {
 				return (<any> document).querySelector('#reinitButton > button').innerHTML === 'test';
 			}, undefined, 1000), undefined);
+	},
+
+	'child elements propagate values'(this: any) {
+		if (skip) {
+			this.skip('not compatible with iOS 9.1 or Safari 9.1');
+		}
+		return this.remote
+			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.setFindTimeout(1000)
+			.findByCssSelector('child-test-widget button')
+			.end()
+			.then(pollUntil<any>(function () {
+				return (<any> document).querySelector('child-test-widget button').innerHTML === 'test children';
+			}, undefined, 1000), undefined);
 	}
 });
