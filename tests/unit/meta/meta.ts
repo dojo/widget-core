@@ -3,6 +3,7 @@ import * as assert from 'intern/chai!assert';
 import { WidgetMeta, WidgetMetaProperties, WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
+import CallbackMixin from '../../support/CallbackMixin';
 
 registerSuite({
 	name: 'meta base',
@@ -54,7 +55,9 @@ registerSuite({
 
 		let renders = 0;
 
-		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+		class TestWidget extends ProjectorMixin(CallbackMixin(2, dfd.callback(() => {
+			assert.strictEqual(renders, 2);
+		}), WidgetBase))<any> {
 			nodes: any;
 
 			render() {
@@ -73,9 +76,5 @@ registerSuite({
 
 		const widget = new TestWidget();
 		widget.append(div);
-
-		setTimeout(dfd.callback(() => {
-			assert.strictEqual(renders, 2);
-		}), 10);
 	}
 });
