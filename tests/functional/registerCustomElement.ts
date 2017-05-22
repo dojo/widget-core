@@ -44,7 +44,7 @@ registerSuite({
 		return this.remote
 			.get((<any> require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
-			.findById('testButton')
+			.findByCssSelector('#testButton > button')
 			.click()
 			.end()
 			.execute('return window.buttonClicked')
