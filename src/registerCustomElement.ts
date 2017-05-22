@@ -26,7 +26,7 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 	customElements.define(descriptor.tagName, class extends HTMLElement {
 		private _isAppended = false;
 		private _appender: Function;
-		private widgetInstance: WidgetBase;
+		private _widgetInstance: WidgetBase;
 
 		constructor() {
 			super();
@@ -46,11 +46,11 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 		}
 
 		getWidgetInstance(): WidgetBase<any> {
-			return this.widgetInstance;
+			return this._widgetInstance;
 		}
 
 		setWidgetInstance(widget: WidgetBase<any>): void {
-			this.widgetInstance = widget;
+			this._widgetInstance = widget;
 		}
 
 		getWidgetConstructor(): Constructor<WidgetBase<WidgetProperties>> {
