@@ -1,6 +1,5 @@
 import { WidgetBase } from './../WidgetBase';
 import { DNode, WidgetProperties } from './../interfaces';
-import { isHNode } from '../d';
 import { assign } from '@dojo/core/lang';
 import { VNode } from '@dojo/interfaces/vdom';
 
@@ -10,7 +9,7 @@ export interface DomWrapperProperties extends WidgetProperties {
 
 export class DomWrapper extends WidgetBase<DomWrapperProperties> {
 
-	private _vNode: VNode | undefined;
+	private _vNode: VNode;
 
 	public afterCreate() {
 		this.handleDomInsertion(this.properties.domNode);
@@ -21,29 +20,18 @@ export class DomWrapper extends WidgetBase<DomWrapperProperties> {
 	}
 
 	public __render__() {
-		const vNode = super.__render__();
-		if (vNode && typeof vNode !== 'string') {
-			if (!this._vNode) {
-				this._vNode = vNode;
-			}
-		}
-		else {
-			this._vNode = undefined;
-		}
-
-		return vNode;
+		this._vNode = <VNode> super.__render__();
+		return this._vNode;
 	}
 
 	protected render(): DNode {
-		const dNode = super.render();
-		if (isHNode(dNode)) {
-			const { afterCreate, afterUpdate } = this;
+		const dNode: any = super.render();
+		const { afterCreate, afterUpdate } = this;
 
-			assign(dNode.properties, {
-				afterCreate,
-				afterUpdate
-			});
-		}
+		assign(dNode.properties, {
+			afterCreate,
+			afterUpdate
+		});
 
 		return dNode;
 	}
@@ -55,15 +43,24 @@ export class DomWrapper extends WidgetBase<DomWrapperProperties> {
 			notNullNode = document.createElement('div'); // placeholder element
 		}
 
-		if (this._vNode) {
-			// replace the vNode domElement with our new element...
-			if (this._vNode.domNode && this._vNode.domNode.parentNode) {
-				this._vNode.domNode.parentNode.replaceChild(notNullNode, this._vNode.domNode);
-			}
-
-			// and update the reference to our vnode
-			this._vNode.domNode = notNullNode;
+		// replace the vNode domElement with our new element...
+		if (this._vNode.domNode && this._vNode.domNode.parentNode) {
+			this._vNode.domNode.parentNode.replaceChild(notNullNode, this._vNode.domNode);
 		}
+
+		// and update the reference to our vnode
+		this._vNode.domNode = notNullNode;
+
+		// set properties
+		const skipKeys = ['bind', 'key', 'domNode'];
+
+		Object.keys(this.properties).filter(key => skipKeys.indexOf(key) === -1).forEach((key: string) => {
+			try {
+				(<any> newNode)[key] = (<any> this.properties)[key];
+			}
+			catch (e) {
+			}
+		});
 	}
 }
 
