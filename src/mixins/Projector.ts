@@ -318,7 +318,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(base: T)
 				};
 			}
 			else if (!this._rootTagName) {
-				this._rootTagName = this._attachType === AttachType.Merge ? this._root.tagName.toLowerCase() : result.vnodeSelector;
+				this._rootTagName = result.vnodeSelector;
 			}
 
 			if (this._rootTagName !== result.vnodeSelector) {
