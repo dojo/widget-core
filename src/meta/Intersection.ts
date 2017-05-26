@@ -30,19 +30,7 @@ export default class Intersection implements WidgetMeta {
 	}
 
 	isInViewport(key: string) {
-		// is this node set up?
-		const node = this._nodes.get(key);
-
-		if (node) {
-			if (this._listeners.has(node)) {
-				return this._listeners.get(node).intersectionRatio > 0;
-			}
-			else {
-				this._rootObserver.observe(node);
-			}
-		}
-
-		return false;
+		return this.getViewportIntersectionRatio(key) > 0;
 	}
 
 	getViewportIntersectionRatio(key: string) {
