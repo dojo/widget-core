@@ -3,10 +3,27 @@ import * as assert from 'intern/chai!assert';
 import { WidgetMeta, WidgetMetaProperties, WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
-import CallbackMixin from '../../support/CallbackMixin';
+import { stub } from 'sinon';
+
+let rAF: any;
+
+function resolveRAF() {
+	for (let i = 0; i < rAF.callCount; i++) {
+		rAF.getCall(0).args[0]();
+	}
+	rAF.reset();
+}
 
 registerSuite({
 	name: 'meta base',
+
+	beforeEach() {
+		rAF = stub(global, 'requestAnimationFrame');
+	},
+
+	afterEach() {
+		rAF.restore();
+	},
 
 	'meta is provided a list of nodes with keys'() {
 		class TestMeta implements WidgetMeta {
@@ -41,8 +58,6 @@ registerSuite({
 	},
 
 	'meta renders the node if it has to'(this: any) {
-		const dfd = this.async();
-
 		class TestMeta implements WidgetMeta {
 			nodes: any;
 
@@ -55,9 +70,7 @@ registerSuite({
 
 		let renders = 0;
 
-		class TestWidget extends ProjectorMixin(CallbackMixin(2, dfd.callback(() => {
-			assert.strictEqual(renders, 2);
-		}), WidgetBase))<any> {
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
 			nodes: any;
 
 			render() {
@@ -76,5 +89,10 @@ registerSuite({
 
 		const widget = new TestWidget();
 		widget.append(div);
+
+		resolveRAF();
+		resolveRAF();
+
+		assert.strictEqual(renders, 2, 'expected two renders');
 	}
 });
