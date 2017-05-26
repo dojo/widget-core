@@ -5,6 +5,7 @@ import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import Dimensions from '../../../src/meta/Dimensions';
 import { stub } from 'sinon';
+import global from '@dojo/core/global';
 
 let rAF: any;
 
