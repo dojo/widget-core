@@ -30,10 +30,11 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
         - [Theming](#theming)
         - [Internationalization](#internationalization-i18n)
         - [Web Components](#web-components)
-        	- [Attributes](#attributes)
-        	- [Properties](#properties)
-        	- [Events](#events)
-        	- [Initialization](#initialization)
+            - [Attributes](#attributes)
+            - [Properties](#properties)
+            - [Events](#events)
+            - [Initialization](#initialization)
+        - [Meta](#meta)
     - [Key Principles](#key-principles)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -1068,6 +1069,77 @@ The initialization function is run from the context of the HTML element.
 
 It should be noted that children nodes are removed from the DOM when widget instantiation occurs, and added as children
 to the widget instance.
+
+#### Meta
+
+Widget meta is used to access information that you would normally only have access to on a DOM element. For example, the dimensions of an HTML node.  You can access and respond to meta data during a widget's render operation.
+
+```typescript
+class TestWidget extends WidgetBase<WidgetProperties> {
+	render() {
+		const dimensions = this.meta(Dimensions).get('root');
+		
+		return v('div', {
+			key: 'root',
+			innerHTML: `Width: ${dimensions.width}`
+		});
+	}
+}
+```
+
+If an HTML node is required to calculate the meta information, a sensible default will be returned and your widget will be automatically re-rendered to provide more accurate information.
+
+##### Dimensions
+
+You can retrieve dimensional information on a widget:
+
+```typescript
+import Dimensions from '@dojo/widget-core/meta/Dimensions';
+
+// ...
+render() {
+	// using "elm" to target a specific v node
+	const hasDimensions = this.meta(Dimensions).has('elm');
+	const dimensions = this.meta(Dimensions).get('elm');
+	
+	return v('div', [
+		v('span', { key: 'elm' })
+	]);
+}
+// ...
+```
+
+Dimensions returned include:
+
+* `left`
+* `top`
+* `right`
+* `bottom`
+* `width`
+* `height`
+* `scrollLeft`
+* `scrollTop`
+* `scrollRight`
+* `scrollBottom`
+
+##### Viewport Intersection
+
+The `Intersection` meta can be used to determine if an HTML element is in the viewport.
+
+```typescript
+import Intersection from `@dojo/widget-core/meta/Intersection`;
+
+// ...
+render() {
+	const isVisible = this.meta(Intersection).get('root') > 0;
+	
+	return v('div', {
+		key: 'root',
+		innerHTML: `I am ${isVisible ? 'visible' : 'invisible'}`
+	});
+}
+// ...
+```
 
 ### Key Principles
 
