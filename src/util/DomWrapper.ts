@@ -7,7 +7,9 @@ export interface DomWrapperOptions {
 	onAttached?(): void;
 }
 
-export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>> {
+export type DomWrapper = Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
+
+export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): DomWrapper {
 	return class extends WidgetBase<VirtualDomProperties & WidgetProperties> {
 		private _vNode: VNode;
 		private _firstRender = true;
