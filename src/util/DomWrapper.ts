@@ -1,8 +1,7 @@
 import { WidgetBase } from './../WidgetBase';
-import { WidgetProperties, VirtualDomProperties } from './../interfaces';
+import { WidgetProperties, VirtualDomProperties, Constructor } from './../interfaces';
 import { v } from './../d';
 import { VNode } from '@dojo/interfaces/vdom';
-import { Constructor } from '../interfaces';
 
 export interface DomWrapperOptions {
 	onAttached?(): void;
