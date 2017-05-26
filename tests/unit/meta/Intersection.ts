@@ -10,7 +10,7 @@ import { WidgetProperties } from '../../../src/interfaces';
 
 let rAF: any;
 let observerCallback: any;
-let oldIntersectionObserver: any;
+let intersectionObserver: any;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
@@ -24,18 +24,17 @@ registerSuite({
 
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
-		oldIntersectionObserver = global.IntersectionObserver;
-		global.IntersectionObserver = function (callback: any) {
+		intersectionObserver = stub(global, 'IntersectionObserver', function (callback: any) {
 			observerCallback = callback;
 			return {
 				observe: stub()
 			};
-		};
+		});
 	},
 
 	afterEach() {
 		rAF.restore();
-		global.IntersectionObserver = oldIntersectionObserver;
+		intersectionObserver.restore();
 	},
 
 	'intersections cause invalidations'() {
@@ -43,7 +42,7 @@ registerSuite({
 
 		class TestWidget extends ProjectorMixin(WidgetBase)<WidgetProperties> {
 			render() {
-				visibles.push(this.meta(Intersection).isInViewport('root'));
+				visibles.push(this.meta(Intersection).get('root') > 0);
 				return v('div', {
 					key: 'root'
 				});
@@ -85,7 +84,7 @@ registerSuite({
 
 		class TestWidget extends ProjectorMixin(WidgetBase)<WidgetProperties> {
 			render() {
-				ratio = this.meta(Intersection).getViewportIntersectionRatio('root');
+				ratio = this.meta(Intersection).get('root');
 
 				return v('div', {
 					key: 'root'

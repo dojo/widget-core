@@ -29,11 +29,13 @@ export default class Intersection implements WidgetMeta {
 		});
 	}
 
-	isInViewport(key: string) {
-		return this.getViewportIntersectionRatio(key) > 0;
+	has(key: string) {
+		const node = this._nodes.get(key);
+
+		return node && this._listeners.has(node);
 	}
 
-	getViewportIntersectionRatio(key: string) {
+	get(key: string) {
 		// is this node set up?
 		const node = this._nodes.get(key);
 
