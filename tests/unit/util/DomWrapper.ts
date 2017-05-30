@@ -89,7 +89,7 @@ registerSuite({
 			render() {
 				return w(DomNode, {
 					styles: {
-						background: 'red'
+						color: 'red'
 					},
 					classes: this.classes(myTheme.class1)
 				});
@@ -100,7 +100,7 @@ registerSuite({
 		projector.append(root);
 		resolveRAF();
 		assert.isTrue(domNode.classList.contains('classFoo'));
-		assert.equal(domNode.style.background, 'red');
+		assert.equal(domNode.style.color, 'red');
 	},
 	'onAttached'() {
 		let attached = false;
