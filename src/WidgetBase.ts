@@ -168,7 +168,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	/**
 	 * cachedVNode from previous render
 	 */
-	private _cachedVNode?: VNode | string;
+	private _cachedVNode?: (VNode | string)[] | VNode | string;
 
 	/**
 	 * internal widget properties
@@ -244,7 +244,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
 	 */
 	@afterRender()
-	protected attachLifecycleCallbacks (node: DNode): DNode {
+	protected attachLifecycleCallbacks (node: DNode | DNode[]): DNode | DNode[] {
 		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
 		// with "key" properties.
 
@@ -257,7 +257,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	}
 
 	@afterRender()
-	protected decorateBind(node: DNode): DNode {
+	protected decorateBind(node: DNode | DNode[]): DNode | DNode[] {
 		decorate(node, (node: InternalWNode | InternalHNode) => {
 			const { properties = {} }: { properties: { bind?: any } } = node;
 			if (!properties.bind) {
@@ -398,7 +398,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		}
 	}
 
-	public __render__(): VNode | string | null {
+	public __render__(): (VNode | string)[] | VNode | string | null {
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
@@ -411,7 +411,24 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
 			});
-			const widget = this.dNodeToVNode(dNode);
+
+			let widget: VNode | string | null | (VNode | string)[];
+			if (Array.isArray(dNode)) {
+				widget = dNode.reduce((widgets, node) => {
+					const vNode = this.dNodeToVNode(node);
+					if (Array.isArray(vNode)) {
+						widgets.push(...vNode);
+					}
+					else {
+						widgets.push(vNode);
+					}
+					return widgets;
+				}, [] as ((VNode | string | null)[]));
+			}
+			else {
+				widget = this.dNodeToVNode(dNode);
+			}
+
 			this.manageDetachedChildren();
 			if (widget) {
 				this._cachedVNode = widget;
@@ -436,7 +453,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		}
 	}
 
-	protected render(): DNode {
+	protected render(): DNode | DNode[] {
 		return v('div', {}, this.children);
 	}
 
@@ -549,7 +566,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 * @param dNode the dnode to process
 	 * @returns a VNode, string or null
 	 */
-	private dNodeToVNode(dNode: DNode): VNode | string | null {
+	private dNodeToVNode(dNode: DNode): (VNode | string)[] | VNode | string | null {
 
 		if (typeof dNode === 'string' || dNode === null) {
 			return dNode;

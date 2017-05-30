@@ -296,6 +296,27 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return this._projection.domNode.outerHTML;
 		}
 
+		private parseArrayResult(nodes: (string | VNode | null)[]): VNode[] {
+			return nodes.reduce((parsedNodes, node) => {
+				if (node === null) {
+					return parsedNodes;
+				}
+				if (typeof node === 'string') {
+					parsedNodes.push({
+						domNode: null,
+						vnodeSelector: '',
+						properties: {},
+						children: undefined,
+						text: node
+					});
+				}
+				else {
+					parsedNodes.push(node);
+				}
+				return parsedNodes;
+			}, [] as VNode[]);
+		}
+
 		public __render__(): VNode {
 			if (this._projectorChildren) {
 				this.setChildren(this._projectorChildren);
@@ -304,7 +325,21 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 				this.setProperties(this._projectorProperties);
 			}
 			let result = super.__render__();
-			if (typeof result === 'string' || result === null) {
+
+			if (Array.isArray(result)) {
+				if (!this._rootTagName) {
+					this._rootTagName = 'span';
+				}
+
+				return {
+					domNode: null,
+					vnodeSelector: this._rootTagName,
+					properties: {},
+					children: this.parseArrayResult(result),
+					text: undefined
+				};
+			}
+			else if (typeof result === 'string' || result === null) {
 				if (!this._rootTagName) {
 					this._rootTagName = 'span';
 				}
