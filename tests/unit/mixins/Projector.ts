@@ -149,6 +149,17 @@ registerSuite({
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
+			},
+			'array root node'() {
+				result = [ v('h2', [ 'my string' ]) ];
+				projector = new MyWidget();
+
+				projector.append();
+				let vnode: any = projector.__render__() as VNode;
+				assert.equal(vnode.vnodeSelector, 'span');
+				assert.lengthOf(vnode.children, 1);
+				assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+				assert.strictEqual(vnode.children[0].text, 'my string');
 			}
 		},
 		'sandbox': {
@@ -293,6 +304,19 @@ registerSuite({
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
+			},
+			'array root node'() {
+				const root = document.createElement('my-app');
+				document.body.appendChild(root);
+				result = [ v('h2', [ 'my string' ]) ];
+				projector = new MyWidget();
+
+				projector.replace(root);
+				let vnode: any = projector.__render__() as VNode;
+				assert.equal(vnode.vnodeSelector, 'span');
+				assert.lengthOf(vnode.children, 1);
+				assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+				assert.strictEqual(vnode.children[0].text, 'my string');
 			}
 		},
 		'merge': {
@@ -385,6 +409,19 @@ registerSuite({
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
+			},
+			'array root node'() {
+				const root = document.createElement('my-app');
+				document.body.appendChild(root);
+				result = [ v('h2', [ 'my string' ]) ];
+				projector = new MyWidget();
+
+				projector.merge(root);
+				let vnode: any = projector.__render__() as VNode;
+				assert.equal(vnode.vnodeSelector, 'my-app');
+				assert.lengthOf(vnode.children, 1);
+				assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+				assert.strictEqual(vnode.children[0].text, 'my string');
 			},
 			'pre rendered DOM used'() {
 				const iframe = document.createElement('iframe');
