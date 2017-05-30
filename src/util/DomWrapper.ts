@@ -25,9 +25,9 @@ export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): D
 		}
 
 		protected render() {
-			const properties: any = this.properties;
+			const properties = { ...this.properties, key: 'root' };
 			delete properties.bind;
-			return v(domNode.tagName, { ...properties, key: 'root' });
+			return v(domNode.tagName, properties);
 		}
 	};
 }
