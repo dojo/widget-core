@@ -168,7 +168,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	/**
 	 * cachedVNode from previous render
 	 */
-	private _cachedVNode?: (VNode | string)[] | VNode | string;
+	private _cachedVNode?: (VNode | string | null)[] | VNode | string;
 
 	/**
 	 * internal widget properties
@@ -398,7 +398,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		}
 	}
 
-	public __render__(): (VNode | string)[] | VNode | string | null {
+	public __render__(): (VNode | string | null)[] | VNode | string | null {
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
@@ -412,22 +412,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 				dNode = afterRenderFunction.call(this, dNode);
 			});
 
-			let widget: VNode | string | null | (VNode | string)[];
-			if (Array.isArray(dNode)) {
-				widget = dNode.reduce((widgets, node) => {
-					const vNode = this.dNodeToVNode(node);
-					if (Array.isArray(vNode)) {
-						widgets.push(...vNode);
-					}
-					else {
-						widgets.push(vNode);
-					}
-					return widgets;
-				}, [] as ((VNode | string | null)[]));
-			}
-			else {
-				widget = this.dNodeToVNode(dNode);
-			}
+			const widget = this.dNodeToVNode(dNode);
 
 			this.manageDetachedChildren();
 			if (widget) {
@@ -566,10 +551,16 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 * @param dNode the dnode to process
 	 * @returns a VNode, string or null
 	 */
-	private dNodeToVNode(dNode: DNode): (VNode | string)[] | VNode | string | null {
+	private dNodeToVNode(dNode: DNode | DNode[]): (VNode | string | null)[] | VNode | string | null {
 
 		if (typeof dNode === 'string' || dNode === null) {
 			return dNode;
+		}
+
+		if (Array.isArray(dNode)) {
+			return dNode.map((node) => {
+				return this.dNodeToVNode(node) as VNode | string | null;
+			});
 		}
 
 		if (isWNode(dNode)) {

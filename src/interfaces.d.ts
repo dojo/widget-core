@@ -367,7 +367,7 @@ export interface WidgetBaseInterface<
 	/**
 	 * Main internal function for dealing with widget rendering
 	 */
-	__render__(): (VNode | string)[] | VNode | string | null;
+	__render__(): (VNode | string | null)[] | VNode | string | null;
 
 	/**
 	 * invalidate the widget

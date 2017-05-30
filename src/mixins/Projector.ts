@@ -3,7 +3,7 @@ import global from '@dojo/core/global';
 import { createHandle } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode } from '@dojo/interfaces/vdom';
-import { dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
+import { h, dom, Projection, ProjectionOptions, VNodeProperties } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
@@ -296,27 +296,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return this._projection.domNode.outerHTML;
 		}
 
-		private parseArrayResult(nodes: (string | VNode | null)[]): VNode[] {
-			return nodes.reduce((parsedNodes, node) => {
-				if (node === null) {
-					return parsedNodes;
-				}
-				if (typeof node === 'string') {
-					parsedNodes.push({
-						domNode: null,
-						vnodeSelector: '',
-						properties: {},
-						children: undefined,
-						text: node
-					});
-				}
-				else {
-					parsedNodes.push(node);
-				}
-				return parsedNodes;
-			}, [] as VNode[]);
-		}
-
 		public __render__(): VNode {
 			if (this._projectorChildren) {
 				this.setChildren(this._projectorChildren);
@@ -331,13 +310,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 					this._rootTagName = 'span';
 				}
 
-				return {
-					domNode: null,
-					vnodeSelector: this._rootTagName,
-					properties: {},
-					children: this.parseArrayResult(result),
-					text: undefined
-				};
+				return h(this._rootTagName, {}, result);
 			}
 			else if (typeof result === 'string' || result === null) {
 				if (!this._rootTagName) {
