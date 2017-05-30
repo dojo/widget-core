@@ -121,7 +121,7 @@ registerSuite({
 				let vnode: VNode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
 				projector.invalidate();
@@ -148,7 +148,7 @@ registerSuite({
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 			}
 		},
 		'sandbox': {
@@ -263,7 +263,7 @@ registerSuite({
 				let vnode: VNode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
 				projector.invalidate();
@@ -292,7 +292,7 @@ registerSuite({
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 			}
 		},
 		'merge': {
@@ -358,7 +358,7 @@ registerSuite({
 				let vnode: VNode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
 				projector.invalidate();
@@ -384,7 +384,7 @@ registerSuite({
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
-				assert.isUndefined(vnode.children);
+				assert.lengthOf(vnode.children, 0);
 			},
 			'pre rendered DOM used'() {
 				const iframe = document.createElement('iframe');

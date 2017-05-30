@@ -305,25 +305,12 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			}
 			let result = super.__render__();
 
-			if (Array.isArray(result)) {
+			if (Array.isArray(result) || typeof result === 'string' || result === null) {
 				if (!this._rootTagName) {
 					this._rootTagName = 'span';
 				}
 
-				return h(this._rootTagName, {}, result);
-			}
-			else if (typeof result === 'string' || result === null) {
-				if (!this._rootTagName) {
-					this._rootTagName = 'span';
-				}
-
-				result = {
-					domNode: null,
-					vnodeSelector: this._rootTagName,
-					properties: {},
-					children: undefined,
-					text: result === null ? undefined : result
-				};
+				result = h(this._rootTagName, {}, result);
 			}
 			else if (!this._rootTagName) {
 				this._rootTagName = result.vnodeSelector;
@@ -334,13 +321,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 					assign(result, { vnodeSelector: this._rootTagName });
 				}
 				else {
-					result = {
-						domNode: null,
-						vnodeSelector: this._rootTagName,
-						properties: {},
-						children: [ result ],
-						text: undefined
-					};
+					result = h(this._rootTagName, {}, result);
 				}
 			}
 			return result;
