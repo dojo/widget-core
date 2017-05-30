@@ -411,9 +411,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
 			});
-
 			const widget = this.dNodeToVNode(dNode);
-
 			this.manageDetachedChildren();
 			if (widget) {
 				this._cachedVNode = widget;
@@ -551,6 +549,8 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 * @param dNode the dnode to process
 	 * @returns a VNode, string or null
 	 */
+	private dNodeToVNode(dNode: DNode): VNode | string | null;
+	private dNodeToVNode(dNode: DNode[]): (VNode | string | null)[];
 	private dNodeToVNode(dNode: DNode | DNode[]): (VNode | string | null)[] | VNode | string | null {
 
 		if (typeof dNode === 'string' || dNode === null) {
@@ -558,9 +558,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		}
 
 		if (Array.isArray(dNode)) {
-			return dNode.map((node) => {
-				return this.dNodeToVNode(node) as VNode | string | null;
-			});
+			return dNode.map((node) => this.dNodeToVNode(node));
 		}
 
 		if (isWNode(dNode)) {
