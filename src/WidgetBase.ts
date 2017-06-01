@@ -69,7 +69,6 @@ export interface WidgetMetaProperties {
 }
 
 export interface WidgetMeta {
-	requiresRender?: boolean;
 }
 
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
@@ -262,14 +261,10 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		if (!cached) {
 			cached = new MetaType({
 				nodes: this._nodeMap,
-				invalidate: this.invalidate.bind(this)
+				invalidate: this.invalidate.bind(this, true)
 			});
 
 			this._metaMap.set(MetaType, cached);
-		}
-
-		if (cached.requiresRender && !this._cachedVNode) {
-			this.invalidate(true);
 		}
 
 		return cached as T;
