@@ -1091,7 +1091,7 @@ If an HTML node is required to calculate the meta information, a sensible defaul
 
 ##### Implementing Custom Meta
 
-You can create your own meta if you need access to DOM nodes:
+You can create your own meta if you need access to DOM nodes.
 ```typescript
 import {WidgetMeta} from "@dojo/widget-core/WidgetBase";
 
@@ -1124,6 +1124,11 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 	// ...
 }
 ```
+
+Meta classes are provided with a few hooks into the widget.
+
+* `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
+* `invalidate` - A method that will invalidate the widget.
 
 ### Key Principles
 
