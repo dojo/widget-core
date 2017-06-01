@@ -1089,6 +1089,42 @@ class TestWidget extends WidgetBase<WidgetProperties> {
 
 If an HTML node is required to calculate the meta information, a sensible default will be returned and your widget will be automatically re-rendered to provide more accurate information.
 
+##### Implementing Custom Meta
+
+You can create your own meta if you need access to DOM nodes:
+```typescript
+import {WidgetMeta} from "@dojo/widget-core/WidgetBase";
+
+class UsefulMeta implements WidgetMeta {
+	private _props: WidgetMetaProperties;
+	
+	constructor(properties: WidgetMetaProperties) {
+		this._props = properties;
+	}
+	
+	nodeAccessingMethod(key: string) {
+		const node = this._props.nodes.get(key);
+		
+		// do something with the DOM node
+	}
+}
+```
+
+And you can use it like,
+
+```typescript
+class MyWidget extends WidgetBase<WidgetProperties> {
+	// ...
+	render() {
+		// run your meta
+		this.meta(UsefulMeta).nodeAccessingMethod('root');
+		
+		return v('div', { key: 'root' });
+	}
+	// ...
+}
+```
+
 ### Key Principles
 
 These are some of the **important** principles to keep in mind when creating and using widgets:
