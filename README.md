@@ -1089,58 +1089,6 @@ class TestWidget extends WidgetBase<WidgetProperties> {
 
 If an HTML node is required to calculate the meta information, a sensible default will be returned and your widget will be automatically re-rendered to provide more accurate information.
 
-##### Dimensions
-
-You can retrieve dimensional information on a widget:
-
-```typescript
-import Dimensions from '@dojo/widget-core/meta/Dimensions';
-
-// ...
-render() {
-	// using "elm" to target a specific v node
-	const hasDimensions = this.meta(Dimensions).has('elm');
-	const dimensions = this.meta(Dimensions).get('elm');
-	
-	return v('div', [
-		v('span', { key: 'elm' })
-	]);
-}
-// ...
-```
-
-Dimensions returned include:
-
-* `left`
-* `top`
-* `right`
-* `bottom`
-* `width`
-* `height`
-* `scrollLeft`
-* `scrollTop`
-* `scrollRight`
-* `scrollBottom`
-
-##### Viewport Intersection
-
-The `Intersection` meta can be used to determine if an HTML element is in the viewport.
-
-```typescript
-import Intersection from `@dojo/widget-core/meta/Intersection`;
-
-// ...
-render() {
-	const isVisible = this.meta(Intersection).get('root') > 0;
-	
-	return v('div', {
-		key: 'root',
-		innerHTML: `I am ${isVisible ? 'visible' : 'invisible'}`
-	});
-}
-// ...
-```
-
 ### Key Principles
 
 These are some of the **important** principles to keep in mind when creating and using widgets:
