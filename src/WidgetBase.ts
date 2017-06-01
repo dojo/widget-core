@@ -222,7 +222,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<any, any>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMeta>();
 	private _nodeMap = new Map<any, any>();
 
 	/**
@@ -272,7 +272,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			this.invalidate(true);
 		}
 
-		return cached;
+		return cached as T;
 	}
 
 	/**
