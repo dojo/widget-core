@@ -61,10 +61,9 @@ registerSuite({
 		class TestMeta implements WidgetMeta {
 			nodes: any;
 
-			requiresRender = true;
-
 			constructor(props: WidgetMetaProperties) {
 				this.nodes = props.nodes;
+				props.invalidate();
 			}
 		}
 
