@@ -46,7 +46,6 @@
     "grunt-dojo2": "latest",
     "grunt-tslint": "^5.0.1",
     "intern": "^3.4.1",
-    "intersection-observer": "^0.2.1",
     "istanbul": "^0.4.5",
     "jsdom": "^9.5.0",
     "sinon": "^1.17.6",
