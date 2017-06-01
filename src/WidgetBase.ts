@@ -222,7 +222,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMeta>();
-	private _nodeMap = new Map<any, any>();
+	private _nodeMap = new Map<string, Element>();
 
 	/**
 	 * @constructor
@@ -305,7 +305,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	private afterCreateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
-		this._setNode(element, projectionOptions, vnodeSelector, properties, children);
+		this._setNode(element, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -314,7 +314,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	private afterUpdateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
-		this._setNode(element, projectionOptions, vnodeSelector, properties, children);
+		this._setNode(element, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
@@ -340,8 +340,10 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		// Do nothing by default.
 	}
 
-	private _setNode(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties, children: VNode[]): void {
-		this._nodeMap.set(properties.key, element);
+	private _setNode(element: Element, properties: VNodeProperties): void {
+		if (properties.key) {
+			this._nodeMap.set(properties.key as string, element);
+		}
 	}
 
 	public get properties(): Readonly<P> {
