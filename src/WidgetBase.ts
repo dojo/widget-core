@@ -341,9 +341,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	}
 
 	private _setNode(element: Element, properties: VNodeProperties): void {
-		if (properties.key) {
-			this._nodeMap.set(properties.key as string, element);
-		}
+		this._nodeMap.set(String(properties.key), element);
 	}
 
 	public get properties(): Readonly<P> {
