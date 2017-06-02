@@ -66,6 +66,7 @@ export interface WidgetMetaConstructor<T> {
 export interface WidgetMetaProperties {
 	nodes: Map<string, any>;
 	invalidate: () => void;
+	rerenderOnNode: (key: string) => void;
 }
 
 export interface WidgetMeta {
@@ -223,6 +224,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMeta>();
 	private _nodeMap = new Map<string, Element>();
+	private _expectedVNodeUpdates: number;
+	private _actualVNodeUpdates: number;
+	private _invalidationTriggerNodes = new Set<string>();
 
 	/**
 	 * @constructor
@@ -261,7 +265,10 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		if (!cached) {
 			cached = new MetaType({
 				nodes: this._nodeMap,
-				invalidate: this.invalidate.bind(this, true)
+				invalidate: this.invalidate.bind(this, true),
+				rerenderOnNode: (key: string) => {
+					this._invalidationTriggerNodes.add(key);
+				}
 			});
 
 			this._metaMap.set(MetaType, cached);
@@ -279,10 +286,16 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
 		// with "key" properties.
 
+		let vNodeCount = 0;
+
 		decorate(node, (node: HNode) => {
+			vNodeCount++;
 			node.properties.afterCreate = this.afterCreateCallback;
 			node.properties.afterUpdate = this.afterUpdateCallback;
 		}, isHNodeWithKey);
+
+		this._expectedVNodeUpdates = vNodeCount;
+		this._actualVNodeUpdates = 0;
 
 		return node;
 	}
@@ -307,6 +320,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
 		this.onElementCreated(element, String(properties.key));
+		this._onDOMElementRendered();
 	}
 
 	/**
@@ -316,6 +330,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
 		this.onElementUpdated(element, String(properties.key));
+		this._onDOMElementRendered();
 	}
 
 	/**
@@ -446,6 +461,8 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render, this._properties, this._children);
 			}, this.render.bind(this));
+
+			this._invalidationTriggerNodes.clear();
 
 			let dNode = render();
 			const afterRenders = this.getDecorator('afterRender');
@@ -691,6 +708,27 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		}
 		if (this.onElementUpdated !== WidgetBase.prototype.onElementUpdated) {
 			console.warn(`Usage of 'onElementUpdated' has been deprecated and will be removed in a future version, see https://github.com/dojo/widget-core/issues/559 for details (${name})`);
+		}
+	}
+
+	private _onDOMElementRendered() {
+		this._actualVNodeUpdates++;
+
+		if (this._actualVNodeUpdates >= this._expectedVNodeUpdates) {
+			this._afterElementsCreated();
+		}
+	}
+
+	private _afterElementsCreated() {
+		let needsUpdate = false;
+		this._invalidationTriggerNodes.forEach(key => {
+			if (!needsUpdate && this._nodeMap.has(key)) {
+				needsUpdate = true;
+			}
+		});
+
+		if (needsUpdate) {
+			this.invalidate(true);
 		}
 	}
 }
