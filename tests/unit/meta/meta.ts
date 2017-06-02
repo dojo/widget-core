@@ -59,11 +59,20 @@ registerSuite({
 
 	'meta renders the node if it has to'(this: any) {
 		class TestMeta implements WidgetMeta {
-			nodes: any;
+			props: WidgetMetaProperties;
 
 			constructor(props: WidgetMetaProperties) {
-				this.nodes = props.nodes;
-				props.invalidate();
+				this.props = props;
+			}
+
+			has(key: string) {
+				const has = this.props.nodes.has(key);
+
+				if (!has) {
+					this.props.rerenderOnNode(key);
+				}
+
+				return has;
 			}
 		}
 
@@ -75,7 +84,7 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta);
+				this.meta(TestMeta).has('root');
 
 				return v('div', {
 					innerHTML: 'hello world',
@@ -93,5 +102,52 @@ registerSuite({
 		resolveRAF();
 
 		assert.strictEqual(renders, 2, 'expected two renders');
+	},
+
+	'meta does not render the node if it doesn\'t have to'(this: any) {
+		class TestMeta implements WidgetMeta {
+			props: WidgetMetaProperties;
+
+			constructor(props: WidgetMetaProperties) {
+				this.props = props;
+			}
+
+			has(key: string) {
+				const has = this.props.nodes.has(key);
+
+				if (!has) {
+					this.props.rerenderOnNode(key);
+				}
+
+				return has;
+			}
+		}
+
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+			nodes: any;
+
+			render() {
+				renders++;
+
+				this.meta(TestMeta).has('test');
+
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		resolveRAF();
+		resolveRAF();
+
+		assert.strictEqual(renders, 1, 'expected one renders');
 	}
 });
