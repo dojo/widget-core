@@ -66,13 +66,8 @@ registerSuite({
 			}
 
 			has(key: string) {
-				const has = this.props.nodes.has(key);
-
-				if (!has) {
-					this.props.rerenderOnNode(key);
-				}
-
-				return has;
+				this.props.requireNode(key);
+				return this.props.nodes.has(key);
 			}
 		}
 
@@ -104,7 +99,7 @@ registerSuite({
 		assert.strictEqual(renders, 2, 'expected two renders');
 	},
 
-	'meta does not render the node if it doesn\'t have to'(this: any) {
+	'meta throws an error if a required node is not found'(this: any) {
 		class TestMeta implements WidgetMeta {
 			props: WidgetMetaProperties;
 
@@ -116,7 +111,7 @@ registerSuite({
 				const has = this.props.nodes.has(key);
 
 				if (!has) {
-					this.props.rerenderOnNode(key);
+					this.props.requireNode(key);
 				}
 
 				return has;
@@ -145,9 +140,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRAF();
-		resolveRAF();
-
-		assert.strictEqual(renders, 1, 'expected one renders');
+		assert.throws(() => {
+			resolveRAF();
+			resolveRAF();
+		});
 	}
 });
