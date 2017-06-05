@@ -1,3 +1,4 @@
+import global from '@dojo/core/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { WidgetMeta, WidgetMetaProperties, WidgetBase } from '../../../src/WidgetBase';
@@ -9,7 +10,7 @@ let rAF: any;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(0).args[0]();
+		rAF.getCall(i).args[0]();
 	}
 	rAF.reset();
 }
@@ -18,7 +19,7 @@ registerSuite({
 	name: 'meta base',
 
 	beforeEach() {
-		rAF = stub(global, 'requestAnimationFrame');
+		rAF = stub(global, 'requestAnimationFrame').returns(1);
 	},
 
 	afterEach() {
@@ -79,12 +80,18 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta).has('root');
+				this.meta(TestMeta).has('greeting');
+				this.meta(TestMeta).has('name');
 
 				return v('div', {
-					innerHTML: 'hello world',
-					key: 'root'
-				});
+					innerHTML: 'hello',
+					key: 'greeting'
+				}, [
+					v('div', {
+						innerHTML: 'world',
+						key: 'name'
+					})
+				]);
 			}
 		}
 
@@ -93,7 +100,6 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRAF();
 		resolveRAF();
 
 		assert.strictEqual(renders, 2, 'expected two renders');
@@ -141,7 +147,6 @@ registerSuite({
 		widget.append(div);
 
 		assert.throws(() => {
-			resolveRAF();
 			resolveRAF();
 		});
 	}

@@ -1,4 +1,5 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
+import global from '@dojo/core/global';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
@@ -261,14 +262,20 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	protected meta<T extends WidgetMeta>(MetaType: WidgetMetaConstructor<T>): T {
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
+			const boundInvalidate = this.invalidate.bind(this);
+			const invalidate = () => {
+				global.cancelAnimationFrame(scheduled);
+				scheduled = global.requestAnimationFrame(boundInvalidate);
+			};
+			let scheduled: number | undefined;
 			cached = new MetaType({
 				nodes: this._nodeMap,
-				invalidate: this.invalidate.bind(this, true),
+				invalidate,
 				requireNode: (key: string) => {
 					this._requiredNodes.add(key);
 
 					if (!this._nodeMap.has(key)) {
-						this.invalidate(true);
+						invalidate();
 					}
 				}
 			});
@@ -482,8 +489,8 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		return this._cachedVNode;
 	}
 
-	public invalidate(force?: boolean): void {
-		if (this._renderState === WidgetRenderState.IDLE || force) {
+	public invalidate(): void {
+		if (this._renderState === WidgetRenderState.IDLE) {
 			this._dirty = true;
 			this.emit({
 				type: 'invalidated',
@@ -654,7 +661,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 				child = new widgetConstructor();
 				child.__setProperties__(properties);
 				child.own(child.on('invalidated', () => {
-					this.invalidate(true);
+					this.invalidate();
 				}));
 				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
 				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
