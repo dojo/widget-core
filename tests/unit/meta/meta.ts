@@ -58,7 +58,7 @@ registerSuite({
 		assert.isNotNull(meta.nodes.get('root'));
 	},
 
-	'meta renders the node if it has to'(this: any) {
+	'meta renders the node if it has to'() {
 		class TestMeta implements WidgetMeta {
 			props: WidgetMetaProperties;
 
@@ -105,7 +105,58 @@ registerSuite({
 		assert.strictEqual(renders, 2, 'expected two renders');
 	},
 
-	'meta throws an error if a required node is not found'(this: any) {
+	'multi-step render'() {
+		class TestMeta implements WidgetMeta {
+			props: WidgetMetaProperties;
+
+			constructor(props: WidgetMetaProperties) {
+				this.props = props;
+			}
+
+			has(key: string) {
+				this.props.requireNode(key);
+				return this.props.nodes.has(key);
+			}
+		}
+
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+			nodes: any;
+
+			render() {
+				renders++;
+
+				const test = this.meta(TestMeta);
+
+				return v('div', {
+					innerHTML: 'hello',
+					key: 'greeting'
+				}, [
+					test.has('greeting') ? v('div', {
+						innerHTML: 'world',
+						key: 'name'
+					}, [
+						test.has('name') ? v('div', {
+							innerHTML: '!',
+							key: 'exclmation'
+						}) : null
+					]) : null
+				]);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		resolveRAF();
+
+		assert.strictEqual(renders, 3, 'expected two renders');
+	},
+
+	'meta throws an error if a required node is not found'() {
 		class TestMeta implements WidgetMeta {
 			props: WidgetMetaProperties;
 
