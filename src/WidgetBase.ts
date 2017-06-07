@@ -259,9 +259,13 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 					return self.indexOf(value) === index;
 				});
 				if (allProperties.length === 0) {
-					// neither passed nor stored options have any keys so they are equal
+					// Neither passed nor stored options have any keys so they are equal
 					cached = meta;
 					break;
+				}
+				if (!options) {
+					// No options were passed but this potential match has keys
+					continue;
 				}
 				if (allProperties.every(propertyName => {
 						return ((<any> options)[propertyName] === variation[propertyName]);
