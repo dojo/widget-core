@@ -1110,7 +1110,7 @@ class HasMeta implements WidgetMeta {
 }
 ```
 
-And you can use it like,
+And you can use it like:
 
 ```typescript
 class MyWidget extends WidgetBase<WidgetProperties> {
