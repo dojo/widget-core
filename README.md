@@ -1097,12 +1097,12 @@ You can create your own meta if you need access to DOM nodes.
 import { WidgetMeta } from "@dojo/widget-core/WidgetBase";
 
 class HasMeta implements WidgetMeta {
-	private _props: WidgetMetaProperties;
-	
-	constructor(properties: WidgetMetaProperties) {
-		this._props = properties;
-	}
-	
+    private _props: WidgetMetaProperties;
+
+    constructor(properties: WidgetMetaProperties) {
+        this._props = properties;
+    }
+
     has(key: string): boolean {
         this._props.requireNode(key);
         return this._props.nodes.has(key);
@@ -1114,14 +1114,14 @@ And you can use it like:
 
 ```typescript
 class MyWidget extends WidgetBase<WidgetProperties> {
-	// ...
-	render() {
-		// run your meta
-		const hasRoot = this.meta(HasMeta).has('root');
-		
-		return v('div', { key: 'root' });
-	}
-	// ...
+    // ...
+    render() {
+        // run your meta
+        const hasRoot = this.meta(HasMeta).has('root');
+
+        return v('div', { key: 'root' });
+    }
+    // ...
 }
 ```
 
