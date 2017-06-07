@@ -1072,7 +1072,7 @@ to the widget instance.
 
 #### Meta
 
-Widget meta is used to access information that you would normally only have access to on a DOM element. For example, the dimensions of an HTML node.  You can access and respond to meta data during a widget's render operation.
+Widget meta is used to access additional information about the widget, usually information only available through the rendered DOM element - for example, the dimensions of an HTML node. You can access and respond to meta data during a widget's render operation.
 
 ```typescript
 class TestWidget extends WidgetBase<WidgetProperties> {
@@ -1092,21 +1092,21 @@ If an HTML node is required to calculate the meta information, a sensible defaul
 ##### Implementing Custom Meta
 
 You can create your own meta if you need access to DOM nodes.
-```typescript
-import {WidgetMeta} from "@dojo/widget-core/WidgetBase";
 
-class UsefulMeta implements WidgetMeta {
+```typescript
+import { WidgetMeta } from "@dojo/widget-core/WidgetBase";
+
+class HasMeta implements WidgetMeta {
 	private _props: WidgetMetaProperties;
 	
 	constructor(properties: WidgetMetaProperties) {
 		this._props = properties;
 	}
 	
-	nodeAccessingMethod(key: string) {
-		const node = this._props.nodes.get(key);
-		
-		// do something with the DOM node
-	}
+    has(key: string): boolean {
+        this._props.requireNode(key);
+        return this._props.nodes.has(key);
+    }
 }
 ```
 
@@ -1117,7 +1117,7 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 	// ...
 	render() {
 		// run your meta
-		this.meta(UsefulMeta).nodeAccessingMethod('root');
+		const hasRoot = this.meta(HasMeta).has('root');
 		
 		return v('div', { key: 'root' });
 	}
@@ -1128,7 +1128,37 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 Meta classes are provided with a few hooks into the widget.
 
 * `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
+* `requireNode` - A method that accept a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If once is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an error will be thrown.
 * `invalidate` - A method that will invalidate the widget.
+
+Meta classes may also be passed options to be used during the initial setup.
+
+```typescript
+import { WidgetMeta } from "@dojo/widget-core/WidgetBase";
+
+interface IsTallMetaOptions {
+    minHeight: number;
+}
+
+class IsTallMeta implements WidgetMeta {
+	private _props: WidgetMetaProperties;
+	private _opts: IsTallMetaOptions;
+
+	constructor(properties: WidgetMetaProperties, options: IsTallMetaOptions) {
+		this._props = properties;
+		this._opts = options;
+	}
+
+    isTall(key: string): boolean {
+        this._props.requireNode(key);
+        const node = this._props.nodes.get(key);
+        if (node) {
+            return node.offsetHeight >= this._opts.minHeight;
+        }
+        return false;
+    }
+}
+```
 
 ### Key Principles
 
