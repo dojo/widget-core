@@ -1128,7 +1128,7 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 Meta classes are provided with a few hooks into the widget.
 
 * `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
-* `requireNode` - A method that accept a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If once is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an error will be thrown.
+* `requireNode` - A method that accept a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an error will be thrown.
 * `invalidate` - A method that will invalidate the widget.
 
 Meta classes may also be passed options to be used during the initial setup.
