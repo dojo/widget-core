@@ -1,5 +1,6 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import global from '@dojo/core/global';
+import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
@@ -212,7 +213,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any, any>, WidgetMeta>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any, any>, { options: any; meta: WidgetMeta }[]>();
 	private _nodeMap = new Map<string, HTMLElement>();
 	private _requiredNodes = new Set<string>();
 
@@ -249,7 +250,31 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	}
 
 	protected meta<T extends WidgetMeta, O>(MetaType: WidgetMetaConstructor<T, O>, options?: O): T {
-		let cached = this._metaMap.get(MetaType);
+		let cached: WidgetMeta | undefined = undefined;
+		let variations = this._metaMap.get(MetaType);
+		if (variations) {
+			const optionKeys = Object.keys(options || {});
+			for (let { options: variation, meta } of variations) {
+				const allProperties = [ ...Object.keys(variation), ...optionKeys ].filter((value, index, self) => {
+					return self.indexOf(value) === index;
+				});
+				if (allProperties.length === 0) {
+					// neither passed nor stored options have any keys so they are equal
+					cached = meta;
+					break;
+				}
+				if (allProperties.every(propertyName => {
+						return ((<any> options)[propertyName] === variation[propertyName]);
+					})) {
+					cached = meta;
+					break;
+				}
+			}
+		}
+		else {
+			variations = [];
+			this._metaMap.set(MetaType, variations);
+		}
 		if (!cached) {
 			const boundInvalidate = this.invalidate.bind(this);
 			const invalidate = function () {
@@ -269,7 +294,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 				}
 			}, options);
 
-			this._metaMap.set(MetaType, cached);
+			variations.push({ options: assign({}, options), meta: cached });
 		}
 
 		return cached as T;

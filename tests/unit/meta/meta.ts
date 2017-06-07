@@ -27,6 +27,68 @@ registerSuite({
 		rAF.restore();
 	},
 
+	'meta returns a singleton'() {
+		class TestMeta implements WidgetMeta {
+			nodes: any;
+
+			constructor(props: WidgetMetaProperties) {
+				this.nodes = props.nodes;
+			}
+		}
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+			render() {
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+
+			getMeta() {
+				return this.meta(TestMeta);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		assert.strictEqual(widget.getMeta(), widget.getMeta());
+	},
+
+	'meta with options return singletons'() {
+		class TestMeta implements WidgetMeta {
+			nodes: any;
+
+			constructor(props: WidgetMetaProperties) {
+				this.nodes = props.nodes;
+			}
+		}
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+			render() {
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+
+			getMeta(id: string) {
+				return this.meta(TestMeta, { id });
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		assert.strictEqual(widget.getMeta('foo'), widget.getMeta('foo'), 'foo equals foo');
+		assert.strictEqual(widget.getMeta('bar'), widget.getMeta('bar'), 'bar equals bar');
+		assert.notStrictEqual(widget.getMeta('foo'), widget.getMeta('bar'), 'foo does not equal bar');
+	},
+
 	'meta is provided a list of nodes with keys'() {
 		class TestMeta implements WidgetMeta {
 			nodes: any;
