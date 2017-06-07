@@ -1076,14 +1076,14 @@ Widget meta is used to access additional information about the widget, usually i
 
 ```typescript
 class TestWidget extends WidgetBase<WidgetProperties> {
-	render() {
-		const dimensions = this.meta(Dimensions).get('root');
-		
-		return v('div', {
-			key: 'root',
-			innerHTML: `Width: ${dimensions.width}`
-		});
-	}
+    render() {
+        const dimensions = this.meta(Dimensions).get('root');
+
+        return v('div', {
+            key: 'root',
+            innerHTML: `Width: ${dimensions.width}`
+        });
+    }
 }
 ```
 
