@@ -58,6 +58,50 @@ registerSuite({
 		assert.isNotNull(meta.nodes.get('root'));
 	},
 
+	'meta accepts options'() {
+		interface TestMetaOptions {
+			rootKey: string;
+		}
+
+		class TestMeta implements WidgetMeta {
+			nodes: any;
+			options: TestMetaOptions;
+
+			constructor(props: WidgetMetaProperties, options: TestMetaOptions) {
+				this.nodes = props.nodes;
+				this.options = options;
+			}
+
+			getRoot() {
+				return this.nodes.get(this.options.rootKey);
+			}
+		}
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+			render() {
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+
+			getMeta() {
+				return this.meta(TestMeta, {
+					rootKey: 'root'
+				});
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+		const meta = widget.getMeta();
+
+		assert.isTrue(meta.nodes.size > 0);
+		assert.isNotNull(meta.getRoot());
+	},
+
 	'meta renders the node if it has to'() {
 		class TestMeta implements WidgetMeta {
 			props: WidgetMetaProperties;

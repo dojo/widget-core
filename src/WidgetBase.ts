@@ -60,8 +60,8 @@ interface DiffPropertyConfig {
 	diffFunction?<P>(previousProperty: P, newProperty: P): PropertyChangeRecord;
 }
 
-export interface WidgetMetaConstructor<T> {
-	new (properties: WidgetMetaProperties): T;
+export interface WidgetMetaConstructor<T, O> {
+	new (properties: WidgetMetaProperties, options?: O): T;
 }
 
 export interface WidgetMetaProperties {
@@ -223,7 +223,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMeta>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any, any>, WidgetMeta>();
 	private _nodeMap = new Map<string, Element>();
 	private _requiredNodes = new Set<string>();
 
@@ -259,7 +259,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._checkOnElementUsage();
 	}
 
-	protected meta<T extends WidgetMeta>(MetaType: WidgetMetaConstructor<T>): T {
+	protected meta<T extends WidgetMeta, O>(MetaType: WidgetMetaConstructor<T, O>, options?: O): T {
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			const boundInvalidate = this.invalidate.bind(this);
@@ -278,7 +278,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 						invalidate();
 					}
 				}
-			});
+			}, options);
 
 			this._metaMap.set(MetaType, cached);
 		}
