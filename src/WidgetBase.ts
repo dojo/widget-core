@@ -20,8 +20,7 @@ import {
 	HNode,
 	WNode,
 	WidgetMeta,
-	WidgetMetaConstructor,
-	WidgetMetaProperties
+	WidgetMetaConstructor
 } from './interfaces';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 import RegistryHandler from './RegistryHandler';
@@ -346,7 +345,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	}
 
 	private _setNode(element: Element, properties: VNodeProperties): void {
-		this._nodeMap.set(String(properties.key), element);
+		this._nodeMap.set(String(properties.key), <HTMLElement> element);
 	}
 
 	public get properties(): Readonly<P> {

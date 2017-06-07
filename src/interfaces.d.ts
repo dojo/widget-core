@@ -1,6 +1,7 @@
 import { Evented } from '@dojo/core/Evented';
 import { EventTypedObject } from '@dojo/interfaces/core';
 import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
+import Map from '@dojo/shim/Map';
 
 /**
  * Generic constructor type
