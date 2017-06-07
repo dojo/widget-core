@@ -65,7 +65,7 @@ export interface WidgetMetaConstructor<T, O> {
 }
 
 export interface WidgetMetaProperties {
-	nodes: Map<string, any>;
+	nodes: Map<string, HTMLElement>;
 	invalidate: () => void;
 	requireNode: (key: string) => void;
 }
