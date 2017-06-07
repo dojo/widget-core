@@ -1,8 +1,9 @@
 import global from '@dojo/core/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { WidgetMeta, WidgetMetaProperties, WidgetBase } from '../../../src/WidgetBase';
+import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
+import { WidgetMeta, WidgetMetaProperties } from '../../../src/interfaces';
 import { ProjectorMixin } from '../../../src/main';
 import { stub } from 'sinon';
 

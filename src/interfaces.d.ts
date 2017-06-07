@@ -374,3 +374,16 @@ export interface WidgetBaseInterface<
 	 */
 	invalidate(): void;
 }
+
+export interface WidgetMeta {
+}
+
+export interface WidgetMetaConstructor<T, O> {
+	new (properties: WidgetMetaProperties, options?: O): T;
+}
+
+export interface WidgetMetaProperties {
+	nodes: Map<string, HTMLElement>;
+	invalidate: () => void;
+	requireNode: (key: string) => void;
+}

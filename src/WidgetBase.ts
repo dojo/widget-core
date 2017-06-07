@@ -18,7 +18,10 @@ import {
 	PropertiesChangeEvent,
 	RegistryLabel,
 	HNode,
-	WNode
+	WNode,
+	WidgetMeta,
+	WidgetMetaConstructor,
+	WidgetMetaProperties
 } from './interfaces';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 import RegistryHandler from './RegistryHandler';
@@ -58,19 +61,6 @@ interface DiffPropertyConfig {
 	propertyName: string;
 	diffType: DiffType;
 	diffFunction?<P>(previousProperty: P, newProperty: P): PropertyChangeRecord;
-}
-
-export interface WidgetMetaConstructor<T, O> {
-	new (properties: WidgetMetaProperties, options?: O): T;
-}
-
-export interface WidgetMetaProperties {
-	nodes: Map<string, HTMLElement>;
-	invalidate: () => void;
-	requireNode: (key: string) => void;
-}
-
-export interface WidgetMeta {
 }
 
 export interface WidgetBaseEvents<P extends WidgetProperties> extends BaseEventedEvents {
@@ -224,7 +214,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any, any>, WidgetMeta>();
-	private _nodeMap = new Map<string, Element>();
+	private _nodeMap = new Map<string, HTMLElement>();
 	private _requiredNodes = new Set<string>();
 
 	/**
