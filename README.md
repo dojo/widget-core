@@ -1141,13 +1141,13 @@ interface IsTallMetaOptions {
 }
 
 class IsTallMeta implements WidgetMeta {
-	private _props: WidgetMetaProperties;
-	private _opts: IsTallMetaOptions;
+    private _props: WidgetMetaProperties;
+    private _opts: IsTallMetaOptions;
 
-	constructor(properties: WidgetMetaProperties, options: IsTallMetaOptions) {
-		this._props = properties;
-		this._opts = options;
-	}
+    constructor(properties: WidgetMetaProperties, options: IsTallMetaOptions) {
+        this._props = properties;
+        this._opts = options;
+    }
 
     isTall(key: string): boolean {
         this._props.requireNode(key);
