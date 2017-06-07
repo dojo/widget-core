@@ -263,7 +263,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			const boundInvalidate = this.invalidate.bind(this);
-			const invalidate = () => {
+			const invalidate = function () {
 				global.cancelAnimationFrame(scheduled);
 				scheduled = global.requestAnimationFrame(boundInvalidate);
 			};
