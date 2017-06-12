@@ -379,8 +379,8 @@ export interface WidgetBaseInterface<
 export interface WidgetMeta {
 }
 
-export interface WidgetMetaConstructor<T, O> {
-	new (properties: WidgetMetaProperties, options?: O): T;
+export interface WidgetMetaConstructor<T> {
+	new (properties: WidgetMetaProperties): T;
 }
 
 export interface WidgetMetaProperties {

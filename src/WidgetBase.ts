@@ -1,6 +1,5 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
 import global from '@dojo/core/global';
-import { assign } from '@dojo/core/lang';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
@@ -20,11 +19,11 @@ import {
 	RegistryLabel,
 	HNode,
 	WNode,
-	WidgetMeta,
 	WidgetMetaConstructor
 } from './interfaces';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 import RegistryHandler from './RegistryHandler';
+import WidgetMetaBase from './WidgetMetaBase';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 
 export { DiffType };
 
@@ -213,9 +212,10 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any, any>, { options: any; meta: WidgetMeta }[]>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMetaBase>();
 	private _nodeMap = new Map<string, HTMLElement>();
 	private _requiredNodes = new Set<string>();
+	private _deferredProperties = new Map<string, any[]>();
 
 	/**
 	 * @constructor
@@ -249,36 +249,8 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._checkOnElementUsage();
 	}
 
-	protected meta<T extends WidgetMeta, O>(MetaType: WidgetMetaConstructor<T, O>, options?: O): T {
-		let cached: WidgetMeta | undefined = undefined;
-		let variations = this._metaMap.get(MetaType);
-		if (variations) {
-			const optionKeys = Object.keys(options || {});
-			for (let { options: variation, meta } of variations) {
-				const allProperties = [ ...Object.keys(variation), ...optionKeys ].filter((value, index, self) => {
-					return self.indexOf(value) === index;
-				});
-				if (allProperties.length === 0) {
-					// Neither passed nor stored options have any keys so they are equal
-					cached = meta;
-					break;
-				}
-				if (!options) {
-					// No options were passed but this potential match has keys
-					continue;
-				}
-				if (allProperties.every(propertyName => {
-						return ((<any> options)[propertyName] === variation[propertyName]);
-					})) {
-					cached = meta;
-					break;
-				}
-			}
-		}
-		else {
-			variations = [];
-			this._metaMap.set(MetaType, variations);
-		}
+	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
+		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			const boundInvalidate = this.invalidate.bind(this);
 			const invalidate = function () {
@@ -296,12 +268,18 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 						invalidate();
 					}
 				}
-			}, options);
+			});
 
-			variations.push({ options: assign({}, options), meta: cached });
+			this._metaMap.set(MetaType, cached);
 		}
 
 		return cached as T;
+	}
+
+	@beforeRender()
+	protected clearDeferredProperties(renderFunction: any, properties: any, children: DNode[]): any {
+		this._deferredProperties.clear();
+		return renderFunction;
 	}
 
 	/**
@@ -333,12 +311,27 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		return node;
 	}
 
+	protected applyDeferredProperties(element: any, properties: VNodeProperties) {
+		const key = String(properties.key);
+		if (this._deferredProperties.has(key)) {
+			(this._deferredProperties.get(key) || []).forEach(({ object, propertyName, callback }: { object: string, propertyName: string, callback: Function }) => {
+				if (object === 'properties') {
+					element[propertyName] = callback.apply(this);
+				}
+				if (object === 'styles') {
+					element.style[propertyName] = callback.apply(this);
+				}
+			});
+		}
+	}
+
 	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
 	 */
 	private afterCreateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
+		this.applyDeferredProperties(<HTMLElement> element, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -348,6 +341,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private afterUpdateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
+		this.applyDeferredProperties(<HTMLElement> element, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
@@ -707,7 +701,43 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			return this.dNodeToVNode(child);
 		});
 
+		this._prepareDeferredProperties(dNode);
+
 		return dNode.render();
+	}
+
+	private _prepareDeferredProperties(node: DNode) {
+		if (isHNode(node)) {
+			const {
+				properties = {},
+				properties: {
+					styles = {}
+				}
+			} = node;
+
+			if (properties.key) {
+				[ 'scrollTop' ].forEach((propertyName) => {
+					if (typeof properties[propertyName] === 'function') {
+						this._deferredProperties.set(<string> properties.key, (this._deferredProperties.get(<string> properties.key) || []).concat({
+							object: 'properties',
+							propertyName: propertyName,
+							callback: properties[propertyName]
+						}));
+						delete (<any> properties)[propertyName];
+					}
+				});
+				Object.keys(styles).forEach((styleName) => {
+					if (typeof styles[styleName] === 'function') {
+						this._deferredProperties.set(<string> properties.key, (this._deferredProperties.get(<string> properties.key) || []).concat({
+							object: 'styles',
+							propertyName: styleName,
+							callback: styles[styleName]
+						}));
+						delete styles[styleName];
+					}
+				});
+			}
+		}
 	}
 
 	/**
