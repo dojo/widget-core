@@ -1094,18 +1094,13 @@ If an HTML node is required to calculate the meta information, a sensible defaul
 You can create your own meta if you need access to DOM nodes.
 
 ```typescript
-import { WidgetMeta } from "@dojo/widget-core/WidgetBase";
+import MetaBase from "@dojo/widget-core/meta/Base";
 
-class HasMeta implements WidgetMeta {
-    private _props: WidgetMetaProperties;
-
-    constructor(properties: WidgetMetaProperties) {
-        this._props = properties;
-    }
-
-    has(key: string): boolean {
-        this._props.requireNode(key);
-        return this._props.nodes.has(key);
+class HtmlMeta extends MetaBase {
+    get(key: string): string {
+        this.requireNode(key);
+        const node = this.nodes.get(key);
+        return node ? node.innerHTML : '';
     }
 }
 ```
@@ -1117,43 +1112,39 @@ class MyWidget extends WidgetBase<WidgetProperties> {
     // ...
     render() {
         // run your meta
-        const hasRoot = this.meta(HasMeta).has('root');
+        const html = this.meta(HtmlMeta).get('comment');
 
-        return v('div', { key: 'root' });
+        return v('div', { key: 'root', innerHTML: html });
     }
     // ...
 }
 ```
 
-Meta classes are provided with a few hooks into the widget.
+Meta classes are provided with a few hooks into the widget, passed to the constructor:
 
 * `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
 * `requireNode` - A method that accept a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an error will be thrown.
 * `invalidate` - A method that will invalidate the widget.
 
-Meta classes may also be passed options to be used during the initial setup.
+Extending the base class found in `meta/Base` will automatically add these hooks to the class instance as well as providing a `has` method:
+
+* `has(key: string)` - A method that returns `true` if the DOM element with the passed key exists in the rendered DOM.
+
+Meta classes that require extra options should accept them in their methods.
 
 ```typescript
-import { WidgetMeta } from "@dojo/widget-core/WidgetBase";
+import MetaBase from "@dojo/widget-core/meta/Base";
 
 interface IsTallMetaOptions {
     minHeight: number;
 }
 
-class IsTallMeta implements WidgetMeta {
-    private _props: WidgetMetaProperties;
-    private _opts: IsTallMetaOptions;
-
-    constructor(properties: WidgetMetaProperties, options: IsTallMetaOptions) {
-        this._props = properties;
-        this._opts = options;
-    }
-
-    isTall(key: string): boolean {
-        this._props.requireNode(key);
-        const node = this._props.nodes.get(key);
+class IsTallMeta extends MetaBase {
+    isTall(key: string, { minHeight }: IsTallMetaOptions = { minHeight: 300 }): boolean {
+        this.requireNode(key);
+        const node = this.nodes.get(key);
         if (node) {
-            return node.offsetHeight >= this._opts.minHeight;
+            return node.offsetHeight >= minHeight;
         }
         return false;
     }
