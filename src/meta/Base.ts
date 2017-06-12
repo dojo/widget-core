@@ -1,7 +1,7 @@
 import Map from '@dojo/shim/Map';
-import { WidgetMeta, WidgetMetaProperties } from './interfaces';
+import { WidgetMeta, WidgetMetaProperties } from '../interfaces';
 
-export class WidgetMetaBase implements WidgetMeta {
+export class Base implements WidgetMeta {
 	protected nodes: Map<string, HTMLElement>;
 
 	constructor(properties: WidgetMetaProperties) {
@@ -20,4 +20,4 @@ export class WidgetMetaBase implements WidgetMeta {
 	protected requireNode(key: string): void {}
 }
 
-export default WidgetMetaBase;
+export default Base;

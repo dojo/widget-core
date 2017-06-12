@@ -21,8 +21,8 @@ import {
 	WNode,
 	WidgetMetaConstructor
 } from './interfaces';
+import MetaBase from './meta/Base';
 import RegistryHandler from './RegistryHandler';
-import WidgetMetaBase from './WidgetMetaBase';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 
 export { DiffType };
@@ -212,7 +212,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMetaBase>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, MetaBase>();
 	private _nodeMap = new Map<string, HTMLElement>();
 	private _requiredNodes = new Set<string>();
 	private _deferredProperties = new Map<string, any[]>();
@@ -249,7 +249,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._checkOnElementUsage();
 	}
 
-	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
+	protected meta<T extends MetaBase>(MetaType: WidgetMetaConstructor<T>): T {
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			const boundInvalidate = this.invalidate.bind(this);

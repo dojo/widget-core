@@ -1,10 +1,11 @@
 import global from '@dojo/core/global';
+import Map from '@dojo/shim/Map';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
+import { Base as MetaBase } from '../../../src/meta/Base';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { WidgetMetaBase } from '../../../src/WidgetMetaBase';
 import { stub } from 'sinon';
 
 let rAF: any;
@@ -28,7 +29,7 @@ registerSuite({
 	},
 
 	'meta returns a singleton'() {
-		class TestMeta extends WidgetMetaBase {
+		class TestMeta extends MetaBase {
 		}
 
 		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
@@ -53,7 +54,7 @@ registerSuite({
 	},
 
 	'meta is provided a list of nodes with keys'() {
-		class TestMeta extends WidgetMetaBase {
+		class TestMeta extends MetaBase {
 		}
 
 		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
@@ -80,7 +81,7 @@ registerSuite({
 	},
 
 	'meta renders the node if it has to'() {
-		class TestMeta extends WidgetMetaBase {
+		class TestMeta extends MetaBase {
 		}
 
 		let renders = 0;
@@ -117,7 +118,7 @@ registerSuite({
 	},
 
 	'multi-step render'() {
-		class TestMeta extends WidgetMetaBase {
+		class TestMeta extends MetaBase {
 		}
 
 		let renders = 0;
@@ -158,7 +159,7 @@ registerSuite({
 	},
 
 	'meta throws an error if a required node is not found'() {
-		class TestMeta extends WidgetMetaBase {
+		class TestMeta extends MetaBase {
 		}
 
 		let renders = 0;
@@ -186,5 +187,15 @@ registerSuite({
 		assert.throws(() => {
 			resolveRAF();
 		});
+	},
+
+	'base meta has no-op functions'() {
+		const base = new MetaBase({
+			nodes: new Map<string, HTMLElement>(),
+			invalidate: (<any> MetaBase.prototype).invalidate,
+			requireNode: (<any> MetaBase.prototype).requireNode
+		});
+		(<any> base).invalidate();
+		(<any> base).requireNode('foo');
 	}
 });
