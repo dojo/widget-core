@@ -275,12 +275,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		return cached as T;
 	}
 
-	@beforeRender()
-	protected clearDeferredProperties(renderFunction: any, properties: any, children: DNode[]): any {
-		this._deferredProperties.clear();
-		return renderFunction;
-	}
-
 	/**
 	 * A render decorator that registers vnode callbacks for 'afterCreate' and
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
