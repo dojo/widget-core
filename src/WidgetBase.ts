@@ -215,7 +215,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, MetaBase>();
 	private _nodeMap = new Map<string, HTMLElement>();
 	private _requiredNodes = new Set<string>();
-	private _deferredProperties = new Map<string, any[]>();
 
 	/**
 	 * @constructor
@@ -311,27 +310,12 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		return node;
 	}
 
-	protected applyDeferredProperties(element: any, properties: VNodeProperties) {
-		const key = String(properties.key);
-		if (this._deferredProperties.has(key)) {
-			(this._deferredProperties.get(key) || []).forEach(({ object, propertyName, callback }: { object: string, propertyName: string, callback: Function }) => {
-				if (object === 'properties') {
-					element[propertyName] = callback.apply(this);
-				}
-				if (object === 'styles') {
-					element.style[propertyName] = callback.apply(this);
-				}
-			});
-		}
-	}
-
 	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
 	 */
 	private afterCreateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
-		this.applyDeferredProperties(<HTMLElement> element, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -341,7 +325,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private afterUpdateCallback(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string,
 		properties: VNodeProperties, children: VNode[]): void {
 		this._setNode(element, properties);
-		this.applyDeferredProperties(<HTMLElement> element, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
@@ -701,43 +684,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			return this.dNodeToVNode(child);
 		});
 
-		this._prepareDeferredProperties(dNode);
-
 		return dNode.render();
-	}
-
-	private _prepareDeferredProperties(node: DNode) {
-		if (isHNode(node)) {
-			const {
-				properties = {},
-				properties: {
-					styles = {}
-				}
-			} = node;
-
-			if (properties.key) {
-				[ 'scrollTop' ].forEach((propertyName) => {
-					if (typeof properties[propertyName] === 'function') {
-						this._deferredProperties.set(<string> properties.key, (this._deferredProperties.get(<string> properties.key) || []).concat({
-							object: 'properties',
-							propertyName: propertyName,
-							callback: properties[propertyName]
-						}));
-						delete (<any> properties)[propertyName];
-					}
-				});
-				Object.keys(styles).forEach((styleName) => {
-					if (typeof styles[styleName] === 'function') {
-						this._deferredProperties.set(<string> properties.key, (this._deferredProperties.get(<string> properties.key) || []).concat({
-							object: 'styles',
-							propertyName: styleName,
-							callback: styles[styleName]
-						}));
-						delete styles[styleName];
-					}
-				});
-			}
-		}
 	}
 
 	/**
