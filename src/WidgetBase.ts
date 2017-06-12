@@ -288,6 +288,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			node.properties.afterCreate = this.afterCreateCallback;
 			node.properties.afterUpdate = this.afterUpdateCallback;
 		}, isHNodeWithKey);
+
 		return node;
 	}
 
