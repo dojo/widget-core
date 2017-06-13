@@ -1,23 +1,38 @@
+import global from '@dojo/core/global';
 import Map from '@dojo/shim/Map';
-import { WidgetMeta, WidgetMetaProperties } from '../interfaces';
+import Set from '@dojo/shim/Set';
+import { WidgetMetaProperties } from '../interfaces';
 
-export class Base implements WidgetMeta {
+export class Base {
+	private _invalidate: () => void;
+	private _requiredNodes: Set<string>;
+	private _invalidating: number;
+
 	protected nodes: Map<string, HTMLElement>;
 
 	constructor(properties: WidgetMetaProperties) {
+		this._invalidate = properties.invalidate;
+		this._requiredNodes = properties.requiredNodes;
 		this.nodes = properties.nodes;
-		this.invalidate = properties.invalidate;
-		this.requireNode = properties.requireNode;
 	}
 
-	public has(key: string): boolean {
+	has(key: string): boolean {
 		this.requireNode(key);
 		return this.nodes.has(key);
 	}
 
-	protected invalidate(): void {}
+	invalidate(): void {
+		global.cancelAnimationFrame(this._invalidating);
+		this._invalidating = global.requestAnimationFrame(this._invalidate);
+	}
 
-	protected requireNode(key: string): void {}
+	requireNode(key: string): void {
+		this._requiredNodes.add(key);
+
+		if (!this.nodes.has(key)) {
+			this.invalidate();
+		}
+	}
 }
 
 export default Base;

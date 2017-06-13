@@ -1,5 +1,4 @@
 import { Evented, BaseEventedEvents } from '@dojo/core/Evented';
-import global from '@dojo/core/global';
 import { EventedListenerOrArray } from '@dojo/interfaces/bases';
 import { Handle } from '@dojo/interfaces/core';
 import { VNode, ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
@@ -251,24 +250,11 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	protected meta<T extends MetaBase>(MetaType: WidgetMetaConstructor<T>): T {
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
-			const boundInvalidate = this.invalidate.bind(this);
-			const invalidate = function () {
-				global.cancelAnimationFrame(scheduled);
-				scheduled = global.requestAnimationFrame(boundInvalidate);
-			};
-			let scheduled: number | undefined;
 			cached = new MetaType({
 				nodes: this._nodeMap,
-				invalidate,
-				requireNode: (key: string) => {
-					this._requiredNodes.add(key);
-
-					if (!this._nodeMap.has(key)) {
-						invalidate();
-					}
-				}
+				requiredNodes: this._requiredNodes,
+				invalidate: this.invalidate.bind(this)
 			});
-
 			this._metaMap.set(MetaType, cached);
 		}
 

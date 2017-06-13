@@ -1,5 +1,4 @@
 import global from '@dojo/core/global';
-import Map from '@dojo/shim/Map';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { v } from '../../../src/d';
@@ -57,7 +56,7 @@ registerSuite({
 		class TestMeta extends MetaBase {
 		}
 
-		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+		class TestWidget extends ProjectorMixin(WidgetBase) {
 			render() {
 				return v('div', {
 					innerHTML: 'hello world',
@@ -76,8 +75,7 @@ registerSuite({
 		widget.append(div);
 		const meta = widget.getMeta();
 
-		assert.isTrue((<any> meta).nodes.size > 0);
-		assert.isNotNull((<any> meta).nodes.get('root'));
+		assert.isTrue(meta.has('root'));
 	},
 
 	'meta renders the node if it has to'() {
@@ -86,7 +84,7 @@ registerSuite({
 
 		let renders = 0;
 
-		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+		class TestWidget extends ProjectorMixin(WidgetBase) {
 			nodes: any;
 
 			render() {
@@ -123,7 +121,7 @@ registerSuite({
 
 		let renders = 0;
 
-		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+		class TestWidget extends ProjectorMixin(WidgetBase) {
 			nodes: any;
 
 			render() {
@@ -155,7 +153,7 @@ registerSuite({
 
 		resolveRAF();
 
-		assert.strictEqual(renders, 3, 'expected two renders');
+		assert.strictEqual(renders, 3, 'expected three renders');
 	},
 
 	'meta throws an error if a required node is not found'() {
@@ -164,7 +162,7 @@ registerSuite({
 
 		let renders = 0;
 
-		class TestWidget extends ProjectorMixin(WidgetBase)<any> {
+		class TestWidget extends ProjectorMixin(WidgetBase) {
 			nodes: any;
 
 			render() {
@@ -187,15 +185,5 @@ registerSuite({
 		assert.throws(() => {
 			resolveRAF();
 		});
-	},
-
-	'base meta has no-op functions'() {
-		const base = new MetaBase({
-			nodes: new Map<string, HTMLElement>(),
-			invalidate: (<any> MetaBase.prototype).invalidate,
-			requireNode: (<any> MetaBase.prototype).requireNode
-		});
-		(<any> base).invalidate();
-		(<any> base).requireNode('foo');
 	}
 });
