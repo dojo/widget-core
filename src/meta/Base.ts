@@ -5,14 +5,15 @@ import { WidgetMetaProperties } from '../interfaces';
 
 export class Base {
 	private _invalidate: () => void;
-	private _requiredNodes: Set<string>;
 	private _invalidating: number;
+	private _requiredNodes: Set<string>;
 
 	protected nodes: Map<string, HTMLElement>;
 
 	constructor(properties: WidgetMetaProperties) {
 		this._invalidate = properties.invalidate;
 		this._requiredNodes = properties.requiredNodes;
+
 		this.nodes = properties.nodes;
 	}
 
