@@ -21,12 +21,12 @@ export class Base {
 		return this.nodes.has(key);
 	}
 
-	invalidate(): void {
+	protected invalidate(): void {
 		global.cancelAnimationFrame(this._invalidating);
 		this._invalidating = global.requestAnimationFrame(this._invalidate);
 	}
 
-	requireNode(key: string): void {
+	protected requireNode(key: string): void {
 		this._requiredNodes.add(key);
 
 		if (!this.nodes.has(key)) {
