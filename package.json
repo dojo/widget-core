@@ -53,6 +53,10 @@
     "typescript": "~2.3.2"
   },
   "dependencies": {
+    "@dojo/core": "^2.0.0-beta2.1",
+    "@dojo/has": "^2.0.0-beta2.1",
+    "@dojo/i18n": "^2.0.0-beta2.1",
+    "@dojo/shim": "^2.0.0-beta2.1",
     "maquette": "~2.5.1",
     "pepjs": "^0.4.2"
   }
