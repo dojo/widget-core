@@ -7,7 +7,6 @@ export class Base {
 	private _invalidate: () => void;
 	private _invalidating: number;
 	private _requiredNodes: Set<string>;
-
 	protected nodes: Map<string, HTMLElement>;
 
 	constructor(properties: WidgetMetaProperties) {
@@ -17,7 +16,7 @@ export class Base {
 		this.nodes = properties.nodes;
 	}
 
-	has(key: string): boolean {
+	public has(key: string): boolean {
 		this.requireNode(key);
 		return this.nodes.has(key);
 	}
