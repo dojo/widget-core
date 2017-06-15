@@ -184,6 +184,6 @@ registerSuite({
 
 		assert.throws(() => {
 			resolveRAF();
-		});
+		}, Error, 'Required node test not found');
 	}
 });
