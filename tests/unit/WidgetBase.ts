@@ -1437,7 +1437,7 @@ widget.__setProperties__({
 		const testWidget = new TestWidget();
 		const testWidget2 = new TestWidget2();
 
-		assert.equal(testWidget.getAfterRenders().length, 3);
-		assert.equal(testWidget2.getAfterRenders().length, 4);
+		assert.equal(testWidget.getAfterRenders().length, 4);
+		assert.equal(testWidget2.getAfterRenders().length, 5);
 	}
 });

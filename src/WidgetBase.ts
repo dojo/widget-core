@@ -264,6 +264,33 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	}
 
 	/**
+	 * A render decorator that verifies nodes required in
+	 * 'meta' calls in this render,
+	 */
+	@beforeRender()
+	protected verifyRequiredNodes(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
+		return () => {
+			this._requiredNodes.forEach((element, key) => {
+				if (!this._nodeMap.has(key)) {
+					throw new Error(`Required node ${key} not found`);
+				}
+			});
+			this._requiredNodes.clear();
+			return renderFunc();
+		};
+	}
+
+	/**
+	 * A render decorator that clears the node map used
+	 * by 'meta' calls in this render.
+	 */
+	@afterRender()
+	clearNodeMap(node: DNode | DNode[]): DNode | DNode[] {
+		this._nodeMap.clear();
+		return node;
+	}
+
+	/**
 	 * A render decorator that registers vnode callbacks for 'afterCreate' and
 	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
 	 */
@@ -435,9 +462,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
-
-			this._verifyRequiredNodes();
-
 			const beforeRenders = this.getDecorator('beforeRender');
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render, this._properties, this._children);
@@ -448,8 +472,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
 			});
-
-			this._nodeMap.clear();
 
 			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
@@ -580,18 +602,6 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	protected get registries(): RegistryHandler {
 		return this._registries;
-	}
-
-	/**
-	 * Verify required nodes appear in this render
-	 */
-	private _verifyRequiredNodes() {
-		this._requiredNodes.forEach((element, key) => {
-			if (!this._nodeMap.has(key)) {
-				throw new Error(`Required node ${key} not found`);
-			}
-		});
-		this._requiredNodes.clear();
 	}
 
 	/**
