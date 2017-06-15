@@ -18,15 +18,12 @@ function resolveRAF() {
 
 registerSuite({
 	name: 'meta base',
-
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame').returns(1);
 	},
-
 	afterEach() {
 		rAF.restore();
 	},
-
 	'meta returns a singleton'() {
 		class TestMeta extends MetaBase {
 		}
@@ -51,7 +48,6 @@ registerSuite({
 
 		assert.strictEqual(widget.getMeta(), widget.getMeta());
 	},
-
 	'meta is provided a list of nodes with keys'() {
 		class TestMeta extends MetaBase {
 		}
@@ -77,7 +73,6 @@ registerSuite({
 
 		assert.isTrue(meta.has('root'));
 	},
-
 	'meta renders the node if it has to'() {
 		class TestMeta extends MetaBase {
 		}
@@ -114,7 +109,6 @@ registerSuite({
 
 		assert.strictEqual(renders, 2, 'expected two renders');
 	},
-
 	'multi-step render'() {
 		class TestMeta extends MetaBase {
 		}
@@ -155,7 +149,6 @@ registerSuite({
 
 		assert.strictEqual(renders, 3, 'expected three renders');
 	},
-
 	'meta throws an error if a required node is not found'() {
 		class TestMeta extends MetaBase {
 		}
