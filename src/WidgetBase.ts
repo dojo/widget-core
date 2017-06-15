@@ -212,7 +212,9 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, MetaBase>();
+
 	private _nodeMap = new Map<string, HTMLElement>();
+
 	private _requiredNodes = new Set<string>();
 
 	/**
@@ -433,17 +435,13 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty || !this._cachedVNode) {
 			this._dirty = false;
+
+			this._verifyRequiredNodes();
+
 			const beforeRenders = this.getDecorator('beforeRender');
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render, this._properties, this._children);
 			}, this.render.bind(this));
-
-			this._requiredNodes.forEach((element, key) => {
-				if (!this._nodeMap.has(key)) {
-					throw new Error(`Required node ${key} not found`);
-				}
-			});
-			this._requiredNodes.clear();
 
 			let dNode = render();
 			const afterRenders = this.getDecorator('afterRender');
@@ -582,6 +580,18 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 
 	protected get registries(): RegistryHandler {
 		return this._registries;
+	}
+
+	/**
+	 * Verify required nodes appear in this render
+	 */
+	private _verifyRequiredNodes() {
+		this._requiredNodes.forEach((element, key) => {
+			if (!this._nodeMap.has(key)) {
+				throw new Error(`Required node ${key} not found`);
+			}
+		});
+		this._requiredNodes.clear();
 	}
 
 	/**
