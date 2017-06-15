@@ -377,10 +377,16 @@ export interface WidgetBaseInterface<
 	invalidate(): void;
 }
 
+/**
+ * Meta Base constructor type
+ */
 export interface WidgetMetaConstructor<T> {
 	new (properties: WidgetMetaProperties): T;
 }
 
+/**
+ * Properties passed to meta Base constructors
+ */
 export interface WidgetMetaProperties {
 	nodes: Map<string, HTMLElement>;
 	requiredNodes: Set<string>;
