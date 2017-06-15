@@ -466,13 +466,11 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 			const render = beforeRenders.reduce((render, beforeRenderFunction) => {
 				return beforeRenderFunction.call(this, render, this._properties, this._children);
 			}, this.render.bind(this));
-
 			let dNode = render();
 			const afterRenders = this.getDecorator('afterRender');
 			afterRenders.forEach((afterRenderFunction: Function) => {
 				dNode = afterRenderFunction.call(this, dNode);
 			});
-
 			const widget = this.dNodeToVNode(dNode);
 			this.manageDetachedChildren();
 			if (widget) {
