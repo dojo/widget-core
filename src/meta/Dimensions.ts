@@ -18,7 +18,7 @@ export interface DimensionResults {
 }
 
 export class Dimensions extends Base {
-	get(key: string): Readonly<DimensionResults> {
+	public get(key: string): Readonly<DimensionResults> {
 		this.requireNode(key);
 
 		const node = this.nodes.get(key);
