@@ -51,20 +51,28 @@ registerSuite({
 
 		assert.strictEqual(dimensions.length, 2);
 		assert.deepEqual(dimensions[0], {
-			bottom: 0,
-			height: 0,
-			left: 0,
-			right: 0,
-			scrollHeight: 0,
-			scrollLeft: 0,
-			scrollTop: 0,
-			scrollWidth: 0,
-			top: 0,
-			width: 0,
-			offsetLeft: 0,
-			offsetTop: 0,
-			offsetWidth: 0,
-			offsetHeight: 0
+			offset: {
+				height: 0,
+				left: 0,
+				top: 0,
+				width: 0
+			},
+			position: {
+				bottom: 0,
+				left: 0,
+				right: 0,
+				top: 0
+			},
+			scroll: {
+				height: 0,
+				left: 0,
+				top: 0,
+				width: 0
+			},
+			size: {
+				height: 0,
+				width: 0
+			}
 		});
 	},
 
