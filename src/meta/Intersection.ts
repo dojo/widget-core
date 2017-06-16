@@ -20,7 +20,7 @@ export default class Intersection extends MetaBase {
 		});
 	}
 
-	get(key: string, { root = '' }: IntersectionOptions = {}): number {
+	public get(key: string, { root = '' }: IntersectionOptions = {}): number {
 		let rootObserver = this._rootObservers.get(root);
 		if (!rootObserver) {
 			const intersectionOptions: any = {
