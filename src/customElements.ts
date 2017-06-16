@@ -66,7 +66,7 @@ export interface CustomElementInitializer {
  * Describes a custom element.
  *
  * @property tagName             The tag name to register this widget under. Tag names must contain a "-"
- * @property widgetConstructorA  widget Constructor that will return the widget to be wrapped in a custom element
+ * @property widgetConstructor   widget Constructor that will return the widget to be wrapped in a custom element
  * @property attributes          A list of attributes to define on this element
  * @property properties          A list of properties to define on this element
  * @property events              A list of events to expose on this element
