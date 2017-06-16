@@ -1089,6 +1089,39 @@ class TestWidget extends WidgetBase<WidgetProperties> {
 
 If an HTML node is required to calculate the meta information, a sensible default will be returned and your widget will be automatically re-rendered to provide more accurate information.
 
+###### Dimensions
+
+The `Dimensions` meta provides size/position information about a node.
+
+```
+const dimensions = this.meta(Dimensions).get('root');
+```
+
+In this simple snippet, `dimensions` would be an object with the following fields:
+
+| Property       | Source                                |
+| -------------- | ------------------------------------- |
+| `bottom`       | `node.getBoundingClientRect().bottom` |
+| `height`       | `node.getBoundingClientRect().height` |
+| `left`         | `node.getBoundingClientRect().left`   |
+| `right`        | `node.getBoundingClientRect().right`  |
+| `top`          | `node.getBoundingClientRect().top`    |
+| `width`        | `node.getBoundingClientRect().width`  |
+| `scrollLeft`   | `node.scrollLeft`                     |
+| `scrollTop`    | `node.scrollTop`                      |
+| `scrollHeight` | `node.scrollHeight`                   |
+| `scrollWidth`  | `node.scrollWidth`                    |
+| `offsetLeft`   | `node.offsetLeft`                     |
+| `offsetTop`    | `node.offsetTop`                      |
+| `offsetWidth`  | `node.offsetWidth`                    |
+| `offsetHeight` | `node.offsetHeight`                   |
+
+If the node has not yet been rendered, all values will contain `0`. If you need more information about whether or not the node has been rendered you can use the `has` method:
+
+```
+const hasRootBeenRendered = this.meta(Dimensions).has('root');
+```
+
 ##### Implementing Custom Meta
 
 You can create your own meta if you need access to DOM nodes.
