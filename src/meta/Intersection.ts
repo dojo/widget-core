@@ -5,25 +5,44 @@ import MetaBase from '../meta/Base';
 
 import 'intersection-observer';
 
+/**
+ * @type IntersectionOptions
+ *
+ * Describes the options that can be passed when requesting intersection information.
+ *
+ * @param root       Optional root node
+ * @param invalidate Set to false to prevent invalidation on intersection change
+ */
 export interface IntersectionOptions {
+	/** default true */
+	invalidate?: boolean;
 	root?: string;
 }
 
-export default class Intersection extends MetaBase {
-	private _listeners = new WeakMap<Element, IntersectionObserverEntry>();
-	private _rootObservers = new Map<string, IntersectionObserver>();
+interface IntersectionDetails {
+	entries: WeakMap<Element, IntersectionObserverEntry>;
+	invalidate: WeakMap<Element, boolean>;
+}
+
+export class Intersection extends MetaBase {
+	private _roots = new Map<string, IntersectionObserver>();
+	private _details = new WeakMap<IntersectionObserver, IntersectionDetails>();
 
 	private _onIntersect(entries: IntersectionObserverEntry[], observer: IntersectionObserver) {
-		entries.forEach(entry => {
-			this._listeners.set(entry.target, entry);
-			this.invalidate();
+		const details = this._details.get(observer);
+		entries.forEach((entry) => {
+			details.entries.set(entry.target, entry);
+			/* istanbul ignore else: only invalidate if enabled */
+			if (details.invalidate.has(entry.target)) {
+				this.invalidate();
+			}
 		});
 	}
 
-	public get(key: string, { root = '' }: IntersectionOptions = {}): number {
-		let rootObserver = this._rootObservers.get(root);
+	public get(key: string, { invalidate = true, root = '' }: IntersectionOptions = {}): number {
+		let rootObserver = this._roots.get(root);
 		if (!rootObserver) {
-			const intersectionOptions: any = {
+			const intersectionOptions: IntersectionObserverInit = {
 				rootMargin: '0px',
 				threshold: 0.0000001
 			};
@@ -39,24 +58,29 @@ export default class Intersection extends MetaBase {
 				rootObserver = new global.IntersectionObserver(this._onIntersect.bind(this), intersectionOptions);
 			}
 			if (rootObserver) {
-				this._rootObservers.set(root, rootObserver);
+				this._roots.set(root, rootObserver);
+				this._details.set(rootObserver, {
+					entries: new WeakMap<Element, IntersectionObserverEntry>(),
+					invalidate: new WeakMap<Element, boolean>()
+				});
 			}
 		}
 
 		if (rootObserver) {
-			// is this node set up?
 			this.requireNode(key);
 			const node = this.nodes.get(key);
 			if (node) {
-				if (this._listeners.has(node)) {
-					return this._listeners.get(node).intersectionRatio;
+				const details = this._details.get(rootObserver);
+				details.invalidate.set(node, invalidate);
+				if (details.entries.has(node)) {
+					return details.entries.get(node).intersectionRatio;
 				}
-				else {
-					rootObserver.observe(node);
-				}
+				rootObserver.observe(node);
 			}
 		}
 
 		return 0;
 	}
 }
+
+export default Intersection;

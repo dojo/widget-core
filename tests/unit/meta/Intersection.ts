@@ -11,6 +11,7 @@ import { WidgetBase } from '../../../src/WidgetBase';
 let rAF: any;
 let observerCallback: any;
 let intersectionObserver: any;
+let currentObserver: any;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
@@ -26,7 +27,7 @@ registerSuite({
 		rAF = stub(global, 'requestAnimationFrame');
 		intersectionObserver = stub(global, 'IntersectionObserver', function (callback: any) {
 			observerCallback = callback;
-			return {
+			return currentObserver = {
 				observe: stub()
 			};
 		});
@@ -65,14 +66,14 @@ registerSuite({
 		observerCallback([{
 			target: node,
 			intersectionRatio: 0.1
-		}]);
+		}], currentObserver);
 
 		resolveRAF();
 
 		observerCallback([{
 			target: node,
 			intersectionRatio: 0
-		}]);
+		}], currentObserver);
 
 		resolveRAF();
 
@@ -108,7 +109,7 @@ registerSuite({
 		observerCallback([{
 			target: node,
 			intersectionRatio: 0.1
-		}]);
+		}], currentObserver);
 
 		resolveRAF();
 
@@ -125,10 +126,11 @@ registerSuite({
 				return [
 					v('div', {
 						key: 'root'
-					}),
-					v('div', {
-						key: 'test'
-					})
+					}, [
+						v('div', {
+							key: 'test'
+						})
+					])
 				];
 			}
 		}
@@ -146,5 +148,68 @@ registerSuite({
 
 		assert.isTrue(intersectionObserver.called);
 		assert.strictEqual(intersectionObserver.args[0][1].root, root);
+	},
+
+	'intersection events can be ignored'() {
+		const visibles: [boolean, boolean][] = [];
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<WidgetProperties> {
+			render() {
+				visibles.push([
+					this.meta(Intersection).get('root') > 0,
+					this.meta(Intersection).get('root', { invalidate: false }) > 0
+				]);
+				return v('div', {
+					key: 'root'
+				}, [
+					v('div', {
+						key: 'ignored'
+					})
+				]);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		document.body.appendChild(div);
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		resolveRAF();
+
+		const node = (<any> widget)._nodeMap.get('root');
+		const ignored = (<any> widget)._nodeMap.get('ignored');
+
+		assert.isNotNull(node);
+
+		observerCallback([{
+			target: node,
+			intersectionRatio: 0.1
+		}, {
+			target: ignored,
+			intersectionRatio: 0.1
+		}], currentObserver);
+
+		resolveRAF();
+
+		observerCallback([{
+			target: node,
+			intersectionRatio: 0
+		}, {
+			target: ignored,
+			intersectionRatio: 0
+		}], currentObserver);
+
+		resolveRAF();
+
+		observerCallback([{
+			target: ignored,
+			intersectionRatio: 0.1
+		}], currentObserver);
+
+		resolveRAF();
+
+		assert.deepEqual(visibles, [[false, false], [false, false], [true, true], [false, false]]);
 	}
 });
