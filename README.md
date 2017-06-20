@@ -1191,7 +1191,7 @@ class IsTallMeta extends MetaBase {
 
 `DomWrapper` is used to wrap DOM that is created _outside_ of the virtual DOM system.  This is the main mechanism to integrate _foreign_ components or widgets into the virtual DOM system.
 
-The `DomWrapper` generates a class/constructor function that is then used as a widget constructor in the virtual DOM.  `DomWrapper` takes up to two arguments.  The first argument is the DOM node that it is wrapping.  The second is an optional set of options.
+The `DomWrapper` generates a class/constructor function that is then used as a widget class in the virtual DOM.  `DomWrapper` takes up to two arguments.  The first argument is the DOM node that it is wrapping.  The second is an optional set of options.
 
 The currently supported options:
 
@@ -1203,7 +1203,6 @@ As an example, we want to integrate a 3rd party library where we need to pass th
 
 ```ts
 import { w } from '@dojo/widget-core/d';
-import { Constructor, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
 import DomWrapper from '@dojo/widget-core/util/DomWrapper';
 import WidgetBase from '@dojo/widget-core/WidgetBase';
 import createComponent from 'third/party/library/createComponent';
@@ -1214,7 +1213,7 @@ export default class WrappedComponent extends WidgetBase {
         this._component = createComponent(this._root);
     }
     private _root: HTMLDivElement;
-    private _WrappedDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
+    private _WrappedDom: DomWrapper;
 
     constructor() {
         super();
