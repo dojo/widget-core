@@ -35,6 +35,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
             - [Events](#events)
             - [Initialization](#initialization)
         - [Meta](#meta)
+		- [DomWrapper](#domwrapper)
     - [Key Principles](#key-principles)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -546,7 +547,7 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 
 #### Widget Registry
 
-The widget registry provides the ability to define a `string` or `symbol` as a label for a `WidgetRegistryItem`. 
+The widget registry provides the ability to define a `string` or `symbol` as a label for a `WidgetRegistryItem`.
 
 The `WidgetRegistryItem`, can be one of the following types:
 
@@ -1182,6 +1183,47 @@ class IsTallMeta extends MetaBase {
             return node.offsetHeight >= minHeight;
         }
         return false;
+    }
+}
+```
+
+#### DomWrapper
+
+`DomWrapper` is used to wrap DOM that is created _outside_ of the virtual DOM system.  This is the main mechanism to integrate _foreign_ components or widgets into the virtual DOM system.
+
+The `DomWrapper` generates a class/constructor function that is then used as a widget constructor in the virtual DOM.  `DomWrapper` takes up to two arguments.  The first argument is the DOM node that it is wrapping.  The second is an optional set of options.
+
+The currently supported options:
+
+|Name|Description|
+|-|-|
+|`onAttached`|A callback that is called when the wrapped DOM is flowed into the virtual DOM|
+
+As an example, we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we don't want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
+
+```ts
+import { w } from '@dojo/widget-core/d';
+import { Constructor, VirtualDomProperties, WidgetProperties } from '@dojo/widget-core/interfaces';
+import DomWrapper from '@dojo/widget-core/util/DomWrapper';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
+import createComponent from 'third/party/library/createComponent';
+
+export default class WrappedComponent extends WidgetBase {
+    private _component: any;
+    private _onAttach = () => {
+        this._component = createComponent(this._root);
+    }
+    private _root: HTMLDivElement;
+    private _WrappedDom: Constructor<WidgetBase<VirtualDomProperties & WidgetProperties>>;
+
+    constructor() {
+        super();
+        const root = this._root = document.createElement('div');
+        this._WrappedDom = DomWrapper(root, { onAttached: this._onAttached });
+    }
+
+    public render() {
+        return w(this._WrappedDom, { key: 'wrapped' });
     }
 }
 ```
