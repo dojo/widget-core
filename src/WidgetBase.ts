@@ -17,12 +17,12 @@ import {
 	PropertiesChangeEvent,
 	RegistryLabel,
 	Render,
+	VirtualDomNode,
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
 	WidgetProperties,
-	WNode,
-	VirtualDomNode
+	WNode
 } from './interfaces';
 import MetaBase from './meta/Base';
 import RegistryHandler from './RegistryHandler';
@@ -648,7 +648,7 @@ export class WidgetBase<P extends WidgetProperties = WidgetProperties, C extends
 	 */
 	private _dNodeToVNode(dNode: DNode): VirtualDomNode;
 	private _dNodeToVNode(dNode: DNode[]): VirtualDomNode[];
-	private _dNodeToVNode(dNode: DNode | DNode[]): VirtualDomNode[] | VirtualDomNode;
+	private _dNodeToVNode(dNode: DNode | DNode[]): VirtualDomNode | VirtualDomNode[];
 	private _dNodeToVNode(dNode: DNode | DNode[]): VirtualDomNode | VirtualDomNode[] {
 		if (typeof dNode === 'string' || dNode === null || dNode === undefined) {
 			return dNode;
