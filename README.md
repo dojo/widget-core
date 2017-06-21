@@ -1227,6 +1227,18 @@ export default class WrappedComponent extends WidgetBase {
 }
 ```
 
+The properties which can be set on `DomWrapper` are the combination of the `WidgetBaseProperties` and the `VirtualDomProperties`, which means effectively you can use any of the properties passed to a `v()` node and they will be applied to the wrapped DOM node.  For example the following would set the classes on the wrapped DOM node:
+
+```ts
+const div = document.createElement('div');
+const WrappedDiv = DomWrapper(div);
+const wnode = w(WrappedDiv, {
+    classes: {
+        'foo': true
+    }
+});
+```
+
 ### Key Principles
 
 These are some of the **important** principles to keep in mind when creating and using widgets:
