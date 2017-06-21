@@ -351,7 +351,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._renderState = WidgetRenderState.PROPERTIES;
 		this._bindFunctionProperties(properties, bind);
 
-		const diffPropertyResults = Object.keys(properties).reduce((diffPropertyResults, propertyName) => {
+		const allProperties = new Set([...Object.keys(properties), ...Object.keys(this._properties)]);
+		const diffPropertyResults: any = {};
+		allProperties.forEach((propertyName) => {
 			const previousProperty = this._properties[propertyName];
 			const newProperty = properties[propertyName];
 			const diffFunctions: DiffPropertyFunction[] = this.getDecorator(`diffProperty:${propertyName}`);
@@ -365,10 +367,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 					changedPropertyKeys.push(propertyName);
 				}
-				diffPropertyResults[propertyName] = result.value;
+				if (propertyName in properties) {
+					diffPropertyResults[propertyName] = result.value;
+				}
 			});
-			return diffPropertyResults;
-		}, {} as any);
+		});
 
 		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
 
