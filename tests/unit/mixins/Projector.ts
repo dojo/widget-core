@@ -13,7 +13,7 @@ import { waitFor } from '../waitFor';
 const Event = global.window.Event;
 
 class BaseTestWidget extends ProjectorMixin(WidgetBase) {
-		public callInvalidate() {
+	public callInvalidate() {
 		this.invalidate();
 	}
 }
@@ -165,7 +165,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -185,7 +185,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -359,7 +359,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -381,7 +381,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -505,7 +505,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.equal(vnode.text, 'other text');
@@ -524,7 +524,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.invalidate();
+				projector.callInvalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
