@@ -1,4 +1,4 @@
-import { Constructor, PropertyChangeRecord } from '../interfaces';
+import { Constructor } from '../interfaces';
 import { diffProperty, WidgetBase } from './../WidgetBase';
 import WidgetRegistry from '../WidgetRegistry';
 
@@ -14,20 +14,11 @@ export function RegistryMixin<T extends Constructor<WidgetBase<any>>>(Base: T): 
 	class Registry extends Base {
 
 		@diffProperty('registry')
-		protected diffPropertyRegistry(previousValue: WidgetRegistry, value: WidgetRegistry): PropertyChangeRecord {
-			let changed = false;
-			if (!previousValue) {
-				this.registries.add(value);
-				changed = true;
+		protected diffPropertyRegistry(previousProperties: any, newProperties: any): void {
+			const result = this.registries.replace(previousProperties.registry, newProperties.registry);
+			if (!result) {
+				this.registries.add(newProperties.registry);
 			}
-			else if (previousValue !== value) {
-				this.registries.replace(previousValue, value);
-				changed = true;
-			}
-			return {
-				changed,
-				value: value
-			};
 		}
 	}
 	return Registry;

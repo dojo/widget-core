@@ -329,6 +329,14 @@ export interface PropertiesChangeRecord<P extends WidgetProperties> {
 	properties: P;
 }
 
+export interface DiffPropertyFunction {
+	<T>(previousProperty: T, newProperty: any): PropertyChangeRecord;
+}
+
+export interface DiffPropertyReaction {
+	(previousProperties: any, newProperties: any): void;
+}
+
 /**
  * WidgetBase constructor type
  */
