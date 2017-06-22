@@ -363,7 +363,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}
 
 			diffFunctions.forEach((diffFunction) => {
-				const result = diffFunction(previousProperty, newProperty);
+				const result = diffFunction.call(null, previousProperty, newProperty);
 				if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 					changedPropertyKeys.push(propertyName);
 				}
