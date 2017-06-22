@@ -11,7 +11,7 @@ import {
 	afterRender,
 	beforeRender
 } from '../../src/WidgetBase';
-import { ignore, always } from '../../src/diff';
+import { ignore, always, auto } from '../../src/diff';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './../../src/WidgetRegistry';
 
 interface TestProperties {
@@ -101,7 +101,7 @@ registerSuite({
 			let invalidateCalled = false;
 			let renderCount = 0;
 			class Foo extends WidgetBase<{ bar: string }> {
-				@diffProperty('bar')
+				@diffProperty('bar', auto)
 				barDiff() {
 					this.invalidate();
 					return {

@@ -6,6 +6,7 @@ import { w, registry } from './../d';
 import { WidgetRegistry } from './../WidgetRegistry';
 import { BaseInjector, Context, Injector } from './../Injector';
 import { beforeRender, diffProperty, WidgetBase, handleDecorator } from './../WidgetBase';
+import { shallow } from './../diff';
 
 /**
  * A representation of the css class names to be applied and
@@ -251,8 +252,8 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T):
 		/**
 		 * Function fired when `theme` or `extraClasses` are changed.
 		 */
-		@diffProperty('theme')
-		@diffProperty('extraClasses')
+		@diffProperty('theme', shallow)
+		@diffProperty('extraClasses', shallow)
 		protected onPropertiesChanged() {
 			this._recalculateClasses = true;
 		}

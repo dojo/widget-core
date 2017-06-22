@@ -89,7 +89,7 @@ export function beforeRender(method?: Function) {
  * @param diffType      The diff type, default is DiffType.AUTO.
  * @param diffFunction  A diff function to run if diffType if DiffType.CUSTOM
  */
-export function diffProperty(propertyName: string, diffFunction: DiffPropertyFunction = auto, reactionFunction?: Function) {
+export function diffProperty(propertyName: string, diffFunction: DiffPropertyFunction, reactionFunction?: Function) {
 	return handleDecorator((target, propertyKey) => {
 		target.addDecorator(`diffProperty:${propertyName}`, diffFunction);
 		if (reactionFunction || propertyKey) {
@@ -347,12 +347,12 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	public __setProperties__(originalProperties: P): void {
 		const { bind, ...properties } = originalProperties as any;
 		const changedPropertyKeys: string[] = [];
+		const allProperties = new Set([...Object.keys(properties), ...Object.keys(this._properties)]);
+		const diffPropertyResults: any = {};
 
 		this._renderState = WidgetRenderState.PROPERTIES;
 		this._bindFunctionProperties(properties, bind);
 
-		const allProperties = new Set([...Object.keys(properties), ...Object.keys(this._properties)]);
-		const diffPropertyResults: any = {};
 		allProperties.forEach((propertyName) => {
 			const previousProperty = this._properties[propertyName];
 			const newProperty = properties[propertyName];
@@ -373,27 +373,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			});
 		});
 
-		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
-
-		const reactionPropertyMap = reactionFunctions.reduce((reactionPropertyMap, { reaction, propertyName }) => {
-			let reactionArguments = reactionPropertyMap.get(reaction);
-			if (reactionArguments === undefined) {
-				reactionArguments = {
-					previousProperties: {},
-					newProperties: {},
-					changed: false
-				};
-			}
-			reactionArguments.previousProperties[propertyName] = this._properties[propertyName];
-			reactionArguments.newProperties[propertyName] = properties[propertyName];
-			if (changedPropertyKeys.indexOf(propertyName) !== -1) {
-				reactionArguments.changed = true;
-			}
-			reactionPropertyMap.set(reaction, reactionArguments);
-			return reactionPropertyMap;
-		}, new Map<Function, ReactionFunctionArguments>());
-
-		reactionPropertyMap.forEach((args, reaction) => {
+		this._mapDiffPropertyReactions(properties, changedPropertyKeys).forEach((args, reaction) => {
 			if (args.changed) {
 				reaction.call(this, args.previousProperties, args.newProperties);
 			}
@@ -403,10 +383,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 		if (changedPropertyKeys.length) {
 			this._dirty = true;
-			this.emit({
-				type: 'properties:changed',
-				target: this
-			});
+			this.emit({ type: 'properties:changed', target: this });
 		}
 	}
 
@@ -534,6 +511,29 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 		this._decoratorCache.set(decoratorKey, allDecorators);
 		return allDecorators;
+	}
+
+	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: string[]): Map<Function, ReactionFunctionArguments> {
+		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
+
+		return reactionFunctions.reduce((reactionPropertyMap, { reaction, propertyName }) => {
+			let reactionArguments = reactionPropertyMap.get(reaction);
+			if (reactionArguments === undefined) {
+				reactionArguments = {
+					previousProperties: {},
+					newProperties: {},
+					changed: false
+				};
+			}
+			reactionArguments.previousProperties[propertyName] = this._properties[propertyName];
+			reactionArguments.newProperties[propertyName] = newProperties[propertyName];
+			if (changedPropertyKeys.indexOf(propertyName) !== -1) {
+				reactionArguments.changed = true;
+			}
+			reactionPropertyMap.set(reaction, reactionArguments);
+			return reactionPropertyMap;
+		}, new Map<Function, ReactionFunctionArguments>());
+
 	}
 
 	/**
