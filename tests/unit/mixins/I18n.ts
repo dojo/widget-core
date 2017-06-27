@@ -10,7 +10,7 @@ import { fetchCldrData } from '../../support/util';
 import { w } from './../../../src/d';
 import { ThemeableMixin } from './../../../src/mixins/Themeable';
 
-class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties & { foo?: string }> { }
+class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> { }
 
 let localized: any;
 
