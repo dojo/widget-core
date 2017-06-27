@@ -33,10 +33,10 @@ export interface Theme {
 /**
  * Properties required for the themeable mixin
  */
-export interface ThemeableProperties extends WidgetProperties {
+export interface ThemeableProperties<T = any> extends WidgetProperties {
 	injectedTheme?: any;
 	theme?: Theme;
-	extraClasses?: any;
+	extraClasses?: { [P in keyof T]?: string };
 }
 
 /**
@@ -72,7 +72,7 @@ export const INJECTED_THEME_KEY = Symbol('theme');
 /**
  * Interface for the ThemeableMixin
  */
-export interface ThemeableMixin {
+export interface ThemeableMixin<T = any> {
 
 	/**
 	 * Processes all the possible classes for the instance with setting the passed class names to
@@ -83,7 +83,7 @@ export interface ThemeableMixin {
 	 */
 	classes(...classNames: (string | null)[]): ClassesFunctionChain;
 
-	properties: ThemeableProperties;
+	properties: ThemeableProperties<T>;
 }
 
 /**
@@ -163,10 +163,10 @@ export function registerThemeInjector(theme: any, themeRegistry: WidgetRegistry 
 /**
  * Function that returns a class decorated with with Themeable functionality
  */
-export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<ThemeableMixin> {
+export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProperties<E>>>>(Base: T): Constructor<ThemeableMixin<E>> & T {
 	class Themeable extends Base {
 
-		public properties: ThemeableProperties;
+		public properties: ThemeableProperties<E>;
 
 		/**
 		 * The Themeable baseClasses
@@ -235,14 +235,14 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T):
 		}
 
 		@beforeRender()
-		protected injectTheme(renderFunc: () => DNode, properties: ThemeableProperties, children: DNode[]): () => DNode {
+		protected injectTheme(renderFunc: () => DNode, properties: ThemeableProperties<E>, children: DNode[]): () => DNode {
 			return () => {
 				const hasInjectedTheme = this.getRegistries().has(INJECTED_THEME_KEY);
 				if (hasInjectedTheme) {
 					return w<BaseInjector>(INJECTED_THEME_KEY, {
 						scope: this,
 						render: renderFunc,
-						getProperties: (inject: Context, properties: ThemeableProperties): ThemeableProperties => {
+						getProperties: (inject: Context, properties: ThemeableProperties<any>): ThemeableProperties<any>  => {
 							if (!properties.theme && this._theme !== properties.injectedTheme) {
 								this._recalculateClasses = true;
 							}
@@ -311,8 +311,9 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T):
 		private _registerThemeClass(className: string) {
 			const { properties: { extraClasses = {} } } = this;
 			const themeClass = this._theme[className] ? this._theme[className] : this._getBaseThemeClass(className);
-			const extraClassNames = extraClasses[className] ? extraClasses[className].split(' ') : [];
-			const cssClassNames = themeClass.split(' ').concat(extraClassNames);
+			const extraClassesClassNames = extraClasses[className];
+			const extraClassesClassNamesArray = extraClassesClassNames ? extraClasses[className]!.split(' ') : [];
+			const cssClassNames = themeClass.split(' ').concat(extraClassesClassNamesArray);
 			const classesObject = cssClassNames.reduce((classesObject, cssClassName) => {
 				classesObject[cssClassName] = true;
 				this._allClasses[cssClassName] = false;
