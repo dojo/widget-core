@@ -312,7 +312,7 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 			const { properties: { extraClasses = {} } } = this;
 			const themeClass = this._theme[className] ? this._theme[className] : this._getBaseThemeClass(className);
 			const extraClassesClassNames = extraClasses[className];
-			const extraClassesClassNamesArray = extraClassesClassNames ? extraClasses[className]!.split(' ') : [];
+			const extraClassesClassNamesArray = extraClassesClassNames ? extraClassesClassNames.split(' ') : [];
 			const cssClassNames = themeClass.split(' ').concat(extraClassesClassNamesArray);
 			const classesObject = cssClassNames.reduce((classesObject, cssClassName) => {
 				classesObject[cssClassName] = true;
