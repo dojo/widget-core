@@ -19,9 +19,9 @@ widget-core is library to create powerful, composable user interface widgets.
 		- [Rendering a Widget in the DOM](#rendering-a-widget-in-the-dom)
 		- [Widgets and Properties](#widgets-and-properties)
 		- [Composing Widgets](#composing-widgets)
-		- [Extracting Widgets](#extracting-widgets)
+		- [Decomposing Widgets](#decomposing-widgets)
 	- [Mixins](#mixins)
-	- [Classes & Theming](#classes--theming)
+	- [Styling & Theming](#styling--theming)
 	- [Internationalization](#internationalization)
 - [Key Principles](#key-principles)
 - [Advanced Concepts](#advanced-concepts)
@@ -30,7 +30,7 @@ widget-core is library to create powerful, composable user interface widgets.
 	- [Render Lifecycle Hooks](#render-lifecycle-hooks)
 	- [DOM Wrapper](#dom-wrapper)
 	- [Meta Configuration](#meta-configuration)
-	- [Tsx Support](#tsx-support)
+	- [JSX Support](#jsx-support)
 	- [Web Components](#web-components)
 - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -162,7 +162,7 @@ projector.append();
 
 **Note:** Widgets must return a single top level `DNode` from the `render` method, which is why the `Hello` widgets were wrapped in `div`.
 
-#### Extracting Widgets
+#### Decomposing Widgets
 
 Splitting widgets into multiple smaller widgets is easy and helps to add extended functionality and promotes reuse.
 
@@ -300,7 +300,7 @@ function StateMixin<T extends new(...args: any[]) => WidgetBase>(Base: T): T & (
 
 Examples of Dojo 2 mixins can be seen with `ThemeableMixin` and `I18nMixin` that are described in [Classes & theming](#classes--theming) and [Internationalization](#internationalization) sections.
 
-### Classes & Theming
+### Styling & Theming
 
 Section coming soon!
 
@@ -343,10 +343,14 @@ class I18nWidget extends MyWidgetBase<I18nWidgetProperties> {
 
 These are some of the **important** principles to keep in mind when creating and using widgets:
 
-1. The widget's *`__render__`*, *`__setProperties__`*, *`__setChildren__`* functions should **never** be called or overridden
+1. The widget's *`__render__`*, *`__setProperties__`*, *`__setChildren__`* functions should **never** be called or overridden.
+   - These are the internal methods of the widget APIs and their behavior can change in the future, causing regressions in your application.
 2. Except for projectors, you should **never** need to deal directly with widget instances
+   - The Dojo 2 widget system manages all instances required including caching and destruction, trying to create and manage other widgets will cause issues and will not work as expected.
 3. **Never** update `properties` within a widget instance, they should be considered pure.
+   - Properties are considered read-only and should not be updated within a widget instance, updating properties could cause unexpected behavior and introduce bugs in your application.
 4. Hyperscript should **always** be written using the `@dojo/widget-core/d#v()` function.
+   - The widget-core abstraction for Hyperscript is the only type of vdom that widget-core can process for standard DOM elements, any other mechanism will not work properly or at all.
 
 ## Advanced Concepts
 
@@ -677,7 +681,7 @@ class IsTallMeta extends MetaBase {
 }
 ```
 
-### Tsx Support
+### JSX Support
 
 In addition to creating widgets functionally using the `v()` and `w()` functions from `@dojo/widget-core/d`, Dojo 2 optionally supports the use of the `jsx` syntax known as [`tsx`](https://www.typescriptlang.org/docs/handbook/jsx.html) in TypeScript.
 
