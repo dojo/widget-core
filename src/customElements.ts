@@ -2,7 +2,7 @@ import { assign } from '@dojo/core/lang';
 import { from as arrayFrom } from '@dojo/shim/array';
 import global from '@dojo/core/global';
 import { Constructor, DNode, WidgetBaseInterface, WidgetProperties } from './interfaces';
-import { WidgetBase } from './WidgetBase';
+import { Base } from './Base';
 import { w } from './d';
 import { ProjectorMixin } from './mixins/Projector';
 import DomWrapper from './util/DomWrapper';
@@ -81,7 +81,7 @@ export interface CustomElementDescriptor {
 	/**
 	 * Widget constructor that will create the widget
 	 */
-	widgetConstructor: Constructor<WidgetBase<WidgetProperties>>;
+	widgetConstructor: Constructor<Base<WidgetProperties>>;
 
 	/**
 	 * List of attributes on the custom element to map to widget properties
@@ -115,7 +115,7 @@ export interface CustomElementDescriptor {
  * @property setWidgetInstance    Set the widget instance for this element
  */
 export interface CustomElement extends HTMLElement {
-	getWidgetConstructor(): Constructor<WidgetBase<WidgetProperties>>;
+	getWidgetConstructor(): Constructor<Base<WidgetProperties>>;
 	getDescriptor(): CustomElementDescriptor;
 	getWidgetInstance(): WidgetBaseInterface<any>;
 	setWidgetInstance(instance: WidgetBaseInterface<any>): void;

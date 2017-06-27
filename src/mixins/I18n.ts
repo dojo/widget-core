@@ -9,7 +9,7 @@ import i18n, {
 } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
-import { afterRender, WidgetBase } from './../WidgetBase';
+import { afterRender, Base } from './../Base';
 import { isHNode } from './../d';
 
 export interface I18nProperties extends WidgetProperties {
@@ -72,7 +72,7 @@ export interface I18nMixin {
 	properties: I18nProperties;
 }
 
-export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<I18nMixin> {
+export function I18nMixin<T extends Constructor<Base<any>>>(Base: T): T & Constructor<I18nMixin> {
 	class I18n extends Base {
 
 		public properties: I18nProperties;

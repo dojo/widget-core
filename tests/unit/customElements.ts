@@ -4,18 +4,19 @@ import { initializeElement, handleAttributeChanged, CustomElementDescriptor } fr
 import { WidgetBase } from '../../src/WidgetBase';
 import global from '@dojo/core/global';
 import { assign } from '@dojo/core/lang';
+import { WidgetBaseInterface } from './../../src/interfaces';
 import * as projector from '../../src/mixins/Projector';
 import * as sinon from 'sinon';
 import { v } from '../../src/d';
 
 function createFakeElement(attributes: any, descriptor: CustomElementDescriptor): any {
-	let widgetInstance: WidgetBase<any> | null;
+	let widgetInstance: WidgetBaseInterface<any> | null;
 	let events: Event[] = [];
 	let removedChildren: any[] = [];
 
 	return {
 		getWidgetInstance: () => widgetInstance!,
-		setWidgetInstance(instance: WidgetBase<any>) {
+		setWidgetInstance(instance: WidgetBaseInterface<any>) {
 			widgetInstance = instance;
 		},
 		getWidgetConstructor: () => WidgetBase,

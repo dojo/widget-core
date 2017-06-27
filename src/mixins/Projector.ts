@@ -7,7 +7,7 @@ import { dom, h, Projection, ProjectionOptions } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
-import { WidgetBase } from './../WidgetBase';
+import { Base } from './../Base';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
 
 /**
@@ -133,7 +133,7 @@ function setDomNodes(vnode: VNode, domNode: Element | null = null) {
 	}
 }
 
-export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
+export function ProjectorMixin<P, T extends Constructor<Base<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
 	class Projector extends Base {
 
 		public projectorState: ProjectorAttachState;

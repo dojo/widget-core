@@ -4,7 +4,7 @@ import {
 	initializeElement
 } from './customElements';
 import { Constructor, WidgetProperties } from './interfaces';
-import { WidgetBase } from './WidgetBase';
+import { Base } from './Base';
 
 declare namespace customElements {
 	function define(name: string, constructor: any): void;
@@ -30,7 +30,7 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 	customElements.define(descriptor.tagName, class extends HTMLElement {
 		private _isAppended = false;
 		private _appender: Function;
-		private _widgetInstance: WidgetBase;
+		private _widgetInstance: Base;
 
 		constructor() {
 			super();
@@ -49,15 +49,15 @@ export function registerCustomElement(descriptorFactory: CustomElementDescriptor
 			handleAttributeChanged(this, name, newValue, oldValue);
 		}
 
-		public getWidgetInstance(): WidgetBase<any> {
+		public getWidgetInstance(): Base<any> {
 			return this._widgetInstance;
 		}
 
-		public setWidgetInstance(widget: WidgetBase<any>): void {
+		public setWidgetInstance(widget: Base<any>): void {
 			this._widgetInstance = widget;
 		}
 
-		public getWidgetConstructor(): Constructor<WidgetBase<WidgetProperties>> {
+		public getWidgetConstructor(): Constructor<Base<WidgetProperties>> {
 			return this.getDescriptor().widgetConstructor;
 		}
 

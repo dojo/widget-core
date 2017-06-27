@@ -2,8 +2,8 @@ import { assign } from '@dojo/core/lang';
 import { Evented } from '@dojo/core/Evented';
 import {
 	diffProperty,
-	WidgetBase
-} from './WidgetBase';
+	Base
+} from './Base';
 import { decorate, isHNode, isWNode } from './d';
 import { always } from './diff';
 import {
@@ -65,7 +65,7 @@ export class Context<T = any> extends Evented {
 }
 
 export interface InjectorProperties extends WidgetProperties {
-	scope: WidgetBase;
+	scope: Base;
 	render(): DNode | DNode[];
 	getProperties?: GetProperties;
 	properties: any;
@@ -73,7 +73,7 @@ export interface InjectorProperties extends WidgetProperties {
 	children: DNode[];
 }
 
-export class BaseInjector<C extends Evented = Context> extends WidgetBase<InjectorProperties> {
+export class BaseInjector<C extends Evented = Context> extends Base<InjectorProperties> {
 
 	protected context: C = <C> {};
 

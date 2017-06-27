@@ -1,4 +1,4 @@
-import { WidgetBase } from './../WidgetBase';
+import { Base } from './../Base';
 import { Constructor, DNode, VirtualDomProperties, WidgetProperties } from './../interfaces';
 import { v } from './../d';
 import { VNode } from '@dojo/interfaces/vdom';
@@ -9,10 +9,10 @@ export interface DomWrapperOptions {
 
 export type DomWrapperProperties = VirtualDomProperties & WidgetProperties;
 
-export type DomWrapper = Constructor<WidgetBase<DomWrapperProperties>>;
+export type DomWrapper = Constructor<Base<DomWrapperProperties>>;
 
 export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): DomWrapper {
-	return class extends WidgetBase<DomWrapperProperties> {
+	return class extends Base<DomWrapperProperties> {
 
 		public __render__(): VNode {
 			const vNode = super.__render__() as VNode;

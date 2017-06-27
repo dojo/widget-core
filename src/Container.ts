@@ -1,4 +1,4 @@
-import { WidgetBase } from './WidgetBase';
+import { Base } from './Base';
 import {
 	Constructor,
 	DNode,
@@ -9,7 +9,7 @@ import {
 import { w } from './d';
 import { BaseInjector, defaultMappers, Mappers } from './Injector';
 
-export type Container<T extends WidgetBaseInterface> = Constructor<WidgetBase<Partial<T['properties']> & WidgetProperties>>;
+export type Container<T extends WidgetBaseInterface> = Constructor<Base<Partial<T['properties']> & WidgetProperties>>;
 
 export function Container<W extends WidgetBaseInterface>(
 	component: Constructor<W> | RegistryLabel,
@@ -21,7 +21,7 @@ export function Container<W extends WidgetBaseInterface>(
 		getChildren = defaultMappers.getChildren
 	} = mappers;
 
-	return class extends WidgetBase<any> {
+	return class extends Base<any> {
 		protected render(): DNode {
 			const { properties, children } = this;
 
