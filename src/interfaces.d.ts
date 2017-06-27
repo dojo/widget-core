@@ -227,13 +227,18 @@ export interface WidgetProperties {
 }
 
 /**
+ * Virtual DOM Node type
+ */
+export type VirtualDomNode = VNode | string | null | undefined;
+
+/**
  * Wrapper for v
  */
 export interface HNode {
 	/**
 	 * Array of processed VNode children.
 	 */
-	vNodes?: ((string | VNode | null)[] |string | VNode | null)[];
+	vNodes?: (VirtualDomNode[] | VirtualDomNode)[];
 	/**
 	 * Specified children
 	 */
@@ -288,25 +293,7 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 /**
  * union type for all possible return types from render
  */
-export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W> | string | null;
-
-/**
- * the event emitted on properties:changed
- */
-export interface PropertiesChangeEvent<T, P extends WidgetProperties> extends EventTypedObject<'properties:changed'> {
-	/**
-	 * the full set of properties
-	 */
-	properties: P;
-	/**
-	 * the changed properties between setProperty calls
-	 */
-	changedPropertyKeys: string[];
-	/**
-	 * the target (this)
-	 */
-	target: T;
-}
+export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W> | string | null | undefined;
 
 /**
  * Property Change record for specific property diff functions
@@ -316,12 +303,12 @@ export interface PropertyChangeRecord {
 	value: any;
 }
 
-/**
- * Properties changed record, return for diffProperties
- */
-export interface PropertiesChangeRecord<P extends WidgetProperties> {
-	changedKeys: string[];
-	properties: P;
+export interface DiffPropertyFunction {
+	<T>(previousProperty: T, newProperty: any): PropertyChangeRecord;
+}
+
+export interface DiffPropertyReaction {
+	(previousProperties: any, newProperties: any): void;
 }
 
 /**
@@ -337,13 +324,13 @@ export interface DefaultWidgetBaseInterface extends WidgetBaseInterface<WidgetPr
  * The interface for WidgetBase
  */
 export interface WidgetBaseInterface<
-	P extends WidgetProperties = WidgetProperties,
+	P = WidgetProperties,
 	C extends DNode = DNode<DefaultWidgetBaseInterface>> extends Evented {
 
 	/**
 	 * Widget properties
 	 */
-	readonly properties: P;
+	readonly properties: P & WidgetProperties;
 
 	/**
 	 * Returns the widget's children
@@ -368,9 +355,8 @@ export interface WidgetBaseInterface<
 	/**
 	 * Main internal function for dealing with widget rendering
 	 */
-	__render__(): (VNode | string | null)[] | VNode | string | null;
+	__render__(): VirtualDomNode | VirtualDomNode[];
 }
-
 /**
  * Meta Base constructor type
  */

@@ -3,17 +3,16 @@ import { Evented } from '@dojo/core/Evented';
 import {
 	afterRender,
 	diffProperty,
-	InternalWNode,
-	InternalHNode,
 	WidgetBase
 } from './WidgetBase';
 import { decorate, isHNode, isWNode } from './d';
-import { DiffType } from './diff';
+import { always } from './diff';
 import {
 	Constructor,
 	DNode,
 	WidgetProperties
 } from './interfaces';
+import RegistryHandler from './RegistryHandler';
 
 export interface GetProperties {
 	<C, P extends WidgetProperties>(inject: C, properties: P): any;
@@ -67,10 +66,10 @@ export class Context<T = any> extends Evented {
 }
 
 export interface InjectorProperties extends WidgetProperties {
-	scope: any;
+	scope: WidgetBase;
 	render(): DNode;
 	getProperties?: GetProperties;
-	properties: WidgetProperties;
+	properties: any;
 	getChildren?: GetChildren;
 	children: DNode[];
 }
@@ -98,7 +97,7 @@ export class BaseInjector<C extends Evented = Context> extends WidgetBase<Inject
  */
 export function Injector<C extends Evented, T extends Constructor<BaseInjector<C>>>(Base: T, context: C): T {
 
-	@diffProperty('render', DiffType.ALWAYS)
+	@diffProperty('render', always)
 	class Injector extends Base {
 
 		constructor(...args: any[]) {
@@ -108,7 +107,7 @@ export function Injector<C extends Evented, T extends Constructor<BaseInjector<C
 		@afterRender()
 		protected decorateBind(node: DNode): DNode {
 			const { scope } = this.properties;
-			decorate(node, (node: InternalHNode | InternalWNode) => {
+			decorate(node, (node: any) => {
 				const { properties } = node;
 				properties.bind = scope;
 			}, (node: DNode) => { return isHNode(node) || isWNode(node); });
@@ -132,6 +131,10 @@ export function Injector<C extends Evented, T extends Constructor<BaseInjector<C
 			}
 
 			return render();
+		}
+
+		public get registries(): RegistryHandler {
+			return this.properties.scope.registries;
 		}
 	}
 	return Injector;

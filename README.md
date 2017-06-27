@@ -20,8 +20,9 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
     - [Writing custom widgets](#writing-custom-widgets)
         - [Public API](#public-api)
         - [The 'properties' lifecycle](#the-properties-lifecycle)
-            - [Custom property diff control](#custom-property-diff-control)
-            - [The `properties:changed` event](#the-propertieschanged-event)
+            - [Individual Property Diffing](#individual-property-diffing)
+			- [Property Diffing Reactions](#property-diffing-reactions)
+		- [Render Lifecycle](#render-lifecycle)
         - [Projector](#projector)
 		  - [Server Side Rendering](#server-side-rendering)
         - [Event Handling](#event-handling)
@@ -35,6 +36,7 @@ We also provide a suite of pre-built widgets to use in your applications: [(@doj
             - [Events](#events)
             - [Initialization](#initialization)
         - [Meta](#meta)
+		- [DomWrapper](#domwrapper)
     - [Key Principles](#key-principles)
     - [API](#api)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -220,62 +222,69 @@ import { WidgetBase } from '@dojo/widget-core/WidgetBase';
 
 #### The 'properties' lifecycle
 
-The widget's properties lifecycle occurs before its render lifecycle.
+The properties lifecycle occurs immediately the widget render lifecycle. Properties are defined by an interface passed as a generic type to `WidgetBase` and represent the public default API. By default properties are automatically diffed against previous properties using the `auto` diff function (see table below).
 
-Properties passed to the `w` function represent the public API for a widget.
+**Note:** If a property contains complex data structures that you need to diff, then individual control is required using the `diffProperty` decorator.
 
-The properties lifecycle starts when properties are passed to the widget.
-The properties lifecycle is performed in the widgets `setProperties` function.
-Properties are differenced using `DiffType.AUTO`.
+##### Individual Property Diffing
 
-**Note:** If a widget's properties contain complex data structures that you need to diff, then individual control is required using the `diffProperty` decorator.
+Property diffing can be controlled for an individual property using the `diffProperty` decorator on a widget class.
 
-##### Custom property diff control
+`widget-core` provides a set of diffing function from `diff.ts` that can be used or a custom diffing function can be provided. Properties that have been configured with a specific diffing type will be excluded from the automatic diffing provided.
 
-You can control individual property differencing by using the `@diffProperty` decorator. Properties with a `diffProperty` decorator **will be excluded from automatic differencing**.
-
-###### At the class level
-
-`@diffProperty(propertyName, diffType)` can be applied at the class level if you want to use a pre-defined diff function.
-
-```typescript
-@diffProperty('title', DiffType.REFERENCE)
-class MyWidget extends WidgetBase<MyProperties> {
-}
-```
-
-The following diff functions are provided:
-
-| Type                 | Description                                                                       |
+| Diff Function                 | Description                                                                       |
 | -------------------- | ----------------------------------------------------------------------------------|
-| `DiffType.ALWAYS`    | Always report a property as changed.                                              |
-| `DiffType.AUTO`      | Ignore functions, shallow compare objects, and reference compare all other values.|
-| `DiffType.CUSTOM`    | Provide a custom diffing function.                                                |
-| `DiffType.IGNORE`    | Never report a property as changed.                                               |
-| `DiffType.REFERENCE` | Compare values by reference (`old === new`)                                       |
-| `DiffType.SHALLOW`   | Treat the values as objects and compare their immediate values by reference.      |
+| `always`    | Always report a property as changed.                                              |
+| `auto`      | Ignore functions, shallow compare objects, and reference compare all other values.|                                 |
+| `ignore`    | Never report a property as changed.                                               |
+| `reference` | Compare values by reference (`old === new`)                                       |
+| `shallow`   | Treat the values as objects and compare their immediate values by reference.      |
 
-`DiffType.CUSTOM` is unique in that it takes a third parameter, the diff function. This function has the following signature:
+**Important:** All diffing functions should be pure functions and are called *WITHOUT* any scope.
 
+```ts
+// using a diff function provided by widget-core#diff
+@diffProperty('title', reference)
+class MyWidget extends WidgetBase<MyProperties> { }
+
+//custom diff function; A pure function with no side effects.
+function customDiff(previousProperty: string, newProperty: string): PropertyChangeRecord {
+	return {
+		changed: previousProperty !== newProperty,
+		value: newProperty
+	};
+}
+
+// using a custom diff function
+@diffProperty('title', customDiff)
+class MyWidget extends WidgetBase<MyProperties> { }
 ```
-(previousValue: any, newValue: any) => {
-  changed: boolean;
-  value: any;
+
+##### Property Diffing Reactions
+
+It can be necessary to perform some internal logic when one or more properties change, this can be done by registering a reaction callback.
+
+A reaction function is registered using the `diffProperty` decorator on a widget class method. This method will be called when the specified property has been detected as changed and receives both the old and new property values.
+
+```ts
+class MyWidget extends WidgetBase<MyProperties> {
+
+	@diffProperty('title', auto)
+	protected onTitleChange(previousProperties: any, newProperties: any): void {
+		this._previousTitle = previousProperties.title;
+	}
 }
 ```
 
-###### At the method level
+`diffProperty` decorators can be stacked on a single class method and will be called if any of the specified properties are considered changed.
 
-You can also provide `DiffType.CUSTOM` diff functions by applying a decorator at the method level.
+```ts
+class MyWidget extends WidgetBase<MyProperties> {
 
-```typescript
-class MyWidget extends WidgetBase<WidgetProperties> {
-	@diffProperty('foo')
-	myComplexDiffFunction(previousValue: MyComplexObject, newValue: MyComplexObject) {
-		return {
-		  changed: true,
-		  value: newValue
-		};
+	@diffProperty('title', auto)
+	@diffProperty('subtitle', auto)
+	protected onTitleOrSubtitleChange(previousProperties: any, newProperties: any): void {
+		this._titlesUpdated = true;
 	}
 }
 ```
@@ -287,76 +296,16 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 
 	constructor() {
 		super();
-		diffProperty('foo', DiffType.CUSTOM, this.customFooDiff)(this);
+		diffProperty('foo', auto, this.diffFooReaction)(this);
 	}
 
-	customFooDiff(previousProperty: MyComplexObject, newProperty: MyComplexObject) {
-	}
-}
-```
-
-If a property has a custom diff function then that property is excluded from the default property diff.
-
-##### The 'properties:changed' event
-
-When `diffProperties` has completed, the results are used to update the properties on the widget instance.
-If any properties were changed, then the `properties:changed` event is emitted. If the new properties do **not** contain keys from the previous properties, the properties are marked as changed.
-
-```typescript
-// set the initial properties
-$widget->setProperties({
-	foo: true,
-	bar: true
-});
-
-// properties:changed will include the "bar" property
-$widget->setProperties({
-	foo: true
-});
-```
-
-Attaching a listener to the event is exposed via a decorator `@onPropertiesChanged`.
-
-```ts
-class MyWidget extends WidgetBase<WidgetProperties> {
-
-	@onPropertiesChanged
-	myPropChangedListener(evt: PropertiesChangeEvent<this, WidgetProperties>) {
-		// do something
+	diffFooReaction(previousProperty: any, newProperty: any) {
+		// do something to reaction to a diff of foo
 	}
 }
 ```
 
-For non decorator environments the listener can be registered using the `onPropertiesChanged ` function in the constructor.
-
-```ts
-class MyWidget extends WidgetBase<WidgetProperties> {
-
-	constructor() {
-		super();
-		onPropertiesChanged(this.myPropChangedListener)(this);
-	}
-
-	myPropChangedListener(evt: PropertiesChangeEvent<this, WidgetProperties>) {
-		// do something
-	}
-}
-```
-
-Example event payload
-
-```ts
-{
-	type: 'properties:changed',
-	target: this,
-	properties: { foo: 'bar', baz: 'qux' },
-	changedKeyValues: [ 'foo' ]
-}
-```
-
-`changedKeyValues` represents a list of keys in the `properties` key/value pairs where the values have changed.
-
-Finally once all the attached events have been processed, the properties lifecycle is complete and the finalized widget properties are available during the render cycle functions.
+#### Render Lifecycle
 
 <!-- TODO: render lifecycle goes here -->
 
@@ -374,7 +323,7 @@ This is the only time in the widget lifecycle that exposes either of these attri
 
 ```ts
 class MyBaseClass extends WidgetBase<WidgetProperties> {
-	@beforeRender
+	@beforeRender()
 	myBeforeRender(renderFunc: () => DNode, properties: any, children: DNode[]): () => DNode {
 		// decorate/manipulate properties or children.
 		properties.extraAttribute = 'foo';
@@ -408,7 +357,7 @@ The `afterRender` call receives the returned `DNode`s from a widget's `render` c
 
 ```ts
 class MyBaseClass extends WidgetBase<WidgetProperties> {
-	@afterRender
+	@afterRender()
 	myAfterRender(result: DNode): DNode {
 		// do something with the result
 		return result;
@@ -546,7 +495,7 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 
 #### Widget Registry
 
-The widget registry provides the ability to define a `string` or `symbol` as a label for a `WidgetRegistryItem`. 
+The widget registry provides the ability to define a `string` or `symbol` as a label for a `WidgetRegistryItem`.
 
 The `WidgetRegistryItem`, can be one of the following types:
 
@@ -1203,6 +1152,58 @@ class IsTallMeta extends MetaBase {
         return false;
     }
 }
+```
+
+#### DomWrapper
+
+`DomWrapper` is used to wrap DOM that is created _outside_ of the virtual DOM system.  This is the main mechanism to integrate _foreign_ components or widgets into the virtual DOM system.
+
+The `DomWrapper` generates a class/constructor function that is then used as a widget class in the virtual DOM.  `DomWrapper` takes up to two arguments.  The first argument is the DOM node that it is wrapping.  The second is an optional set of options.
+
+The currently supported options:
+
+|Name|Description|
+|-|-|
+|`onAttached`|A callback that is called when the wrapped DOM is flowed into the virtual DOM|
+
+As an example, we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we don't want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
+
+```ts
+import { w } from '@dojo/widget-core/d';
+import DomWrapper from '@dojo/widget-core/util/DomWrapper';
+import WidgetBase from '@dojo/widget-core/WidgetBase';
+import createComponent from 'third/party/library/createComponent';
+
+export default class WrappedComponent extends WidgetBase {
+    private _component: any;
+    private _onAttach = () => {
+        this._component = createComponent(this._root);
+    }
+    private _root: HTMLDivElement;
+    private _WrappedDom: DomWrapper;
+
+    constructor() {
+        super();
+        const root = this._root = document.createElement('div');
+        this._WrappedDom = DomWrapper(root, { onAttached: this._onAttached });
+    }
+
+    public render() {
+        return w(this._WrappedDom, { key: 'wrapped' });
+    }
+}
+```
+
+The properties which can be set on `DomWrapper` are the combination of the `WidgetBaseProperties` and the `VirtualDomProperties`, which means effectively you can use any of the properties passed to a `v()` node and they will be applied to the wrapped DOM node.  For example the following would set the classes on the wrapped DOM node:
+
+```ts
+const div = document.createElement('div');
+const WrappedDiv = DomWrapper(div);
+const wnode = w(WrappedDiv, {
+    classes: {
+        'foo': true
+    }
+});
 ```
 
 ### Key Principles
