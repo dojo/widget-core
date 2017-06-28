@@ -304,27 +304,28 @@ Examples of Dojo 2 mixins can be seen with `ThemeableMixin` and `I18nMixin` that
 
 #### Overview
 
-Dojo 2 widget-core provides `ThemeableMixin` to decorate a widget with theming functionality and `@theme` decorator to specify the classes available to the widget, both from `@dojo/widget-core/mixins/Themeable`.
+Dojo 2 widget-core provides `ThemeableMixin` to decorate a widget with theming functionality and a `@theme` decorator to specify the classes available to the widget. Both of which come from `@dojo/widget-core/mixins/Themeable`.
 
-To specify the classes for a widget an interface needs to be imported with named exports for each class and passed to the `@theme` decorator. Importing the interface provides intellisense for the class names and passing This tells the `ThemeableMixin` which classes can be themed.
+To specify the classes for a widget, an interface needs to be imported with named exports for each class and passed to the `@theme` decorator. Importing the interface provides intellisense for the class names and passing this via the `@theme` decorator tells the `ThemeableMixin` which classes can be themed.
 
 <details><summary>Example css classes interface</summary>
 
-```ts
+```typescript
 export const classNameOne: string;
 export const classNameTwo: string;
 ```
 </details>
 
-**Note:** at runtime a javascript file is required to provide the processed css class names.
 
-The `ThemeableMixin` provides a method available on the instance `this.classes()` that consumes string class names that will get converted into the expected class object when a widget is rendered. Classes that are passed to `this.classes()` are made available to be themed, as described [here](applying-a-theme).
+**Important:** at runtime a javascript file is required to provide the processed css class names.
 
-However it is not always desirable to allow consumers to override styling that may be required for a widget to function correctly, these classes are known as "fixed". Fixed classes are passed by using a chained function `this.classes().fixed()`.
+The `ThemeableMixin` provides a method available on the instance `this.classes()` that consumes string class names and converts them into the expected class object when a widget is rendered. Classes that are passed to `this.classes()` are made available to be themed, as described [here](applying-a-theme).
+
+However, it is not always desirable to allow consumers to override styling that may be required for a widget to function correctly, these classes are known as "fixed". Fixed classes are passed by using a chained function `this.classes().fixed()`.
 
 The following example passes `css.root` that will be themeable and `css.rootFixed` that cannot be overridden.
 
-```ts
+```typescript
 import * as css from './styles/myWidget.m.css';
 import { ThemeableMixin, theme } from '@dojo/widget-core/mixins/Themeable';
 
@@ -338,16 +339,16 @@ export default class MyWidget extends ThemeableMixin(WidgetBase) {
 
 #### Writing a theme
 
-Themes are typescript modules that export an object that contains css-modules files keyed by widget name.
+Themes are typescript modules that export an object that contains css-modules files keyed by a widgets css file name.
 
-``` css
+```css
 /* myTheme/styles/myWidget.m.css */
 .root {
 	color: blue;
 }
 ```
 
-``` typescript
+```typescript
 // myTheme/theme.ts
 import * as myWidget from './styles/myWidget.m.css';
 
@@ -356,13 +357,13 @@ export default {
 }
 ```
 
-In the above example, the new `root` class provided by the theme for `myWidget` will replace the `root` class that was provided by the original `myWidget.m.css`. This means the `myWidget` will now have color set to blue, but will no longer receive the styles from the `root` int he original class
+In the above example, the new `root` class provided by the theme for `myWidget` will replace the `root` class that was provided by the original `myWidget.m.css`. This means the `myWidget` will now have color set to blue, but will no longer receive the styles from the `root` class in the original css.
 
 #### Applying a theme
 
-To apply a theme to a widget, simply require it as a module and pass it to a widget via its properties. It is important to ensure that any child widgets that are created within your widgets render function are passed the `theme` or they will not be themed.
+To apply a theme to a widget, simply require it as a module and pass it to a widget via its properties. It is important to ensure that any child widgets created within your widgets render function are passed the `theme` or they will not be themed.
 
-``` typescript
+```typescript
 // app.ts
 import myTheme from './myTheme/theme';
 
@@ -376,7 +377,7 @@ render() {
 
 Sometimes you may need to apply positioning or layout styles to a child widget. As it is not possible to pass `classes` directly to `WNodes` they provide an `extraClasses` property that can be used to target themeable classes used within its `render` function. In most cases this should only target the `root` class and apply positioning adjustments. The classes passed via `extraClasses` are outside of the theming mechanism and thus will not be effected by a change in `theme`.
 
-``` css
+```css
 /* app.m.css */
 .tabPanel {
 	position: absolute;
@@ -385,9 +386,9 @@ Sometimes you may need to apply positioning or layout styles to a child widget. 
 }
 ```
 
-``` typescript
+```typescript
 // app.ts
-import * as appCss from './styles/app.m.css`;
+import * as appCss from './styles/app.m.css';
 
 // ...
 render() {
