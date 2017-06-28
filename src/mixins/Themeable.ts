@@ -33,7 +33,7 @@ export interface Theme {
 /**
  * Properties required for the themeable mixin
  */
-export interface ThemeableProperties<T = any> extends WidgetProperties {
+export interface ThemeableProperties<T = ClassNames> extends WidgetProperties {
 	injectedTheme?: any;
 	theme?: Theme;
 	extraClasses?: { [P in keyof T]?: string };
@@ -63,8 +63,6 @@ export interface ClassesFunctionChain {
 	get: ClassesFunction;
 }
 
-type ThemeClasses = { [key: string]: string; };
-
 const THEME_KEY = ' _key';
 
 export const INJECTED_THEME_KEY = Symbol('theme');
@@ -72,7 +70,7 @@ export const INJECTED_THEME_KEY = Symbol('theme');
 /**
  * Interface for the ThemeableMixin
  */
-export interface ThemeableMixin<T = any> {
+export interface ThemeableMixin<T = ClassNames> {
 
 	/**
 	 * Processes all the possible classes for the instance with setting the passed class names to
@@ -134,7 +132,7 @@ function createClassNameObject(classNames: string[], applied: boolean) {
  * @param classes The baseClasses object
  * @requires
  */
-function createThemeClassesLookup(classes: ThemeClasses[]): ClassNames {
+function createThemeClassesLookup(classes: ClassNames[]): ClassNames {
 	return classes.reduce((currentClassNames, baseClass) => {
 		Object.keys(baseClass).forEach((key: string) => {
 			currentClassNames[baseClass[key]] = key;
@@ -171,7 +169,7 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		/**
 		 * The Themeable baseClasses
 		 */
-		private _registeredBaseThemes: ThemeClasses[];
+		private _registeredBaseThemes: ClassNames[];
 
 		/**
 		 * All classes ever seen by the instance
@@ -370,7 +368,7 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		/**
 		 * Search for the class name in other base themes
 		 */
-		private _isDuplicate(key: string, originatingBaseTheme: ThemeClasses): boolean {
+		private _isDuplicate(key: string, originatingBaseTheme: ClassNames): boolean {
 			let duplicate = false;
 			if (key !== THEME_KEY) {
 				for (let i = 0; i < this._registeredBaseThemes.length; i++) {
