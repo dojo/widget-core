@@ -28,7 +28,7 @@ export class Base {
 	protected requireNode(key: string): void {
 		if (!this.nodes.has(key)) {
 			this._requiredNodes.add(key);
-			this.invalidate();
+			this._invalidate();
 		}
 	}
 }
