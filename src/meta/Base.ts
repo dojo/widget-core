@@ -17,7 +17,6 @@ export class Base {
 	}
 
 	public has(key: string): boolean {
-		this.requireNode(key);
 		return this.nodes.has(key);
 	}
 
@@ -27,9 +26,8 @@ export class Base {
 	}
 
 	protected requireNode(key: string): void {
-		this._requiredNodes.add(key);
-
 		if (!this.nodes.has(key)) {
+			this._requiredNodes.add(key);
 			this.invalidate();
 		}
 	}
