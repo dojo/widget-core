@@ -5,7 +5,7 @@ import { ClassesFunction, Constructor, DNode, WidgetProperties } from './../inte
 import { w, registry } from './../d';
 import { WidgetRegistry } from './../WidgetRegistry';
 import { BaseInjector, Context, Injector } from './../Injector';
-import { beforeRender, diffProperty, WidgetBase, handleDecorator } from './../WidgetBase';
+import { beforeRender, diffProperty, Base, handleDecorator } from './../Base';
 import { shallow } from './../diff';
 
 /**
@@ -156,7 +156,7 @@ export function registerThemeInjector(theme: any, themeRegistry: WidgetRegistry 
 /**
  * Function that returns a class decorated with with Themeable functionality
  */
-export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<ThemeableMixin> {
+export function ThemeableMixin<T extends Constructor<Base<any>>>(Base: T): T & Constructor<ThemeableMixin> {
 	class Themeable extends Base {
 
 		public properties: ThemeableProperties;

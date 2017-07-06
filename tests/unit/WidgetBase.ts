@@ -4,7 +4,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub, spy, SinonStub } from 'sinon';
 import { v, w, registry } from '../../src/d';
-import { Constructor, DNode, PropertyChangeRecord, Render } from '../../src/interfaces';
+import { Constructor, DNode, PropertyChangeRecord, Render, WidgetBaseInterface } from '../../src/interfaces';
 import {
 	WidgetBase,
 	diffProperty,
@@ -827,7 +827,7 @@ registerSuite({
 		'async factories only initialise once'() {
 			let resolveFunction: any;
 			const loadFunction = () => {
-				return new Promise<Constructor<WidgetBase>>((resolve) => {
+				return new Promise<Constructor<WidgetBaseInterface>>((resolve) => {
 					resolveFunction = resolve;
 				});
 			};
@@ -875,7 +875,7 @@ registerSuite({
 		'render with async factory'() {
 			let resolveFunction: any;
 			const loadFunction = () => {
-				return new Promise<Constructor<WidgetBase>>((resolve) => {
+				return new Promise<Constructor<WidgetBaseInterface>>((resolve) => {
 					resolveFunction = resolve;
 				});
 			};
