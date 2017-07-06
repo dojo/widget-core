@@ -4,12 +4,12 @@
 [![codecov](https://codecov.io/gh/dojo/widget-core/branch/master/graph/badge.svg)](https://codecov.io/gh/dojo/widget-core)
 [![npm version](https://badge.fury.io/js/%40dojo%2Fwidget-core.svg)](https://badge.fury.io/js/%40dojo%2Fwidget-core)
 
-widget-core is library to create powerful, composable user interface widgets.
+widget-core is a library to create powerful, composable user interface widgets.
 
-* **Reactive & unidirectional:** Widget-core follows core reactive principles to ensure predictable consistent behavior.
+* **Reactive & unidirectional:** widget-core follows core reactive principles to ensure predictable, consistent behavior.
 * **Encapsulated Widgets:** Create independent encapsulated widgets that can be wired together to create complex and beautiful user interfaces.
-* **DOM Abstractions:** Widget-core provides API abstractions to avoid needing to access or manipulate the DOM outside of the reactive render life-cycle.
-* **I18n & Themes:** Widget-core provides core mixins to enable internationalization and theming support for your components.
+* **DOM Abstractions:** widget-core provides API abstractions to avoid needing to access or manipulate the DOM outside of the reactive render life-cycle.
+* **I18n & Themes:** widget-core provides core mixins to enable internationalization and theming support for your widgets.
 
 -----
 
@@ -58,7 +58,7 @@ You can also use the [dojo cli](https://github.com/dojo/cli) to create a complet
 
 ### Basic Widgets
 
-Dojo 2 applications use a concept called Virtual DOM (vdom) to represent what should be shown on the screen. These vdom nodes are plain javascript objects that are not expensive to create, unlike browser DOM elements. Dojo 2 uses these vdom elements to synchronize and update the browser DOM so that application shows the expected view.
+Dojo 2 applications use the Virtual DOM (vdom) paradigm to represent what should be shown on the view. These vdom nodes are plain JavaScript objects that are more efficient to create from a performance perspective than browser DOM elements. Dojo 2 uses these vdom elements to synchronize and update the browser DOM so that the application shows the expected view.
 
 There are two types of vdom within Dojo 2, the first are pure representations of DOM elements and are the fundamental building blocks of all Dojo 2 applications. These are called `HNode`s and are created using the `v()` function available from the `@dojo/widget-core/d` module.
 
@@ -68,7 +68,7 @@ The following will create a `HNode` that represents a simple `div` DOM element, 
 v('div', [ 'Hello, Dojo 2!' ])
 ```
 
-The second vdom type, `WNode`s represent widgets. A widget is a class that extends `WidgetBase` from `@dojo/widget-core/WidgetBase` and implements a `render` function that returns one of the Dojo 2 vdom types (known as a `DNode`). Widgets are used to represent reusable, independent sections of a Dojo 2 application.
+The second vdom type, `WNode`, represent widgets. A widget is a class that extends `WidgetBase` from `@dojo/widget-core/WidgetBase` and implements a `render` function that returns one of the Dojo 2 vdom types (known as a `DNode`). Widgets are used to represent reusable, independent sections of a Dojo 2 application.
 
 The following returns the `HNode` example from above from the `render` function:
 
@@ -82,7 +82,7 @@ class HelloDojo extends WidgetBase {
 
 #### Rendering a Widget in the DOM
 
-To display your new component in the browser you will need to decorate it with some functionality needed to "project" the widget into the browser. This is done using the `ProjectorMixin` from `@dojo/widget-core/mixins/Projector`.
+To display your new component in the view you will need to decorate it with some functionality needed to "project" the widget into the browser. This is done using the `ProjectorMixin` from `@dojo/widget-core/mixins/Projector`.
 
 ```ts
 const Projector = ProjectorMixin(HelloDojo);
@@ -91,7 +91,7 @@ const projector = new Projector();
 projector.append();
 ```
 
-By default the projector will attach the widget to the `document.body` in the DOM, but this can be overridden by passing a reference to the Element to attach to.
+By default the projector will attach the widget to the `document.body` in the DOM, but this can be overridden by passing a reference to the preferred parent DOM Element.
 
 Consider the following in your HTML file:
 
@@ -99,7 +99,7 @@ Consider the following in your HTML file:
 <div id="my-app"></div>
 ```
 
-You can target this Element like so:
+You can target this Element:
 
 ```ts
 const root = document.getElementById('my-app');
@@ -111,9 +111,9 @@ projector.append(root);
 
 #### Widgets and Properties
 
-We have created a widget used to project our `HNode`s into the DOM, however widgets can be composed of other widgets and `properties` are used to determine if a widget needs to be re-rendered.
+We have created a widget used to project our `HNode`s into the DOM, however widgets can be composed of other widgets and `properties` which are used to determine if a widget needs to be re-rendered.
 
-Properties are available on the the widget instance, defined by an interface and passed as a generic to the `WidgetBase` class when creating your custom component. The properties interface should extend the base `WidgetProperties` provided from `@dojo/widget-core/interfaces`:
+Properties are available on the the widget instance, defined by an interface and passed as a [`generic`](https://www.typescriptlang.org/docs/handbook/generics.html) to the `WidgetBase` class when creating your custom widget. The properties interface should extend the base `WidgetProperties` provided from `@dojo/widget-core/interfaces`:
 
 ```ts
 interface MyProperties extends WidgetProperties {
@@ -129,11 +129,11 @@ class Hello extends WidgetBase<MyProperties> {
 }
 ```
 
-New properties are compared with the previous properties to determine if a widget requires re-rendering, by default Dojo 2 uses the `auto` diffing strategy, that performs a shallow comparison for objects and arrays, ignores functions (except classes that extend WidgetBase) and a reference comparison for all other values.
+New properties are compared with the previous properties to determine if a widget requires re-rendering. By default Dojo 2 uses the `auto` diffing strategy, that performs a shallow comparison for objects and arrays, ignores functions (except classes that extend `WidgetBase`) and a reference comparison for all other values.
 
 #### Composing Widgets
 
-As mentioned, often widgets are composed of other widgets in their `render` output. This promotes widget reuse across an application (or multiple applications) and helps enables widget best practices.
+As mentioned, often widgets are composed of other widgets in their `render` output. This promotes widget reuse across an application (or multiple applications) and promotes widget best practices.
 
 To compose widgets, we need to create `WNode`s and we can do this using the `w()` function from `@dojo/widget-core/d`.
 
@@ -160,7 +160,7 @@ const projector = new Projector();
 projector.append();
 ```
 
-**Note:** Widgets must return a single top level `DNode` from the `render` method, which is why the `Hello` widgets were wrapped in `div`.
+**Note:** Widgets must return a single top level `DNode` from the `render` method, which is why the `Hello` widgets were wrapped in a `div` element.
 
 #### Decomposing Widgets
 
@@ -190,9 +190,9 @@ class List extends WidgetBase<ListProperties> {
 	}
 }
 ```
-The `List` widget does works as expected and displays the list in the browser but is hard to change, add functionality and reuse parts.
+The `List` widget works as expected and displays the list in the browser but is difficult to reuse, modify, and/or extend.
 
-**Note:** When working with children arrays with the same type of widget or Element it is important to add a unique `key` property or attribute so that Dojo 2 can identify the correct node when updates are made.
+**Note:** When working with children arrays with the same type of widget or Element, it is important to add a unique `key` property or attribute so that Dojo 2 can identify the correct node when updates are made.
 
 To extend the `List` API with an event that needs to be called when an item is clicked with the item's `id`, we first update the properties interface:
 
@@ -211,7 +211,7 @@ If we try to use the `onItemClick` function in the current `List` widget, we wou
 
 This would mean a new function would be created every render but Dojo 2 does not support changing listener functions after the first render and this would **error**.
 
-To resolve this, the list item can be extracted:
+To resolve this, the list item can be extracted into a separate widget:
 
 ```ts
 interface ListItemProperties extends WidgetProperties {
@@ -238,7 +238,7 @@ class ListItem extends WidgetBase<ListItemProperties> {
 }
 ```
 
-Using the `ListItem` we can simplify the `List` slightly and also add the on click functionality that we required:
+Using the `ListItem` we can simplify the `List` slightly and also add the `onclick` functionality that we required:
 
 ```ts
 interface ListProperties extends WidgetProperties {
@@ -278,7 +278,7 @@ interface StateMixin {
 	setState(state: any): void;
 }
 
-// function that accepts a class that extends WidgetBase and returns the extended class with the StateMixin
+// function that accepts a class that extends `WidgetBase` and returns the extended class with the `StateMixin`
 // behavior
 function StateMixin<T extends new(...args: any[]) => WidgetBase>(Base: T): T & (new(...args: any[]) => StateMixin) {
 	return class extends Base {
@@ -304,9 +304,9 @@ Examples of Dojo 2 mixins can be seen with `ThemeableMixin` and `I18nMixin` that
 
 #### Overview
 
-Dojo 2 widget-core provides `ThemeableMixin` to decorate a widget with theming functionality and a `@theme` decorator to specify the classes available to the widget. Both of which come from `@dojo/widget-core/mixins/Themeable`.
+Dojo 2 widget-core provides `ThemeableMixin` to decorate a widget with theming functionality and a `@theme` decorator to specify the classes available to the widget. Both `ThemeableMixin` and `@theme` are provided by `@dojo/widget-core/mixins/Themeable`.
 
-To specify the classes for a widget, an interface needs to be imported with named exports for each class and passed to the `@theme` decorator. Importing the interface provides intellisense for the class names and passing this via the `@theme` decorator tells the `ThemeableMixin` which classes can be themed.
+To specify the classes for a widget, an interface needs to be imported with named exports for each class and passed to the `@theme` decorator. Importing the interface provides IntelliSense / auto-complete for the class names and passing this via the `@theme` decorator informs the `ThemeableMixin` which classes can be themed.
 
 <details><summary>Example css classes interface</summary>
 
@@ -317,11 +317,11 @@ export const classNameTwo: string;
 </details>
 
 
-**Important:** at runtime a javascript file is required to provide the processed css class names.
+**Important:** at runtime a JavaScript file is required to provide the processed CSS class names.
 
-The `ThemeableMixin` provides a method available on the instance `this.classes()` that consumes string class names and converts them into the expected class object when a widget is rendered. Classes that are passed to `this.classes()` are made available to be themed, as described [here](applying-a-theme).
+The `ThemeableMixin` provides a method available on the instance `this.classes()` that consumes string class names and converts them into the expected class object when a widget is rendered. Classes that are passed to `this.classes()` are made available to be themed, as described in the [applying a theme](applying-a-theme) section.
 
-However, it is not always desirable to allow consumers to override styling that may be required for a widget to function correctly, these classes are known as "fixed". Fixed classes are passed by using a chained function `this.classes().fixed()`.
+However, it is not always desirable to allow consumers to override styling that may be required for a widget to function correctly. These classes which should not be overridden are known as "fixed". Fixed classes are passed by using a chained function `this.classes().fixed()`.
 
 The following example passes `css.root` that will be themeable and `css.rootFixed` that cannot be overridden.
 
@@ -339,7 +339,7 @@ export default class MyWidget extends ThemeableMixin(WidgetBase) {
 
 #### Writing a theme
 
-Themes are typescript modules that export an object that contains css-modules files keyed by a widgets css file name.
+Themes are TypeScript modules that export an object that contains css-modules files keyed by a widgets CSS file name.
 
 ```css
 /* myTheme/styles/myWidget.m.css */
@@ -357,11 +357,11 @@ export default {
 }
 ```
 
-In the above example, the new `root` class provided by the theme for `myWidget` will replace the `root` class that was provided by the original `myWidget.m.css`. This means the `myWidget` will now have color set to blue, but will no longer receive the styles from the `root` class in the original css.
+In the above example, the new `root` class provided by the theme for `myWidget` will replace the `root` class that was provided by the original `myWidget.m.css`. This means the `myWidget` will now have its color set to blue, but will no longer receive the styles from the `root` class in the original CSS.
 
 #### Applying a theme
 
-To apply a theme to a widget, simply require it as a module and pass it to a widget via its properties. It is important to ensure that any child widgets created within your widgets render function are passed the `theme` or they will not be themed.
+To apply a theme to a widget, simply require it as a module and pass it to a widget via its properties. It is important to ensure that any child widgets created within your widget's render function are passed the `theme` or they will not be themed.
 
 ```typescript
 // app.ts
@@ -375,7 +375,7 @@ render() {
 
 #### Passing extra classes
 
-Sometimes you may need to apply positioning or layout styles to a child widget. As it is not possible to pass `classes` directly to `WNodes` they provide an `extraClasses` property that can be used to target themeable classes used within its `render` function. In most cases this should only target the `root` class and apply positioning adjustments. The classes passed via `extraClasses` are outside of the theming mechanism and thus will not be effected by a change in `theme`.
+Sometimes you may need to apply positioning or layout styles to a child widget. As it is not possible to pass `classes` directly to virtualized widget nodes. `WNodes` thus provide an `extraClasses` property to target themeable classes within its `render` function. In most cases this should only target the `root` class and apply positioning adjustments. The classes passed via `extraClasses` are outside of the theming mechanism and thus will not be effected by a change in `theme`.
 
 ```css
 /* app.m.css */
@@ -403,7 +403,7 @@ In the above example, the tabPanel will receive its original `root` class in add
 Widgets can be internationalized by adding the `I18nMixin` mixin from `@dojo/widget-core/mixins/I18n`. [Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`.
 
 If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then the default messages are returned.
-The widget will be invalidated once the locale-specific messages have been loaded.
+The widget will be invalidated once the locale-specific messages have been loaded, triggering a re-render with the localized message content.
 
 Each widget can have its own locale by passing a property - `properties.locale`.
 If no locale is set, then the default locale, as set by [`@dojo/i18n`](https://github.com/dojo/i18n), is assumed.
@@ -531,7 +531,7 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 
 ### Widget Registry
 
-Section Coming Soon!
+TODO: Section
 
 ### Render Lifecycle Hooks
 
@@ -607,7 +607,7 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
 }
 ```
 
-### DOM Wrapper
+### `DOMWrapper`
 
 `DomWrapper` is used to wrap DOM that is created _outside_ of the virtual DOM system.  This is the main mechanism to integrate _foreign_ components or widgets into the virtual DOM system.
 
@@ -619,7 +619,7 @@ The currently supported options:
 |-|-|
 |`onAttached`|A callback that is called when the wrapped DOM is flowed into the virtual DOM|
 
-As an example, we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we don't want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
+For example, if we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we don't want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
 
 ```ts
 import { w } from '@dojo/widget-core/d';
@@ -647,7 +647,7 @@ export default class WrappedComponent extends WidgetBase {
 }
 ```
 
-The properties which can be set on `DomWrapper` are the combination of the `WidgetBaseProperties` and the `VirtualDomProperties`, which means effectively you can use any of the properties passed to a `v()` node and they will be applied to the wrapped DOM node.  For example the following would set the classes on the wrapped DOM node:
+The properties which can be set on `DomWrapper` are the combination of the `WidgetBaseProperties` and the `VirtualDomProperties`, which means effectively you can use any of the properties passed to a `v()` node and they will be applied to the wrapped DOM node.  For example the following would set the `classes` on the wrapped DOM node:
 
 ```ts
 const div = document.createElement('div');
@@ -747,12 +747,12 @@ class MyWidget extends WidgetBase<WidgetProperties> {
 Meta classes are provided with a few hooks into the widget, passed to the constructor:
 
 * `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
-* `requireNode` - A method that accept a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an error will be thrown.
+* `requireNode` - A method that accepts a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an **error** will be thrown.
 * `invalidate` - A method that will invalidate the widget.
 
 Extending the base class found in `meta/Base` will automatically add these hooks to the class instance as well as providing a `has` method:
 
-* `has(key: string)` - A method that returns `true` if the DOM element with the passed key exists in the rendered DOM.
+* `has(key: string)` - A method that returns `true` if the DOM element with the passed `key` exists in the rendered DOM.
 
 Meta classes that require extra options should accept them in their methods.
 
@@ -779,7 +779,7 @@ class IsTallMeta extends MetaBase {
 
 In addition to creating widgets functionally using the `v()` and `w()` functions from `@dojo/widget-core/d`, Dojo 2 optionally supports the use of the `jsx` syntax known as [`tsx`](https://www.typescriptlang.org/docs/handbook/jsx.html) in TypeScript.
 
-To start to use `jsx` in your project the widgets need to be named with a `.tsx` extension and some configuration is required in the project's `tsconfig.json`:
+To start to use `jsx` in your project, widgets need to be named with a `.tsx` extension and some configuration is required in the project's `tsconfig.json`:
 
 Add the configuration options for `jsx`:
 
@@ -822,7 +822,7 @@ class MyWidgetWithTsx extends WidgetBase<MyProperties> {
 }
 ```
 
-**Note:** Unfortunately `tsx` is not directly used within the module so will report as an unused import so would be needed to be ignored by linters.
+**Note:** Unfortunately `tsx` is not directly used within the module so the tsx module will report as an unused import, and will need to be ignored by linters..
 
 ### Web Components
 
@@ -1006,7 +1006,7 @@ It should be noted that children nodes are removed from the DOM when widget inst
 
 ## API
 
-[API Documentation](http://dojo.io/api/widget-core/v2.0.0-alpha.28/)
+[API Documentation](https://dojo.io/api/widget-core/v2.0.0-beta1.6/)
 
 ## How Do I Contribute?
 
