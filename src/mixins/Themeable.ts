@@ -345,7 +345,7 @@ export function ThemeableMixin<T extends Constructor<WidgetBase<any>>>(Base: T):
 			const registeredBaseTheme = find(this._registeredBaseThemes, (registeredBaseThemeClasses) => {
 				return Boolean(registeredBaseThemeClasses[className]);
 			});
-			return registeredBaseTheme[className] || '';
+			return (registeredBaseTheme && registeredBaseTheme[className]) || '';
 		}
 
 		/**
