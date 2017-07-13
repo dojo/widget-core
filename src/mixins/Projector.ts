@@ -6,7 +6,7 @@ import { VNode } from '@dojo/interfaces/vdom';
 import { dom, h, Projection, ProjectionOptions } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
-import { Constructor, DNode, WidgetProperties } from './../interfaces';
+import { Constructor, DNode } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
 
