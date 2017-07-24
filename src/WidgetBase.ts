@@ -302,11 +302,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		const diffPropertyResults: any = {};
 
 		this._renderState = WidgetRenderState.PROPERTIES;
-		this._bindFunctionProperties(properties, bind);
 
 		allProperties.forEach((propertyName) => {
 			const previousProperty = this._properties[propertyName];
-			const newProperty = properties[propertyName];
+			const newProperty = this._bindFunctionProperty(properties[propertyName], bind);
 			const diffFunctions: DiffPropertyFunction[] = this.getDecorator(`diffProperty:${propertyName}`);
 
 			if (diffFunctions.length === 0) {
@@ -491,21 +490,17 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 *
 	 * @param properties properties to check for functions
 	 */
-	private _bindFunctionProperties(properties: any, bind: any): void {
-		Object.keys(properties).forEach((propertyKey) => {
-			const property = properties[propertyKey];
+	private _bindFunctionProperty(property: any, bind: any): any {
+		if (typeof property === 'function' && isWidgetBaseConstructor(property) === false) {
+			const bindInfo: Partial<BoundFunctionData> = this._bindFunctionPropertyMap.get(property) || {};
+			let { boundFunc, scope } = bindInfo;
 
-			if (typeof property === 'function' && !isWidgetBaseConstructor(property)) {
-				const bindInfo: Partial<BoundFunctionData> = this._bindFunctionPropertyMap.get(property) || {};
-				let { boundFunc, scope } = bindInfo;
-
-				if (!boundFunc || scope !== bind) {
-					boundFunc = property.bind(bind) as ((...args: any[]) => any);
-					this._bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
-				}
-				properties[propertyKey] = boundFunc;
+			if (boundFunc === undefined || scope !== bind) {
+				this._bindFunctionPropertyMap.set(property, { boundFunc: property.bind(bind), scope: bind });
 			}
-		});
+			return boundFunc;
+		}
+		return property;
 	}
 
 	protected getRegistries(): RegistryHandler {
