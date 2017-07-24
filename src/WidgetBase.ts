@@ -179,6 +179,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _requiredNodes = new Set<string>();
 
+	private _boundRenderFunc: Render;
+
+	private _boundInvalidate: () => void;
+
 	/**
 	 * @constructor
 	 */
@@ -195,8 +199,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._registries = new RegistryHandler();
 		this._registries.add(registry);
 		this.own(this._registries);
+		this._boundRenderFunc = this.render.bind(this);
+		this._boundInvalidate = this.invalidate.bind(this);
 
-		this.own(this._registries.on('invalidate', this.invalidate.bind(this)));
+		this.own(this._registries.on('invalidate', this._boundInvalidate));
 		this._checkOnElementUsage();
 	}
 
@@ -206,7 +212,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			cached = new MetaType({
 				nodes: this._nodeMap,
 				requiredNodes: this._requiredNodes,
-				invalidate: this.invalidate.bind(this)
+				invalidate: this._boundInvalidate
 			});
 			this._metaMap.set(MetaType, cached);
 		}
@@ -519,7 +525,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				return render;
 			}
 			return updatedRender;
-		}, this.render.bind(this));
+		}, this._boundRenderFunc);
 	}
 
 	/**
