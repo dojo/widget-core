@@ -4,7 +4,7 @@ import Map from '@dojo/shim/Map';
 import '@dojo/shim/Promise'; // Imported for side-effects
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
-import { decorate, isHNode, isWNode, registry, v } from './d';
+import { isWNode, registry, v } from './d';
 import { auto, reference } from './diff';
 import {
 	AfterRender,
@@ -12,7 +12,6 @@ import {
 	DiffPropertyFunction,
 	DiffPropertyReaction,
 	DNode,
-	HNode,
 	RegistryLabel,
 	Render,
 	VirtualDomNode,
@@ -112,13 +111,6 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 			handler(target, propertyKey);
 		}
 	};
-}
-
-/**
- * Function that identifies DNodes that are HNodes with key properties.
- */
-function isHNodeWithKey(node: DNode): node is HNode {
-	return isHNode(node) && (node.properties != null) && (node.properties.key != null);
 }
 
 /**
@@ -239,36 +231,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			this._nodeMap.clear();
 			return dNodes;
 		};
-	}
-
-	/**
-	 * A render decorator that registers vnode callbacks for 'afterCreate' and
-	 * 'afterUpdate' that will in turn call lifecycle methods onElementCreated and onElementUpdated.
-	 */
-	@afterRender()
-	protected attachLifecycleCallbacks (node: DNode | DNode[]): DNode | DNode[] {
-		// Create vnode afterCreate and afterUpdate callback functions that will only be set on nodes
-		// with "key" properties.
-
-		decorate(node, (node: HNode) => {
-			node.properties.afterCreate = this._afterCreateCallback;
-			node.properties.afterUpdate = this._afterUpdateCallback;
-		}, isHNodeWithKey);
-
-		return node;
-	}
-
-	@afterRender()
-	protected decorateBind(node: DNode | DNode[]): DNode | DNode[] {
-		decorate(node, (node: any) => {
-			const { properties = {} }: { properties: { bind?: any } } = node;
-			if (!properties.bind) {
-				properties.bind = this;
-			}
-		}, (node: DNode) => {
-			return isHNode(node) || isWNode(node);
-		});
-		return node;
 	}
 
 	/**
@@ -617,6 +579,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				return false;
 			});
 
+			if (!(<any> properties).bind) {
+				(<any> properties).bind = this;
+			}
+
 			if (cachedChild) {
 				child = cachedChild.child;
 				child.__setProperties__(properties);
@@ -646,6 +612,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 			child.__setChildren__(children);
 			return child.__render__();
+		}
+
+		if (dNode.properties.key !== undefined) {
+			dNode.properties.afterCreate = this._afterCreateCallback;
+			dNode.properties.afterUpdate = this._afterUpdateCallback;
+		}
+
+		if (!dNode.properties.bind) {
+			(<any> dNode).properties.bind = this;
 		}
 
 		dNode.vNodes = dNode.children
