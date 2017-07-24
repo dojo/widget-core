@@ -629,11 +629,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			(<any> dNode).properties.bind = this;
 		}
 
-		dNode.vNodes = dNode.children
-		.filter((child) => child !== null && child !== undefined)
-		.map((child: DNode) => {
-			return this._dNodeToVNode(child);
-		});
+		dNode.vNodes = [];
+		for (let i = 0; i < dNode.children.length; i++) {
+			const child = dNode.children[i];
+			if (child === null || child === undefined) {
+				continue;
+			}
+			dNode.vNodes.push(this._dNodeToVNode(child));
+		}
 
 		return dNode.render();
 	}
