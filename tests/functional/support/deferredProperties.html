@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../../../../node_modules/@dojo/loader/loader.js"></script>
+	<style type="text/css">
+		.accordion ul {
+			padding: 0;
+			margin: 0;
+			list-style-type: none;
+		}
+
+		.accordion ul li {
+			padding: 0;
+			margin: 0;
+			border: 1px solid black;
+			border-radius: 5px;
+		}
+
+		.accordion ul li .title {
+			padding: 7px 14px;
+			border-bottom: 1px solid black;
+			background-color: #dedede;
+			cursor: pointer;
+		}
+
+		.accordion ul li .content {
+			overflow: hidden;
+		}
+
+		.accordion ul li .content .padded {
+			padding: 13px;
+		}
+
+		.accordion ul li.selected .content {
+		}
+	</style>
+</head>
+<body>
+	<div id="content-area"></div>
+	<div>
+		<br/><br/><br/>
+		<button id="change-button">Update panels</button>
+	</div>
+
+<script>
+    require.config({
+        packages: [
+            { name: '@dojo', location: '../../../../../node_modules/@dojo' },
+            { name: 'maquette', location: '../../../../../node_modules/maquette/dist', main: 'maquette' },
+            { name: 'pepjs', location: '../../../../../node_modules/pepjs/dist', main: 'pep' }
+        ]
+    });
+
+    require(['./deferredProperties'], function() {
+    });
+</script>
+</body>
+</html>

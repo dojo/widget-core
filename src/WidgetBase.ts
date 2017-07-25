@@ -52,6 +52,12 @@ interface ReactionFunctionConfig {
 	reaction: DiffPropertyReaction;
 }
 
+interface DeferredProperty {
+	object: 'properties' | 'styles';
+	propertyName: string;
+	callback: () => any;
+}
+
 const decoratorMap = new Map<Function, Map<string, any[]>>();
 
 /**
@@ -110,6 +116,22 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 			handler(target, propertyKey);
 		}
 	};
+}
+
+const asyncPropertySymbol = Symbol.for('asyncProperty');
+
+export function asyncProperty(callback: (element: Element) => void) {
+	return Object.create(null, {
+		[asyncPropertySymbol]: {
+			get: () => {
+				return callback;
+			}
+		}
+	});
+}
+
+function isAsyncProperty(obj: any): true {
+	return typeof obj === 'object' && obj[asyncPropertySymbol];
 }
 
 /**
@@ -184,6 +206,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _nodeMap = new Map<string, HTMLElement>();
 
 	private _requiredNodes = new Set<string>();
+	private _deferredProperties = new Map<string, DeferredProperty[]>();
 
 	/**
 	 * @constructor
@@ -218,6 +241,67 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 
 		return cached as T;
+	}
+
+	@beforeRender()
+	protected clearDeferredProperties(renderFunction: any, properties: any, children: DNode[]): any {
+		this._deferredProperties.clear();
+		return renderFunction;
+	}
+
+	@afterRender()
+	protected prepareDeferredProperties(node: DNode | DNode[]): DNode | DNode[] {
+		decorate(node, ((hNode: HNode) => {
+			const {
+				properties = {},
+				properties: {
+					key,
+					styles = {}
+				}
+			} = hNode;
+
+			const deferredProperties = this._deferredProperties.get(key as string) || [];
+			['scrollTop', 'scrollLeft'].forEach(propertyName => {
+				const prop = properties[propertyName];
+				if (isAsyncProperty(prop)) {
+					deferredProperties.push({
+						callback: (<any> prop)[asyncPropertySymbol],
+						object: 'properties',
+						propertyName
+					});
+					delete (<any> properties)[propertyName]; // cast to any to delete read-only property
+				}
+			});
+			Object.keys(styles).forEach(propertyName => {
+				const prop = styles[propertyName];
+				if (isAsyncProperty(prop)) {
+					deferredProperties.push({
+						callback: (<any> prop)[asyncPropertySymbol],
+						object: 'styles',
+						propertyName
+					});
+					delete styles[propertyName];
+				}
+			});
+			this._deferredProperties.set(key as string, deferredProperties);
+		}), isHNodeWithKey);
+
+		return node;
+	}
+
+	protected applyDeferredProperties(element: any, properties: VNodeProperties) {
+		const key = properties.key;
+		const deferredProperties = this._deferredProperties;
+		if (typeof key === 'string' && deferredProperties.has(key)) {
+			(deferredProperties.get(key) || []).forEach(({object, propertyName, callback}) => {
+				if (object === 'properties') {
+					element[propertyName] = callback.call(this, element);
+				}
+				if (object === 'styles') {
+					element.style[propertyName] = callback.call(this, element);
+				}
+			});
+		}
 	}
 
 	/**
@@ -279,6 +363,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		properties: VNodeProperties
 	): void {
 		this._setNode(element, properties);
+		this.applyDeferredProperties(element, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -292,6 +377,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		properties: VNodeProperties
 	): void {
 		this._setNode(element, properties);
+		this.applyDeferredProperties(element, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
