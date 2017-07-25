@@ -344,7 +344,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 		this._properties = diffPropertyResults;
 
-		if (changedPropertyKeys.length) {
+		if (changedPropertyKeys.length > 0) {
 			this.invalidate();
 		}
 	}
@@ -355,7 +355,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	public __setChildren__(children: (C | null)[]): void {
 		this._renderState = WidgetRenderState.CHILDREN;
-		if (this._children.length || children.length) {
+		if (this._children.length > 0 || children.length > 0) {
 			this._children = children;
 			this.invalidate();
 		}
@@ -363,16 +363,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	public __render__(): VirtualDomNode | VirtualDomNode[] {
 		this._renderState = WidgetRenderState.RENDER;
-		if (this._dirty || !this._cachedVNode) {
+		if (this._dirty === true || this._cachedVNode === undefined) {
 			this._dirty = false;
 			const render = this._runBeforeRenders();
 			let dNode = render();
 			dNode = this.runAfterRenders(dNode);
 			const widget = this._dNodeToVNode(dNode);
 			this._manageDetachedChildren();
-			if (widget) {
-				this._cachedVNode = widget;
-			}
+			this._cachedVNode = widget;
 			this._renderState = WidgetRenderState.IDLE;
 			return widget;
 		}
@@ -526,14 +524,17 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _runBeforeRenders(): Render {
 		const beforeRenders = this.getDecorator('beforeRender');
 
-		return beforeRenders.reduce((render: Render, beforeRenderFunction: BeforeRender) => {
-			const updatedRender = beforeRenderFunction.call(this, render, this._properties, this._children);
-			if (!updatedRender) {
-				console.warn('Render function not returned from beforeRender, using previous render');
-				return render;
-			}
-			return updatedRender;
-		}, this._boundRenderFunc);
+		if (beforeRenders.length > 0) {
+			return beforeRenders.reduce((render: Render, beforeRenderFunction: BeforeRender) => {
+				const updatedRender = beforeRenderFunction.call(this, render, this._properties, this._children);
+				if (!updatedRender) {
+					console.warn('Render function not returned from beforeRender, using previous render');
+					return render;
+				}
+				return updatedRender;
+			}, this._boundRenderFunc);
+		}
+		return this._boundRenderFunc;
 	}
 
 	/**
@@ -544,9 +545,12 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	protected runAfterRenders(dNode: DNode | DNode[]): DNode | DNode[] {
 		const afterRenders = this.getDecorator('afterRender');
 
-		return afterRenders.reduce((dNode: DNode | DNode[], afterRenderFunction: AfterRender) => {
-			return afterRenderFunction.call(this, dNode);
-		}, dNode);
+		if (afterRenders.length > 0) {
+			return afterRenders.reduce((dNode: DNode | DNode[], afterRenderFunction: AfterRender) => {
+				return afterRenderFunction.call(this, dNode);
+			}, dNode);
+		}
+		return dNode;
 	}
 
 	/**
@@ -585,19 +589,20 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			const childrenMapKey = key || widgetConstructor;
 			let cachedChildren = this._cachedChildrenMap.get(childrenMapKey) || [];
 			let cachedChild: WidgetCacheWrapper | undefined;
-			cachedChildren.some((cachedChildWrapper) => {
-				if (cachedChildWrapper.widgetConstructor === widgetConstructor && !cachedChildWrapper.used) {
-					cachedChild = cachedChildWrapper;
-					return true;
-				}
-				return false;
-			});
 
-			if (!(<any> properties).bind) {
+			for (let i = 0; i < cachedChildren.length; i++) {
+				const cachedChildWrapper = cachedChildren[i];
+				if (cachedChildWrapper.widgetConstructor === widgetConstructor && cachedChildWrapper.used === false) {
+					cachedChild = cachedChildWrapper;
+					break;
+				}
+			}
+
+			if ((<any> properties).bind === undefined) {
 				(<any> properties).bind = this;
 			}
 
-			if (cachedChild) {
+			if (cachedChild !== undefined) {
 				child = cachedChild.child;
 				child.__setProperties__(properties);
 				cachedChild.used = true;
@@ -605,9 +610,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			else {
 				child = new widgetConstructor();
 				child.__setProperties__(properties);
-				child.own(child.on('invalidated', () => {
-					this.invalidate();
-				}));
+				child.own(child.on('invalidated', this._boundInvalidate));
 				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
 				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
 				this.own(child);
@@ -633,7 +636,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			dNode.properties.afterUpdate = this._afterUpdateCallback;
 		}
 
-		if (!dNode.properties.bind) {
+		if (dNode.properties.bind === undefined) {
 			(<any> dNode).properties.bind = this;
 		}
 
@@ -654,15 +657,17 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _manageDetachedChildren(): void {
 		this._cachedChildrenMap.forEach((cachedChildren, key) => {
-			const filterCachedChildren = cachedChildren.filter((cachedChild) => {
-				if (cachedChild.used) {
-					cachedChild.used = false;
-					return true;
+			const filteredCacheChildren: WidgetCacheWrapper[] = [];
+			for (let i = 0; i < cachedChildren.length; i++) {
+				const cachedChild = cachedChildren[i];
+				if (cachedChild.used === false) {
+					cachedChild.child.destroy();
+					continue;
 				}
-				cachedChild.child.destroy();
-				return false;
-			});
-			this._cachedChildrenMap.set(key, filterCachedChildren);
+				cachedChild.used = false;
+				filteredCacheChildren.push(cachedChild);
+			}
+			this._cachedChildrenMap.set(key, filteredCacheChildren);
 		});
 	}
 
