@@ -5,7 +5,7 @@ import '@dojo/shim/Promise'; // Imported for side-effects
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
 import { isWNode, registry, v } from './d';
-import { auto, reference } from './diff';
+import { auto } from './diff';
 import {
 	AfterRender,
 	BeforeRender,
@@ -117,7 +117,6 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 /**
  * Main widget base for all widgets to extend
  */
-@diffProperty('bind', reference)
 export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends Evented implements WidgetBaseInterface<P, C> {
 
 	/**
