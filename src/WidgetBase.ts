@@ -159,11 +159,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _decoratorCache: Map<string, any[]>;
 
-	/**
-	 * set of render decorators
-	 */
-	private _renderDecorators: Set<string>;
-
 	private _registries: RegistryHandler;
 
 	/**
@@ -194,7 +189,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._properties = <P> {};
 		this._cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
-		this._renderDecorators = new Set<string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registries = new RegistryHandler();
 		this._registries.add(registry);
