@@ -86,7 +86,7 @@ export function beforeRender(method?: Function) {
  */
 export function diffProperty(propertyName: string, diffFunction: DiffPropertyFunction, reactionFunction?: Function) {
 	return handleDecorator((target, propertyKey) => {
-		target.addDecorator(`diffProperty:${propertyName}`, diffFunction);
+		target.addDecorator(`diffProperty:${propertyName}`, diffFunction.bind(null));
 		target.addDecorator('registeredDiffProperty', propertyName);
 		if (reactionFunction || propertyKey) {
 			target.addDecorator('diffReaction', {
@@ -113,6 +113,8 @@ export function handleDecorator(handler: (target: any, propertyKey?: string) => 
 		}
 	};
 }
+
+const boundAuto = auto.bind(null);
 
 /**
  * Main widget base for all widgets to extend
@@ -292,35 +294,45 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	public __setProperties__(originalProperties: this['properties']): void {
 		const { bind, ...properties } = originalProperties as any;
 		const changedPropertyKeys: string[] = [];
-		const allProperties = new Set([...Object.keys(properties), ...Object.keys(this._properties)]);
+		const allProperties = [ ...Object.keys(properties), ...Object.keys(this._properties) ];
+		const checkedProperties: string[] = [];
 		const diffPropertyResults: any = {};
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
 		let runReactions = false;
 
 		this._renderState = WidgetRenderState.PROPERTIES;
 
-		allProperties.forEach((propertyName) => {
+		for (let i = 0; i < allProperties.length; i++) {
+			const propertyName = allProperties[i];
+			if (checkedProperties.indexOf(propertyName) > 0) {
+				continue;
+			}
+			checkedProperties.push(propertyName);
 			const previousProperty = this._properties[propertyName];
 			const newProperty = this._bindFunctionProperty(properties[propertyName], bind);
-			let diffFunctions: DiffPropertyFunction[];
 			if (registeredDiffPropertyNames.indexOf(propertyName) !== -1) {
-				diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
 				runReactions = true;
+				const diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
+				for (let i = 0; i < diffFunctions.length; i++) {
+					const result = diffFunctions[i](previousProperty, newProperty);
+					if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
+						changedPropertyKeys.push(propertyName);
+					}
+					if (propertyName in properties) {
+						diffPropertyResults[propertyName] = result.value;
+					}
+				}
 			}
 			else {
-				diffFunctions = [ auto ];
-			}
-
-			diffFunctions.forEach((diffFunction) => {
-				const result = diffFunction.call(null, previousProperty, newProperty);
+				const result = boundAuto(previousProperty, newProperty);
 				if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 					changedPropertyKeys.push(propertyName);
 				}
 				if (propertyName in properties) {
 					diffPropertyResults[propertyName] = result.value;
 				}
-			});
-		});
+			}
+		}
 
 		if (runReactions) {
 			this._mapDiffPropertyReactions(properties, changedPropertyKeys).forEach((args, reaction) => {
