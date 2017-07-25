@@ -87,6 +87,7 @@ export function beforeRender(method?: Function) {
 export function diffProperty(propertyName: string, diffFunction: DiffPropertyFunction, reactionFunction?: Function) {
 	return handleDecorator((target, propertyKey) => {
 		target.addDecorator(`diffProperty:${propertyName}`, diffFunction);
+		target.addDecorator('registeredDiffProperty', propertyName);
 		if (reactionFunction || propertyKey) {
 			target.addDecorator('diffReaction', {
 				propertyName,
@@ -294,17 +295,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		const changedPropertyKeys: string[] = [];
 		const allProperties = new Set([...Object.keys(properties), ...Object.keys(this._properties)]);
 		const diffPropertyResults: any = {};
+		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
 
 		this._renderState = WidgetRenderState.PROPERTIES;
 
 		allProperties.forEach((propertyName) => {
 			const previousProperty = this._properties[propertyName];
 			const newProperty = this._bindFunctionProperty(properties[propertyName], bind);
-			const diffFunctions: DiffPropertyFunction[] = this.getDecorator(`diffProperty:${propertyName}`);
-
-			if (diffFunctions.length === 0) {
-				diffFunctions.push(auto);
-			}
+			const diffFunctions: DiffPropertyFunction[] = registeredDiffPropertyNames.indexOf(propertyName) !== -1 ? this.getDecorator(`diffProperty:${propertyName}`) : [ auto ];
 
 			diffFunctions.forEach((diffFunction) => {
 				const result = diffFunction.call(null, previousProperty, newProperty);
