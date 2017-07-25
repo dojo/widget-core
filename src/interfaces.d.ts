@@ -357,21 +357,6 @@ export interface WidgetBaseInterface<
 	 */
 	__render__(): VirtualDomNode | VirtualDomNode[];
 }
-/**
- * Meta Base constructor type
- */
-export interface WidgetMetaConstructor<T> {
-	new (properties: WidgetMetaProperties): T;
-}
-
-/**
- * Properties passed to meta Base constructors
- */
-export interface WidgetMetaProperties {
-	nodes: Map<string, HTMLElement>;
-	requiredNodes: Set<string>;
-	invalidate: () => void;
-}
 
 export interface Render {
 	(): DNode | DNode[];

@@ -48,7 +48,7 @@ const defaultDimensions = {
 	}
 };
 
-export class Dimensions extends Base {
+export class Dimensions extends Base<DimensionResults> {
 	public get(key: string): Readonly<DimensionResults> {
 		this.requireNode(key);
 

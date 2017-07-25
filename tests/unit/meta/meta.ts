@@ -7,6 +7,7 @@ import { Base as MetaBase } from '../../../src/meta/Base';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { stub } from 'sinon';
 import { ThemeableMixin } from './../../../src/mixins/Themeable';
+import MetaWithOptions from '../../../src/meta/MetaWithOptions';
 
 class TestWidgetBase<P = any> extends ThemeableMixin(WidgetBase)<P> {}
 
@@ -28,7 +29,8 @@ registerSuite({
 		rAF.restore();
 	},
 	'meta returns a singleton'() {
-		class TestMeta extends MetaBase {
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {}
 		}
 
 		class TestWidget extends ProjectorMixin(TestWidgetBase)<any> {
@@ -52,7 +54,8 @@ registerSuite({
 		assert.strictEqual(widget.getMeta(), widget.getMeta());
 	},
 	'meta is provided a list of nodes with keys'() {
-		class TestMeta extends MetaBase {
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {}
 		}
 
 		class TestWidget extends ProjectorMixin(TestWidgetBase) {
@@ -77,7 +80,11 @@ registerSuite({
 		assert.isTrue(meta.has('root'));
 	},
 	'meta renders the node if it has to'() {
-		class TestMeta extends MetaBase {
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -88,8 +95,8 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta).has('greeting');
-				this.meta(TestMeta).has('name');
+				this.meta(TestMeta).get('greeting');
+				this.meta(TestMeta).get('name');
 
 				return v('div', {
 					innerHTML: 'hello',
@@ -113,7 +120,11 @@ registerSuite({
 		assert.strictEqual(renders, 2, 'expected two renders');
 	},
 	'multi-step render'() {
-		class TestMeta extends MetaBase {
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -130,11 +141,11 @@ registerSuite({
 					innerHTML: 'hello',
 					key: 'greeting'
 				}, [
-					test.has('greeting') ? v('div', {
+					test.get('greeting') ? v('div', {
 						innerHTML: 'world',
 						key: 'name'
 					}, [
-						test.has('name') ? v('div', {
+						test.get('name') ? v('div', {
 							innerHTML: '!',
 							key: 'exclamation'
 						}) : null
@@ -153,7 +164,11 @@ registerSuite({
 		assert.strictEqual(renders, 3, 'expected three renders');
 	},
 	'meta throws an error if a required node is not found'() {
-		class TestMeta extends MetaBase {
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -164,7 +179,7 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta).has('test');
+				this.meta(TestMeta).get('test');
 
 				return v('div', {
 					innerHTML: 'hello world',
@@ -181,5 +196,111 @@ registerSuite({
 		assert.throws(() => {
 			resolveRAF();
 		}, Error, 'Required node test not found');
+	},
+	'requireNode accepts a callback'() {
+		let callbacks = 0;
+
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {
+				this.requireNode(key, (node) => {
+					callbacks++;
+				});
+			}
+		}
+
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(TestWidgetBase) {
+			nodes: any;
+
+			render() {
+				renders++;
+
+				this.meta(TestMeta).get('root');
+
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		assert.strictEqual(callbacks, 1, 'callback fired when node was missing');
+		assert.strictEqual(renders, 1, 'callback did not call invalidate and did not re-render');
+	},
+	'callback can invalidate'() {
+		let callbacks = 0;
+
+		class TestMeta extends MetaBase<any> {
+			get(key: string) {
+				const invalidate = !this.nodes.has(key);
+				this.requireNode(key, (node) => {
+					callbacks++;
+					invalidate && this.invalidate();
+				});
+			}
+		}
+
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(TestWidgetBase) {
+			nodes: any;
+
+			render() {
+				renders++;
+
+				this.meta(TestMeta).get('root');
+
+				return v('div', {
+					innerHTML: 'hello world',
+					key: 'root'
+				});
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		resolveRAF();
+
+		assert.strictEqual(callbacks, 2, 'callback fired when node was missing and when existing');
+		assert.strictEqual(renders, 2, 'callback called invalidate causing a re-render');
+	},
+	'options available in meta'() {
+		class TestMeta extends MetaBase<string, { optionKey: string }> {
+			get(key: 'optionKey') {
+				return this.options[key];
+			}
+		}
+
+		const TestMetaWithOptions = MetaWithOptions(TestMeta, {
+			optionKey: 'optionValue'
+		});
+
+		let optionKey = '';
+
+		class TestWidget extends ProjectorMixin(TestWidgetBase) {
+			nodes: any;
+
+			render() {
+				optionKey = this.meta(TestMetaWithOptions).get('optionKey');
+
+				return v('div');
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		assert.strictEqual(optionKey, 'optionValue', 'expected to read passed option');
 	}
 });
