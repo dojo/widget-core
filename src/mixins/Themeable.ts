@@ -27,7 +27,7 @@ export type ClassNames = {
  * A lookup object for available widget classes names
  */
 export interface Theme {
-	[key: string]: ClassNames;
+	[key: string]: object;
 }
 
 /**
