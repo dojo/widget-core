@@ -507,7 +507,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			let { boundFunc, scope } = bindInfo;
 
 			if (boundFunc === undefined || scope !== bind) {
-				this._bindFunctionPropertyMap.set(property, { boundFunc: property.bind(bind), scope: bind });
+				boundFunc = property.bind(bind) as (...args: any[]) => any;
+				this._bindFunctionPropertyMap.set(property, { boundFunc, scope: bind });
 			}
 			return boundFunc;
 		}
