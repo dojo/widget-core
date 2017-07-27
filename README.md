@@ -1073,6 +1073,25 @@ If the node has not yet been rendered, all values will contain `0`. If you need 
 const hasRootBeenRendered = this.meta(Dimensions).has('root');
 ```
 
+##### Viewport Intersection
+
+The `Intersection` meta can be used to determine if an HTML element is in the viewport.
+
+```typescript
+import Intersection from `@dojo/widget-core/meta/Intersection`;
+
+// ...
+render() {
+	const isVisible = this.meta(Intersection).get('root') > 0;
+	
+	return v('div', {
+		key: 'root',
+		innerHTML: `I am ${isVisible ? 'visible' : 'invisible'}`
+	});
+}
+// ...
+```
+
 ##### Implementing Custom Meta
 
 You can create your own meta if you need access to DOM nodes.
