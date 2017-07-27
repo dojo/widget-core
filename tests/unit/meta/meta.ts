@@ -78,6 +78,10 @@ registerSuite({
 	},
 	'meta renders the node if it has to'() {
 		class TestMeta extends MetaBase {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -88,8 +92,8 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta).has('greeting');
-				this.meta(TestMeta).has('name');
+				this.meta(TestMeta).get('greeting');
+				this.meta(TestMeta).get('name');
 
 				return v('div', {
 					innerHTML: 'hello',
@@ -114,6 +118,10 @@ registerSuite({
 	},
 	'multi-step render'() {
 		class TestMeta extends MetaBase {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -130,11 +138,11 @@ registerSuite({
 					innerHTML: 'hello',
 					key: 'greeting'
 				}, [
-					test.has('greeting') ? v('div', {
+					test.get('greeting') ? v('div', {
 						innerHTML: 'world',
 						key: 'name'
 					}, [
-						test.has('name') ? v('div', {
+						test.get('name') ? v('div', {
 							innerHTML: '!',
 							key: 'exclamation'
 						}) : null
@@ -154,6 +162,10 @@ registerSuite({
 	},
 	'meta throws an error if a required node is not found'() {
 		class TestMeta extends MetaBase {
+			get(key: string) {
+				this.requireNode(key);
+				return this.nodes.get(key);
+			}
 		}
 
 		let renders = 0;
@@ -164,7 +176,7 @@ registerSuite({
 			render() {
 				renders++;
 
-				this.meta(TestMeta).has('test');
+				this.meta(TestMeta).get('test');
 
 				return v('div', {
 					innerHTML: 'hello world',
