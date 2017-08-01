@@ -16,12 +16,17 @@ import {
 	RegistryLabel,
 	Render,
 	VirtualDomNode,
-	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
 	WidgetProperties
 } from './interfaces';
 import MetaBase from './meta/Base';
+import {
+	WidgetMetaConstructor,
+	WidgetMetaOptions,
+	WidgetMetaRequiredNodeCallback
+} from './meta/interfaces';
+import { MetaWithOptionsRef } from './meta/MetaWithOptions';
 import RegistryHandler from './RegistryHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
 
@@ -181,11 +186,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, MetaBase>();
+	private _metaMap = new Map<WidgetMetaConstructor<any> | MetaWithOptionsRef<any, any>, MetaBase<any>>();
 
 	private _nodeMap = new Map<string, HTMLElement>();
 
-	private _requiredNodes = new Set<string>();
+	private _requiredNodes = new Map<string, WidgetMetaRequiredNodeCallback[]>();
 
 	/**
 	 * @constructor
@@ -208,15 +213,25 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._checkOnElementUsage();
 	}
 
-	protected meta<T extends MetaBase>(MetaType: WidgetMetaConstructor<T>): T {
-		let cached = this._metaMap.get(MetaType);
+	protected meta<T extends MetaBase<any>>(MetaOrMetaWithOptions: WidgetMetaConstructor<T> | MetaWithOptionsRef<T, any>): T {
+		let cached = this._metaMap.get(MetaOrMetaWithOptions);
 		if (!cached) {
+			let options: WidgetMetaOptions;
+			let MetaType: WidgetMetaConstructor<T>;
+			if (MetaOrMetaWithOptions instanceof MetaWithOptionsRef) {
+				options = (<any> MetaOrMetaWithOptions).options;
+				MetaType = (<any> MetaOrMetaWithOptions).MetaType;
+			}
+			else {
+				options = {};
+				MetaType = MetaOrMetaWithOptions;
+			}
 			cached = new MetaType({
 				nodes: this._nodeMap,
 				requiredNodes: this._requiredNodes,
 				invalidate: this.invalidate.bind(this)
-			});
-			this._metaMap.set(MetaType, cached);
+			}, options);
+			this._metaMap.set(MetaOrMetaWithOptions, cached);
 		}
 
 		return cached as T;
@@ -271,6 +286,25 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return node;
 	}
 
+	@afterRender()
+	protected notifyMetaKeys(node: DNode | DNode[]): DNode | DNode[] {
+		if (this._metaMap.size > 0) {
+			const keys: string[] = [];
+			decorate(node, (node: any) => {
+				const { properties = {} }: { properties: { key?: string } } = node;
+				if (properties.key) {
+					keys.push(properties.key);
+				}
+			}, (node: DNode) => {
+				return isHNode(node) || isWNode(node);
+			});
+			this._metaMap.forEach((meta) => {
+				meta.onKeysUpdated(keys);
+			});
+		}
+		return node;
+	}
+
 	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
 	 */
@@ -320,7 +354,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _setNode(element: Element, properties: VNodeProperties): void {
-		this._nodeMap.set(String(properties.key), <HTMLElement> element);
+		const key = String(properties.key);
+		const callbacks = this._requiredNodes.get(key);
+		if (callbacks) {
+			for (const callback of callbacks) {
+				callback.call(this, element);
+			}
+			this._requiredNodes.delete(key);
+		}
+		this._nodeMap.set(key, <HTMLElement> element);
 	}
 
 	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
