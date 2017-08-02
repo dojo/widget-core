@@ -327,10 +327,12 @@ export interface WidgetBaseInterface<
 	P = WidgetProperties,
 	C extends DNode = DNode<DefaultWidgetBaseInterface>> extends Evented {
 
+	readonly defaultProperties: {};
+
 	/**
 	 * Widget properties
 	 */
-	readonly properties: P & WidgetProperties;
+	readonly properties: P & WidgetProperties & this['defaultProperties'];
 
 	/**
 	 * Returns the widget's children

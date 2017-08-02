@@ -187,6 +187,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _requiredNodes = new Set<string>();
 
+	public readonly defaultProperties = {};
+
 	/**
 	 * @constructor
 	 */
@@ -323,7 +325,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._nodeMap.set(String(properties.key), <HTMLElement> element);
 	}
 
-	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
+	public get properties(): Readonly<P> & Readonly<WidgetProperties> & this['defaultProperties'] {
 		return this._properties;
 	}
 
@@ -362,7 +364,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}
 		});
 
-		this._properties = diffPropertyResults;
+		this._properties = { ...this.defaultProperties, ...diffPropertyResults };
 
 		if (changedPropertyKeys.length) {
 			this.invalidate();
