@@ -1377,8 +1377,8 @@ registerSuite({
 		const testWidget = new TestWidget();
 		const testWidget2 = new TestWidget2();
 
-		assert.equal(testWidget.getAfterRenders().length, 3);
-		assert.equal(testWidget2.getAfterRenders().length, 4);
+		assert.equal(testWidget.getAfterRenders().length, 1);
+		assert.equal(testWidget2.getAfterRenders().length, 2);
 	},
 	'decorator cache is populated when addDecorator is called after instantiation'() {
 		class TestWidget extends WidgetBase<any> {
@@ -1396,7 +1396,7 @@ registerSuite({
 
 		const testWidget = new TestWidget();
 
-		assert.equal(testWidget.getDecoratorCount('beforeRender'), 2, '1 beforeRender added to existing 1');
-		assert.equal(testWidget.getDecoratorCount('afterRender'), 3, '1 afterRender added to existing 2');
+		assert.equal(testWidget.getDecoratorCount('beforeRender'), 2, 'beforeRender = 1 (existing) + 1');
+		assert.equal(testWidget.getDecoratorCount('afterRender'), 1, 'afterRender = 0 (existing) + 1');
 	}
 });
