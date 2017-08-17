@@ -3,7 +3,7 @@ import Promise from '@dojo/shim/Promise';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub, spy, SinonStub } from 'sinon';
-import { v, w, registry } from '../../src/d';
+import { v, w } from '../../src/d';
 import { Constructor, DNode, PropertyChangeRecord, Render } from '../../src/interfaces';
 import {
 	WidgetBase,
@@ -23,6 +23,8 @@ interface TestProperties {
 }
 
 let consoleStub: SinonStub;
+
+const registry = new WidgetRegistry();
 
 registerSuite({
 	name: 'WidgetBase',
@@ -762,6 +764,7 @@ registerSuite({
 				}
 			}
 			const myWidget: any = new TestWidget();
+			myWidget.__setProperties__({ registry });
 			let result = <VNode> myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			registry.define('my-header3', TestHeaderWidget);
@@ -784,6 +787,7 @@ registerSuite({
 				}
 			}
 			const myWidget: any = new TestWidget();
+			myWidget.__setProperties__({ registry });
 			let result = <VNode> myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			registry.define(myHeader, TestHeaderWidget);
@@ -796,6 +800,7 @@ registerSuite({
 			class TestWidget extends WidgetBase<any> {
 				constructor() {
 					super();
+					this.getRegistries().add(registry);
 					this.getRegistries().add(localRegistry);
 				}
 				render() {
@@ -817,7 +822,7 @@ registerSuite({
 				}
 			}
 			registry.define('my-header4', TestHeaderWidget);
-			const myWidget: any = new TestWidget();
+			const myWidget = new TestWidget();
 			let result = <any> myWidget.__render__();
 			assert.equal(result.children[0].vnodeSelector, 'global-header');
 			localRegistry.define('my-header4', TestHeaderLocalWidget);
@@ -834,6 +839,9 @@ registerSuite({
 			registry.define('my-header', loadFunction);
 
 			class TestWidget extends WidgetBase<any> {
+				public invalidate() {
+					super.invalidate();
+				}
 				render() {
 					return v('div', [
 						w('my-header', <any> undefined)
@@ -849,7 +857,8 @@ registerSuite({
 
 			let invalidateCount = 0;
 
-			const myWidget: any = new TestWidget();
+			const myWidget = new TestWidget();
+			myWidget.__setProperties__({ registry });
 			myWidget.on('invalidated', () => {
 				invalidateCount++;
 			});
@@ -884,7 +893,7 @@ registerSuite({
 			class TestWidget extends WidgetBase<any> {
 				render() {
 					return v('div', [
-						w('my-header1', <any> undefined)
+						w('my-header1', {})
 					]);
 				}
 			}
@@ -895,7 +904,8 @@ registerSuite({
 				}
 			}
 
-			const myWidget: any = new TestWidget();
+			const myWidget = new TestWidget();
+			myWidget.__setProperties__({ registry });
 
 			let result = <VNode> myWidget.__render__();
 			assert.lengthOf(result.children, 0);

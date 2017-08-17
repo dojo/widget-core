@@ -4,7 +4,7 @@ import Map from '@dojo/shim/Map';
 import '@dojo/shim/Promise'; // Imported for side-effects
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
-import { isWNode, registry, v, isHNode } from './d';
+import { isWNode, v, isHNode } from './d';
 import { auto } from './diff';
 import {
 	AfterRender,
@@ -193,7 +193,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registries = new RegistryHandler();
-		this._registries.add(registry);
 		this.own(this._registries);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
@@ -289,6 +288,25 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
 		return this._properties;
+	}
+
+	@diffProperty('registry', auto)
+	protected diffPropertyRegistry(previousProperties: any, newProperties: any): void {
+		const result = this._registries.replace(previousProperties.registry, newProperties.registry);
+		if (!result) {
+			this.getRegistries().add(newProperties.registry);
+		}
+	}
+
+	@diffProperty('defaultRegistry', auto)
+	protected diffPropertyDefaultRegistry(previousProperties: any, newProperties: any): void {
+		let result = false;
+		if (this._registries.defaultRegistry) {
+			result = this._registries.replace(this._registries.defaultRegistry, newProperties.defaultRegistry);
+		}
+		if (!result) {
+			this._registries.add(newProperties.defaultRegistry, true);
+		}
 	}
 
 	public __setProperties__(originalProperties: this['properties']): void {
@@ -395,6 +413,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			node.properties = node.properties || {};
 			if ((<any> node.properties).bind === undefined) {
 				(<any> node.properties).bind = this;
+			}
+			if (isWNode(node)) {
+				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry;
 			}
 			nodes = [ ...nodes, ...node.children ];
 		}
