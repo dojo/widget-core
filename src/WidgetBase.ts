@@ -22,7 +22,7 @@ import {
 } from './interfaces';
 import MetaBase from './meta/Base';
 import RegistryHandler from './RegistryHandler';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './WidgetRegistry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
 
 /**
  * Widget cache wrapper for instance management
@@ -180,6 +180,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _boundInvalidate: () => void;
 
+	private _registry = new WidgetRegistry();
+
 	/**
 	 * @constructor
 	 */
@@ -300,10 +302,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	@diffProperty('defaultRegistry', auto)
 	protected diffPropertyDefaultRegistry(previousProperties: any, newProperties: any): void {
-		let result = false;
-		if (this._registries.defaultRegistry) {
-			result = this._registries.replace(this._registries.defaultRegistry, newProperties.defaultRegistry);
-		}
+		const result = this._registries.replace(previousProperties.defaultRegistry, newProperties.defaultRegistry);
 		if (!result) {
 			this._registries.add(newProperties.defaultRegistry, true);
 		}
@@ -415,7 +414,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				(<any> node.properties).bind = this;
 			}
 			if (isWNode(node)) {
-				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry;
+				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry || this._registry;
 			}
 			nodes = [ ...nodes, ...node.children ];
 		}
