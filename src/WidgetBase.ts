@@ -426,7 +426,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				(<any> node.properties).bind = this;
 			}
 			if (isWNode(node)) {
-				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry || this._defaultRegistry;
+				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry;
 			}
 			nodes = [ ...nodes, ...node.children ];
 		}
