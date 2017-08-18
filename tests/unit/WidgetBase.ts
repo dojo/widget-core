@@ -1422,6 +1422,38 @@ registerSuite({
 			widget.__setProperties__({});
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+		},
+		'Can add widgets to the default widget registry'() {
+			class MyWidgetOne extends WidgetBase {}
+			class MyWidgetTwo extends WidgetBase {}
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+				@diffProperty('defaultRegistry', auto)
+				addItemsToDefaultRegistry() {
+					const defaultRegistry = this.getRegistries().defaultRegistry;
+					if (defaultRegistry) {
+						defaultRegistry.define('my-widget-1', MyWidgetOne);
+						defaultRegistry.define('my-widget-2', MyWidgetTwo);
+					}
+				}
+			}
+			const defaultRegistry = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__setProperties__({ defaultRegistry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
+			assert.strictEqual(widget.getRegistries().defaultRegistry.get('my-widget-1'), MyWidgetOne);
+			assert.strictEqual(widget.getRegistries().defaultRegistry.get('my-widget-2'), MyWidgetTwo);
+			widget.__setProperties__({ });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+			assert.strictEqual(widget.getRegistries().defaultRegistry.get('my-widget-1'), MyWidgetOne);
+			assert.strictEqual(widget.getRegistries().defaultRegistry.get('my-widget-2'), MyWidgetTwo);
 		}
 	},
 	'child invalidation invalidates parent'() {
