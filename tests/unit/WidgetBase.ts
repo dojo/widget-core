@@ -13,6 +13,7 @@ import {
 } from '../../src/WidgetBase';
 import { ignore, always, auto } from '../../src/diff';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './../../src/WidgetRegistry';
+import { ThemeableMixin } from './../../src/mixins/Themeable';
 
 interface TestProperties {
 	id?: string;
@@ -25,6 +26,8 @@ interface TestProperties {
 let consoleStub: SinonStub;
 
 const registry = new WidgetRegistry();
+
+const ThemableWidgetBase = ThemeableMixin(WidgetBase);
 
 registerSuite({
 	name: 'WidgetBase',
@@ -1254,9 +1257,9 @@ registerSuite({
 	},
 	'registry': {
 		'creates and uses a default registry when defaultRegistry & registry properties are not passed'() {
-			class ChildRegistryWidget extends WidgetBase { }
+			class ChildRegistryWidget extends ThemableWidgetBase { }
 
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1274,9 +1277,9 @@ registerSuite({
 			assert.strictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
 		},
 		'creates but does not use a default registry when defaultRegistry is passed'() {
-			class ChildRegistryWidget extends WidgetBase { }
+			class ChildRegistryWidget extends ThemableWidgetBase { }
 
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1297,9 +1300,9 @@ registerSuite({
 			assert.strictEqual(childWidgetProperties.defaultRegistry, defaultRegistry);
 		},
 		'Uses registry property as defaultRegistry when a defaultRegistry property is not passed'() {
-			class ChildRegistryWidget extends WidgetBase { }
+			class ChildRegistryWidget extends ThemableWidgetBase { }
 
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1320,7 +1323,7 @@ registerSuite({
 			assert.strictEqual(childWidgetProperties.defaultRegistry, registry);
 		},
 		'Passing a different registry will replace the previous registry'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1336,7 +1339,7 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
 		},
 		'Passing a different defaultRegistry will replace the previous defaultRegistry'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1352,7 +1355,7 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
 		},
 		'Widgets default registry is used if the defaultRegistry is not passed on a subsequent render'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1370,7 +1373,7 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
 		},
 		'Widgets registry property is promoted to defaultRegistry if defaultRegistry is received a subsequent render'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1389,7 +1392,7 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
 		},
 		'Registry replaces widgets defaultRegistry when passed'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1406,7 +1409,7 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
 		},
 		'Widgets defaultRegistry is used when neither registry or defaultRegistry is passed on subsequent renders'() {
-			class RegistryWidget extends WidgetBase {
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
@@ -1424,9 +1427,9 @@ registerSuite({
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
 		},
 		'Can add widgets to the default widget registry'() {
-			class MyWidgetOne extends WidgetBase {}
-			class MyWidgetTwo extends WidgetBase {}
-			class RegistryWidget extends WidgetBase {
+			class MyWidgetOne extends ThemableWidgetBase {}
+			class MyWidgetTwo extends ThemableWidgetBase {}
+			class RegistryWidget extends ThemableWidgetBase {
 				getRegistries() {
 					return super.getRegistries();
 				}
