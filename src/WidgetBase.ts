@@ -180,7 +180,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _boundInvalidate: () => void;
 
-	private _registry = new WidgetRegistry();
+	private _defaultRegistry = new WidgetRegistry();
 
 	/**
 	 * @constructor
@@ -414,7 +414,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				(<any> node.properties).bind = this;
 			}
 			if (isWNode(node)) {
-				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry || this._registry;
+				(<any> node.properties).defaultRegistry = this._registries.defaultRegistry || this._defaultRegistry;
 			}
 			nodes = [ ...nodes, ...node.children ];
 		}
