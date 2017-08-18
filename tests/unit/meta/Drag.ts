@@ -24,7 +24,7 @@ const emptyResults: DragResults = {
 };
 
 registerSuite({
-	name: 'meta/Hover',
+	name: 'meta/Drag',
 
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
