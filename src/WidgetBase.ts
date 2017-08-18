@@ -5,7 +5,7 @@ import '@dojo/shim/Promise'; // Imported for side-effects
 import Set from '@dojo/shim/Set';
 import WeakMap from '@dojo/shim/WeakMap';
 import { isWNode, v, isHNode } from './d';
-import { auto } from './diff';
+import { auto, reference } from './diff';
 import {
 	AfterRender,
 	BeforeRender,
@@ -195,6 +195,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registries = new RegistryHandler();
+		this._registries.add(this._defaultRegistry, true);
 		this.own(this._registries);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
@@ -292,19 +293,30 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	@diffProperty('registry', auto)
+	@diffProperty('registry', reference)
 	protected diffPropertyRegistry(previousProperties: any, newProperties: any): void {
+		if (this._registries.defaultRegistry === this._defaultRegistry) {
+			this._registries.remove(this._defaultRegistry);
+		}
 		const result = this._registries.replace(previousProperties.registry, newProperties.registry);
 		if (!result) {
 			this.getRegistries().add(newProperties.registry);
 		}
 	}
 
-	@diffProperty('defaultRegistry', auto)
+	@diffProperty('defaultRegistry', reference)
 	protected diffPropertyDefaultRegistry(previousProperties: any, newProperties: any): void {
-		const result = this._registries.replace(previousProperties.defaultRegistry, newProperties.defaultRegistry);
-		if (!result) {
-			this._registries.add(newProperties.defaultRegistry, true);
+		if (newProperties.defaultRegistry === undefined) {
+			this._registries.remove(previousProperties.defaultRegistry);
+			if (this._registries.defaultRegistry === undefined) {
+				this._registries.add(this._defaultRegistry);
+			}
+		}
+		else {
+			const result = this._registries.replace(previousProperties.defaultRegistry || this._defaultRegistry, newProperties.defaultRegistry);
+			if (!result) {
+				this._registries.add(newProperties.defaultRegistry, true);
+			}
 		}
 	}
 

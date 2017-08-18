@@ -1252,6 +1252,178 @@ registerSuite({
 			assert.isTrue(widgetTwoInstantiated);
 		}
 	},
+	'registry': {
+		'creates and uses a default registry when defaultRegistry & registry properties are not passed'() {
+			class ChildRegistryWidget extends WidgetBase { }
+
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+				render() {
+					return w(ChildRegistryWidget, {});
+				}
+			}
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setProperties__');
+			const widget = new RegistryWidget();
+			widget.__render__();
+			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
+			assert.strictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
+		},
+		'creates but does not use a default registry when defaultRegistry is passed'() {
+			class ChildRegistryWidget extends WidgetBase { }
+
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+				render() {
+					return w(ChildRegistryWidget, {});
+				}
+			}
+			const defaultRegistry = new WidgetRegistry();
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setProperties__');
+			const widget = new RegistryWidget();
+			(<any> widget).__setProperties__({ defaultRegistry });
+			widget.__render__();
+			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
+			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
+			assert.strictEqual(childWidgetProperties.defaultRegistry, defaultRegistry);
+		},
+		'Uses registry property as defaultRegistry when a defaultRegistry property is not passed'() {
+			class ChildRegistryWidget extends WidgetBase { }
+
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+				render() {
+					return w(ChildRegistryWidget, {});
+				}
+			}
+			const registry = new WidgetRegistry();
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setProperties__');
+			const widget = new RegistryWidget();
+			widget.__setProperties__({ registry });
+			widget.__render__();
+			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
+			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
+			assert.strictEqual(childWidgetProperties.defaultRegistry, registry);
+		},
+		'Passing a different registry will replace the previous registry'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+			}
+			const registryOne = new WidgetRegistry();
+			const registryTwo = new WidgetRegistry();
+			const widget = new RegistryWidget();
+			widget.__setProperties__({ registry: registryOne });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registryOne);
+			widget.__setProperties__({ registry: registryTwo });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
+		},
+		'Passing a different defaultRegistry will replace the previous defaultRegistry'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+			}
+			const registryOne = new WidgetRegistry();
+			const registryTwo = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__setProperties__({ defaultRegistry: registryOne });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registryOne);
+			widget.__setProperties__({ defaultRegistry: registryTwo });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
+		},
+		'Widgets default registry is used if the defaultRegistry is not passed on a subsequent render'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+			}
+			const defaultRegistry = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__setProperties__({ defaultRegistry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
+			widget.__setProperties__({ });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+		},
+		'Widgets registry property is promoted to defaultRegistry if defaultRegistry is received a subsequent render'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+			}
+			const defaultRegistry = new WidgetRegistry();
+			const registry = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__setProperties__({ defaultRegistry, registry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
+			widget.__setProperties__({ registry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
+		},
+		'Registry replaces widgets defaultRegistry when passed'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+			}
+			const registry = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+			widget.__setProperties__({ registry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
+		},
+		'Widgets defaultRegistry is used when neither registry or defaultRegistry is passed on subsequent renders'() {
+			class RegistryWidget extends WidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+			}
+			const defaultRegistry = new WidgetRegistry();
+			const widget: any = new RegistryWidget();
+			widget.__setProperties__({ defaultRegistry });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
+			widget.__setProperties__({});
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+		}
+	},
 	'child invalidation invalidates parent'() {
 		let childInvalidate = () => {};
 		let childInvalidateCalled = false;
