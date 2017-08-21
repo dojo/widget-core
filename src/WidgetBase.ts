@@ -295,27 +295,29 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	@diffProperty('registry', reference)
 	protected diffPropertyRegistry(previousProperties: any, newProperties: any): void {
-		if (this._registries.defaultRegistry === this._defaultRegistry) {
-			this._registries.remove(this._defaultRegistry);
+		const { _registries, _defaultRegistry } = this;
+		if (_registries.defaultRegistry === _defaultRegistry) {
+			_registries.remove(_defaultRegistry);
 		}
-		const result = this._registries.replace(previousProperties.registry, newProperties.registry);
+		const result = _registries.replace(previousProperties.registry, newProperties.registry);
 		if (!result) {
-			this.getRegistries().add(newProperties.registry);
+			_registries.add(newProperties.registry);
 		}
 	}
 
 	@diffProperty('defaultRegistry', reference)
 	protected diffPropertyDefaultRegistry(previousProperties: any, newProperties: any): void {
+		const { _registries, _defaultRegistry } = this;
 		if (newProperties.defaultRegistry === undefined) {
-			this._registries.remove(previousProperties.defaultRegistry);
-			if (this._registries.defaultRegistry === undefined) {
-				this._registries.add(this._defaultRegistry);
+			_registries.remove(previousProperties.defaultRegistry);
+			if (_registries.defaultRegistry === undefined) {
+				_registries.add(_defaultRegistry);
 			}
 		}
 		else {
-			const result = this._registries.replace(previousProperties.defaultRegistry || this._defaultRegistry, newProperties.defaultRegistry);
+			const result = _registries.replace(previousProperties.defaultRegistry || _defaultRegistry, newProperties.defaultRegistry);
 			if (!result) {
-				this._registries.add(newProperties.defaultRegistry, true);
+				_registries.add(newProperties.defaultRegistry, true);
 			}
 		}
 	}
