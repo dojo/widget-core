@@ -66,9 +66,6 @@ class DragController {
 	private _dragging: HTMLElement | undefined = undefined;
 
 	private _onDragStart = (e: MouseEvent & TouchEvent) => {
-		if (this._dragging) {
-			return; // should this really occur?
-		}
 		const state = this._nodeMap.get(e.target as HTMLElement);
 		if (state) {
 			this._dragging = e.target as HTMLElement;
@@ -84,12 +81,11 @@ class DragController {
 		if (!_dragging) {
 			return;
 		}
-		const state = this._nodeMap.get(_dragging);
-		if (state) {
-			state.last = getPosition(e);
-			state.dragResults.delta = getDelta(state.start, state.last);
-			state.invalidate();
-		}
+		// state cannot be unset, using ! operator
+		const state = this._nodeMap.get(_dragging)!;
+		state.last = getPosition(e);
+		state.dragResults.delta = getDelta(state.start, state.last);
+		state.invalidate();
 	}
 
 	private _onDragStop = (e: MouseEvent & TouchEvent) => {
@@ -97,15 +93,14 @@ class DragController {
 		if (!_dragging) {
 			return;
 		}
-		const state = this._nodeMap.get(_dragging);
-		if (state) {
-			state.last = getPosition(e);
-			state.dragResults = {
-				delta: getDelta(state.start, state.last),
-				isDragging: false
-			};
-			state.invalidate();
-		}
+		// state cannot be unset, using ! operator
+		const state = this._nodeMap.get(_dragging)!;
+		state.last = getPosition(e);
+		state.dragResults = {
+			delta: getDelta(state.start, state.last),
+			isDragging: false
+		};
+		state.invalidate();
 		this._dragging = undefined;
 	}
 
