@@ -276,9 +276,7 @@ registerSuite({
 				this.requireNode(key, (node) => {
 					callbacks++;
 
-					global.requestAnimationFrame(() => {
-						this.invalidate();
-					});
+					this.invalidate();
 				});
 			}
 		}
