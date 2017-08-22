@@ -378,8 +378,18 @@ export interface WidgetMetaConstructor<T> {
  */
 export interface WidgetMetaProperties {
 	nodes: Map<string, HTMLElement>;
-	requiredNodes: Set<string>;
+	/**
+	 * Array with one item for each requireNode call
+	 */
+	requiredNodes: Map<string, WidgetMetaRequiredNodeCallback[]>;
 	invalidate: () => void;
+}
+
+/**
+ * Callback when asking widget meta for a required node
+ */
+export interface WidgetMetaRequiredNodeCallback {
+	(node: HTMLElement): void;
 }
 
 export interface Render {
