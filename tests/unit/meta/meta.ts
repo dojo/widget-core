@@ -263,8 +263,62 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRAF();
+
 		assert.strictEqual(callbacks, 1, 'callback fired when node was missing');
 		assert.strictEqual(renders, 1, 'callback did not call invalidate and did not re-render');
+	},
+	'asynchronous invalidation with dynamic nodes does not throw an error'() {
+		let callbacks = 0;
+
+		class TestMeta extends MetaBase {
+			get(key: string) {
+				this.requireNode(key, (node) => {
+					callbacks++;
+
+					global.requestAnimationFrame(() => {
+						this.invalidate();
+					});
+				});
+			}
+		}
+
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(TestWidgetBase) {
+			nodes: any;
+
+			render() {
+				renders++;
+
+				if (renders === 1) {
+					this.meta(TestMeta).get('world');
+				}
+
+				return v('div', {
+					key: 'root',
+					innerHTML: 'hello '
+				}, [
+					renders === 1 ? v('div', {
+						key: 'world',
+						innerHTML: 'world'
+					}) : null
+				]);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		assert.strictEqual(callbacks, 1, 'callback fired when node was missing');
+		assert.strictEqual(renders, 1, 'only one render on until asynchronous invalidation completes');
+
+		resolveRAF();
+
+		assert.strictEqual(callbacks, 1, 'callback did not fire on second render');
+		assert.strictEqual(renders, 2, 'callback re-rendered without required node error');
 	},
 	'callback can invalidate'() {
 		let callbacks = 0;
