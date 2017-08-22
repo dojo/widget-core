@@ -107,16 +107,28 @@ registerSuite({
 		document.body.removeChild(div);
 	},
 
-	'calling before node'() {
+	'node only exists on some renders'() {
 		const results: boolean[] = [];
 
 		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
+			private _renderSecond = false;
+			private _onclick(evt: MouseEvent) {
+				results.push(this.meta(Matches).get('child1', evt));
+				results.push(this.meta(Matches).get('child2', evt));
+				this._renderSecond = true;
+				this.invalidate();
+			}
+
 			render() {
-				results.push(this.meta(Matches).get('root', { target: div } as any as Event));
 				return v('div', {
-					innerHTML: 'Hello World',
-					key: 'root'
-				});
+					key: 'root',
+					onclick: this._onclick
+				}, [
+					v('div', {
+						innerHTML: this._renderSecond ? 'child2' : 'child1',
+						key: this._renderSecond ? 'child2' : 'child1'
+					})
+				]);
 			}
 		}
 
@@ -129,7 +141,21 @@ registerSuite({
 
 		resolveRAF();
 
-		assert.deepEqual(results, [ false, false ], 'should have been called twice and the target not matching');
+		sendEvent(div.firstChild!.firstChild as Element, 'click', {
+			eventInit: {
+				bubbles: true
+			}
+		});
+
+		resolveRAF();
+
+		sendEvent(div.firstChild!.firstChild as Element, 'click', {
+			eventInit: {
+				bubbles: true
+			}
+		});
+
+		assert.deepEqual(results, [ true, false, false, true ], 'should have been called twice and keys changed');
 
 		widget.destroy();
 		document.body.removeChild(div);
