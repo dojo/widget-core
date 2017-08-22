@@ -211,6 +211,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				invalidate: this._boundInvalidate
 			});
 			this._metaMap.set(MetaType, cached);
+			this.own(cached);
 		}
 
 		return cached as T;
