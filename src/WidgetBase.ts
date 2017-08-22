@@ -295,13 +295,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _setNode(element: Element, properties: VNodeProperties): void {
 		const key = String(properties.key);
+		this._nodeMap.set(key, <HTMLElement> element);
 		const callbacks = this._requiredNodes.get(key);
 		if (callbacks) {
 			for (const callback of callbacks) {
 				callback.call(this, element);
 			}
 		}
-		this._nodeMap.set(key, <HTMLElement> element);
 	}
 
 	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
