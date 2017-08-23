@@ -65,10 +65,20 @@ class DragController {
 	private _nodeMap = new WeakMap<HTMLElement, NodeData>();
 	private _dragging: HTMLElement | undefined = undefined;
 
+	private _getData(target: HTMLElement): { state: NodeData, target: HTMLElement } | undefined {
+		if (this._nodeMap.has(target)) {
+			return { state: this._nodeMap.get(target)!, target };
+		}
+		if (target.parentElement) {
+			return this._getData(target.parentElement);
+		}
+	}
+
 	private _onDragStart = (e: MouseEvent & TouchEvent) => {
-		const state = this._nodeMap.get(e.target as HTMLElement);
-		if (state) {
-			this._dragging = e.target as HTMLElement;
+		const data = this._getData(e.target as HTMLElement);
+		if (data) {
+			const { state, target } = data;
+			this._dragging = target;
 			state.dragResults.isDragging = true;
 			state.last = state.start = getPosition(e);
 			state.dragResults.delta = { x: 0, y: 0 };

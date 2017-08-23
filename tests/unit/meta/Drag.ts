@@ -24,7 +24,7 @@ const emptyResults: DragResults = {
 };
 
 registerSuite({
-	name: 'meta/Drag',
+	name: 'support/meta/Drag',
 
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
@@ -353,7 +353,7 @@ registerSuite({
 		document.body.removeChild(div);
 	},
 
-	'dragging on not a drag node'() {
+	'dragging where descendent is target'() {
 		const dragResults: DragResults[] = [];
 
 		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
@@ -415,8 +415,91 @@ registerSuite({
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
+			emptyResults,
+			{
+				delta: { x: 0, y: 0 },
+				isDragging: true
+			}, {
+				delta: { x: 10, y: 5 },
+				isDragging: true
+			}, {
+				delta: { x: -5, y: -10 },
+				isDragging: false
+			}
+		], 'dragging should be attributed to parent node');
+
+		widget.destroy();
+		document.body.removeChild(div);
+	},
+
+	'non draggable node'() {
+		const dragResults: DragResults[] = [];
+
+		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
+			render() {
+				dragResults.push(this.meta(Drag).get('child2'));
+				return v('div', {
+					key: 'root',
+					styles: {
+						width: '100px',
+						height: '100px'
+					}
+				}, [
+					v('div', {
+						innerHTML: 'Hello World',
+						key: 'child1'
+					}),
+					v('div', {
+						innerHTML: 'Hello Wolrd',
+						key: 'child2'
+					})
+				]);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		document.body.appendChild(div);
+
+		const widget = new TestWidget();
+		widget.append(div);
+
+		resolveRAF();
+
+		sendEvent(div.firstChild!.firstChild as Element, 'mousedown', {
+			eventInit: {
+				bubbles: true,
+				pageX: 100,
+				pageY: 50
+			}
+		});
+
+		resolveRAF();
+
+		sendEvent(div.firstChild!.firstChild as Element, 'mousemove', {
+			eventInit: {
+				bubbles: true,
+				pageX: 110,
+				pageY: 55
+			}
+		});
+
+		resolveRAF();
+
+		sendEvent(div.firstChild!.firstChild as Element, 'mouseup', {
+			eventInit: {
+				bubbles: true,
+				pageX: 105,
+				pageY: 45
+			}
+		});
+
+		resolveRAF();
+
+		assert.deepEqual(dragResults, [
+			emptyResults,
 			emptyResults
-		], 'there should not be drag information');
+		], 'there should be no drag results');
 
 		widget.destroy();
 		document.body.removeChild(div);
