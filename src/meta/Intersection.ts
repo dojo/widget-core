@@ -7,6 +7,7 @@ import 'intersection-observer';
 (<{ THROTTLE_TIMEOUT: number }> global.IntersectionObserver.prototype).THROTTLE_TIMEOUT = 0;
 
 interface IntersectionDetail {
+	conditions: { [key: string]: [ IntersectionTestCondition, IntersectionGetOptions | undefined, IntersectionResult ] };
 	entries: WeakMap<Element, IntersectionObserverEntry>;
 	keys: string[];
 	intersections: { [key: string]: IntersectionResult }; // previous intersections
@@ -19,7 +20,6 @@ interface IntersectionDetail {
 export interface IntersectionGetOptions {
 	root?: string;
 	rootMargin?: string;
-	step?: number;
 	threshold?: number;
 	thresholds?: number[];
 }
@@ -59,7 +59,6 @@ const defaultIntersection: IntersectionResult = Object.freeze({
 
 export class Intersection extends Base {
 	private _details: IntersectionDetail[] = [];
-	private _conditions: { [key: string]: [ IntersectionTestCondition, IntersectionGetOptions | undefined, IntersectionResult ] } = {};
 
 	private _getDetails(options: IntersectionGetOptions): IntersectionDetail {
 		let {
@@ -91,6 +90,7 @@ export class Intersection extends Base {
 		}
 		if (!cached) {
 			cached = {
+				conditions: {},
 				entries: new WeakMap<Element, IntersectionObserverEntry>(),
 				intersections: {},
 				keys: [],
@@ -168,7 +168,7 @@ export class Intersection extends Base {
 			}
 		}
 
-		const conditions = this._conditions;
+		const conditions = details.conditions;
 		let invalidate = false;
 		for (const key of keys) {
 			if (key in conditions) {
@@ -180,6 +180,7 @@ export class Intersection extends Base {
 				conditions[key][2] = value;
 			}
 			else {
+				// no invalidation test exists for this key
 				invalidate = true;
 			}
 		}
@@ -240,7 +241,7 @@ export class Intersection extends Base {
 	public invalidateIf(key: string, type: IntersectionType.Within, options?: IntersectionGetOptions): void;
 	public invalidateIf(key: string, type: IntersectionType, ...args: any[]): void {
 		let condition: IntersectionTestCondition | undefined;
-		let options: IntersectionGetOptions | undefined;
+		let options: IntersectionGetOptions = {};
 		switch (type) {
 			case IntersectionType.Custom:
 				condition = args[0];
@@ -259,7 +260,8 @@ export class Intersection extends Base {
 				options = args[0];
 		}
 		if (condition) {
-			this._conditions[key] = [ condition, options, this.get(key, options) ];
+			const details = this._getDetails(options);
+			details.conditions[key] = [ condition, options, this.get(key, options) ];
 		}
 	}
 }
