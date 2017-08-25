@@ -12,6 +12,7 @@ interface IntersectionDetail {
 	keys: string[];
 	intersections: { [key: string]: IntersectionResult }; // previous intersections
 	intersectionObserver?: IntersectionObserver; // attached observer
+	options: IntersectionGetOptions;
 	root: string;
 	rootMargin: string | undefined;
 	thresholds: number[]; // thresholds the observe should be attached with
@@ -77,12 +78,15 @@ export class Intersection extends Base {
 		let cached: IntersectionDetail | undefined = undefined;
 		for (const detail of details) {
 			if (
-				root === detail.root &&
-				rootMargin === detail.rootMargin &&
-				thresholds.length === detail.thresholds.length &&
-				thresholds.every(function(i) {
-					return thresholds[i] === detail.thresholds[i];
-				})
+				options === detail.options ||
+				(
+					root === detail.root &&
+					rootMargin === detail.rootMargin &&
+					thresholds.length === detail.thresholds.length &&
+					thresholds.every(function(i) {
+						return thresholds[i] === detail.thresholds[i];
+					})
+				)
 			) {
 				cached = detail;
 				break;
@@ -94,6 +98,7 @@ export class Intersection extends Base {
 				entries: new WeakMap<Element, IntersectionObserverEntry>(),
 				intersections: {},
 				keys: [],
+				options,
 				root,
 				rootMargin,
 				thresholds
