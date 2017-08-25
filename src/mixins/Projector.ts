@@ -109,7 +109,7 @@ export interface ProjectorMixin<P> {
 	toHtml(): string;
 
 	/**
-	 * Indicates if the projectors is n async mode, configured to `true` by defaults.
+	 * Indicates if the projectors is in async mode, configured to `true` by defaults.
 	 */
 	async: boolean;
 
