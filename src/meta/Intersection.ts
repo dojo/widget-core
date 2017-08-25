@@ -195,9 +195,11 @@ export class Intersection extends Base {
 			details.keys.push(key);
 		}
 		if (details.root) {
+			let rootNode: HTMLElement;
+			let node: HTMLElement;
 			const all = () => {
-				const rootNode = this.nodes.get(details.root);
-				const node = this.nodes.get(key);
+				rootNode = this.nodes.get(details.root) || rootNode;
+				node = this.nodes.get(key) || node;
 				if (rootNode && node) {
 					this._observe(rootNode, node, details);
 				}
@@ -262,6 +264,7 @@ export class Intersection extends Base {
 		if (condition) {
 			const details = this._getDetails(options);
 			details.conditions[key] = [ condition, options, this.get(key, options) ];
+			this._track(key, options);
 		}
 	}
 }
