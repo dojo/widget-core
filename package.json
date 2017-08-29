@@ -50,9 +50,13 @@
     "jsdom": "^9.5.0",
     "sinon": "^1.17.6",
     "tslint": "^5.2.0",
-    "typescript": "~2.4.1"
+    "typescript": "~2.5.0"
   },
   "dependencies": {
+    "@dojo/core": "^2.0.0-beta2.3",
+    "@dojo/has": "^2.0.0-beta2.2",
+    "@dojo/i18n": "^2.0.0-beta2.2",
+    "@dojo/shim": "^2.0.0-beta2.3",
     "maquette": "~2.5.1",
     "pepjs": "^0.4.2"
   }
