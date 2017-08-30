@@ -26,11 +26,8 @@ export interface IntersectionGetOptions {
 }
 
 export interface IntersectionResult {
-	boundingClientRect: ClientRect;
 	intersectionRatio: number;
-	intersectionRect: ClientRect;
 	isIntersecting: boolean;
-	rootBounds: ClientRect;
 }
 
 export enum IntersectionType {
@@ -56,21 +53,9 @@ function WithinCondition(previousValue: IntersectionResult, value: IntersectionR
 	return value.isIntersecting;
 }
 
-const defaultRect: ClientRect = Object.freeze({
-	width: 0,
-	height: 0,
-	top: 0,
-	bottom: 0,
-	left: 0,
-	right: 0
-});
-
 const defaultIntersection: IntersectionResult = Object.freeze({
-	boundingClientRect: defaultRect,
 	intersectionRatio: 0,
-	intersectionRect: defaultRect,
-	isIntersecting: false,
-	rootBounds: defaultRect
+	isIntersecting: false
 });
 
 export class Intersection extends Base {
@@ -172,22 +157,16 @@ export class Intersection extends Base {
 		const keys: string[] = [];
 		for (const intersectionEntry of intersectionObserverEntries) {
 			const {
-				boundingClientRect,
 				intersectionRatio,
-				intersectionRect,
-				isIntersecting,
-				rootBounds
+				isIntersecting
 			} = <(IntersectionObserverEntry & { isIntersecting: boolean })> intersectionEntry;
 			details.entries.set(intersectionEntry.target, intersectionEntry);
 			if (lookup.has(intersectionEntry.target)) {
 				const key = lookup.get(intersectionEntry.target);
 				if (key) {
 					details.intersections[key] = {
-						boundingClientRect,
 						intersectionRatio,
-						intersectionRect,
-						isIntersecting,
-						rootBounds
+						isIntersecting
 					};
 					keys.push(key);
 				}
