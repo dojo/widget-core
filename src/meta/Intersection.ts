@@ -1,4 +1,5 @@
 import global from '@dojo/core/global';
+import { from } from '@dojo/shim/array';
 import WeakMap from '@dojo/shim/WeakMap';
 import { Base } from './Base';
 
@@ -9,7 +10,6 @@ import 'intersection-observer';
 interface IntersectionDetail {
 	conditions: { [key: string]: [ IntersectionTestCondition, IntersectionGetOptions | undefined, IntersectionResult ] };
 	entries: WeakMap<Element, IntersectionObserverEntry>;
-	keys: string[];
 	intersections: { [key: string]: IntersectionResult }; // previous intersections
 	intersectionObserver?: IntersectionObserver; // attached observer
 	options: IntersectionGetOptions;
@@ -97,7 +97,6 @@ export class Intersection extends Base {
 				conditions: {},
 				entries: new WeakMap<Element, IntersectionObserverEntry>(),
 				intersections: {},
-				keys: [],
 				options,
 				root,
 				rootMargin,
@@ -147,7 +146,7 @@ export class Intersection extends Base {
 
 	private _onIntersect(details: IntersectionDetail, intersectionObserverEntries: IntersectionObserverEntry[]) {
 		const lookup = new WeakMap<Element, string>();
-		for (const key of details.keys) {
+		for (const key of from(this.nodes.keys())) {
 			const node = this.nodes.get(key);
 			if (node) {
 				lookup.set(node, key);
@@ -196,9 +195,6 @@ export class Intersection extends Base {
 
 	private _track(key: string, options: IntersectionGetOptions): void {
 		const details = this._getDetails(options);
-		if (details.keys.indexOf(key) < 0) {
-			details.keys.push(key);
-		}
 		if (details.root) {
 			let rootNode: HTMLElement;
 			let node: HTMLElement;
