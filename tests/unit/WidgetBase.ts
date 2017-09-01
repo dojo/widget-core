@@ -9,7 +9,8 @@ import {
 	WidgetBase,
 	diffProperty,
 	afterRender,
-	beforeRender
+	beforeRender,
+	registryItem
 } from '../../src/WidgetBase';
 import { ignore, always, auto } from '../../src/diff';
 import WidgetRegistry, { WIDGET_BASE_TYPE } from './../../src/WidgetRegistry';
@@ -521,6 +522,98 @@ registerSuite({
 			testWidget.callWidgetSpy();
 			assert.isFalse(testWidget.functionIsBound);
 			assert.isTrue(testWidget.properties.functionIsBound);
+		}
+	},
+	register: {
+		'register items against created default registry'() {
+			class RegistryWidget extends WidgetBase {
+				render() {
+					return v('registry-item');
+				}
+			}
+
+			@registryItem('registry-item', RegistryWidget)
+			class TestWidget extends WidgetBase {
+				render() {
+					return w('registry-item', {});
+				}
+			}
+
+			const widget = new TestWidget();
+			const vnode = widget.__render__() as VNode;
+			assert.strictEqual(vnode.vnodeSelector, 'registry-item');
+		},
+		'register items against passed default registry'() {
+			class RegistryWidget extends WidgetBase {
+				render() {
+					return v('registry-item');
+				}
+			}
+
+			@registryItem('registry-item', RegistryWidget)
+			class TestWidget extends WidgetBase {
+				render() {
+					return w('registry-item', {});
+				}
+			}
+
+			const defaultRegistry = new WidgetRegistry();
+
+			const widget = new TestWidget();
+			widget.__setProperties__({ defaultRegistry } as any);
+			const vnode = widget.__render__() as VNode;
+			assert.strictEqual(vnode.vnodeSelector, 'registry-item');
+		},
+		're-registers items when the default registry changes'() {
+			class RegistryWidget extends WidgetBase {
+				render() {
+					return v('registry-item');
+				}
+			}
+
+			@registryItem('registry-item', RegistryWidget)
+			class TestWidget extends WidgetBase {
+				render() {
+					return w('registry-item', {});
+				}
+			}
+
+			const defaultRegistry = new WidgetRegistry();
+
+			const widget = new TestWidget();
+			widget.__setProperties__({ defaultRegistry } as any);
+			let vnode = widget.__render__() as VNode;
+			assert.strictEqual(vnode.vnodeSelector, 'registry-item');
+			widget.__setProperties__({ defaultRegistry: new WidgetRegistry() } as any);
+			vnode = widget.__render__() as VNode;
+			assert.strictEqual(vnode.vnodeSelector, 'registry-item');
+		},
+		'supports the same widget being used twice'() {
+			class RegistryWidget extends WidgetBase {
+				render() {
+					return v('registry-item');
+				}
+			}
+
+			@registryItem('registry-item', RegistryWidget)
+			class RegistryItemWidget extends WidgetBase {
+				render() {
+					return w('registry-item', {});
+				}
+			}
+
+			class TestWidget extends WidgetBase {
+				render() {
+					return [
+						w(RegistryItemWidget, { key: '1' }),
+						w(RegistryItemWidget, { key: '2' })
+					];
+				}
+			}
+			const widget = new TestWidget();
+			let vnode = widget.__render__() as VNode[];
+			assert.strictEqual(vnode[0].vnodeSelector, 'registry-item');
+			assert.strictEqual(vnode[1].vnodeSelector, 'registry-item');
 		}
 	},
 	beforeRender: {

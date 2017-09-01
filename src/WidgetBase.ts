@@ -23,7 +23,7 @@ import {
 	WidgetMetaRequiredNodeCallback
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry, WidgetRegistryItem } from './WidgetRegistry';
 
 /**
  * Widget cache wrapper for instance management
@@ -50,6 +50,11 @@ interface ReactionFunctionArguments {
 interface ReactionFunctionConfig {
 	propertyName: string;
 	reaction: DiffPropertyReaction;
+}
+
+interface RegisterConfig {
+	label: RegistryLabel;
+	item: WidgetRegistryItem;
 }
 
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
@@ -95,6 +100,12 @@ export function diffProperty(propertyName: string, diffFunction: DiffPropertyFun
 				reaction: propertyKey ? target[propertyKey] : reactionFunction
 			});
 		}
+	});
+}
+
+export function registryItem(label: RegistryLabel, item: WidgetRegistryItem) {
+	return handleDecorator((target) => {
+		target.addDecorator('registryItem', { label, item });
 	});
 }
 
@@ -185,6 +196,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _boundInvalidate: () => void;
 
 	private _defaultRegistry = new WidgetRegistry();
+
+	private _initializeDefaultRegistryItems = true;
 
 	/**
 	 * @constructor
@@ -344,6 +357,19 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				_registries.add(newRegistry, true);
 			}
 		}
+		this._defineRegistryItems();
+	}
+
+	private _defineRegistryItems(): void {
+		const registryItems: RegisterConfig[] = this.getDecorator('registryItem');
+		const { defaultRegistry } = this._registries;
+		for (let i = 0; i < registryItems.length; i++) {
+			const { label, item } = registryItems[i];
+			if (defaultRegistry && defaultRegistry.has(label) === false) {
+				defaultRegistry.define(label, item);
+			}
+		}
+		this._initializeDefaultRegistryItems = false;
 	}
 
 	public __setCoreProperties__(coreProperties: CoreProperties) {
@@ -433,6 +459,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	public __render__(): VirtualDomNode | VirtualDomNode[] {
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty === true || this._cachedVNode === undefined) {
+			if (this._initializeDefaultRegistryItems) {
+				this._defineRegistryItems();
+			}
 			this._dirty = false;
 			const render = this._runBeforeRenders();
 			let dNode = render();
