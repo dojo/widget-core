@@ -23,7 +23,8 @@ import {
 	WidgetMetaRequiredNodeCallback
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry, WidgetRegistryItem } from './WidgetRegistry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
+import { DefineDecoratorConfig } from './decorators/registry';
 
 /**
  * Widget cache wrapper for instance management
@@ -50,11 +51,6 @@ interface ReactionFunctionArguments {
 interface ReactionFunctionConfig {
 	propertyName: string;
 	reaction: DiffPropertyReaction;
-}
-
-interface RegisterConfig {
-	label: RegistryLabel;
-	item: WidgetRegistryItem;
 }
 
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
@@ -100,12 +96,6 @@ export function diffProperty(propertyName: string, diffFunction: DiffPropertyFun
 				reaction: propertyKey ? target[propertyKey] : reactionFunction
 			});
 		}
-	});
-}
-
-export function registryItem(label: RegistryLabel, item: WidgetRegistryItem) {
-	return handleDecorator((target) => {
-		target.addDecorator('registryItem', { label, item });
 	});
 }
 
@@ -361,7 +351,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _defineRegistryItems(): void {
-		const registryItems: RegisterConfig[] = this.getDecorator('registryItem');
+		const registryItems: DefineDecoratorConfig[] = this.getDecorator('registryItem');
 		const { defaultRegistry } = this._registries;
 		for (let i = 0; i < registryItems.length; i++) {
 			const { label, item } = registryItems[i];

@@ -7,6 +7,7 @@ import './customElements';
 import './d';
 import './mixins/all';
 import './util/all';
+import './decorators/all';
 import './main';
 import './diff';
 import './RegistryHandler';
