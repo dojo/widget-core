@@ -1,3 +1,4 @@
+import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
 import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
@@ -368,7 +369,7 @@ export interface WidgetBaseInterface<
 /**
  * Meta Base type
  */
-export interface WidgetMetaBase {
+export interface WidgetMetaBase extends Destroyable {
 	has(key: string): boolean;
 }
 
