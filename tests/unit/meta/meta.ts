@@ -232,11 +232,15 @@ registerSuite({
 	},
 	'requireNode accepts a callback'() {
 		let callbacks = 0;
+		let context: any;
+		let foundNode: HTMLElement;
 
 		class TestMeta extends MetaBase {
 			get(key: string) {
-				this.requireNode(key, (node) => {
+				this.requireNode(key, function (this: TestMeta, node) {
 					callbacks++;
+					context = this;
+					foundNode = node;
 				});
 			}
 		}
@@ -245,6 +249,10 @@ registerSuite({
 
 		class TestWidget extends ProjectorMixin(TestWidgetBase) {
 			nodes: any;
+
+			getMeta() {
+				return this.meta(TestMeta);
+			}
 
 			render() {
 				renders++;
@@ -266,6 +274,8 @@ registerSuite({
 		resolveRAF();
 
 		assert.strictEqual(callbacks, 1, 'callback fired when node was missing');
+		assert.strictEqual(context, widget.getMeta(), 'required node called in meta context');
+		assert.strictEqual(foundNode! && foundNode!.tagName, 'DIV');
 		assert.strictEqual(renders, 1, 'callback did not call invalidate and did not re-render');
 	},
 	'asynchronous invalidation with dynamic nodes does not throw an error'() {

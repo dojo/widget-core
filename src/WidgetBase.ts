@@ -14,13 +14,13 @@ import {
 	RegistryLabel,
 	Render,
 	VirtualDomNode,
+	WidgetMetaBase,
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
 	WidgetProperties,
 	WidgetMetaRequiredNodeCallback
 } from './interfaces';
-import MetaBase from './meta/Base';
 import RegistryHandler from './RegistryHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
 
@@ -170,11 +170,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _renderState: WidgetRenderState = WidgetRenderState.IDLE;
 
-	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, MetaBase>();
+	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMetaBase>();
 
 	private _nodeMap = new Map<string, HTMLElement>();
 
-	private _requiredNodes = new Map<string, WidgetMetaRequiredNodeCallback[]>();
+	private _requiredNodes = new Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>();
 
 	private _boundRenderFunc: Render;
 
@@ -210,7 +210,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._checkOnElementUsage();
 	}
 
-	protected meta<T extends MetaBase>(MetaType: WidgetMetaConstructor<T>): T {
+	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			cached = new MetaType({
@@ -298,8 +298,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._nodeMap.set(key, <HTMLElement> element);
 		const callbacks = this._requiredNodes.get(key);
 		if (callbacks) {
-			for (const callback of callbacks) {
-				callback.call(this, element);
+			for (const [ meta, callback ] of callbacks) {
+				callback.call(meta, element);
 			}
 		}
 	}

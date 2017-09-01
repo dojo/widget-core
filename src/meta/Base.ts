@@ -1,12 +1,12 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import global from '@dojo/shim/global';
 import Map from '@dojo/shim/Map';
-import { WidgetMetaProperties, WidgetMetaRequiredNodeCallback } from '../interfaces';
+import { WidgetMetaBase, WidgetMetaProperties, WidgetMetaRequiredNodeCallback } from '../interfaces';
 
-export class Base extends Destroyable {
+export class Base extends Destroyable implements WidgetMetaBase {
 	private _invalidate: () => void;
 	private _invalidating: number;
-	private _requiredNodes: Map<string, WidgetMetaRequiredNodeCallback[]>;
+	private _requiredNodes: Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>;
 	protected nodes: Map<string, HTMLElement>;
 
 	constructor(properties: WidgetMetaProperties) {
@@ -34,7 +34,7 @@ export class Base extends Destroyable {
 		}
 		else {
 			const callbacks = this._requiredNodes.get(key) || [];
-			callback && callbacks.push(callback);
+			callback && callbacks.push([ this, callback ]);
 			this._requiredNodes.set(key, callbacks);
 			if (!callback) {
 				this.invalidate();
