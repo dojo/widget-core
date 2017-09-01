@@ -355,7 +355,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		const { defaultRegistry } = this._registries;
 		for (let i = 0; i < registryItems.length; i++) {
 			const { label, item } = registryItems[i];
-			if (defaultRegistry && defaultRegistry.has(label) === false) {
+			if (defaultRegistry && !defaultRegistry.has(label)) {
 				defaultRegistry.define(label, item);
 			}
 		}
