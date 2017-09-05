@@ -337,7 +337,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		else if (previousRegistry) {
 			_registries.remove(previousRegistry);
 		}
-
 	}
 
 	protected processDefaultRegistry(previousRegistry: WidgetRegistry | undefined, newRegistry: WidgetRegistry | undefined): void {
@@ -357,13 +356,16 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __setBaseProperties__(baseProperties: BaseProperties) {
+		this._renderState = WidgetRenderState.PROPERTIES;
 		const { registry, defaultRegistry } = baseProperties;
 
 		if (this._baseProperties.registry !== registry) {
 			this.processRegistry(this._baseProperties.registry, registry);
+			this.invalidate();
 		}
 		if (this._baseProperties.defaultRegistry !== defaultRegistry) {
 			this.processDefaultRegistry(this._baseProperties.defaultRegistry, defaultRegistry);
+			this.invalidate();
 		}
 		this._baseProperties = baseProperties;
 	}

@@ -1423,6 +1423,39 @@ registerSuite({
 			widget.__setBaseProperties__({ bind: widget });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+			widget.__setBaseProperties__({ bind: widget, defaultRegistry: null });
+			widget.__render__();
+			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
+		},
+		'Removes registry when not passed on subsequent renders'() {
+			class TestWidget extends WidgetBase {
+				render() {
+					return 'test';
+				}
+			}
+			class RegistryWidget extends ThemableWidgetBase {
+				getRegistries() {
+					return super.getRegistries();
+				}
+				getDefaultRegistry() {
+					return (<any> this)._defaultRegistry;
+				}
+				render() {
+					return w('test', {});
+				}
+			}
+			const registry = new WidgetRegistry();
+			registry.define('test', TestWidget);
+			const widget = new RegistryWidget();
+			widget.__setBaseProperties__({ bind: widget, registry });
+			let node: any = widget.__render__();
+			assert.strictEqual(node, 'test');
+			widget.__setBaseProperties__({ bind: widget });
+			node = widget.__render__();
+			assert.isNull(node);
+			widget.__setBaseProperties__({ bind: widget, registry: null });
+			node = widget.__render__();
+			assert.isNull(node);
 		}
 	},
 	'child invalidation invalidates parent'() {
