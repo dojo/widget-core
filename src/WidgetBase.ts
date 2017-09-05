@@ -371,9 +371,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __setProperties__(properties: this['properties']): void {
-		const props: any = properties;
 		const changedPropertyKeys: string[] = [];
-		const allProperties = [ ...Object.keys(props), ...Object.keys(this._properties) ];
+		const allProperties = [ ...Object.keys(properties), ...Object.keys(this._properties) ];
 		const checkedProperties: string[] = [];
 		const diffPropertyResults: any = {};
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
@@ -388,7 +387,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}
 			checkedProperties.push(propertyName);
 			const previousProperty = this._properties[propertyName];
-			const newProperty = this._bindFunctionProperty(props[propertyName], this._baseProperties.bind);
+			const newProperty = this._bindFunctionProperty((properties as any)[propertyName], this._baseProperties.bind);
 			if (registeredDiffPropertyNames.indexOf(propertyName) !== -1) {
 				runReactions = true;
 				const diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
@@ -397,7 +396,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 						changedPropertyKeys.push(propertyName);
 					}
-					if (propertyName in props) {
+					if (propertyName in properties) {
 						diffPropertyResults[propertyName] = result.value;
 					}
 				}
