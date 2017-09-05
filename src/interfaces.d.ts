@@ -231,6 +231,27 @@ export interface WidgetProperties {
 }
 
 /**
+ *
+ */
+interface BaseProperties {
+
+	/**
+	 *
+	 */
+	registry?: any;
+
+	/**
+	 *
+	 */
+	defaultRegistry?: any;
+
+	/**
+	 *
+	 */
+	bind: any;
+}
+
+/**
  * Virtual DOM Node type
  */
 export type VirtualDomNode = VNode | string | null | undefined;
@@ -350,6 +371,12 @@ export interface WidgetBaseInterface<
 	 * @param properties The new widget properties
 	 */
 	__setProperties__(properties: P & { [index: string]: any }): void;
+
+	/**
+	 *
+	 * @param baseProperties
+	 */
+	__setBaseProperties__(baseProperties: BaseProperties): any;
 
 	/**
 	 * Sets the widget's children
