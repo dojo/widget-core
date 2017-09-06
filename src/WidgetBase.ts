@@ -464,7 +464,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					}
 				}
 				else {
-					const { defaultRegistry, registry } = this.getCoreProperties(node.properties);
+					const { defaultRegistry, registry } = this.__getCoreProperties__(node.properties);
 					node.coreProperties = node.coreProperties || {};
 
 					if (node.coreProperties.bind === undefined) {
@@ -478,7 +478,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	protected getCoreProperties(properties: any): CoreProperties {
+	protected __getCoreProperties__(properties: any): CoreProperties {
 		const {
 			registry
 		} = properties;
