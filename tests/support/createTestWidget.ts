@@ -12,11 +12,11 @@ interface TestWidget<W extends WidgetBase> extends WidgetBaseInterface {
 
 function createTestWidget<W extends WidgetBase>(
 	component: Constructor<W>,
-	properties: W['properties'],
+	properties?: W['properties'],
 	children?: W['children']
 ): TestWidget<W> {
 	const testWidget = new class extends WidgetBase implements TestWidget<W> {
-		private _testProperties: W['properties'] = properties;
+		private _testProperties: W['properties'] = properties || {};
 		private _testChildren: W['children'] = children || [];
 
 		getAttribute(key: string): any {

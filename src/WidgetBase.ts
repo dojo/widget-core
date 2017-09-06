@@ -24,6 +24,7 @@ import {
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
+import { DefineDecoratorConfig } from './decorators/registry';
 
 /**
  * Widget cache wrapper for instance management
@@ -186,6 +187,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _defaultRegistry = new WidgetRegistry();
 
+	private _initializeDefaultRegistryItems = true;
+
 	/**
 	 * @constructor
 	 */
@@ -344,6 +347,19 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				_registries.add(newRegistry, true);
 			}
 		}
+		this._defineRegistryItems();
+	}
+
+	private _defineRegistryItems(): void {
+		const registryItems: DefineDecoratorConfig[] = this.getDecorator('registryItem');
+		const { defaultRegistry } = this._registries;
+		for (let i = 0; i < registryItems.length; i++) {
+			const { label, item } = registryItems[i];
+			if (defaultRegistry && !defaultRegistry.has(label)) {
+				defaultRegistry.define(label, item);
+			}
+		}
+		this._initializeDefaultRegistryItems = false;
 	}
 
 	public __setCoreProperties__(coreProperties: CoreProperties) {
@@ -356,8 +372,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 		if (this._coreProperties.defaultRegistry !== defaultRegistry) {
 			this.setDefaultRegistry(this._coreProperties.defaultRegistry, defaultRegistry);
+			this._initializeDefaultRegistryItems = true;
 			this.invalidate();
 		}
+		if (this._initializeDefaultRegistryItems) {
+			this._defineRegistryItems();
+		}
+
 		this._coreProperties = coreProperties;
 	}
 
