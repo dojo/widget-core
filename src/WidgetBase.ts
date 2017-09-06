@@ -7,8 +7,8 @@ import { isWNode, v, isHNode } from './d';
 import { auto } from './diff';
 import {
 	AfterRender,
-	BaseProperties,
 	BeforeRender,
+	CoreProperties,
 	DiffPropertyFunction,
 	DiffPropertyReaction,
 	DNode,
@@ -20,8 +20,7 @@ import {
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
 	WidgetProperties,
-	WidgetMetaRequiredNodeCallback,
-	WNode
+	WidgetMetaRequiredNodeCallback
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, WidgetRegistry } from './WidgetRegistry';
@@ -51,15 +50,6 @@ interface ReactionFunctionArguments {
 interface ReactionFunctionConfig {
 	propertyName: string;
 	reaction: DiffPropertyReaction;
-}
-
-interface InternalWNode extends WNode {
-	properties: WNode['properties'] & { defaultRegistry?: WidgetRegistry, bind?: any };
-	baseProperties: BaseProperties;
-}
-
-function isInternalWNode(child: DNode): child is InternalWNode {
-	return isWNode(child);
 }
 
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
@@ -157,7 +147,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _properties: P & WidgetProperties & { [index: string]: any };
 
-	private _baseProperties: BaseProperties = {} as BaseProperties;
+	private _coreProperties: CoreProperties = {} as CoreProperties;
 
 	/**
 	 * cached chldren map for instance management
@@ -321,7 +311,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	protected processRegistry(previousRegistry: WidgetRegistry | undefined, newRegistry: WidgetRegistry | undefined): void {
+	protected setRegistry(previousRegistry: WidgetRegistry | undefined, newRegistry: WidgetRegistry | undefined): void {
 		const { _registries, _defaultRegistry } = this;
 
 		if (_registries.defaultRegistry === _defaultRegistry && newRegistry) {
@@ -339,7 +329,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	protected processDefaultRegistry(previousRegistry: WidgetRegistry | undefined, newRegistry: WidgetRegistry | undefined): void {
+	protected setDefaultRegistry(previousRegistry: WidgetRegistry | undefined, newRegistry: WidgetRegistry | undefined): void {
 		const { _registries, _defaultRegistry } = this;
 		if (newRegistry === undefined && previousRegistry) {
 			_registries.remove(previousRegistry);
@@ -355,19 +345,19 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	public __setBaseProperties__(baseProperties: BaseProperties) {
+	public __setCoreProperties__(coreProperties: CoreProperties) {
 		this._renderState = WidgetRenderState.PROPERTIES;
-		const { registry, defaultRegistry } = baseProperties;
+		const { registry, defaultRegistry } = coreProperties;
 
-		if (this._baseProperties.registry !== registry) {
-			this.processRegistry(this._baseProperties.registry, registry);
+		if (this._coreProperties.registry !== registry) {
+			this.setRegistry(this._coreProperties.registry, registry);
 			this.invalidate();
 		}
-		if (this._baseProperties.defaultRegistry !== defaultRegistry) {
-			this.processDefaultRegistry(this._baseProperties.defaultRegistry, defaultRegistry);
+		if (this._coreProperties.defaultRegistry !== defaultRegistry) {
+			this.setDefaultRegistry(this._coreProperties.defaultRegistry, defaultRegistry);
 			this.invalidate();
 		}
-		this._baseProperties = baseProperties;
+		this._coreProperties = coreProperties;
 	}
 
 	public __setProperties__(properties: this['properties']): void {
@@ -387,7 +377,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}
 			checkedProperties.push(propertyName);
 			const previousProperty = this._properties[propertyName];
-			const newProperty = this._bindFunctionProperty((properties as any)[propertyName], this._baseProperties.bind);
+			const newProperty = this._bindFunctionProperty((properties as any)[propertyName], this._coreProperties.bind);
 			if (registeredDiffPropertyNames.indexOf(propertyName) !== -1) {
 				runReactions = true;
 				const diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
@@ -461,7 +451,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
 		while (nodes.length) {
 			const node = nodes.pop();
-			if (isHNode(node) || isInternalWNode(node)) {
+			if (isHNode(node) || isWNode(node)) {
 				node.properties = node.properties || {};
 				if (isHNode(node)) {
 					if (node.properties.key) {
@@ -473,37 +463,31 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					}
 				}
 				else {
-					const { properties, baseProperties: { bind, defaultRegistry, registry } } = this.parseBaseProperties(node.properties);
-					node.baseProperties = node.baseProperties || {};
-					node.properties = properties;
-					if (node.baseProperties.bind === undefined) {
-						node.baseProperties.bind = bind;
+					const { defaultRegistry, registry } = this.getCoreProperties(node.properties);
+					node.coreProperties = node.coreProperties || {};
+
+					if (node.coreProperties.bind === undefined) {
+						node.coreProperties.bind = this;
 					}
-					node.baseProperties.defaultRegistry = defaultRegistry;
-					node.baseProperties.registry = registry;
+					node.coreProperties.defaultRegistry = defaultRegistry;
+					node.coreProperties.registry = registry;
 				}
 				nodes = [ ...nodes, ...node.children ];
 			}
 		}
 	}
 
-	protected parseBaseProperties(properties: any): { properties: any, baseProperties: BaseProperties } {
+	protected getCoreProperties(properties: any): CoreProperties {
 		const {
-			registry,
-			bind = this,
-			...props
+			registry
 		} = properties;
 		const {
 			defaultRegistry = this._registries.defaultRegistry
-		} = this._baseProperties;
+		} = this._coreProperties;
 
 		return {
-			properties: props,
-			baseProperties: {
-				bind,
-				registry,
-				defaultRegistry
-			}
+			registry,
+			defaultRegistry
 		};
 	}
 
@@ -702,7 +686,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 
 		if (isWNode(dNode)) {
-			const { children, properties, baseProperties } = dNode as any;
+			const { children, properties, coreProperties } = dNode;
 			const { key } = properties;
 
 			let { widgetConstructor } = dNode;
@@ -739,7 +723,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
 				this.own(child);
 			}
-			child.__setBaseProperties__(baseProperties);
+			child.__setCoreProperties__(coreProperties);
 			child.__setProperties__(properties);
 			if (typeof childrenMapKey !== 'string' && cachedChildren.length > 1) {
 				const widgetName = (<any> childrenMapKey).name;

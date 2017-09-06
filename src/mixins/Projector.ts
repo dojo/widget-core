@@ -272,11 +272,11 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public setProperties(properties: this['properties']): void {
-			const { properties: props, baseProperties } = this.parseBaseProperties(properties);
+			const baseProperties = this.getCoreProperties(properties);
 			this._projectorProperties = assign({}, properties);
 
-			super.__setBaseProperties__(baseProperties);
-			super.__setProperties__(props);
+			super.__setCoreProperties__(baseProperties);
+			super.__setProperties__(properties);
 		}
 
 		public toHtml(): string {

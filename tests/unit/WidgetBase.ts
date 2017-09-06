@@ -1267,9 +1267,9 @@ registerSuite({
 					return w(ChildRegistryWidget, {});
 				}
 			}
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setBaseProperties__');
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget });
+			widget.__setCoreProperties__({ bind: widget });
 			widget.__render__();
 			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
 			assert.strictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
@@ -1289,9 +1289,9 @@ registerSuite({
 				}
 			}
 			const defaultRegistry = new WidgetRegistry();
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setBaseProperties__');
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
 			const widget = new RegistryWidget();
-			(<any> widget).__setBaseProperties__({ bind: widget, defaultRegistry });
+			(<any> widget).__setCoreProperties__({ bind: widget, defaultRegistry });
 			widget.__render__();
 			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
 			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
@@ -1312,9 +1312,9 @@ registerSuite({
 				}
 			}
 			const registry = new WidgetRegistry();
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setBaseProperties__');
+			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ registry } as any);
+			widget.__setCoreProperties__({ registry } as any);
 			widget.__render__();
 			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
 			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
@@ -1329,10 +1329,10 @@ registerSuite({
 			const registryOne = new WidgetRegistry();
 			const registryTwo = new WidgetRegistry();
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, registry: registryOne });
+			widget.__setCoreProperties__({ bind: widget, registry: registryOne });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryOne);
-			widget.__setBaseProperties__({ bind: widget, registry: registryTwo });
+			widget.__setCoreProperties__({ bind: widget, registry: registryTwo });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
 		},
@@ -1345,10 +1345,10 @@ registerSuite({
 			const registryOne = new WidgetRegistry();
 			const registryTwo = new WidgetRegistry();
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry: registryOne });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry: registryOne });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryOne);
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry: registryTwo });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry: registryTwo });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registryTwo);
 		},
@@ -1363,10 +1363,10 @@ registerSuite({
 			}
 			const defaultRegistry = new WidgetRegistry();
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
-			widget.__setBaseProperties__({ bind: widget });
+			widget.__setCoreProperties__({ bind: widget });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
 		},
@@ -1382,10 +1382,10 @@ registerSuite({
 			const defaultRegistry = new WidgetRegistry();
 			const registry = new WidgetRegistry();
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry, registry });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry, registry });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
-			widget.__setBaseProperties__({ bind: widget, registry });
+			widget.__setCoreProperties__({ bind: widget, registry });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
 		},
@@ -1402,7 +1402,7 @@ registerSuite({
 			const widget = new RegistryWidget();
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
-			widget.__setBaseProperties__({ bind: widget, registry });
+			widget.__setCoreProperties__({ bind: widget, registry });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, registry);
 		},
@@ -1417,13 +1417,13 @@ registerSuite({
 			}
 			const defaultRegistry = new WidgetRegistry();
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, defaultRegistry);
-			widget.__setBaseProperties__({ bind: widget });
+			widget.__setCoreProperties__({ bind: widget });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
-			widget.__setBaseProperties__({ bind: widget, defaultRegistry: null });
+			widget.__setCoreProperties__({ bind: widget, defaultRegistry: null });
 			widget.__render__();
 			assert.strictEqual(widget.getRegistries().defaultRegistry, widget.getDefaultRegistry());
 		},
@@ -1447,13 +1447,13 @@ registerSuite({
 			const registry = new WidgetRegistry();
 			registry.define('test', TestWidget);
 			const widget = new RegistryWidget();
-			widget.__setBaseProperties__({ bind: widget, registry });
+			widget.__setCoreProperties__({ bind: widget, registry });
 			let node: any = widget.__render__();
 			assert.strictEqual(node, 'test');
-			widget.__setBaseProperties__({ bind: widget });
+			widget.__setCoreProperties__({ bind: widget });
 			node = widget.__render__();
 			assert.isNull(node);
-			widget.__setBaseProperties__({ bind: widget, registry: null });
+			widget.__setCoreProperties__({ bind: widget, registry: null });
 			node = widget.__render__();
 			assert.isNull(node);
 		}
