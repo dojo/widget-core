@@ -372,8 +372,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 		if (this._coreProperties.defaultRegistry !== defaultRegistry) {
 			this.setDefaultRegistry(this._coreProperties.defaultRegistry, defaultRegistry);
+			this._initializeDefaultRegistryItems = true;
 			this.invalidate();
 		}
+		if (this._initializeDefaultRegistryItems) {
+			this._defineRegistryItems();
+		}
+
 		this._coreProperties = coreProperties;
 	}
 
@@ -449,9 +454,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	public __render__(): VirtualDomNode | VirtualDomNode[] {
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty === true || this._cachedVNode === undefined) {
-			if (this._initializeDefaultRegistryItems) {
-				this._defineRegistryItems();
-			}
 			this._dirty = false;
 			const render = this._runBeforeRenders();
 			let dNode = render();

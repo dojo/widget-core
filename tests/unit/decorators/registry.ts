@@ -7,6 +7,8 @@ import { define } from './../../../src/decorators/registry';
 import { v, w } from './../../../src/d';
 import { WidgetRegistry } from './../../../src/WidgetRegistry';
 
+import createTestWidget from './../../support/createTestWidget';
+
 registerSuite({
 	name: 'decorators/registry',
 	'register items against created default registry'() {
@@ -23,7 +25,7 @@ registerSuite({
 			}
 		}
 
-		const widget = new TestWidget();
+		const widget = createTestWidget(TestWidget);
 		const vnode = widget.__render__() as VNode;
 		assert.strictEqual(vnode.vnodeSelector, 'registry-item');
 	},
@@ -43,8 +45,7 @@ registerSuite({
 
 		const defaultRegistry = new WidgetRegistry();
 
-		const widget = new TestWidget();
-		widget.__setProperties__({ defaultRegistry } as any);
+		const widget = createTestWidget(TestWidget, { defaultRegistry } as any);
 		const vnode = widget.__render__() as VNode;
 		assert.strictEqual(vnode.vnodeSelector, 'registry-item');
 	},
@@ -64,11 +65,10 @@ registerSuite({
 
 		const defaultRegistry = new WidgetRegistry();
 
-		const widget = new TestWidget();
-		widget.__setProperties__({ defaultRegistry } as any);
+		const widget = createTestWidget(TestWidget, { defaultRegistry } as any);
 		let vnode = widget.__render__() as VNode;
 		assert.strictEqual(vnode.vnodeSelector, 'registry-item');
-		widget.__setProperties__({ defaultRegistry: new WidgetRegistry() } as any);
+		widget.setProperties({ defaultRegistry: new WidgetRegistry() } as any);
 		vnode = widget.__render__() as VNode;
 		assert.strictEqual(vnode.vnodeSelector, 'registry-item');
 	},
@@ -94,7 +94,7 @@ registerSuite({
 				];
 			}
 		}
-		const widget = new TestWidget();
+		const widget = createTestWidget(TestWidget);
 		let vnode = widget.__render__() as VNode[];
 		assert.strictEqual(vnode[0].vnodeSelector, 'registry-item');
 		assert.strictEqual(vnode[1].vnodeSelector, 'registry-item');
