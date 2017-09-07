@@ -71,10 +71,11 @@ export class Intersection extends Base {
 		const {
 			_details: details
 		} = this;
-
 		if (typeof threshold === 'number' && !thresholds.length) {
 			thresholds = [ threshold ];
 		}
+
+		// Look to see if a detail record has already been created for these options
 		let cached: IntersectionDetail | undefined = undefined;
 		for (const detail of details) {
 			if (
@@ -136,14 +137,6 @@ export class Intersection extends Base {
 		return observer;
 	}
 
-	private _observe(rootNode: HTMLElement | undefined, node: HTMLElement, details: IntersectionDetail): void {
-		const intersectionObserver = this._getIntersectionObserver(details, rootNode);
-		intersectionObserver.observe(node);
-		if (typeof (<any> intersectionObserver)._checkForIntersections === 'function') {
-			(<any> intersectionObserver)._checkForIntersections();
-		}
-	}
-
 	private _onIntersect(details: IntersectionDetail, intersectionObserverEntries: IntersectionObserverEntry[]) {
 		const lookup = new WeakMap<Element, string>();
 		for (const key of from(this.nodes.keys())) {
@@ -172,6 +165,7 @@ export class Intersection extends Base {
 			}
 		}
 
+		// Check to see if this intersection should cause an invalidation
 		const conditions = details.conditions;
 		let invalidate = false;
 		for (const key of keys) {
@@ -202,7 +196,7 @@ export class Intersection extends Base {
 				rootNode = this.nodes.get(details.root) || rootNode;
 				node = this.nodes.get(key) || node;
 				if (rootNode && node) {
-					this._observe(rootNode, node, details);
+					this._getIntersectionObserver(details, rootNode).observe(node);
 				}
 			};
 			this.requireNode(details.root, all);
@@ -210,7 +204,7 @@ export class Intersection extends Base {
 		}
 		else {
 			this.requireNode(key, (node) => {
-				this._observe(undefined, node, details);
+				this._getIntersectionObserver(details).observe(node);
 			});
 		}
 	}
