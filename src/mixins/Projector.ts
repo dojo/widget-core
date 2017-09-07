@@ -2,8 +2,9 @@ import { assign } from '@dojo/core/lang';
 import global from '@dojo/shim/global';
 import { createHandle } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
-import { VNode } from '@dojo/interfaces/vdom';
-import { dom, h, Projection, ProjectionOptions } from 'maquette';
+import { Evented } from '@dojo/core/Evented';
+import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
+import { dom, h, Projection } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode } from './../interfaces';
@@ -164,7 +165,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this._projectionOptions = {
 				transitions: cssTransitions,
-				eventHandlerInterceptor: eventHandlerInterceptor.bind(this)
+				eventHandlerInterceptor: eventHandlerInterceptor.bind(this),
+				nodeEvent: new Evented()
 			};
 
 			this._boundDoRender = this._doRender.bind(this);
@@ -284,6 +286,24 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 				throw new Error('Projector is not attached, cannot return an HTML string of projection.');
 			}
 			return this._projection.domNode.outerHTML;
+		}
+
+		_afterRootCreateCallback(element: Element,
+			projectionOptions: ProjectionOptions,
+			vnodeSelector: string,
+			properties: VNodeProperties) {
+
+			super._afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
+			projectionOptions.nodeEvent.emit({ type: 'mounted' }, element, properties);
+		}
+
+		_afterRootUpdateCallback(element: Element,
+			projectionOptions: ProjectionOptions,
+			vnodeSelector: string,
+			properties: VNodeProperties) {
+
+			super._afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
+			projectionOptions.nodeEvent.emit({ type: 'mounted' }, element, properties);
 		}
 
 		public __render__(): VNode {

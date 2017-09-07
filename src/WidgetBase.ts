@@ -24,6 +24,7 @@ import {
 	WidgetMetaRequiredNodeCallback
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
+import NodeHandler from './NodeHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, Registry } from './Registry';
 
 /**
@@ -177,15 +178,23 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMetaBase>();
 
-	private _nodeMap = new Map<string, HTMLElement>();
+	// private _nodeMap = new Map<string, HTMLElement>();
 
-	private _requiredNodes = new Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>();
+	// private _requiredNodes = new Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>();
 
 	private _boundRenderFunc: Render;
 
 	private _boundInvalidate: () => void;
 
 	private _defaultRegistry = new Registry();
+
+	private _nodeHandler: NodeHandler;
+
+	private _projectorMountEvent: any;
+
+	private _currentRootNode = 0;
+
+	private _numRootNodes = 0;
 
 	/**
 	 * @constructor
@@ -200,14 +209,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registries = new RegistryHandler();
+		this._nodeHandler = new NodeHandler();
 		this._registries.add(this._defaultRegistry, true);
 		this.own(this._registries);
-		this.own({
-			destroy: () => {
-				this._nodeMap.clear();
-				this._requiredNodes.clear();
-			}
-		});
+		// this.own({
+		// 	destroy: () => {
+		// 		this._nodeMap.clear();
+		// 		this._requiredNodes.clear();
+		// 	}
+		// });
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 
@@ -219,9 +229,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			cached = new MetaType({
-				nodes: this._nodeMap,
-				requiredNodes: this._requiredNodes,
-				invalidate: this._boundInvalidate
+				// nodes: this._nodeMap,
+				// requiredNodes: this._requiredNodes,
+				invalidate: this._boundInvalidate,
+				nodeHandler: this._nodeHandler
 			});
 			this._metaMap.set(MetaType, cached);
 			this.own(cached);
@@ -234,21 +245,21 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 * A render decorator that verifies nodes required in
 	 * 'meta' calls in this render,
 	 */
-	@beforeRender()
-	protected verifyRequiredNodes(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
-		return () => {
-			this._requiredNodes.forEach((element, key) => {
-				/* istanbul ignore else: only checking for errors */
-				if (!this._nodeMap.has(key)) {
-					throw new Error(`Required node ${key} not found`);
-				}
-			});
-			this._requiredNodes.clear();
-			const dNodes = renderFunc();
-			this._nodeMap.clear();
-			return dNodes;
-		};
-	}
+	// @beforeRender()
+	// protected verifyRequiredNodes(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
+	// 	return () => {
+	// 		this._requiredNodes.forEach((element, key) => {
+	// 			/* istanbul ignore else: only checking for errors */
+	// 			if (!this._nodeMap.has(key)) {
+	// 				throw new Error(`Required node ${key} not found`);
+	// 			}
+	// 		});
+	// 		this._requiredNodes.clear();
+	// 		const dNodes = renderFunc();
+	// 		this._nodeMap.clear();
+	// 		return dNodes;
+	// 	};
+	// }
 
 	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
@@ -259,7 +270,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		this._setNode(element, properties);
+		// this._setNode(element, properties);
+		this._nodeHandler.add(element, properties);
+		this.onElementCreated(element, String(properties.key));
+	}
+
+	protected _afterRootCreateCallback(
+		element: Element,
+		projectionOptions: ProjectionOptions,
+		vnodeSelector: string,
+		properties: VNodeProperties
+	): void {
+		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
 
@@ -272,8 +294,37 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		this._setNode(element, properties);
+		// this._setNode(element, properties);
+		this._nodeHandler.add(element, properties);
 		this.onElementUpdated(element, String(properties.key));
+	}
+
+	protected _afterRootUpdateCallback(
+		element: Element,
+		projectionOptions: ProjectionOptions,
+		vnodeSelector: string,
+		properties: VNodeProperties
+	): void {
+		this._addElementToNodeHandler(element, projectionOptions, properties);
+		this.onElementUpdated(element, String(properties.key));
+	}
+
+	_addElementToNodeHandler(element: Element, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
+		this._currentRootNode += 1;
+
+		if (!this._projectorMountEvent) {
+			this._projectorMountEvent = projectionOptions.nodeEvent.on('mounted',
+				(element: Element, properties: VNodeProperties) => {
+					this._nodeHandler.addProjector(element, properties);
+				});
+		}
+
+		if (this._currentRootNode === this._numRootNodes) {
+			this._nodeHandler.addRoot(element, properties);
+		}
+		else {
+			this._nodeHandler.add(element, properties);
+		}
 	}
 
 	/**
@@ -298,16 +349,16 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		// Do nothing by default.
 	}
 
-	private _setNode(element: Element, properties: VNodeProperties): void {
-		const key = String(properties.key);
-		this._nodeMap.set(key, <HTMLElement> element);
-		const callbacks = this._requiredNodes.get(key);
-		if (callbacks) {
-			for (const [ meta, callback ] of callbacks) {
-				callback.call(meta, element);
-			}
-		}
-	}
+	// private _setNode(element: Element, properties: VNodeProperties): void {
+	// 	const key = String(properties.key);
+	// 	this._nodeMap.set(key, <HTMLElement> element);
+	// 	const callbacks = this._requiredNodes.get(key);
+	// 	if (callbacks) {
+	// 		for (const [ meta, callback ] of callbacks) {
+	// 			callback.call(meta, element);
+	// 		}
+	// 	}
+	// }
 
 	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
 		return this._properties;
@@ -452,12 +503,26 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _decorateNodes(node: DNode | DNode[]) {
 		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
+
+		this._numRootNodes = nodes.length;
+		this._currentRootNode = 0;
+		const rootNodes: DNode[] = [];
+
+		nodes.forEach(node => {
+			if (isHNode(node)) {
+				rootNodes.push(node);
+				node.properties = node.properties || {};
+				node.properties.afterCreate = this._afterRootCreateCallback;
+				node.properties.afterUpdate = this._afterRootUpdateCallback;
+			}
+		});
+
 		while (nodes.length) {
 			const node = nodes.pop();
 			if (isHNode(node) || isWNode(node)) {
 				node.properties = node.properties || {};
 				if (isHNode(node)) {
-					if (node.properties.key) {
+					if (rootNodes.indexOf(node) < 0 && node.properties.key) {
 						node.properties.afterCreate = this._afterCreateCallback;
 						node.properties.afterUpdate = this._afterUpdateCallback;
 					}

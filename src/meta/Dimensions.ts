@@ -1,5 +1,7 @@
 import { Base } from './Base';
 import { deepAssign } from '@dojo/core/lang';
+import { Type } from '../NodeHandler';
+import { WidgetMetaProperties } from '../interfaces';
 
 export interface TopLeft {
 	left: number;
@@ -23,7 +25,7 @@ export interface DimensionResults {
 	scroll: TopLeft & Size;
 }
 
-const defaultDimensions = {
+export const defaultDimensions = {
 	offset: {
 		height: 0,
 		left: 0,
@@ -49,10 +51,16 @@ const defaultDimensions = {
 };
 
 export class Dimensions extends Base {
-	public get(key: string): Readonly<DimensionResults> {
-		this.requireNode(key);
+	constructor(properties: WidgetMetaProperties) {
+		super(properties);
 
-		const node = this.nodes.get(key);
+		this.nodeHandler.on(Type.Projector, () => {
+			this.invalidate();
+		});
+	}
+
+	public get(key: string): Readonly<DimensionResults> {
+		const node = this.nodeHandler.get(key);
 		if (!node) {
 			return deepAssign({}, defaultDimensions);
 		}
