@@ -22,11 +22,6 @@ let childrenCalled = false;
 let propertiesCalled = false;
 let assertRender = (properties: any) => {};
 
-function getChildren(toInject: any, children: any) {
-	childrenCalled = true;
-	return children;
-}
-
 function getProperties(toInject: any, properties: any) {
 	propertiesCalled = true;
 	return properties;
@@ -50,22 +45,6 @@ registerSuite({
 		propertiesCalled = false;
 		assertRender = (properties: any) => {};
 	},
-	'container with default mappers'() {
-		assertRender = (properties: any) => {
-			const calculatedChildren = properties.getChildren();
-			const calculatedProperties = properties.getProperties();
-			assert.isFalse(childrenCalled);
-			assert.isFalse(propertiesCalled);
-			assert.deepEqual(calculatedProperties, {});
-			assert.deepEqual(calculatedChildren, []);
-			assert.deepEqual(properties.properties, { foo: 'bar', registry });
-			assert.deepEqual(properties.children, []);
-		};
-		const TestWidgetContainer = Container(TestWidget, 'test-state-1');
-		const widget = new TestWidgetContainer();
-		widget.__setProperties__({ foo: 'bar', registry });
-		widget.__render__();
-	},
 	'container with no default mappers'() {
 		assertRender = (properties: any) => {
 			properties.getChildren();
@@ -75,7 +54,7 @@ registerSuite({
 			assert.deepEqual(properties.properties, { foo: 'bar', registry });
 			assert.deepEqual(properties.children, []);
 		};
-		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties, getChildren });
+		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
 		const widget = new TestWidgetContainer();
 		widget.__setProperties__({ foo: 'bar', registry });
 		widget.__setChildren__([]);
@@ -99,21 +78,6 @@ registerSuite({
 		widget.__setChildren__([ child ]);
 		widget.__render__();
 	},
-	'container with custom getChildren mapper only'() {
-		assertRender = (properties: any) => {
-			properties.getChildren();
-			const calculatedProperties = properties.getProperties();
-			assert.isTrue(childrenCalled);
-			assert.isFalse(propertiesCalled);
-			assert.deepEqual(calculatedProperties, {});
-			assert.deepEqual(properties.properties, { foo: 'bar', registry });
-			assert.deepEqual(properties.children, []);
-		};
-		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getChildren });
-		const widget = new TestWidgetContainer();
-		widget.__setProperties__({ foo: 'bar', registry });
-		widget.__render__();
-	},
 	'container for registry item'() {
 		assertRender = (properties: any) => {
 			const calculatedChildren = properties.getChildren();
@@ -126,7 +90,7 @@ registerSuite({
 			assert.deepEqual(properties.children, []);
 		};
 
-		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1');
+		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1', { getProperties });
 		const widget = createTestWidget(TestWidgetContainer, { foo: 'bar' });
 		widget.__setCoreProperties__({ bind: this, registry });
 		const renderResult: any = widget.__render__();
