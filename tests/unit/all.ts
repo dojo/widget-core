@@ -2,6 +2,7 @@ import 'dojo/has!host-node?../support/loadJsdom';
 import './Container';
 import './WidgetBase';
 import './Registry';
+import './Injector';
 import './lifecycle';
 import './customElements';
 import './d';

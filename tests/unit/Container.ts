@@ -92,7 +92,7 @@ registerSuite({
 
 		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1', { getProperties });
 		const widget = createTestWidget(TestWidgetContainer, { foo: 'bar' });
-		widget.__setCoreProperties__({ bind: this, registry });
+		widget.__setCoreProperties__({ registry });
 		const renderResult: any = widget.__render__();
 		assert.strictEqual(renderResult.vnodeSelector, 'test');
 	}

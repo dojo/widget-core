@@ -21,7 +21,7 @@ export function inject({ name, getProperties }: InjectConfig) {
 			if (context) {
 				const registeredInjectors = registeredInjectorsMap.get(this) || [];
 				if (registeredInjectors.length === 0) {
-					registeredInjectorsMap.set(this, []);
+					registeredInjectorsMap.set(this, registeredInjectors);
 				}
 				if (registeredInjectors.indexOf(context) === -1) {
 					context.on('invalidate', () => {
