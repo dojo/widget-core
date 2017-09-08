@@ -231,17 +231,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	/**
-	 * A render decorator that clears the nodehandles map
-	 */
-	@beforeRender()
-	protected clearNodeHandlerMap(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
-		return () => {
-			this._nodeHandler.clear();
-			return renderFunc();
-		};
-	}
-
-	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
 	 */
 	private _afterCreateCallback(
@@ -451,6 +440,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __render__(): VirtualDomNode | VirtualDomNode[] {
+		this._nodeHandler.clear();
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty === true || this._cachedVNode === undefined) {
 			this._dirty = false;
