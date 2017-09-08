@@ -12,6 +12,10 @@ export function Container<W extends WidgetBase> (
 ): Container<W> {
 	@inject({ name, getProperties })
 	class Container extends WidgetBase<Partial<W['properties']>> {
+		public __setProperties__(properties: Partial<W['properties']>): void {
+			super.__setProperties__(properties as any);
+			this.invalidate();
+		}
 		protected render(): DNode {
 			return w(component, this.properties, this.children);
 		}

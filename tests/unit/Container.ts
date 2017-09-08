@@ -1,9 +1,11 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { v } from '../../src/d';
-import { WidgetBase } from '../../src/WidgetBase';
+import { v , w } from '../../src/d';
+import { diffProperty, WidgetBase } from '../../src/WidgetBase';
+import { always } from '../../src/diff';
 import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
+import { Injector } from './../../src/Injector';
 
 import createTestWidget from './../support/createTestWidget';
 
@@ -27,15 +29,9 @@ function getProperties(toInject: any, properties: any) {
 	return properties;
 }
 
-class StubInjector extends WidgetBase<any> {
-	render() {
-		assertRender(this.properties);
-		return this.properties.render();
-	}
-}
-
 const registry = new Registry();
-registry.define('test-state-1', StubInjector);
+const injector = new Injector({});
+registry.defineInjector('test-state-1', injector);
 registry.define('test-widget', TestWidget);
 
 registerSuite({
@@ -95,5 +91,28 @@ registerSuite({
 		widget.__setCoreProperties__({ registry });
 		const renderResult: any = widget.__render__();
 		assert.strictEqual(renderResult.vnodeSelector, 'test');
+	},
+	'container always updates'() {
+		@diffProperty('foo', always)
+		class Child extends WidgetBase<{ foo: string }> {}
+		const ChildContainer = Container(Child, 'test-state-1', { getProperties });
+
+		class Parent extends WidgetBase<any> {
+			render() {
+				const { foo } = this.properties;
+				return w(ChildContainer, { foo });
+			}
+
+		}
+		const widget = new Parent();
+		widget.__setCoreProperties__({ bind: widget, registry });
+		widget.__setProperties__({ foo: 'bar'});
+		const renderResult = widget.__render__();
+		injector.set({ foo: 'bar' });
+		const injectorUpdatedRenderResult = widget.__render__();
+		assert.notStrictEqual(injectorUpdatedRenderResult, renderResult);
+		widget.__setProperties__({ foo: 'bar', bar: 'foo' });
+		const updatedRenderResult = widget.__render__();
+		assert.notStrictEqual(updatedRenderResult, injectorUpdatedRenderResult);
 	}
 });
