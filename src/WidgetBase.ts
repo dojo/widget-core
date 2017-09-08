@@ -3,6 +3,7 @@ import { ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 import '@dojo/shim/Promise'; // Imported for side-effects
 import WeakMap from '@dojo/shim/WeakMap';
+import { Handle } from '@dojo/interfaces/core';
 import { isWNode, v, isHNode } from './d';
 import { auto, ignore } from './diff';
 import {
@@ -185,7 +186,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _nodeHandler: NodeHandler;
 
-	private _projectorMountEvent: any;
+	private _projectorAttachEvent: Handle;
 
 	private _currentRootNode = 0;
 
@@ -207,6 +208,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._nodeHandler = new NodeHandler();
 		this._registries.add(this._defaultRegistry, true);
 		this.own(this._registries);
+		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 
@@ -288,8 +290,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	_addElementToNodeHandler(element: Element, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
 		this._currentRootNode += 1;
 
-		if (!this._projectorMountEvent) {
-			this._projectorMountEvent = projectionOptions.nodeEvent.on('mounted',
+		if (!this._projectorAttachEvent) {
+			this._projectorAttachEvent = projectionOptions.nodeEvent.on('attached',
 				(element: Element, properties: VNodeProperties) => {
 					this._nodeHandler.addProjector(element, properties);
 				});
@@ -487,7 +489,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (isHNode(node) || isWNode(node)) {
 				node.properties = node.properties || {};
 				if (isHNode(node)) {
-					if (rootNodes.indexOf(node) < 0 && node.properties.key) {
+					if (rootNodes.indexOf(node) === -1 && node.properties.key) {
 						node.properties.afterCreate = this._afterCreateCallback;
 						node.properties.afterUpdate = this._afterUpdateCallback;
 					}

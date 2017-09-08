@@ -409,12 +409,21 @@ export interface WidgetMetaConstructor<T extends WidgetMetaBase> {
 	new (properties: WidgetMetaProperties): T;
 }
 
+export interface NodeHandler extends Evented {
+	get(key: string): HTMLElement | undefined;
+	has(key: string): boolean;
+	add(element: HTMLElement, properties: VNodeProperties): void;
+	addRoot(element: HTMLElement, properties: VNodeProperties): void;
+	addProjector(element: HTMLElement, properties: VNodeProperties): void;
+	clear(): void;
+}
+
 /**
  * Properties passed to meta Base constructors
  */
 export interface WidgetMetaProperties {
 	invalidate: () => void;
-	nodeHandler: any;
+	nodeHandler: NodeHandler;
 }
 
 export interface Render {

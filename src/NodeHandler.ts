@@ -1,36 +1,45 @@
 import { Evented } from '@dojo/core/Evented';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
+import { NodeHandler as NodeHandlerInterface } from './interfaces';
 
+/**
+ * Enum to identify the type of event.
+ * Listening to 'Projector' will notify when projector is created or updated
+ * Listening to 'Widget' will notifiy when widget root is created or updated
+ */
 export enum Type {
 	Projector = 'Projector',
 	Widget = 'Widget'
 }
 
-export default class NodeHandler extends Evented {
+export class NodeHandler extends Evented implements NodeHandlerInterface {
 
-	private _nodeMap = new Map<string, Element>();
+	private _nodeMap = new Map<string, HTMLElement>();
 
-	public get(key: string): Element | undefined {
+	public get(key: string): HTMLElement | undefined {
 		return this._nodeMap.get(key);
 	}
 
-	public has(key: string): Boolean {
+	public has(key: string): boolean {
 		return this._nodeMap.has(key);
 	}
 
-	public add(element: Element, properties: VNodeProperties) {
+	public add(element: HTMLElement, properties: VNodeProperties) {
 		const key = String(properties.key);
 		this._nodeMap.set(key, element);
 		this.emit({ type: key });
 	}
 
-	public addRoot(element: Element, properties: VNodeProperties) {
-		this.add(element, properties);
+	public addRoot(element: HTMLElement, properties: VNodeProperties) {
+		if (properties && properties.key) {
+			this.add(element, properties);
+		}
+
 		this.emit({ type: Type.Widget });
 	}
 
-	public addProjector(element: Element, properties: VNodeProperties) {
+	public addProjector(element: HTMLElement, properties: VNodeProperties) {
 		if (properties && properties.key) {
 			this.add(element, properties);
 		}
@@ -42,3 +51,5 @@ export default class NodeHandler extends Evented {
 		this._nodeMap.clear();
 	}
 }
+
+export default NodeHandler;

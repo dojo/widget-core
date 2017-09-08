@@ -56,11 +56,25 @@ registerSuite({
 			assert.isTrue(elementStub.calledOnce);
 			assert.isTrue(projectorStub.notCalled);
 		},
-		'add projector emits Projector, Widget and element event'() {
+		'add root without a key emits Widget event only'() {
+			nodeHandler.addRoot(element, {});
+
+			assert.isTrue(widgetStub.calledOnce);
+			assert.isTrue(elementStub.notCalled);
+			assert.isTrue(projectorStub.notCalled);
+		},
+		'add projector emits Projector and element event'() {
 			nodeHandler.addProjector(element, { key: 'foo' });
 
 			assert.isTrue(widgetStub.notCalled);
 			assert.isTrue(elementStub.calledOnce);
+			assert.isTrue(projectorStub.calledOnce);
+		},
+		'add projector without a key emits Projector event only'() {
+			nodeHandler.addProjector(element, {});
+
+			assert.isTrue(widgetStub.notCalled);
+			assert.isTrue(elementStub.notCalled);
 			assert.isTrue(projectorStub.calledOnce);
 		}
 	}
