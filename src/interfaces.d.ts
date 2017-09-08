@@ -1,7 +1,14 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
-import { VNode, VNodeProperties, ProjectionOptions } from '@dojo/interfaces/vdom';
+import { VNode, VNodeProperties, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
+
+/**
+ * Extended Dojo 2 projection options
+ */
+export interface ProjectionOptions extends MaquetteProjectionOptions {
+	nodeEvent: Evented;
+}
 
 /**
  * Generic constructor type

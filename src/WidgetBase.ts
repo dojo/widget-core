@@ -1,5 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
-import { ProjectionOptions, VNodeProperties } from '@dojo/interfaces/vdom';
+import { VNodeProperties } from '@dojo/interfaces/vdom';
+import { ProjectionOptions } from './interfaces';
 import Map from '@dojo/shim/Map';
 import '@dojo/shim/Promise'; // Imported for side-effects
 import WeakMap from '@dojo/shim/WeakMap';
