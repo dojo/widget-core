@@ -8,7 +8,7 @@ import { NodeHandlerInterface } from './interfaces';
  * Listening to 'Projector' will notify when projector is created or updated
  * Listening to 'Widget' will notifiy when widget root is created or updated
  */
-export enum MetaEventType {
+export enum NodeEventType {
 	Projector = 'Projector',
 	Widget = 'Widget'
 }
@@ -36,7 +36,7 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 			this.add(element, properties);
 		}
 
-		this.emit({ type: MetaEventType.Widget });
+		this.emit({ type: NodeEventType.Widget });
 	}
 
 	public addProjector(element: HTMLElement, properties: VNodeProperties) {
@@ -44,7 +44,7 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 			this.add(element, properties);
 		}
 
-		this.emit({ type: MetaEventType.Projector });
+		this.emit({ type: NodeEventType.Projector });
 	}
 
 	public clear() {

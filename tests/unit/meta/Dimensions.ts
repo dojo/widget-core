@@ -3,7 +3,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub } from 'sinon';
 import Dimensions from '../../../src/meta/Dimensions';
-import NodeHandler, { MetaEventType } from '../../../src/NodeHandler';
+import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
 
 let rAF: any;
 const defaultDimensions = {
@@ -58,7 +58,7 @@ registerSuite({
 			nodeHandler
 		});
 
-		nodeHandler.emit({ type: MetaEventType.Projector });
+		nodeHandler.emit({ type: NodeEventType.Projector });
 		resolveRAF();
 		assert.isTrue(invalidate.calledOnce);
 	},
