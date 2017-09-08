@@ -399,7 +399,7 @@ export interface WidgetBaseInterface<
  * Meta Base type
  */
 export interface WidgetMetaBase extends Destroyable {
-	// has(key: string): boolean;
+	has(key: string): boolean;
 }
 
 /**
@@ -413,18 +413,9 @@ export interface WidgetMetaConstructor<T extends WidgetMetaBase> {
  * Properties passed to meta Base constructors
  */
 export interface WidgetMetaProperties {
-	// nodes: Map<string, HTMLElement>;
-	// requiredNodes: Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>;
 	invalidate: () => void;
 	nodeHandler: any;
 }
-
-/**
- * Callback when asking widget meta for a required node
- */
-// export interface WidgetMetaRequiredNodeCallback {
-// 	(node: HTMLElement): void;
-// }
 
 export interface Render {
 	(): DNode | DNode[];
