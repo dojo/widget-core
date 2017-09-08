@@ -1,11 +1,12 @@
 import { Evented } from '@dojo/core/Evented';
 import { Constructor, RegistryLabel, WidgetBaseInterface } from './interfaces';
-import { WidgetRegistry, WidgetRegistryEventObject } from './WidgetRegistry';
+import { Registry, RegistryEventObject } from './Registry';
+import { Injector } from './Injector';
 
 export default class RegistryHandler extends Evented {
-	private _registries: { handle?: any, registry: WidgetRegistry }[] = [];
+	private _registries: { handle?: any, registry: Registry }[] = [];
 
-	public add(registry: WidgetRegistry, isDefault: boolean = false) {
+	public add(registry: Registry, isDefault: boolean = false) {
 		if (isDefault) {
 			this._registries.push({ registry });
 		}
@@ -14,7 +15,7 @@ export default class RegistryHandler extends Evented {
 		}
 	}
 
-	public remove(registry: WidgetRegistry): boolean {
+	public remove(registry: Registry): boolean {
 		return this._registries.some((registryWrapper, i) => {
 			if (registryWrapper.registry === registry) {
 				registry.destroy();
@@ -25,7 +26,7 @@ export default class RegistryHandler extends Evented {
 		});
 	}
 
-	public replace(original: WidgetRegistry, replacement: WidgetRegistry): boolean {
+	public replace(original: Registry, replacement: Registry): boolean {
 		return this._registries.some((registryWrapper, i) => {
 			if (registryWrapper.registry === original) {
 				original.destroy();
@@ -36,7 +37,7 @@ export default class RegistryHandler extends Evented {
 		});
 	}
 
-	public get defaultRegistry(): WidgetRegistry | undefined {
+	public get defaultRegistry(): Registry | undefined {
 		if (this._registries.length) {
 			return this._registries[this._registries.length - 1].registry;
 		}
@@ -48,6 +49,14 @@ export default class RegistryHandler extends Evented {
 		});
 	}
 
+	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
+		for (let i = 0; i < this._registries.length; i++) {
+			const registryWrapper = this._registries[i];
+			return registryWrapper.registry.getInjector<T>(label);
+		}
+		return null;
+	}
+
 	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(widgetLabel: RegistryLabel): Constructor<T> | null {
 		for (let i = 0; i < this._registries.length; i++) {
 			const registryWrapper = this._registries[i];
@@ -56,7 +65,7 @@ export default class RegistryHandler extends Evented {
 				return item;
 			}
 			else if (!registryWrapper.handle) {
-				registryWrapper.handle = registryWrapper.registry.on(widgetLabel, (event: WidgetRegistryEventObject) => {
+				registryWrapper.handle = registryWrapper.registry.on(widgetLabel, (event: RegistryEventObject) => {
 					if (event.action === 'loaded') {
 						this.emit({ type: 'invalidate' });
 						registryWrapper.handle.destroy();

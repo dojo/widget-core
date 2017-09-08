@@ -8,9 +8,9 @@ import {
 	INJECTED_THEME_KEY,
 	registerThemeInjector
 } from '../../../src/mixins/Themeable';
-import { BaseInjector, Context, Injector } from './../../../src/Injector';
+import { Injector } from './../../../src/Injector';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { WidgetRegistry } from '../../../src/WidgetRegistry';
+import { Registry } from '../../../src/Registry';
 import { v, w } from '../../../src/d';
 import { stub, SinonStub } from 'sinon';
 
@@ -28,7 +28,7 @@ import createTestWidget from './../../support/createTestWidget';
 (<any> baseThemeClasses2)[' _key'] = 'testPath2';
 (<any> baseThemeClasses3)[' _key'] = 'testPath3';
 
-let testRegistry: WidgetRegistry;
+let testRegistry: Registry;
 
 @theme(baseThemeClasses1)
 class TestWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties<typeof baseThemeClasses1>> { }
@@ -57,7 +57,7 @@ let consoleStub: SinonStub;
 registerSuite({
 	name: 'themeManager',
 	beforeEach() {
-		testRegistry = new WidgetRegistry();
+		testRegistry = new Registry();
 		consoleStub = stub(console, 'warn');
 	},
 	afterEach() {
@@ -379,9 +379,8 @@ registerSuite({
 	},
 	'injecting a theme': {
 		'theme can be injected by defining a ThemeInjector with registry'() {
-			const themeInjectorContext = new Context(testTheme1);
-			const InjectorBase = Injector(BaseInjector, themeInjectorContext);
-			testRegistry.define(INJECTED_THEME_KEY, InjectorBase);
+			const injector = new Injector(testTheme1);
+			testRegistry.defineInjector(INJECTED_THEME_KEY, injector);
 			class InjectedTheme extends TestWidget {
 				render() {
 					return v('div', { classes: this.classes(baseThemeClasses1.class1) });
@@ -392,9 +391,8 @@ registerSuite({
 			assert.deepEqual(vNode.properties.classes, { theme1Class1: true });
 		},
 		'theme will not be injected if a theme has been passed via a property'() {
-			const themeInjectorContext = new Context(testTheme1);
-			const InjectorBase = Injector(BaseInjector, themeInjectorContext);
-			testRegistry.define(INJECTED_THEME_KEY, InjectorBase);
+			const injector = new Injector(testTheme1);
+			testRegistry.defineInjector(INJECTED_THEME_KEY, injector);
 			class InjectedTheme extends TestWidget {
 				render() {
 					return v('div', { classes: this.classes(baseThemeClasses1.class1) });
