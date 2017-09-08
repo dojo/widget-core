@@ -62,7 +62,8 @@ export const loaderOptions = {
 		{ name: 'maquette', location: 'node_modules/maquette/dist', main: 'maquette' },
 		{ name: 'pepjs', location: 'node_modules/pepjs/dist', main: 'pep' },
 		{ name: 'grunt-dojo2', location: 'node_modules/grunt-dojo2'},
-		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' }
+		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' },
+		{ name: 'intersection-observer', location: 'node_modules/intersection-observer', main: 'intersection-observer' }
 	],
 	map: {
 		globalize: {
