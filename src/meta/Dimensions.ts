@@ -1,6 +1,6 @@
 import { Base } from './Base';
 import { deepAssign } from '@dojo/core/lang';
-import { Type } from '../NodeHandler';
+import { MetaEventType } from '../NodeHandler';
 import { WidgetMetaProperties } from '../interfaces';
 
 export interface TopLeft {
@@ -54,7 +54,7 @@ export class Dimensions extends Base {
 	constructor(properties: WidgetMetaProperties) {
 		super(properties);
 
-		this.nodeHandler.on(Type.Projector, () => {
+		this.nodeHandler.on(MetaEventType.Projector, () => {
 			this.invalidate();
 		});
 	}

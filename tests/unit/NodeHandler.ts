@@ -1,7 +1,7 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub, SinonStub } from 'sinon';
-import NodeHandler, { Type } from '../../src/NodeHandler';
+import NodeHandler, { MetaEventType } from '../../src/NodeHandler';
 
 const elementStub: SinonStub = stub();
 const widgetStub: SinonStub = stub();
@@ -39,8 +39,8 @@ registerSuite({
 			projectorStub.reset();
 
 			nodeHandler.on('foo', elementStub);
-			nodeHandler.on(Type.Widget, widgetStub);
-			nodeHandler.on(Type.Projector, projectorStub);
+			nodeHandler.on(MetaEventType.Widget, widgetStub);
+			nodeHandler.on(MetaEventType.Projector, projectorStub);
 		},
 		'add emits event when element added'() {
 			nodeHandler.add(element, { key: 'foo' });
