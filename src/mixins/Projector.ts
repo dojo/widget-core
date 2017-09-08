@@ -288,23 +288,23 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return this._projection.domNode.outerHTML;
 		}
 
-		_afterRootCreateCallback(element: Element,
+		protected afterRootCreateCallback(element: HTMLElement,
 			projectionOptions: ProjectionOptions,
 			vnodeSelector: string,
 			properties: VNodeProperties
 		) {
 
-			super._afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
+			super.afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
 			projectionOptions.nodeEvent.emit({ type: 'attached' }, element, properties);
 		}
 
-		_afterRootUpdateCallback(element: Element,
+		protected afterRootUpdateCallback(element: HTMLElement,
 			projectionOptions: ProjectionOptions,
 			vnodeSelector: string,
 			properties: VNodeProperties
 		) {
 
-			super._afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
+			super.afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
 			projectionOptions.nodeEvent.emit({ type: 'attached' }, element, properties);
 		}
 

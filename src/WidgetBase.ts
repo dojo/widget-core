@@ -243,7 +243,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementCreated(element, String(properties.key));
 	}
 
-	protected _afterRootCreateCallback(
+	protected afterRootCreateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -266,7 +266,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	protected _afterRootUpdateCallback(
+	protected afterRootUpdateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -470,8 +470,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (isHNode(node)) {
 				rootNodes.push(node);
 				node.properties = node.properties || {};
-				node.properties.afterCreate = this._afterRootCreateCallback;
-				node.properties.afterUpdate = this._afterRootUpdateCallback;
+				node.properties.afterCreate = this.afterRootCreateCallback;
+				node.properties.afterUpdate = this.afterRootUpdateCallback;
 			}
 		});
 

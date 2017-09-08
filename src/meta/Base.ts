@@ -1,11 +1,11 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import global from '@dojo/shim/global';
-import { WidgetMetaBase, WidgetMetaProperties, NodeHandler } from '../interfaces';
+import { WidgetMetaBase, WidgetMetaProperties, NodeHandlerInterface } from '../interfaces';
 
 export class Base extends Destroyable implements WidgetMetaBase {
 	private _invalidate: () => void;
 	private _invalidating: number;
-	protected nodeHandler: NodeHandler;
+	protected nodeHandler: NodeHandlerInterface;
 
 	constructor(properties: WidgetMetaProperties) {
 		super();
