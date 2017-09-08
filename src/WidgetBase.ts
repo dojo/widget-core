@@ -20,8 +20,7 @@ import {
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
-	WidgetProperties,
-	WidgetMetaRequiredNodeCallback
+	WidgetProperties
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
@@ -178,10 +177,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _metaMap = new WeakMap<WidgetMetaConstructor<any>, WidgetMetaBase>();
 
-	// private _nodeMap = new Map<string, HTMLElement>();
-
-	// private _requiredNodes = new Map<string, ([ WidgetMetaBase, WidgetMetaRequiredNodeCallback ])[]>();
-
 	private _boundRenderFunc: Render;
 
 	private _boundInvalidate: () => void;
@@ -212,12 +207,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._nodeHandler = new NodeHandler();
 		this._registries.add(this._defaultRegistry, true);
 		this.own(this._registries);
-		// this.own({
-		// 	destroy: () => {
-		// 		this._nodeMap.clear();
-		// 		this._requiredNodes.clear();
-		// 	}
-		// });
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 
@@ -229,8 +218,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		let cached = this._metaMap.get(MetaType);
 		if (!cached) {
 			cached = new MetaType({
-				// nodes: this._nodeMap,
-				// requiredNodes: this._requiredNodes,
 				invalidate: this._boundInvalidate,
 				nodeHandler: this._nodeHandler
 			});
@@ -242,24 +229,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	/**
-	 * A render decorator that verifies nodes required in
-	 * 'meta' calls in this render,
+	 * A render decorator that clears the nodehandles map
 	 */
-	// @beforeRender()
-	// protected verifyRequiredNodes(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
-	// 	return () => {
-	// 		this._requiredNodes.forEach((element, key) => {
-	// 			/* istanbul ignore else: only checking for errors */
-	// 			if (!this._nodeMap.has(key)) {
-	// 				throw new Error(`Required node ${key} not found`);
-	// 			}
-	// 		});
-	// 		this._requiredNodes.clear();
-	// 		const dNodes = renderFunc();
-	// 		this._nodeMap.clear();
-	// 		return dNodes;
-	// 	};
-	// }
+	@beforeRender()
+	protected clearNodeHandlerMap(renderFunc: () => DNode, properties: WidgetProperties, children: DNode[]): () => DNode {
+		return () => {
+			this._nodeHandler.clear();
+			return renderFunc();
+		};
+	}
 
 	/**
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
@@ -270,7 +248,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		// this._setNode(element, properties);
 		this._nodeHandler.add(element, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
@@ -294,7 +271,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		// this._setNode(element, properties);
 		this._nodeHandler.add(element, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
@@ -348,17 +324,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	protected onElementUpdated(element: Element, key: string): void {
 		// Do nothing by default.
 	}
-
-	// private _setNode(element: Element, properties: VNodeProperties): void {
-	// 	const key = String(properties.key);
-	// 	this._nodeMap.set(key, <HTMLElement> element);
-	// 	const callbacks = this._requiredNodes.get(key);
-	// 	if (callbacks) {
-	// 		for (const [ meta, callback ] of callbacks) {
-	// 			callback.call(meta, element);
-	// 		}
-	// 	}
-	// }
 
 	public get properties(): Readonly<P> & Readonly<WidgetProperties> {
 		return this._properties;

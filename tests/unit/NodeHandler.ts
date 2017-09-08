@@ -26,6 +26,12 @@ registerSuite({
 		nodeHandler.add(element, { key: 'foo' });
 		assert.equal(nodeHandler.get('foo'), element);
 	},
+	'clear removes nodes from map'() {
+		nodeHandler.add(element, { key: 'foo' });
+		assert.isTrue(nodeHandler.has('foo'));
+		nodeHandler.clear();
+		assert.isFalse(nodeHandler.has('foo'));
+	},
 	'events': {
 		beforeEach() {
 			elementStub.reset();

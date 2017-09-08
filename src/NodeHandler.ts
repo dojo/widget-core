@@ -31,7 +31,14 @@ export default class NodeHandler extends Evented {
 	}
 
 	public addProjector(element: Element, properties: VNodeProperties) {
-		this.add(element, properties);
+		if (properties && properties.key) {
+			this.add(element, properties);
+		}
+
 		this.emit({ type: Type.Projector });
+	}
+
+	public clear() {
+		this._nodeMap.clear();
 	}
 }

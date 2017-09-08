@@ -2,12 +2,7 @@ import global from '@dojo/shim/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub } from 'sinon';
-// import { assign } from '@dojo/core/lang';
-// import { v } from '../../../src/d';
-// import { ProjectorMixin } from '../../../src/main';
 import Dimensions from '../../../src/meta/Dimensions';
-// import { WidgetBase } from '../../../src/WidgetBase';
-// import { ThemeableMixin } from './../../../src/mixins/Themeable';
 import NodeHandler, { Type } from '../../../src/NodeHandler';
 
 let rAF: any;
