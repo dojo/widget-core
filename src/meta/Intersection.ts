@@ -1,5 +1,5 @@
-import global from '@dojo/core/global';
 import { from } from '@dojo/shim/array';
+import global from '@dojo/shim/global';
 import WeakMap from '@dojo/shim/WeakMap';
 import { Base } from './Base';
 
@@ -31,7 +31,6 @@ export interface IntersectionResult {
 }
 
 export enum IntersectionType {
-	Custom,
 	Never,
 	Outside,
 	Within
@@ -41,15 +40,15 @@ export interface IntersectionTestCondition {
 	(previousValue: IntersectionResult, value: IntersectionResult, key: string): boolean;
 }
 
-function NeverCondition() {
+function neverCondition() {
 	return false;
 }
 
-function OutsideCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
+function outsideCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
 	return !value.isIntersecting;
 }
 
-function WithinCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
+function withinCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
 	return value.isIntersecting;
 }
 
@@ -232,31 +231,33 @@ export class Intersection extends Base {
 		return key in details.intersections;
 	}
 
-	public invalidateIf(key: string, type: IntersectionType.Custom, condition: IntersectionTestCondition, options?: IntersectionGetOptions): void;
 	public invalidateIf(key: string, type: IntersectionType.Never, options?: IntersectionGetOptions): void;
 	public invalidateIf(key: string, type: IntersectionType.Outside, options?: IntersectionGetOptions): void;
 	public invalidateIf(key: string, type: IntersectionType.Within, options?: IntersectionGetOptions): void;
-	public invalidateIf(key: string, type: IntersectionType, ...args: any[]): void {
+	public invalidateIf(key: string, condition: IntersectionTestCondition, options?: IntersectionGetOptions): void;
+	public invalidateIf(key: string, type: IntersectionType | IntersectionTestCondition, ...args: any[]): void {
 		let condition: IntersectionTestCondition | undefined;
-		let options: IntersectionGetOptions = {};
+		let options: IntersectionGetOptions | undefined;
 		switch (type) {
-			case IntersectionType.Custom:
-				condition = args[0];
-				options = args[1];
-				break;
 			case IntersectionType.Never:
-				condition = NeverCondition;
+				condition = neverCondition;
 				options = args[0];
 				break;
 			case IntersectionType.Outside:
-				condition = OutsideCondition;
+				condition = outsideCondition;
 				options = args[0];
 				break;
 			case IntersectionType.Within:
-				condition = WithinCondition;
+				condition = withinCondition;
 				options = args[0];
+				break;
+			default:
+				condition = <IntersectionTestCondition> type;
+				options = args[0];
+				break;
 		}
 		if (condition) {
+			options = options || {};
 			const details = this._getDetails(options);
 			details.conditions[key] = [ condition, options, this.get(key, options) ];
 			this._track(key, options);
