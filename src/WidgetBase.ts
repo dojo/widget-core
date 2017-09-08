@@ -234,7 +234,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
 	 */
 	private _afterCreateCallback(
-		element: Element,
+		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
 		properties: VNodeProperties
@@ -244,7 +244,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	protected _afterRootCreateCallback(
-		element: Element,
+		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
 		properties: VNodeProperties
@@ -257,7 +257,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 * vnode afterUpdate callback that calls the onElementUpdated lifecycle method.
 	 */
 	private _afterUpdateCallback(
-		element: Element,
+		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
 		properties: VNodeProperties
@@ -267,7 +267,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	protected _afterRootUpdateCallback(
-		element: Element,
+		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
 		properties: VNodeProperties
@@ -276,14 +276,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	_addElementToNodeHandler(element: Element, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
+	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
 		this._currentRootNode += 1;
 
-		if (!this._projectorAttachEvent) {
+		if (this._projectorAttachEvent === undefined) {
 			this._projectorAttachEvent = projectionOptions.nodeEvent.on('attached',
-				(element: Element, properties: VNodeProperties) => {
+				(element: HTMLElement, properties: VNodeProperties) => {
 					this._nodeHandler.addProjector(element, properties);
 				});
+			this.own(this._projectorAttachEvent);
 		}
 
 		if (this._currentRootNode === this._numRootNodes) {
@@ -440,10 +441,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __render__(): VirtualDomNode | VirtualDomNode[] {
-		this._nodeHandler.clear();
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty === true || this._cachedVNode === undefined) {
 			this._dirty = false;
+			this._nodeHandler.clear();
 			const render = this._runBeforeRenders();
 			let dNode = render();
 			dNode = this.runAfterRenders(dNode);

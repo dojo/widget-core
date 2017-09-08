@@ -1,7 +1,7 @@
 import { Evented } from '@dojo/core/Evented';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
-import { NodeHandler as NodeHandlerInterface } from './interfaces';
+import { NodeHandlerInterface } from './interfaces';
 
 /**
  * Enum to identify the type of event.

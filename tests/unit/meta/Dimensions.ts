@@ -2,10 +2,34 @@ import global from '@dojo/shim/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub } from 'sinon';
-import Dimensions, { defaultDimensions } from '../../../src/meta/Dimensions';
+import Dimensions from '../../../src/meta/Dimensions';
 import NodeHandler, { Type } from '../../../src/NodeHandler';
 
 let rAF: any;
+const defaultDimensions = {
+	offset: {
+		height: 0,
+		left: 0,
+		top: 0,
+		width: 0
+	},
+	position: {
+		bottom: 0,
+		left: 0,
+		right: 0,
+		top: 0
+	},
+	scroll: {
+		height: 0,
+		left: 0,
+		top: 0,
+		width: 0
+	},
+	size: {
+		height: 0,
+		width: 0
+	}
+};
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {

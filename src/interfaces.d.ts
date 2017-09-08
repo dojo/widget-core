@@ -409,7 +409,7 @@ export interface WidgetMetaConstructor<T extends WidgetMetaBase> {
 	new (properties: WidgetMetaProperties): T;
 }
 
-export interface NodeHandler extends Evented {
+export interface NodeHandlerInterface extends Evented {
 	get(key: string): HTMLElement | undefined;
 	has(key: string): boolean;
 	add(element: HTMLElement, properties: VNodeProperties): void;
@@ -423,7 +423,7 @@ export interface NodeHandler extends Evented {
  */
 export interface WidgetMetaProperties {
 	invalidate: () => void;
-	nodeHandler: NodeHandler;
+	nodeHandler: NodeHandlerInterface;
 }
 
 export interface Render {

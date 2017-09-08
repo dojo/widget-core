@@ -25,7 +25,7 @@ export interface DimensionResults {
 	scroll: TopLeft & Size;
 }
 
-export const defaultDimensions = {
+const defaultDimensions = {
 	offset: {
 		height: 0,
 		left: 0,
