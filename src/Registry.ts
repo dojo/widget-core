@@ -152,12 +152,15 @@ export class Registry extends Evented implements RegistryInterface {
 		this._injectorRegistry.set(label, item);
 	}
 
-	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(widgetLabel: RegistryLabel): Constructor<T> | null {
-		if (!this.has(widgetLabel)) {
+	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {
+		if (!this.has(label)) {
+			if (this.hasInjector(label)) {
+				console.warn(`Unable to find widget '${label.toString()}', did you mean to get a injector?`);
+			}
 			return null;
 		}
 
-		const item = this._widgetRegistry.get(widgetLabel);
+		const item = this._widgetRegistry.get(label);
 
 		if (isWidgetBaseConstructor<T>(item)) {
 			return item;
@@ -168,11 +171,11 @@ export class Registry extends Evented implements RegistryInterface {
 		}
 
 		const promise = (<WidgetBaseConstructorFunction> item)();
-		this._widgetRegistry.set(widgetLabel, promise);
+		this._widgetRegistry.set(label, promise);
 
 		promise.then((widgetCtor) => {
-			this._widgetRegistry.set(widgetLabel, widgetCtor);
-			this.emitLoadedEvent(widgetLabel);
+			this._widgetRegistry.set(label, widgetCtor);
+			this.emitLoadedEvent(label);
 			return widgetCtor;
 		}, (error) => {
 			throw error;
@@ -183,6 +186,9 @@ export class Registry extends Evented implements RegistryInterface {
 
 	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
 		if (!this.hasInjector(label)) {
+			if (this.has(label)) {
+				console.warn(`Unable to find injector '${label.toString()}', did you mean to get a widget?`);
+			}
 			return null;
 		}
 

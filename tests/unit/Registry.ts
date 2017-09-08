@@ -1,14 +1,22 @@
+import * as registerSuite from 'intern!object';
+import * as assert from 'intern/chai!assert';
 import Registry from './../../src/Registry';
 import { WidgetBase } from './../../src/WidgetBase';
 import Promise from '@dojo/shim/Promise';
 import { Injector } from './../../src/Injector';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+import { stub, SinonStub } from 'sinon';
 
 const testInjector = new Injector({});
+let consoleStub: SinonStub;
 
 registerSuite({
 	name: 'Registry',
+	beforeEach() {
+		consoleStub = stub(console, 'warn');
+	},
+	afterEach() {
+		consoleStub.restore();
+	},
 	'api'() {
 		const factoryRegistry = new Registry();
 
@@ -148,6 +156,12 @@ registerSuite({
 					assert.isTrue(error instanceof Error);
 					assert.equal(error.message, 'reject error');
 				});
+			},
+			'hints to the user if there is no widget but an injector exists for a label'() {
+				const factoryRegistry = new Registry();
+				factoryRegistry.defineInjector('item', testInjector);
+				factoryRegistry.get('item');
+				assert.isTrue(consoleStub.firstCall.calledWith('Unable to find widget \'item\', did you mean to get a injector?'));
 			}
 		}
 	},
@@ -205,6 +219,12 @@ registerSuite({
 				const factoryRegistry = new Registry();
 				const injector = factoryRegistry.getInjector(symbolLabel);
 				assert.isNull(injector);
+			},
+			'hints to the user if there is no injector but widget exists for a label'() {
+				const factoryRegistry = new Registry();
+				factoryRegistry.define('item', WidgetBase);
+				factoryRegistry.getInjector('item');
+				assert.isTrue(consoleStub.firstCall.calledWith('Unable to find injector \'item\', did you mean to get a widget?'));
 			}
 		}
 	},
