@@ -1,16 +1,9 @@
-import { from } from '@dojo/shim/array';
 import global from '@dojo/shim/global';
 import WeakMap from '@dojo/shim/WeakMap';
 import { Base } from './Base';
 
-import 'intersection-observer';
-
-(<{ THROTTLE_TIMEOUT: number }> global.IntersectionObserver.prototype).THROTTLE_TIMEOUT = 0;
-
 interface IntersectionDetail {
-	conditions: { [key: string]: [ IntersectionTestCondition, IntersectionGetOptions | undefined, IntersectionResult ] };
 	entries: WeakMap<Element, IntersectionObserverEntry>;
-	intersections: { [key: string]: IntersectionResult }; // previous intersections
 	intersectionObserver?: IntersectionObserver; // attached observer
 	options: IntersectionGetOptions;
 	root: string;
@@ -28,28 +21,6 @@ export interface IntersectionGetOptions {
 export interface IntersectionResult {
 	intersectionRatio: number;
 	isIntersecting: boolean;
-}
-
-export enum IntersectionType {
-	Never,
-	Outside,
-	Within
-}
-
-export interface IntersectionTestCondition {
-	(previousValue: IntersectionResult, value: IntersectionResult, key: string): boolean;
-}
-
-function neverCondition() {
-	return false;
-}
-
-function outsideCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
-	return !value.isIntersecting;
-}
-
-function withinCondition(previousValue: IntersectionResult, value: IntersectionResult, key: string) {
-	return value.isIntersecting;
 }
 
 const defaultIntersection: IntersectionResult = Object.freeze({
@@ -94,9 +65,7 @@ export class Intersection extends Base {
 		}
 		if (!cached) {
 			cached = {
-				conditions: {},
 				entries: new WeakMap<Element, IntersectionObserverEntry>(),
-				intersections: {},
 				options,
 				root,
 				rootMargin,
@@ -137,56 +106,14 @@ export class Intersection extends Base {
 	}
 
 	private _onIntersect(details: IntersectionDetail, intersectionObserverEntries: IntersectionObserverEntry[]) {
-		const lookup = new WeakMap<Element, string>();
-		for (const key of from(this.nodes.keys())) {
-			const node = this.nodes.get(key);
-			if (node) {
-				lookup.set(node, key);
-			}
-		}
-
-		const keys: string[] = [];
 		for (const intersectionEntry of intersectionObserverEntries) {
-			const {
-				intersectionRatio,
-				isIntersecting
-			} = <(IntersectionObserverEntry & { isIntersecting: boolean })> intersectionEntry;
 			details.entries.set(intersectionEntry.target, intersectionEntry);
-			if (lookup.has(intersectionEntry.target)) {
-				const key = lookup.get(intersectionEntry.target);
-				if (key) {
-					details.intersections[key] = {
-						intersectionRatio,
-						isIntersecting
-					};
-					keys.push(key);
-				}
-			}
 		}
 
-		// Check to see if this intersection should cause an invalidation
-		const conditions = details.conditions;
-		let invalidate = false;
-		for (const key of keys) {
-			if (key in conditions) {
-				const [ condition, options, previousValue ] = conditions[key];
-				const value = this.get(key, options);
-				if (condition(previousValue, value, key)) {
-					invalidate = true;
-				}
-				conditions[key][2] = value;
-			}
-			else {
-				// no invalidation test exists for this key
-				invalidate = true;
-			}
-		}
-		if (invalidate) {
-			this.invalidate();
-		}
+		this.invalidate();
 	}
 
-	private _track(key: string, options: IntersectionGetOptions): void {
+	public get(key: string, options: IntersectionGetOptions = {}): IntersectionResult {
 		const details = this._getDetails(options);
 		if (details.root) {
 			let rootNode: HTMLElement;
@@ -206,62 +133,23 @@ export class Intersection extends Base {
 				this._getIntersectionObserver(details).observe(node);
 			});
 		}
-	}
 
-	public get(key: string, options: IntersectionGetOptions = {}): IntersectionResult {
-		if (this.has(key, options)) {
-			return this._getDetails(options).intersections[key];
-		}
-		this._track(key, options);
-		return defaultIntersection;
-	}
-
-	public has(key: string, options: IntersectionGetOptions = {}): boolean {
-		if (!this.nodes.has(key)) {
-			return false;
-		}
-		const details = this._getDetails(options);
-		const intersectionObserver = details.intersectionObserver;
-		if (intersectionObserver) {
-			const entries = intersectionObserver.takeRecords();
-			if (entries.length) {
-				this._onIntersect(details, entries);
+		const node = this.nodes.get(key);
+		if (details && node) {
+			const entry = details.entries.get(node);
+			if (entry) {
+				const {
+					intersectionRatio,
+					isIntersecting
+				} = <(IntersectionObserverEntry & { isIntersecting: boolean })> entry;
+				return {
+					intersectionRatio,
+					isIntersecting
+				};
 			}
 		}
-		return key in details.intersections;
-	}
 
-	public invalidateIf(key: string, type: IntersectionType.Never, options?: IntersectionGetOptions): void;
-	public invalidateIf(key: string, type: IntersectionType.Outside, options?: IntersectionGetOptions): void;
-	public invalidateIf(key: string, type: IntersectionType.Within, options?: IntersectionGetOptions): void;
-	public invalidateIf(key: string, condition: IntersectionTestCondition, options?: IntersectionGetOptions): void;
-	public invalidateIf(key: string, type: IntersectionType | IntersectionTestCondition, ...args: any[]): void {
-		let condition: IntersectionTestCondition | undefined;
-		let options: IntersectionGetOptions | undefined;
-		switch (type) {
-			case IntersectionType.Never:
-				condition = neverCondition;
-				options = args[0];
-				break;
-			case IntersectionType.Outside:
-				condition = outsideCondition;
-				options = args[0];
-				break;
-			case IntersectionType.Within:
-				condition = withinCondition;
-				options = args[0];
-				break;
-			default:
-				condition = <IntersectionTestCondition> type;
-				options = args[0];
-				break;
-		}
-		if (condition) {
-			options = options || {};
-			const details = this._getDetails(options);
-			details.conditions[key] = [ condition, options, this.get(key, options) ];
-			this._track(key, options);
-		}
+		return defaultIntersection;
 	}
 }
 
