@@ -137,6 +137,7 @@ export class Intersection extends Base {
 		const node = this.nodes.get(key);
 		if (details && node) {
 			const entry = details.entries.get(node);
+			/* istanbul ignore else: only process entry if it exists */
 			if (entry) {
 				const {
 					intersectionRatio,
@@ -150,6 +151,16 @@ export class Intersection extends Base {
 		}
 
 		return defaultIntersection;
+	}
+
+	public has(key: string, options: IntersectionGetOptions = {}): boolean {
+		const node = this.nodes.get(key);
+		/* istanbul ignore else: only check for true if node exists */
+		if (node) {
+			const details = this._getDetails(options);
+			return details && details.entries.has(node);
+		}
+		return false;
 	}
 }
 

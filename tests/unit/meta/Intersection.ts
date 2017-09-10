@@ -160,5 +160,53 @@ registerSuite({
 
 		assert.isTrue(intersectionObserver.called);
 		assert.strictEqual(intersectionObserver.args[0][1].root, root);
+	},
+
+	'intersections report has only when observing'() {
+		let renders = 0;
+
+		class TestWidget extends ProjectorMixin(WidgetBase)<WidgetProperties> {
+			has(key: string): boolean {
+				return this.meta(Intersection).has(key);
+			}
+
+			render() {
+				renders++;
+				this.meta(Intersection).get('root');
+				return v('div', {
+					key: 'root'
+				});
+			}
+		}
+
+		const div = document.createElement('div');
+
+		document.body.appendChild(div);
+
+		const widget = new TestWidget();
+
+		assert.isFalse(widget.has('root'));
+
+		widget.append(div);
+
+		resolveRAF();
+
+		assert.equal(renders, 1);
+		assert.isFalse(widget.has('root'));
+
+		const node = (<any> widget)._nodeMap.get('root');
+
+		const [ observer, callback ] = observers[0];
+
+		callback([{
+			target: node,
+			intersectionRatio: 0.1,
+			isIntersecting: true
+		}], observer);
+
+		resolveRAF();
+
+		assert.equal(renders, 2);
+		assert.isTrue(widget.has('root'));
 	}
 });
