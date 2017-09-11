@@ -1,6 +1,5 @@
 import { Base } from './Base';
 import { deepAssign } from '@dojo/core/lang';
-import Set from '@dojo/shim/Set';
 
 export interface TopLeft {
 	left: number;
@@ -51,26 +50,11 @@ const defaultDimensions = {
 
 export class Dimensions extends Base {
 
-	private _requestedNodeKeys = new Set<string>();
-
 	public get(key: string): Readonly<DimensionResults> {
-		const node = this.nodeHandler.get(key);
+		const node = this.getNode(key);
 
 		if (!node) {
-
-			if (this._requestedNodeKeys.has(key)) {
-				throw new Error(`Required node ${key} not found`);
-			}
-
-			const handle = this.nodeHandler.on(key, () => {
-				handle.destroy();
-				this._requestedNodeKeys.delete(key);
-				this.invalidate();
-			});
-
-			this._requestedNodeKeys.add(key);
 			return deepAssign({}, defaultDimensions);
-
 		}
 
 		const boundingDimensions = node.getBoundingClientRect();

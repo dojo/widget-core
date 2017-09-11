@@ -1,11 +1,14 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import global from '@dojo/shim/global';
+import Set from '@dojo/shim/Set';
 import { WidgetMetaBase, WidgetMetaProperties, NodeHandlerInterface } from '../interfaces';
 
 export class Base extends Destroyable implements WidgetMetaBase {
 	private _invalidate: () => void;
 	private _invalidating: number;
 	protected nodeHandler: NodeHandlerInterface;
+
+	private _requestedNodeKeys = new Set<string>();
 
 	constructor(properties: WidgetMetaProperties) {
 		super();
@@ -16,6 +19,26 @@ export class Base extends Destroyable implements WidgetMetaBase {
 
 	public has(key: string): boolean {
 		return this.nodeHandler.has(key);
+	}
+
+	protected getNode(key: string): HTMLElement | undefined {
+		const node = this.nodeHandler.get(key);
+
+		if (!node) {
+			if (this._requestedNodeKeys.has(key)) {
+				throw new Error(`Required node ${key} not found`);
+			}
+
+			const handle = this.nodeHandler.on(key, () => {
+				handle.destroy();
+				this._requestedNodeKeys.delete(key);
+				this.invalidate();
+			});
+
+			this._requestedNodeKeys.add(key);
+		}
+
+		return node;
 	}
 
 	protected invalidate(): void {
