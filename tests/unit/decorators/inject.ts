@@ -9,8 +9,8 @@ import { WidgetProperties } from './../../../src/interfaces';
 
 import createTestWidget from './../../support/createTestWidget';
 
-let injectorOne = new Injector({ foo: 'bar' });
-let injectorTwo = new Injector({ bar: 'foo' });
+let injectorOne = new Injector<any>({ foo: 'bar' });
+let injectorTwo = new Injector<any>({ bar: 'foo' });
 let registry: Registry;
 
 registerSuite({

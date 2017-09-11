@@ -1,19 +1,19 @@
 import { Evented } from '@dojo/core/Evented';
 
-export class Injector extends Evented {
+export class Injector<T = any> extends Evented {
 
-	private _context: any;
+	private _context: T;
 
-	constructor(context: any) {
+	constructor(context: T) {
 		super({});
 		this._context = context;
 	}
 
-	public get(): any {
+	public get(): T {
 		return this._context;
 	}
 
-	public set(context: any): void {
+	public set(context: T): void {
 		this._context = context;
 		this.emit({ type: 'invalidate' });
 	}
