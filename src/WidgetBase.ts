@@ -706,7 +706,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			let child: WidgetBaseInterface<WidgetProperties>;
 
 			if (!isWidgetBaseConstructor(widgetConstructor)) {
-				const item = this.registries.get(widgetConstructor);
+				const item = this._registries.get(widgetConstructor);
 				if (item === null) {
 					return null;
 				}
