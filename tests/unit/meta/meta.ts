@@ -4,6 +4,10 @@ import * as assert from 'intern/chai!assert';
 import { Base as MetaBase } from '../../../src/meta/Base';
 import { stub, SinonStub, spy } from 'sinon';
 import NodeHandler from '../../../src/NodeHandler';
+import { v } from '../../../src/d';
+import { ProjectorMixin } from '../../../src/main';
+import { WidgetBase } from '../../../src/WidgetBase';
+import { ThemeableMixin } from './../../../src/mixins/Themeable';
 
 let rAFStub: SinonStub;
 let cancelrAFStub: SinonStub;
@@ -179,5 +183,35 @@ registerSuite({
 		meta.callInvalidate();
 		resolveRAF();
 		assert.isTrue(cancelrAFStub.calledThrice);
+	},
+	'integration'() {
+		// class TestWidgetBase<P = any> extends ThemeableMixin(WidgetBase)<P> {}
+
+		class MyMeta extends MetaBase {
+			callGetNode(key: string) {
+				return this.getNode(key);
+			}
+		}
+
+		class TestWidget extends ProjectorMixin(WidgetBase) {
+			render() {
+				return v('div', { key: 'foo' }, [
+					v('div', { 'key': 'bar' }, [ 'hello world' ])
+				]);
+			}
+
+			getMeta() {
+				return this.meta(MyMeta);
+			}
+		}
+
+		const div = document.createElement('div');
+
+		const widget = new TestWidget();
+		widget.append(div);
+		const meta = widget.getMeta();
+
+		assert.isTrue(meta.has('foo'));
+		assert.isTrue(meta.has('bar'));
 	}
 });
