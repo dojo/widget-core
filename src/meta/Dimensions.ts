@@ -1,7 +1,6 @@
 import { Base } from './Base';
 import { deepAssign } from '@dojo/core/lang';
-import { NodeEventType } from '../NodeHandler';
-import { WidgetMetaProperties } from '../interfaces';
+import Set from '@dojo/shim/Set';
 
 export interface TopLeft {
 	left: number;
@@ -51,18 +50,27 @@ const defaultDimensions = {
 };
 
 export class Dimensions extends Base {
-	constructor(properties: WidgetMetaProperties) {
-		super(properties);
 
-		this.nodeHandler.on(NodeEventType.Projector, () => {
-			this.invalidate();
-		});
-	}
+	private _requestedNodeKeys = new Set<string>();
 
 	public get(key: string): Readonly<DimensionResults> {
 		const node = this.nodeHandler.get(key);
+
 		if (!node) {
+
+			if (this._requestedNodeKeys.has(key)) {
+				throw new Error(`Required node ${key} not found`);
+			}
+
+			const handle = this.nodeHandler.on(key, () => {
+				handle.destroy();
+				this._requestedNodeKeys.delete(key);
+				this.invalidate();
+			});
+
+			this._requestedNodeKeys.add(key);
 			return deepAssign({}, defaultDimensions);
+
 		}
 
 		const boundingDimensions = node.getBoundingClientRect();

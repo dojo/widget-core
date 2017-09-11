@@ -1,5 +1,6 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
+import { EventTargettedObject } from '@dojo/interfaces/core';
 import { VNode, VNodeProperties, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 
@@ -20,6 +21,14 @@ export type Constructor<T> = new (...args: any[]) => T;
  */
 export interface TypedTargetEvent<T extends EventTarget> extends Event {
 	target: T;
+}
+
+/**
+ * Projector rendered event
+ */
+export interface ProjectorRenderedEvent extends EventTargettedObject<Evented> {
+	element: HTMLElement;
+	properties: VNodeProperties;
 }
 
 /*

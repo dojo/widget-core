@@ -22,7 +22,8 @@ import {
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
-	WidgetProperties
+	WidgetProperties,
+	ProjectorRenderedEvent
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
@@ -281,8 +282,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._currentRootNode += 1;
 
 		if (this._projectorAttachEvent === undefined) {
-			this._projectorAttachEvent = projectionOptions.nodeEvent.on('attached',
-				(element: HTMLElement, properties: VNodeProperties) => {
+			this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered',
+				({ element, properties }: ProjectorRenderedEvent) => {
 					this._nodeHandler.addProjector(element, properties);
 				});
 			this.own(this._projectorAttachEvent);
@@ -445,13 +446,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty === true || this._cachedVNode === undefined) {
 			this._dirty = false;
-			this._nodeHandler.clear();
 			const render = this._runBeforeRenders();
 			let dNode = render();
 			dNode = this.runAfterRenders(dNode);
 			this._decorateNodes(dNode);
 			const widget = this._dNodeToVNode(dNode);
 			this._manageDetachedChildren();
+			this._nodeHandler.clear();
 			this._cachedVNode = widget;
 			this._renderState = WidgetRenderState.IDLE;
 			return widget;

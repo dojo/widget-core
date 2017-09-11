@@ -294,9 +294,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			vnodeSelector: string,
 			properties: VNodeProperties
 		) {
-
 			super.afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
-			projectionOptions.nodeEvent.emit({ type: 'attached' }, element, properties);
+			projectionOptions.nodeEvent.emit({ type: 'rendered', element, properties });
 		}
 
 		protected afterRootUpdateCallback(element: HTMLElement,
@@ -304,9 +303,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			vnodeSelector: string,
 			properties: VNodeProperties
 		) {
-
 			super.afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
-			projectionOptions.nodeEvent.emit({ type: 'attached' }, element, properties);
+			projectionOptions.nodeEvent.emit({ type: 'rendered', element, properties });
 		}
 
 		public __render__(): VNode {

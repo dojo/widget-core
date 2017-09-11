@@ -1585,7 +1585,7 @@ registerSuite({
 
 		const testWidget = new TestWidget();
 
-		assert.equal(testWidget.getDecoratorCount('beforeRender'), 2, 'beforeRender = 1 (existing) + 1');
+		assert.equal(testWidget.getDecoratorCount('beforeRender'), 1, 'beforeRender = 0 (existing) + 1');
 		assert.equal(testWidget.getDecoratorCount('afterRender'), 1, 'afterRender = 0 (existing) + 1');
 	}
 });

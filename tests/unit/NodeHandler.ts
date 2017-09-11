@@ -7,7 +7,7 @@ const elementStub: SinonStub = stub();
 const widgetStub: SinonStub = stub();
 const projectorStub: SinonStub = stub();
 let nodeHandler: NodeHandler;
-let element: Element;
+let element: HTMLElement;
 
 registerSuite({
 	name: 'NodeHandler',

@@ -1,9 +1,9 @@
 import global from '@dojo/shim/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { stub } from 'sinon';
+import { stub, spy } from 'sinon';
 import Dimensions from '../../../src/meta/Dimensions';
-import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
+import NodeHandler from '../../../src/NodeHandler';
 
 let rAF: any;
 const defaultDimensions = {
@@ -49,19 +49,6 @@ registerSuite({
 		rAF.restore();
 	},
 
-	'Dimensions will call invalidate when nodehandler projector event fires'() {
-		const nodeHandler = new NodeHandler();
-		const invalidate = stub();
-
-		new Dimensions({
-			invalidate,
-			nodeHandler
-		});
-
-		nodeHandler.emit({ type: NodeEventType.Projector });
-		resolveRAF();
-		assert.isTrue(invalidate.calledOnce);
-	},
 	'Will return default dimensions if node not loaded'() {
 		const nodeHandler = new NodeHandler();
 
@@ -71,6 +58,72 @@ registerSuite({
 		});
 
 		assert.deepEqual(dimensions.get('foo'), defaultDimensions);
+	},
+	'Will create event listener for node if not yet loaded'() {
+		const nodeHandler = new NodeHandler();
+		const onSpy = spy(nodeHandler, 'on');
+
+		const dimensions = new Dimensions({
+			invalidate: () => {},
+			nodeHandler
+		});
+
+		dimensions.get('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+	},
+	'Will call invalidate when awaited node is available'() {
+		const nodeHandler = new NodeHandler();
+		const onSpy = spy(nodeHandler, 'on');
+		const invalidateStub = stub();
+
+		const dimensions = new Dimensions({
+			invalidate: invalidateStub,
+			nodeHandler
+		});
+
+		dimensions.get('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+
+		const element = document.createElement('div');
+		const getRectSpy = spy(element, 'getBoundingClientRect');
+
+		nodeHandler.add(element, { key: 'foo' });
+
+		resolveRAF();
+		assert.isTrue(invalidateStub.calledOnce);
+
+		onSpy.reset();
+		dimensions.get('foo');
+
+		assert.isFalse(onSpy.called);
+		assert.isTrue(getRectSpy.calledOnce);
+	},
+	'Will throw error if node not available on second get'() {
+		const nodeHandler = new NodeHandler();
+		const onSpy = spy(nodeHandler, 'on');
+		const invalidateStub = stub();
+		let errorThrown = false;
+
+		const dimensions = new Dimensions({
+			invalidate: invalidateStub,
+			nodeHandler
+		});
+
+		dimensions.get('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+
+		try {
+			dimensions.get('foo');
+		}
+		catch (e) {
+			errorThrown = true;
+		}
+
+		assert.isTrue(errorThrown);
+		assert.isFalse(invalidateStub.called);
 	},
 	'Will return element dimensions if node is loaded'() {
 		const nodeHandler = new NodeHandler();
