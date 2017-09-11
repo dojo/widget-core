@@ -398,9 +398,8 @@ registerSuite({
 					return v('div', { classes: this.classes(baseThemeClasses1.class1) });
 				}
 			}
-			const themeableInstance = new InjectedTheme();
-			themeableInstance.__setProperties__({ theme: testTheme2, registry: testRegistry });
-			const vNode: any = themeableInstance.__render__();
+			const themeableInstance = createTestWidget(InjectedTheme, { theme: testTheme2, registry: testRegistry });
+			const vNode: any = themeableInstance.renderResult;
 			assert.deepEqual(vNode.properties.classes, { theme2Class1: true });
 		},
 		'does not attempt to inject if the ThemeInjector has not been defined in the registry'() {
