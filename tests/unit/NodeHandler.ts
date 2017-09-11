@@ -63,15 +63,8 @@ registerSuite({
 			assert.isTrue(elementStub.notCalled);
 			assert.isTrue(projectorStub.notCalled);
 		},
-		'add projector emits Projector and element event'() {
+		'add projector emits Projector event'() {
 			nodeHandler.addProjector(element, { key: 'foo' });
-
-			assert.isTrue(widgetStub.notCalled);
-			assert.isTrue(elementStub.calledOnce);
-			assert.isTrue(projectorStub.calledOnce);
-		},
-		'add projector without a key emits Projector event only'() {
-			nodeHandler.addProjector(element, {});
 
 			assert.isTrue(widgetStub.notCalled);
 			assert.isTrue(elementStub.notCalled);
