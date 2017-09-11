@@ -2,7 +2,7 @@ import global from '@dojo/shim/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { Base as MetaBase } from '../../../src/meta/Base';
-import { stub, SinonStub } from 'sinon';
+import { stub, SinonStub, spy } from 'sinon';
 import NodeHandler from '../../../src/NodeHandler';
 
 let rAFStub: SinonStub;
@@ -36,6 +36,109 @@ registerSuite({
 
 		assert.isTrue(meta.has('foo'));
 		assert.isFalse(meta.has('bar'));
+	},
+	'get node returns element from nodehandler'() {
+		const nodeHandler = new NodeHandler();
+		const invalidate = stub();
+		const element = document.createElement('div');
+		nodeHandler.add(element, { key: 'foo' });
+
+		class MyMeta extends MetaBase {
+			callGetNode(key: string) {
+				return this.getNode(key);
+			}
+		}
+
+		const meta = new MyMeta({
+			invalidate,
+			nodeHandler
+		});
+
+		const node = meta.callGetNode('foo');
+		assert.equal(node, element);
+	},
+	'Will create event listener for node if not yet loaded'() {
+		const nodeHandler = new NodeHandler();
+		const invalidate = stub();
+		const onSpy = spy(nodeHandler, 'on');
+
+		class MyMeta extends MetaBase {
+			callGetNode(key: string) {
+				return this.getNode(key);
+			}
+		}
+
+		const meta = new MyMeta({
+			invalidate,
+			nodeHandler
+		});
+
+		meta.callGetNode('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+	},
+	'Will call invalidate when awaited node is available'() {
+		const nodeHandler = new NodeHandler();
+		const onSpy = spy(nodeHandler, 'on');
+		const invalidate = stub();
+
+		class MyMeta extends MetaBase {
+			callGetNode(key: string) {
+				return this.getNode(key);
+			}
+		}
+
+		const meta = new MyMeta({
+			invalidate,
+			nodeHandler
+		});
+
+		meta.callGetNode('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+
+		const element = document.createElement('div');
+
+		nodeHandler.add(element, { key: 'foo' });
+
+		resolveRAF();
+		assert.isTrue(invalidate.calledOnce);
+
+		onSpy.reset();
+		meta.callGetNode('foo');
+
+		assert.isFalse(onSpy.called);
+	},
+	'Will throw error if node not available on second get'() {
+		const nodeHandler = new NodeHandler();
+		const onSpy = spy(nodeHandler, 'on');
+		const invalidate = stub();
+		let errorThrown = false;
+
+		class MyMeta extends MetaBase {
+			callGetNode(key: string) {
+				return this.getNode(key);
+			}
+		}
+
+		const meta = new MyMeta({
+			invalidate,
+			nodeHandler
+		});
+
+		meta.callGetNode('foo');
+		assert.isTrue(onSpy.calledOnce);
+		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+
+		try {
+			meta.callGetNode('foo');
+		}
+		catch (e) {
+			errorThrown = true;
+		}
+
+		assert.isTrue(errorThrown);
+		assert.isFalse(invalidate.called);
 	},
 	'invalidate calls passed in invalidate function'() {
 		const nodeHandler = new NodeHandler();
