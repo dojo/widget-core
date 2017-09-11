@@ -7,10 +7,8 @@ import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
-// import { ThemeableMixin } from './../../../src/mixins/Themeable';
 
 let rAFStub: SinonStub;
-let cancelrAFStub: SinonStub;
 
 function resolveRAF() {
 	for (let i = 0; i < rAFStub.callCount; i++) {
@@ -23,11 +21,9 @@ registerSuite({
 	name: 'meta base',
 	beforeEach() {
 		rAFStub = stub(global, 'requestAnimationFrame').returns(1);
-		cancelrAFStub = stub(global, 'cancelAnimationFrame');
 	},
 	afterEach() {
 		rAFStub.restore();
-		cancelrAFStub.restore();
 	},
 	'has checks nodehandler for nodes'() {
 		const nodeHandler = new NodeHandler();
@@ -162,27 +158,6 @@ registerSuite({
 		meta.callInvalidate();
 		resolveRAF();
 		assert.isTrue(invalidate.calledOnce);
-	},
-	'old invalidate calls are cancelled'() {
-		const nodeHandler = new NodeHandler();
-		const invalidate = stub();
-
-		class MyMeta extends MetaBase {
-			callInvalidate() {
-				this.invalidate();
-			}
-		}
-
-		const meta = new MyMeta({
-			invalidate,
-			nodeHandler
-		});
-
-		meta.callInvalidate();
-		meta.callInvalidate();
-		meta.callInvalidate();
-		resolveRAF();
-		assert.isTrue(cancelrAFStub.calledThrice);
 	},
 	'integration'() {
 		class MyMeta extends MetaBase {

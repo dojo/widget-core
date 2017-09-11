@@ -1,11 +1,9 @@
 import { Destroyable } from '@dojo/core/Destroyable';
-import global from '@dojo/shim/global';
 import Set from '@dojo/shim/Set';
 import { WidgetMetaBase, WidgetMetaProperties, NodeHandlerInterface } from '../interfaces';
 
 export class Base extends Destroyable implements WidgetMetaBase {
 	private _invalidate: () => void;
-	private _invalidating: number;
 	protected nodeHandler: NodeHandlerInterface;
 
 	private _requestedNodeKeys = new Set<string>();
@@ -42,8 +40,7 @@ export class Base extends Destroyable implements WidgetMetaBase {
 	}
 
 	protected invalidate(): void {
-		global.cancelAnimationFrame(this._invalidating);
-		this._invalidating = global.requestAnimationFrame(this._invalidate);
+		this._invalidate();
 	}
 }
 
