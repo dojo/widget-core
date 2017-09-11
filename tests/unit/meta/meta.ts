@@ -3,11 +3,11 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { Base as MetaBase } from '../../../src/meta/Base';
 import { stub, SinonStub, spy } from 'sinon';
-import NodeHandler from '../../../src/NodeHandler';
+import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
-import { ThemeableMixin } from './../../../src/mixins/Themeable';
+// import { ThemeableMixin } from './../../../src/mixins/Themeable';
 
 let rAFStub: SinonStub;
 let cancelrAFStub: SinonStub;
@@ -185,11 +185,12 @@ registerSuite({
 		assert.isTrue(cancelrAFStub.calledThrice);
 	},
 	'integration'() {
-		// class TestWidgetBase<P = any> extends ThemeableMixin(WidgetBase)<P> {}
-
 		class MyMeta extends MetaBase {
 			callGetNode(key: string) {
 				return this.getNode(key);
+			}
+			getNodeHandler() {
+				return this.nodeHandler;
 			}
 		}
 
@@ -205,13 +206,30 @@ registerSuite({
 			}
 		}
 
-		const div = document.createElement('div');
-
 		const widget = new TestWidget();
-		widget.append(div);
 		const meta = widget.getMeta();
+
+		const nodeHandler = meta.getNodeHandler();
+		const onFoo = stub();
+		const onBar = stub();
+		const onWidget = stub();
+		const onProjector = stub();
+
+		nodeHandler.on('foo', onFoo);
+		nodeHandler.on('bar', onBar);
+		nodeHandler.on(NodeEventType.Widget, onWidget);
+		nodeHandler.on(NodeEventType.Projector, onProjector);
+
+		const div = document.createElement('div');
+		widget.append(div);
 
 		assert.isTrue(meta.has('foo'));
 		assert.isTrue(meta.has('bar'));
+		assert.isTrue(onFoo.calledOnce);
+		assert.isTrue(onBar.calledOnce);
+		assert.isTrue(onWidget.calledOnce);
+		assert.isTrue(onProjector.calledOnce);
+		assert.isTrue(onFoo.calledBefore(onWidget));
+		assert.isTrue(onFoo.calledBefore(onProjector));
 	}
 });

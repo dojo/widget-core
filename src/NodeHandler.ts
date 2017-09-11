@@ -40,10 +40,6 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 	}
 
 	public addProjector(element: HTMLElement, properties: VNodeProperties) {
-		if (properties && properties.key) {
-			this.add(element, properties);
-		}
-
 		this.emit({ type: NodeEventType.Projector });
 	}
 
