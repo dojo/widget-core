@@ -109,11 +109,10 @@ registerSuite({
 
 		assert.isFalse(onSpy.called);
 	},
-	'Will throw error if node not available on second get'() {
+	'Will not add a second callback handle if one already exists'() {
 		const nodeHandler = new NodeHandler();
 		const onSpy = spy(nodeHandler, 'on');
 		const invalidate = stub();
-		let errorThrown = false;
 
 		class MyMeta extends MetaBase {
 			callGetNode(key: string) {
@@ -129,16 +128,10 @@ registerSuite({
 		meta.callGetNode('foo');
 		assert.isTrue(onSpy.calledOnce);
 		assert.isTrue(onSpy.firstCall.calledWith('foo'));
-
-		try {
-			meta.callGetNode('foo');
-		}
-		catch (e) {
-			errorThrown = true;
-		}
-
-		assert.isTrue(errorThrown);
-		assert.isFalse(invalidate.called);
+		onSpy.reset();
+		meta.callGetNode('foo');
+		assert.isTrue(onSpy.notCalled);
+		assert.isTrue(invalidate.notCalled);
 	},
 	'invalidate calls passed in invalidate function'() {
 		const nodeHandler = new NodeHandler();

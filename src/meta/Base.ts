@@ -22,17 +22,14 @@ export class Base extends Destroyable implements WidgetMetaBase {
 	protected getNode(key: string): HTMLElement | undefined {
 		const node = this.nodeHandler.get(key);
 
-		if (!node) {
-			if (this._requestedNodeKeys.has(key)) {
-				throw new Error(`Required node ${key} not found`);
-			}
-
+		if (!node && !this._requestedNodeKeys.has(key)) {
 			const handle = this.nodeHandler.on(key, () => {
 				handle.destroy();
 				this._requestedNodeKeys.delete(key);
 				this.invalidate();
 			});
 
+			this.own(handle);
 			this._requestedNodeKeys.add(key);
 		}
 

@@ -100,31 +100,6 @@ registerSuite({
 		assert.isFalse(onSpy.called);
 		assert.isTrue(getRectSpy.calledOnce);
 	},
-	'Will throw error if node not available on second get'() {
-		const nodeHandler = new NodeHandler();
-		const onSpy = spy(nodeHandler, 'on');
-		const invalidateStub = stub();
-		let errorThrown = false;
-
-		const dimensions = new Dimensions({
-			invalidate: invalidateStub,
-			nodeHandler
-		});
-
-		dimensions.get('foo');
-		assert.isTrue(onSpy.calledOnce);
-		assert.isTrue(onSpy.firstCall.calledWith('foo'));
-
-		try {
-			dimensions.get('foo');
-		}
-		catch (e) {
-			errorThrown = true;
-		}
-
-		assert.isTrue(errorThrown);
-		assert.isFalse(invalidateStub.called);
-	},
 	'Will return element dimensions if node is loaded'() {
 		const nodeHandler = new NodeHandler();
 

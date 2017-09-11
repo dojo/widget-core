@@ -25,13 +25,13 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 		return this._nodeMap.has(key);
 	}
 
-	public add(element: HTMLElement, properties: VNodeProperties) {
+	public add(element: HTMLElement, properties: VNodeProperties): void {
 		const key = String(properties.key);
 		this._nodeMap.set(key, element);
 		this.emit({ type: key });
 	}
 
-	public addRoot(element: HTMLElement, properties: VNodeProperties) {
+	public addRoot(element: HTMLElement, properties: VNodeProperties): void {
 		if (properties && properties.key) {
 			this.add(element, properties);
 		}
@@ -39,11 +39,11 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 		this.emit({ type: NodeEventType.Widget });
 	}
 
-	public addProjector(element: HTMLElement, properties: VNodeProperties) {
+	public addProjector(element: HTMLElement, properties: VNodeProperties): void {
 		this.emit({ type: NodeEventType.Projector });
 	}
 
-	public clear() {
+	public clear(): void {
 		this._nodeMap.clear();
 	}
 }
