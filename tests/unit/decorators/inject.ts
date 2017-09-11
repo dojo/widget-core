@@ -23,8 +23,8 @@ registerSuite({
 		registry.defineInjector('inject-two', injectorTwo);
 	},
 	beforeProperties() {
-		function getProperties(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getProperties(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
 
 		@inject({ name: 'inject-one', getProperties })
@@ -33,11 +33,11 @@ registerSuite({
 		assert.strictEqual(widget.getWidgetUnderTest().properties.foo, 'bar');
 	},
 	'multiple injectors'() {
-		function getPropertiesOne(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getPropertiesOne(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
-		function getPropertiesTwo(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getPropertiesTwo(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
 
 		@inject({ name: 'inject-one', getProperties: getPropertiesOne })
@@ -47,10 +47,10 @@ registerSuite({
 		assert.strictEqual(widget.getWidgetUnderTest().properties.foo, 'bar');
 		assert.strictEqual(widget.getWidgetUnderTest().properties.bar, 'foo');
 	},
-	'context are only attached once'() {
+	'payload are only attached once'() {
 		let invalidateCount = 0;
-		function getProperties(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getProperties(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
 
 		@inject({ name: 'inject-one', getProperties })
@@ -64,11 +64,11 @@ registerSuite({
 		assert.strictEqual(invalidateCount, 1);
 	},
 	'programmatic registration'() {
-		function getPropertiesOne(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getPropertiesOne(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
-		function getPropertiesTwo(context: any, properties: WidgetProperties): WidgetProperties {
-			return context;
+		function getPropertiesTwo(payload: any, properties: WidgetProperties): WidgetProperties {
+			return payload;
 		}
 
 		class TestWidget extends WidgetBase<any> {

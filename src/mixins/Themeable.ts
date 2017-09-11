@@ -143,18 +143,18 @@ function createThemeClassesLookup(classes: ClassNames[]): ClassNames {
 
 /**
  * Convenience function that is given a theme and an optional registry, the theme
- * injector is defined against the registry, returning the theme context.
+ * injector is defined against the registry, returning the theme.
  *
  * @param theme the theme to set
  * @param themeRegistry registry to define the theme injector against. Defaults
  * to the global registry
  *
- * @returns the theme context instance used to set the theme
+ * @returns the theme injector used to set the theme
  */
 export function registerThemeInjector(theme: any, themeRegistry: Registry): Injector {
-	const themeInjectorContext = new Injector(theme);
-	themeRegistry.defineInjector(INJECTED_THEME_KEY, themeInjectorContext);
-	return themeInjectorContext;
+	const themeInjector = new Injector(theme);
+	themeRegistry.defineInjector(INJECTED_THEME_KEY, themeInjector);
+	return themeInjector;
 }
 
 /**

@@ -14,7 +14,7 @@ const registeredInjectorsMap: WeakMap<WidgetBase, Injector[]> = new WeakMap();
  * used to map the injected properties.
  */
 export interface GetProperties<T = any> {
-	(context: any, properties: T): T;
+	(payload: any, properties: T): T;
 }
 
 /**
@@ -29,15 +29,15 @@ export interface InjectConfig {
 
 	/**
 	 * Function that returns propertues to inject using the passed properties
-	 * and the injected context.
+	 * and the injected payload.
 	 */
 	getProperties: GetProperties;
 }
 
 /**
- * Decorator retrieves a context from an available registry using the name and
- * returns calls the `getProperties` function with the existing found context
- * and passed properties to return the injected properties.
+ * Decorator retrieves an injector from an available registry using the name and
+ * calls the `getProperties` function with the payload from the injector
+ * and current properties with the the injected properties returned.
  *
  * @param InjectConfig the inject configuration
  */

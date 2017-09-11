@@ -6,15 +6,15 @@ import { Injector } from './../../src/Injector';
 registerSuite({
 	name: 'Injector',
 	get() {
-		const context = {};
-		const injector = new Injector(context);
-		assert.strictEqual(injector.get(), context);
+		const payload = {};
+		const injector = new Injector(payload);
+		assert.strictEqual(injector.get(), payload);
 	},
 	set() {
 		let invalidateCalled = false;
-		const context = {};
-		const injector = new Injector(context);
-		assert.strictEqual(injector.get(), context);
+		const payload = {};
+		const injector = new Injector(payload);
+		assert.strictEqual(injector.get(), payload);
 		injector.on('invalidate', () => {
 			invalidateCalled = true;
 		});
