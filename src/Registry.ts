@@ -154,9 +154,6 @@ export class Registry extends Evented implements RegistryInterface {
 
 	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {
 		if (!this.has(label)) {
-			if (this.hasInjector(label)) {
-				console.warn(`Unable to find widget '${label.toString()}', did you mean to get a injector?`);
-			}
 			return null;
 		}
 
@@ -186,9 +183,6 @@ export class Registry extends Evented implements RegistryInterface {
 
 	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
 		if (!this.hasInjector(label)) {
-			if (this.has(label)) {
-				console.warn(`Unable to find injector '${label.toString()}', did you mean to get a widget?`);
-			}
 			return null;
 		}
 
