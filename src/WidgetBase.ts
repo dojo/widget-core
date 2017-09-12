@@ -103,6 +103,16 @@ export function diffProperty(propertyName: string, diffFunction: DiffPropertyFun
 }
 
 /**
+ * WeakMap containing the current root node number
+ */
+export const currentRootNodeMap = new WeakMap<WidgetBase, number>();
+
+/**
+ * Weakmap containing the number of root nodes
+ */
+export const numRootNodesMap = new WeakMap<WidgetBase, number>();
+
+/**
  * Generic decorator handler to take care of whether or not the decorator was called at the class level
  * or the method level.
  *
@@ -190,10 +200,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _projectorAttachEvent: Handle;
 
-	private _currentRootNode = 0;
-
-	private _numRootNodes = 0;
-
 	/**
 	 * @constructor
 	 */
@@ -279,7 +285,12 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
-		this._currentRootNode += 1;
+		let currentRootNode = currentRootNodeMap.get(this) || 0;
+		const numRootNodes = numRootNodesMap.get(this);
+
+		currentRootNode += 1;
+		currentRootNodeMap.set(this, currentRootNode);
+		const isLastRootNode = (currentRootNode === numRootNodes);
 
 		if (this._projectorAttachEvent === undefined) {
 			this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered',
@@ -289,7 +300,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			this.own(this._projectorAttachEvent);
 		}
 
-		if (this._currentRootNode === this._numRootNodes) {
+		if (isLastRootNode) {
 			this._nodeHandler.addRoot(element, properties);
 		}
 		else {
@@ -464,8 +475,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _decorateNodes(node: DNode | DNode[]) {
 		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
 
-		this._numRootNodes = nodes.length;
-		this._currentRootNode = 0;
+		numRootNodesMap.set(this, nodes.length);
+		currentRootNodeMap.set(this, 0);
 		const rootNodes: DNode[] = [];
 
 		nodes.forEach(node => {

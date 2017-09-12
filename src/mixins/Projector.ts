@@ -9,7 +9,7 @@ import { dom, h, Projection } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode } from './../interfaces';
-import { WidgetBase } from './../WidgetBase';
+import { WidgetBase, currentRootNodeMap, numRootNodesMap } from './../WidgetBase';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
 
 /**
@@ -296,7 +296,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			properties: VNodeProperties
 		): void {
 			super.afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
-			projectionOptions.nodeEvent.emit({ type: 'rendered', element, properties });
+			this._emitProjectorRenderedEvent(element, properties, projectionOptions.nodeEvent);
 		}
 
 		protected afterRootUpdateCallback(
@@ -306,7 +306,17 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			properties: VNodeProperties
 		): void {
 			super.afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
-			projectionOptions.nodeEvent.emit({ type: 'rendered', element, properties });
+			this._emitProjectorRenderedEvent(element, properties, projectionOptions.nodeEvent);
+		}
+
+		private _emitProjectorRenderedEvent(element: HTMLElement, properties: VNodeProperties, nodeEvent: Evented) {
+			const currentRootNode = currentRootNodeMap.get(this) || 0;
+			const numRootNodes = numRootNodesMap.get(this);
+			const isLastRootNode = (currentRootNode === numRootNodes);
+
+			if (isLastRootNode) {
+				nodeEvent.emit({ type: 'rendered', element, properties });
+			}
 		}
 
 		public __render__(): VNode {
