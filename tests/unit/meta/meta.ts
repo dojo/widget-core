@@ -191,14 +191,14 @@ registerSuite({
 		const div = document.createElement('div');
 		widget.append(div);
 
-		assert.isTrue(meta.has('foo'));
-		assert.isTrue(meta.has('bar'));
-		assert.isTrue(onFoo.calledOnce);
-		assert.isTrue(onBar.calledOnce);
-		assert.isTrue(onWidget.calledOnce);
-		assert.isTrue(onProjector.calledOnce);
-		assert.isTrue(onFoo.calledBefore(onWidget));
-		assert.isTrue(onFoo.calledBefore(onProjector));
+		assert.isTrue(meta.has('foo'), '1');
+		assert.isTrue(meta.has('bar'), '2');
+		assert.isTrue(onFoo.calledOnce, '3');
+		assert.isTrue(onBar.calledOnce, '4');
+		assert.isTrue(onWidget.calledOnce, '5');
+		assert.isTrue(onProjector.calledOnce, '6');
+		assert.isTrue(onFoo.calledBefore(onWidget), '7');
+		assert.isTrue(onFoo.calledBefore(onProjector), '8');
 	},
 	'integration with multiple root node'() {
 		class MyMeta extends MetaBase {

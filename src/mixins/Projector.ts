@@ -3,13 +3,13 @@ import global from '@dojo/shim/global';
 import { createHandle } from '@dojo/core/lang';
 import { Handle } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
-import { VNode, VNodeProperties } from '@dojo/interfaces/vdom';
+import { VNode } from '@dojo/interfaces/vdom';
 import { ProjectionOptions } from '../interfaces';
 import { dom, h, Projection } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode } from './../interfaces';
-import { WidgetBase, currentRootNodeMap, numRootNodesMap } from './../WidgetBase';
+import { WidgetBase } from './../WidgetBase';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
 
 /**
@@ -289,36 +289,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return this._projection.domNode.outerHTML;
 		}
 
-		protected afterRootCreateCallback(
-			element: HTMLElement,
-			projectionOptions: ProjectionOptions,
-			vnodeSelector: string,
-			properties: VNodeProperties
-		): void {
-			super.afterRootCreateCallback(element, projectionOptions, vnodeSelector, properties);
-			this._emitProjectorRenderedEvent(element, properties, projectionOptions.nodeEvent);
-		}
-
-		protected afterRootUpdateCallback(
-			element: HTMLElement,
-			projectionOptions: ProjectionOptions,
-			vnodeSelector: string,
-			properties: VNodeProperties
-		): void {
-			super.afterRootUpdateCallback(element, projectionOptions, vnodeSelector, properties);
-			this._emitProjectorRenderedEvent(element, properties, projectionOptions.nodeEvent);
-		}
-
-		private _emitProjectorRenderedEvent(element: HTMLElement, properties: VNodeProperties, nodeEvent: Evented) {
-			const currentRootNode = currentRootNodeMap.get(this) || 0;
-			const numRootNodes = numRootNodesMap.get(this);
-			const isLastRootNode = (currentRootNode === numRootNodes);
-
-			if (isLastRootNode) {
-				nodeEvent.emit({ type: 'rendered', element, properties });
-			}
-		}
-
 		public __render__(): VNode {
 			if (this._projectorChildren) {
 				this.setChildren(this._projectorChildren);
@@ -360,6 +330,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			if (this._projection) {
 				this._projection.update(this._boundRender());
+				this._projectionOptions.nodeEvent.emit({ type: 'rendered' });
 			}
 		}
 
@@ -400,6 +371,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 					this._projection = dom.replace(this.root, this._boundRender(), this._projectionOptions);
 				break;
 			}
+
+			this._projectionOptions.nodeEvent.emit({ type: 'rendered' });
 
 			return this._attachHandle;
 		}

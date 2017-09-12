@@ -22,8 +22,7 @@ import {
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
 	WidgetBaseInterface,
-	WidgetProperties,
-	ProjectorRenderedEvent
+	WidgetProperties
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
@@ -101,16 +100,6 @@ export function diffProperty(propertyName: string, diffFunction: DiffPropertyFun
 		}
 	});
 }
-
-/**
- * WeakMap containing the current root node number
- */
-export const currentRootNodeMap = new WeakMap<WidgetBase, number>();
-
-/**
- * Weakmap containing the number of root nodes
- */
-export const numRootNodesMap = new WeakMap<WidgetBase, number>();
 
 /**
  * Generic decorator handler to take care of whether or not the decorator was called at the class level
@@ -200,6 +189,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _projectorAttachEvent: Handle;
 
+	private _currentRootNode = 0;
+	private _numRootNodes = 0;
+
 	/**
 	 * @constructor
 	 */
@@ -251,7 +243,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementCreated(element, String(properties.key));
 	}
 
-	protected afterRootCreateCallback(
+	private afterRootCreateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -274,7 +266,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	protected afterRootUpdateCallback(
+	private afterRootUpdateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -285,18 +277,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
-		let currentRootNode = currentRootNodeMap.get(this) || 0;
-		const numRootNodes = numRootNodesMap.get(this);
-
-		currentRootNode += 1;
-		currentRootNodeMap.set(this, currentRootNode);
-		const isLastRootNode = (currentRootNode === numRootNodes);
+		this._currentRootNode += 1;
+		const isLastRootNode = (this._currentRootNode === this._numRootNodes);
 
 		if (this._projectorAttachEvent === undefined) {
-			this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered',
-				({ element, properties }: ProjectorRenderedEvent) => {
-					this._nodeHandler.addProjector(element, properties);
-				});
+			this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered', () => {
+				this._nodeHandler.addProjector();
+			});
 			this.own(this._projectorAttachEvent);
 		}
 
@@ -475,8 +462,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _decorateNodes(node: DNode | DNode[]) {
 		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
 
-		numRootNodesMap.set(this, nodes.length);
-		currentRootNodeMap.set(this, 0);
+		this._numRootNodes = nodes.length;
+		this._currentRootNode =  0;
 		const rootNodes: DNode[] = [];
 
 		nodes.forEach(node => {

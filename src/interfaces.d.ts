@@ -23,14 +23,6 @@ export interface TypedTargetEvent<T extends EventTarget> extends Event {
 	target: T;
 }
 
-/**
- * Projector rendered event
- */
-export interface ProjectorRenderedEvent extends EventTargettedObject<Evented> {
-	element: HTMLElement;
-	properties: VNodeProperties;
-}
-
 /*
  These are the event handlers exposed by Maquette.
  */
