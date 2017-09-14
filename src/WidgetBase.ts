@@ -242,20 +242,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		// this._nodeHandler.add(element, properties);
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
-
-	// private _afterRootCreateCallback(
-	// 	element: HTMLElement,
-	// 	projectionOptions: ProjectionOptions,
-	// 	vnodeSelector: string,
-	// 	properties: VNodeProperties
-	// ): void {
-	// 	this._addElementToNodeHandler(element, projectionOptions, properties);
-	// 	this.onElementCreated(element, String(properties.key));
-	// }
 
 	/**
 	 * vnode afterUpdate callback that calls the onElementUpdated lifecycle method.
@@ -266,20 +255,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		// this._nodeHandler.add(element, properties);
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
-
-	// private _afterRootUpdateCallback(
-	// 	element: HTMLElement,
-	// 	projectionOptions: ProjectionOptions,
-	// 	vnodeSelector: string,
-	// 	properties: VNodeProperties
-	// ): void {
-	// 	this._addElementToNodeHandler(element, projectionOptions, properties);
-	// 	this.onElementUpdated(element, String(properties.key));
-	// }
 
 	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
 		const isRootNode = !properties.key || this._rootNodeKeys.indexOf(properties.key) > -1;
