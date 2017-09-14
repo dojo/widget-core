@@ -48,6 +48,13 @@ let rafStub: SinonStub;
 let cancelRafStub: SinonStub;
 let projector: BaseTestWidget | MyWidget;
 
+function resolveRAF() {
+	for (let i = 0; i < rafStub.callCount; i++) {
+		rafStub.getCall(i).args[0]();
+	}
+	rafStub.reset();
+}
+
 registerSuite({
 	name: 'mixins/projectorMixin',
 
@@ -880,6 +887,7 @@ registerSuite({
 		}));
 
 		projector.callInvalidate();
+		resolveRAF();
 
 		await waitFor(() => {
 			return document.getElementById('test-element') !== null;
@@ -896,6 +904,7 @@ registerSuite({
 
 		children = [];
 		projector.callInvalidate();
+		resolveRAF();
 
 		await waitFor(() => {
 			return domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active');
@@ -931,6 +940,7 @@ registerSuite({
 		}));
 
 		projector.callInvalidate();
+		resolveRAF();
 
 		await waitFor(() => {
 			return document.getElementById('test-element') !== null;
