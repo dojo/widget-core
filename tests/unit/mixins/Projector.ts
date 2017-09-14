@@ -8,7 +8,6 @@ import { spy, stub, SinonStub } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
 import { beforeRender, WidgetBase } from '../../../src/WidgetBase';
-import { waitFor } from '../waitFor';
 
 const Event = global.window.Event;
 
@@ -47,13 +46,6 @@ function sendAnimationEndEvents(element: Element) {
 let rafStub: SinonStub;
 let cancelRafStub: SinonStub;
 let projector: BaseTestWidget | MyWidget;
-
-function resolveRAF() {
-	for (let i = 0; i < rafStub.callCount; i++) {
-		rafStub.getCall(i).args[0]();
-	}
-	rafStub.reset();
-}
 
 registerSuite({
 	name: 'mixins/projectorMixin',
@@ -877,8 +869,8 @@ registerSuite({
 		}
 
 		const projector = new TestProjector();
-
-		await projector.append();
+		projector.async = false;
+		projector.append();
 
 		children.push(v('div', {
 			id: 'test-element',
@@ -887,28 +879,18 @@ registerSuite({
 		}));
 
 		projector.callInvalidate();
-		resolveRAF();
-
-		await waitFor(() => {
-			return document.getElementById('test-element') !== null;
-		}, 'Element was never added');
 
 		const domNode = document.getElementById('test-element')!;
-
-		await waitFor(() => {
-			return domNode.classList.contains('fade-in') && domNode.classList.contains('fade-in-active');
-		}, 'fade-in classes never got added to element');
+		assert(domNode !== null, 'Element was never added');
+		assert(domNode.classList.contains('fade-in') && domNode.classList.contains('fade-in-active'), 'fade-in classes never got added to element');
 
 		// manually fire the transition end events
-		sendAnimationEndEvents(domNode);
+		sendAnimationEndEvents(domNode!);
 
 		children = [];
 		projector.callInvalidate();
-		resolveRAF();
 
-		await waitFor(() => {
-			return domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active');
-		}, 'fade-out classes never got added to element');
+		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active'), 'fade-out classes never got added to element');
 
 		domNode.parentElement!.removeChild(domNode);
 	},
@@ -928,8 +910,8 @@ registerSuite({
 		}
 
 		const projector = new TestProjector();
-
-		await projector.append();
+		projector.async = false;
+		projector.append();
 
 		children.push(v('div', {
 			id: 'test-element',
@@ -940,17 +922,11 @@ registerSuite({
 		}));
 
 		projector.callInvalidate();
-		resolveRAF();
-
-		await waitFor(() => {
-			return document.getElementById('test-element') !== null;
-		}, 'Element was never added');
 
 		const domNode = document.getElementById('test-element')!;
+		assert(domNode !== null, 'Element was never added');
 
-		await waitFor(() => {
-			return domNode.classList.contains('fade-in') && domNode.classList.contains('active-fade-in');
-		}, 'fade-in classes never got added to element');
+		assert(domNode.classList.contains('fade-in') && domNode.classList.contains('active-fade-in'), 'fade-in classes never got added to element');
 
 		// manually fire the transition end events
 		sendAnimationEndEvents(domNode);
@@ -958,9 +934,7 @@ registerSuite({
 		children = [];
 		projector.callInvalidate();
 
-		await waitFor(() => {
-			return domNode.classList.contains('fade-out') && domNode.classList.contains('active-fade-out');
-		}, 'fade-out classes never got added to element');
+		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('active-fade-out'), 'fade-out classes never got added to element');
 
 		domNode.parentElement!.removeChild(domNode);
 	},
@@ -987,27 +961,20 @@ registerSuite({
 		}
 
 		const projector = new TestProjector();
-
+		projector.async = false;
 		await projector.append();
 
-		await waitFor(() => {
-			return document.getElementById('test-element') !== null;
-		}, 'Element was never added');
-
 		const domNode = document.getElementById('test-element')!;
+		assert(domNode !== null, 'Element was never added');
 
 		children = [];
 		projector.callInvalidate();
 
-		await waitFor(() => {
-			return domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active');
-		}, 'fade-out classes never got added to element');
+		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active'), 'fade-out classes never got added to element');
 
 		// manually fire the transition end events
 		sendAnimationEndEvents(domNode);
 
-		await waitFor(() => {
-			return document.getElementById('test-element') === null;
-		}, 'Element never got removed');
+		assert(document.getElementById('test-element') === null, 'Element never got removed');
 	}
 });
