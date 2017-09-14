@@ -243,7 +243,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementCreated(element, String(properties.key));
 	}
 
-	private afterRootCreateCallback(
+	private _afterRootCreateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -266,7 +266,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	private afterRootUpdateCallback(
+	private _afterRootUpdateCallback(
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
@@ -277,7 +277,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
-		this._currentRootNode += 1;
+		this._currentRootNode++;
 		const isLastRootNode = (this._currentRootNode === this._numRootNodes);
 
 		if (this._projectorAttachEvent === undefined) {
@@ -470,8 +470,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (isHNode(node)) {
 				rootNodes.push(node);
 				node.properties = node.properties || {};
-				node.properties.afterCreate = this.afterRootCreateCallback;
-				node.properties.afterUpdate = this.afterRootUpdateCallback;
+				node.properties.afterCreate = this._afterRootCreateCallback;
+				node.properties.afterUpdate = this._afterRootUpdateCallback;
 			}
 		});
 
