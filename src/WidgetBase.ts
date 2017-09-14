@@ -193,6 +193,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _numRootNodes = 0;
 
+	private _rootNodeKeys: object[];
+
 	/**
 	 * @constructor
 	 */
@@ -240,19 +242,20 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		this._nodeHandler.add(element, properties);
-		this.onElementCreated(element, String(properties.key));
-	}
-
-	private _afterRootCreateCallback(
-		element: HTMLElement,
-		projectionOptions: ProjectionOptions,
-		vnodeSelector: string,
-		properties: VNodeProperties
-	): void {
+		// this._nodeHandler.add(element, properties);
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementCreated(element, String(properties.key));
 	}
+
+	// private _afterRootCreateCallback(
+	// 	element: HTMLElement,
+	// 	projectionOptions: ProjectionOptions,
+	// 	vnodeSelector: string,
+	// 	properties: VNodeProperties
+	// ): void {
+	// 	this._addElementToNodeHandler(element, projectionOptions, properties);
+	// 	this.onElementCreated(element, String(properties.key));
+	// }
 
 	/**
 	 * vnode afterUpdate callback that calls the onElementUpdated lifecycle method.
@@ -263,35 +266,42 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		vnodeSelector: string,
 		properties: VNodeProperties
 	): void {
-		this._nodeHandler.add(element, properties);
-		this.onElementUpdated(element, String(properties.key));
-	}
-
-	private _afterRootUpdateCallback(
-		element: HTMLElement,
-		projectionOptions: ProjectionOptions,
-		vnodeSelector: string,
-		properties: VNodeProperties
-	): void {
+		// this._nodeHandler.add(element, properties);
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
-		this._currentRootNode++;
-		const isLastRootNode = (this._currentRootNode === this._numRootNodes);
+	// private _afterRootUpdateCallback(
+	// 	element: HTMLElement,
+	// 	projectionOptions: ProjectionOptions,
+	// 	vnodeSelector: string,
+	// 	properties: VNodeProperties
+	// ): void {
+	// 	this._addElementToNodeHandler(element, projectionOptions, properties);
+	// 	this.onElementUpdated(element, String(properties.key));
+	// }
 
-		if (this._projectorAttachEvent === undefined) {
-			this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered', () => {
-				this._nodeHandler.addProjector();
-			});
-			this.own(this._projectorAttachEvent);
+	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
+		const isRootNode = !properties.key || this._rootNodeKeys.indexOf(properties.key) > -1;
+		const hasKey = !!properties.key;
+		let isLastRootNode = false;
+
+		if (isRootNode) {
+			this._currentRootNode++;
+			isLastRootNode = (this._currentRootNode === this._numRootNodes);
+
+			if (this._projectorAttachEvent === undefined) {
+				this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered', () => {
+					this._nodeHandler.addProjector();
+				});
+				this.own(this._projectorAttachEvent);
+			}
 		}
 
 		if (isLastRootNode) {
 			this._nodeHandler.addRoot(element, properties);
 		}
-		else {
+		else if (hasKey) {
 			this._nodeHandler.add(element, properties);
 		}
 	}
@@ -466,13 +476,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._numRootNodes = nodes.length;
 		this._currentRootNode =  0;
 		const rootNodes: DNode[] = [];
+		this._rootNodeKeys = [];
 
 		nodes.forEach(node => {
 			if (isHNode(node)) {
 				rootNodes.push(node);
 				node.properties = node.properties || {};
-				node.properties.afterCreate = this._afterRootCreateCallback;
-				node.properties.afterUpdate = this._afterRootUpdateCallback;
+				if (node.properties.key) {
+					this._rootNodeKeys.push(node.properties.key);
+				}
 			}
 		});
 
@@ -481,7 +493,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (isHNode(node) || isWNode(node)) {
 				node.properties = node.properties || {};
 				if (isHNode(node)) {
-					if (rootNodes.indexOf(node) === -1 && node.properties.key) {
+					if (rootNodes.indexOf(node) === -1 || node.properties.key) {
 						node.properties.afterCreate = this._afterCreateCallback;
 						node.properties.afterUpdate = this._afterUpdateCallback;
 					}
