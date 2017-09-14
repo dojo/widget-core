@@ -164,10 +164,13 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		constructor(...args: any[]) {
 			super(...args);
 
+			const nodeEvent = new Evented();
+			this.own(nodeEvent);
+
 			this._projectionOptions = {
 				transitions: cssTransitions,
 				eventHandlerInterceptor: eventHandlerInterceptor.bind(this),
-				nodeEvent: new Evented()
+				nodeEvent
 			};
 
 			this._boundDoRender = this._doRender.bind(this);

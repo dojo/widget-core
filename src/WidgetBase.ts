@@ -190,6 +190,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _projectorAttachEvent: Handle;
 
 	private _currentRootNode = 0;
+
 	private _numRootNodes = 0;
 
 	/**
