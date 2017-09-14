@@ -8,6 +8,9 @@ declare global {
 		interface ElementAttributesProperty {
 			properties: {};
 		}
+		interface ElementChildrenAttribute {
+			children: {};
+		}
 		interface IntrinsicElements {
 			[key: string]: VirtualDomProperties;
 		}
