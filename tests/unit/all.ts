@@ -13,6 +13,6 @@ import './diff';
 import './RegistryHandler';
 import './Injector';
 import './tsx';
-import './testIntegration';
+import './tsxIntegration';
 import './NodeHandler';
 import './meta/all';
