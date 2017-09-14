@@ -4,7 +4,7 @@ import '@dojo/shim/Promise';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { spy } from 'sinon';
+import { spy, stub, SinonStub } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
 import { beforeRender, WidgetBase } from '../../../src/WidgetBase';
@@ -44,8 +44,8 @@ function sendAnimationEndEvents(element: Element) {
 	dispatchEvent(element, 'animationend');
 }
 
-let rafSpy: any;
-let cancelRafSpy: any;
+let rafStub: SinonStub;
+let cancelRafSpy: SinonStub;
 let projector: BaseTestWidget | MyWidget;
 
 registerSuite({
@@ -53,8 +53,8 @@ registerSuite({
 
 	beforeEach() {
 		result = null;
-		rafSpy = spy(global, 'requestAnimationFrame');
-		cancelRafSpy = spy(global, 'cancelAnimationFrame');
+		rafStub = stub(global, 'requestAnimationFrame').returns(1);
+		cancelRafSpy = stub(global, 'cancelAnimationFrame');
 	},
 
 	afterEach() {
@@ -62,7 +62,7 @@ registerSuite({
 			projector.destroy();
 			projector = <any> undefined;
 		}
-		rafSpy.restore();
+		rafStub.restore();
 		cancelRafSpy.restore();
 	},
 	'attach to projector': {
@@ -636,7 +636,7 @@ registerSuite({
 
 		projector.pause();
 		projector.scheduleRender();
-		assert.isFalse(rafSpy.called);
+		assert.isFalse(rafStub.called);
 	},
 	'pause cancels animation frame if scheduled'() {
 		const projector = new BaseTestWidget();
@@ -786,14 +786,14 @@ registerSuite({
 
 		projector.invalidate();
 
-		assert.isFalse(rafSpy.called);
+		assert.isFalse(rafStub.called);
 	},
 	'invalidate after attached'() {
 		const projector: any = new BaseTestWidget();
 
 		projector.append();
 		projector.invalidate();
-		assert.isTrue(rafSpy.called);
+		assert.isTrue(rafStub.called);
 	},
 	'reattach'() {
 		const root = document.createElement('div');
