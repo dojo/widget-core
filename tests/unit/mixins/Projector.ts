@@ -881,8 +881,9 @@ registerSuite({
 		projector.callInvalidate();
 
 		const domNode = document.getElementById('test-element')!;
-		assert(domNode !== null, 'Element was never added');
-		assert(domNode.classList.contains('fade-in') && domNode.classList.contains('fade-in-active'), 'fade-in classes never got added to element');
+		assert.isNotNull(domNode);
+		assert.isTrue(domNode.classList.contains('fade-in'));
+		assert.isTrue(domNode.classList.contains('fade-in-active'));
 
 		// manually fire the transition end events
 		sendAnimationEndEvents(domNode!);
@@ -890,7 +891,8 @@ registerSuite({
 		children = [];
 		projector.callInvalidate();
 
-		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active'), 'fade-out classes never got added to element');
+		assert.isTrue(domNode.classList.contains('fade-out'));
+		assert.isTrue(domNode.classList.contains('fade-out-active'));
 
 		domNode.parentElement!.removeChild(domNode);
 	},
@@ -924,9 +926,9 @@ registerSuite({
 		projector.callInvalidate();
 
 		const domNode = document.getElementById('test-element')!;
-		assert(domNode !== null, 'Element was never added');
-
-		assert(domNode.classList.contains('fade-in') && domNode.classList.contains('active-fade-in'), 'fade-in classes never got added to element');
+		assert.isNotNull(domNode);
+		assert.isTrue(domNode.classList.contains('fade-in'));
+		assert.isTrue(domNode.classList.contains('active-fade-in'));
 
 		// manually fire the transition end events
 		sendAnimationEndEvents(domNode);
@@ -934,7 +936,8 @@ registerSuite({
 		children = [];
 		projector.callInvalidate();
 
-		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('active-fade-out'), 'fade-out classes never got added to element');
+		assert.isTrue(domNode.classList.contains('fade-out'));
+		assert.isTrue(domNode.classList.contains('active-fade-out'));
 
 		domNode.parentElement!.removeChild(domNode);
 	},
@@ -965,16 +968,17 @@ registerSuite({
 		await projector.append();
 
 		const domNode = document.getElementById('test-element')!;
-		assert(domNode !== null, 'Element was never added');
+		assert.isNotNull(domNode);
 
 		children = [];
 		projector.callInvalidate();
 
-		assert(domNode.classList.contains('fade-out') && domNode.classList.contains('fade-out-active'), 'fade-out classes never got added to element');
+		assert.isTrue(domNode.classList.contains('fade-out'));
+		assert.isTrue(domNode.classList.contains('fade-out-active'));
 
 		// manually fire the transition end events
 		sendAnimationEndEvents(domNode);
 
-		assert(document.getElementById('test-element') === null, 'Element never got removed');
+		assert.isNull(document.getElementById('test-element'));
 	}
 });
