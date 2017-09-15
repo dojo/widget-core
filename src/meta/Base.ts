@@ -23,7 +23,7 @@ export class Base extends Destroyable implements WidgetMetaBase {
 		const node = this.nodeHandler.get(key);
 
 		if (!node && !this._requestedNodeKeys.has(key)) {
-			const handle = this.nodeHandler.on(key as string, () => {
+			const handle = this.nodeHandler.on(`${key}`, () => {
 				handle.destroy();
 				this._requestedNodeKeys.delete(key);
 				this.invalidate();
