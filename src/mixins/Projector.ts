@@ -44,11 +44,13 @@ export interface AttachOptions {
 	root?: Element;
 }
 
+export interface ProjectorProperties {
+	registry?: Registry;
+}
+
 export interface ProjectorMixin<P> {
 
-	readonly properties: Readonly<P> & {
-		registry?: any;
-	};
+	readonly properties: Readonly<P> & ProjectorProperties;
 
 	/**
 	 * Append the projector to the root.
@@ -145,16 +147,11 @@ function setDomNodes(vnode: VNode, domNode: Element | null = null) {
 	}
 }
 
-export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<Readonly<P> & {
-	registry?: any;
-}>> {
+export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<Readonly<P> & ProjectorProperties>> {
 	class Projector extends Base {
 
 		public projectorState: ProjectorAttachState;
-
-		public properties: Readonly<P> & {
-			registry?: any;
-		};
+		public properties: Readonly<P> & ProjectorProperties;
 
 		private _root: Element;
 		private _async = true;
@@ -166,7 +163,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _boundDoRender: () => void;
 		private _boundRender: Function;
 		private _projectorChildren: DNode[];
-		private _projectorProperties: this['properties'];
+		private _projectorProperties: this['properties'] = {} as any;
 		private _rootTagName: string;
 		private _attachType: AttachType;
 		private _baseRegistry = new Registry();
@@ -288,20 +285,17 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			super.__setChildren__(children);
 		}
 
-		protected setBaseRegistry(previousBaseRegistry: Registry, newBaseRegistry: Registry = new Registry()): void {
-			if (previousBaseRegistry !== newBaseRegistry) {
-				this.registry.base = newBaseRegistry;
-				this.own(newBaseRegistry);
-				this.invalidate();
-			}
-			if (previousBaseRegistry) {
-				previousBaseRegistry.destroy();
-			}
-		}
-
 		public setProperties(properties: this['properties']): void {
+			const { registry: previousRegistry } = this._projectorProperties;
+			if (previousRegistry !== properties.registry) {
+				if (previousRegistry) {
+					previousRegistry.destroy();
+				}
+				if (properties.registry) {
+					this.own(properties.registry);
+				}
+			}
 			this._projectorProperties = assign({}, properties);
-
 			super.__setCoreProperties__({ bind: this, baseRegistry: properties.registry });
 			super.__setProperties__(properties);
 		}

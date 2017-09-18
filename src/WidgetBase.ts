@@ -25,7 +25,7 @@ import {
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, Registry } from './Registry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './Registry';
 
 /**
  * Widget cache wrapper for instance management
@@ -306,18 +306,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	protected setBaseRegistry(previousBaseRegistry: Registry, newBaseRegistry: Registry): void {
-		if (previousBaseRegistry !== newBaseRegistry) {
-			this._registry.base = newBaseRegistry;
-			this.invalidate();
-		}
-	}
-
 	public __setCoreProperties__(coreProperties: CoreProperties): void {
 		this._renderState = WidgetRenderState.PROPERTIES;
 		const { baseRegistry } = coreProperties;
 
-		this.setBaseRegistry(this._coreProperties.baseRegistry, baseRegistry);
+		if (this._coreProperties.baseRegistry !== baseRegistry) {
+			this._registry.base = baseRegistry;
+			this.invalidate();
+		}
 		this._coreProperties = coreProperties;
 	}
 
