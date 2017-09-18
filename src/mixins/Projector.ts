@@ -166,7 +166,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _projectorProperties: this['properties'] = {} as any;
 		private _rootTagName: string;
 		private _attachType: AttachType;
-		private _baseRegistry = new Registry();
 
 		constructor(...args: any[]) {
 			super(...args);
@@ -182,7 +181,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this._boundDoRender = this._doRender.bind(this);
 			this._boundRender = this.__render__.bind(this);
-			this.own(this._baseRegistry);
 			this.own(this.on('invalidated', this.scheduleRender));
 
 			this.root = document.body;

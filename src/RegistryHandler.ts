@@ -1,24 +1,23 @@
+import { Handle } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
 import { Constructor, RegistryLabel, WidgetBaseInterface } from './interfaces';
 import { Registry, RegistryEventObject } from './Registry';
 import { Injector } from './Injector';
 
 export default class RegistryHandler extends Evented {
-	private _baseRegistry = new Registry();
 	private _registry = new Registry();
-	private _widgetHandles: RegistryLabel[] = [];
-	private _injectorHandles: RegistryLabel[] = [];
+	private _baseRegistry = this._registry;
+
+	private _widgetLabels: RegistryLabel[] = [];
 
 	constructor() {
 		super();
 		this.own(this._registry);
-		this.own(this._baseRegistry);
 	}
 
 	public set base(baseRegistry: Registry) {
 		this._baseRegistry = baseRegistry;
-		this._widgetHandles = [];
-		this._injectorHandles = [];
+
 	}
 
 	public define(label: RegistryLabel, widget: any): void {
@@ -33,31 +32,51 @@ export default class RegistryHandler extends Evented {
 		return this._registry.hasInjector(label) || this._baseRegistry.hasInjector(label);
 	}
 
-	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {
-		const item = this._registry.get<T>(label) || this._baseRegistry.get<T>(label);
+	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel, globalPrecedence: boolean = false): Constructor<T> | null {
+		let primaryRegistry = this._registry;
+		let secondaryRegistry = this._baseRegistry;
+
+		if (globalPrecedence) {
+			primaryRegistry = this._baseRegistry;
+			secondaryRegistry = this._registry;
+		}
+
+		let item = primaryRegistry.get<T>(label);
 		if (item) {
 			return item;
 		}
 
-		if (this._widgetHandles.indexOf(label) === -1) {
-			const baseHandle = this._baseRegistry.on(label, (event: RegistryEventObject) => {
+		const handles: Handle[] = [];
+		if (this._widgetLabels.indexOf(label) === -1) {
+			const primaryHandle = primaryRegistry.on(label, (event: RegistryEventObject) => {
 				if (event.action === 'loaded') {
 					this.emit({ type: 'invalidate' });
-					baseHandle.destroy();
+					handles.forEach((handle) => {
+						handle.destroy();
+					});
 				}
 			});
+			handles.push(primaryHandle);
+			this.own(primaryHandle);
+		}
 
-			const localHandle = this._registry.on(label, (event: RegistryEventObject) => {
-				if (event.action === 'loaded') {
-					this.emit({ type: 'invalidate' });
-					baseHandle.destroy();
-					localHandle.destroy();
-				}
-			});
-
-			this._baseRegistry.own(baseHandle);
-			this._registry.own(localHandle);
-			this._widgetHandles.push(label);
+		if (secondaryRegistry !== primaryRegistry) {
+			item = secondaryRegistry.get<T>(label);
+			if (item) {
+				this._widgetLabels.push(label);
+				return item;
+			}
+			if (this._widgetLabels.indexOf(label) === -1) {
+				const secondaryHandle = secondaryRegistry.on(label, (event: RegistryEventObject) => {
+					if (event.action === 'loaded') {
+						this.emit({ type: 'invalidate' });
+						secondaryHandle.destroy();
+					}
+				});
+				handles.push(secondaryHandle);
+				this.own(secondaryHandle);
+				this._widgetLabels.push(label);
+			}
 		}
 		return null;
 	}
@@ -66,26 +85,6 @@ export default class RegistryHandler extends Evented {
 		const item = this._registry.getInjector(label) || this._baseRegistry.getInjector(label);
 		if (item) {
 			return item;
-		}
-		if (this._widgetHandles.indexOf(label) === -1) {
-			const baseHandle = this._baseRegistry.on(label, (event: RegistryEventObject) => {
-				if (event.action === 'loaded') {
-					this.emit({ type: 'invalidate' });
-					baseHandle.destroy();
-				}
-			});
-
-			const localHandle = this._registry.on(label, (event: RegistryEventObject) => {
-				if (event.action === 'loaded') {
-					this.emit({ type: 'invalidate' });
-					baseHandle.destroy();
-					localHandle.destroy();
-				}
-			});
-
-			this._baseRegistry.own(baseHandle);
-			this._registry.own(localHandle);
-			this._injectorHandles.push(label);
 		}
 		return null;
 	}
