@@ -150,6 +150,7 @@ export class Registry extends Evented implements RegistryInterface {
 		}
 
 		this._injectorRegistry.set(label, item);
+		this.emitLoadedEvent(label);
 	}
 
 	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {

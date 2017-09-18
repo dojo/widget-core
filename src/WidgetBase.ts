@@ -182,8 +182,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _boundInvalidate: () => void;
 
-	private _defaultRegistry = new Registry();
-
 	private _nodeHandler: NodeHandler;
 
 	private _projectorAttachEvent: Handle;
@@ -208,7 +206,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registries = new RegistryHandler();
 		this._nodeHandler = new NodeHandler();
-		this._registries.add(this._defaultRegistry, true);
 		this.own(this._registries);
 		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
@@ -309,52 +306,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	protected setRegistry(previousRegistry: Registry | undefined, newRegistry: Registry | undefined): void {
-		const { _registries, _defaultRegistry } = this;
-
-		if (_registries.defaultRegistry === _defaultRegistry && newRegistry) {
-			_registries.remove(_defaultRegistry);
-		}
-
-		if (previousRegistry && newRegistry) {
-			_registries.replace(previousRegistry, newRegistry);
-		}
-		else if (newRegistry) {
-			_registries.add(newRegistry);
-		}
-		else if (previousRegistry) {
-			_registries.remove(previousRegistry);
+	protected setBaseRegistry(previousBaseRegistry: Registry, newBaseRegistry: Registry): void {
+		if (previousBaseRegistry !== newBaseRegistry) {
+			this.registries.base = newBaseRegistry;
+			this.invalidate();
 		}
 	}
 
-	protected setDefaultRegistry(previousRegistry: Registry | undefined, newRegistry: Registry | undefined): void {
-		const { _registries, _defaultRegistry } = this;
-		if (newRegistry === undefined && previousRegistry) {
-			_registries.remove(previousRegistry);
-			if (_registries.defaultRegistry === undefined) {
-				_registries.add(_defaultRegistry);
-			}
-		}
-		else if (newRegistry) {
-			const result = _registries.replace(previousRegistry || _defaultRegistry, newRegistry);
-			if (!result) {
-				_registries.add(newRegistry, true);
-			}
-		}
-	}
-
-	public __setCoreProperties__(coreProperties: CoreProperties) {
+	public __setCoreProperties__(coreProperties: CoreProperties): void {
 		this._renderState = WidgetRenderState.PROPERTIES;
-		const { registry, defaultRegistry } = coreProperties;
+		const { baseRegistry } = coreProperties;
 
-		if (this._coreProperties.registry !== registry) {
-			this.setRegistry(this._coreProperties.registry, registry);
-			this.invalidate();
-		}
-		if (this._coreProperties.defaultRegistry !== defaultRegistry) {
-			this.setDefaultRegistry(this._coreProperties.defaultRegistry, defaultRegistry);
-			this.invalidate();
-		}
+		this.setBaseRegistry(this._coreProperties.baseRegistry, baseRegistry);
 		this._coreProperties = coreProperties;
 	}
 
@@ -479,32 +442,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					}
 				}
 				else {
-					const { defaultRegistry, registry } = this.__getCoreProperties__(node.properties);
-					node.coreProperties = node.coreProperties || {};
-
-					if (node.coreProperties.bind === undefined) {
-						node.coreProperties.bind = this;
-					}
-					node.coreProperties.defaultRegistry = defaultRegistry;
-					node.coreProperties.registry = registry;
+					node.coreProperties = {
+						bind: this,
+						baseRegistry: this._coreProperties.baseRegistry
+					};
 				}
 				nodes = [ ...nodes, ...node.children ];
 			}
 		}
-	}
-
-	protected __getCoreProperties__(properties: any): CoreProperties {
-		const {
-			registry
-		} = properties;
-		const {
-			defaultRegistry = registry || this._registries.defaultRegistry
-		} = this._coreProperties;
-
-		return {
-			registry,
-			defaultRegistry
-		};
 	}
 
 	protected invalidate(): void {

@@ -19,59 +19,14 @@ registryB.define(bar, WidgetBase);
 
 registerSuite({
 	name: 'RegistryHandler',
-	'add': {
-		'add standard registry'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			const widget = registry.get('foo');
-			assert.equal(widget, WidgetBase);
-		},
-		'add default registry'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			assert.equal(registryHandler.defaultRegistry, registry);
-			registryHandler.add(registryB, true);
-			assert.equal(registryHandler.defaultRegistry, registryB);
-		}
-	},
-	'remove': {
-		'existing'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			assert.equal(registry.get('foo'), WidgetBase);
-			registryHandler.remove(registry);
-			assert.isNull(registryHandler.get('foo'));
-		},
-		'non-existing'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			assert.equal(registry.get('foo'), WidgetBase);
-			assert.isFalse(registryHandler.remove(registryB));
-		}
-	},
-	'replace': {
-		'existing'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			assert.equal(registry.get('foo'), WidgetBase);
-			registryHandler.replace(registry, registryB);
-			assert.isNull(registryHandler.get('foo'));
-			assert.equal(registryHandler.get('bar'), WidgetBase);
-		},
-		'non-existing'() {
-			const registryHandler = new RegistryHandler();
-			registryHandler.add(registry);
-			assert.equal(registry.get('foo'), WidgetBase);
-			assert.isFalse(registryHandler.replace(registryB, registry));
-		}
-	},
 	'has'() {
 		const registryHandler = new RegistryHandler();
-		registryHandler.add(registry);
-		registryHandler.add(registryB);
+		registryHandler.base = registry;
 		assert.isTrue(registryHandler.has('foo'));
-		assert.isTrue(registryHandler.has('bar'));
 		assert.isTrue(registryHandler.has(foo));
+		registryHandler.define('bar', WidgetBase);
+		registryHandler.define(bar, WidgetBase);
+		assert.isTrue(registryHandler.has('bar'));
 		assert.isTrue(registryHandler.has(bar));
 	},
 	'get'() {
@@ -81,8 +36,8 @@ registerSuite({
 			}, 1);
 		});
 		const registryHandler = new RegistryHandler();
-		registryHandler.add(registry);
-		registry.define('baz', promise);
+		registryHandler.base = registry;
+		registryHandler.define('baz', promise);
 		return promise.then(() => {
 			assert.equal(registryHandler.get('baz'), WidgetBase);
 		});
@@ -95,8 +50,7 @@ registerSuite({
 			}, 1);
 		});
 		const registryHandler = new RegistryHandler();
-		registryHandler.add(registry);
-		registry.define(baz, promise);
+		registryHandler.define(baz, promise);
 		return promise.then(() => {
 			assert.equal(registryHandler.get(baz), WidgetBase);
 		});
@@ -109,8 +63,7 @@ registerSuite({
 			}, 1);
 		});
 		const registryHandler = new RegistryHandler();
-		registryHandler.add(registry);
-		registry.define('baz-1', promise);
+		registryHandler.define('baz-1', promise);
 		return promise.then(() => {
 			const RegistryWidget = registryHandler.get<TestWidget>('baz-1');
 			assert.equal(RegistryWidget, TestWidget);
@@ -137,8 +90,7 @@ registerSuite({
 			invalidateCalled = true;
 		});
 
-		registryHandler.add(registry);
-		registry.define(baz, lazyWidget);
+		registryHandler.define(baz, lazyWidget);
 		registryHandler.get(baz);
 		return promise.then(() => {
 			assert.isTrue(invalidateCalled);
@@ -158,8 +110,7 @@ registerSuite({
 			invalidateCalled = true;
 		});
 
-		registryHandler.add(registry);
-		registry.define(baz, lazyWidget);
+		registryHandler.define(baz, lazyWidget);
 		registryHandler.get(baz);
 		registry.emit({ type: baz, action: 'other' });
 		assert.isFalse(invalidateCalled);

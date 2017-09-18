@@ -4,75 +4,88 @@ import { Registry, RegistryEventObject } from './Registry';
 import { Injector } from './Injector';
 
 export default class RegistryHandler extends Evented {
-	private _registries: { handle?: any, registry: Registry }[] = [];
+	private _baseRegistry = new Registry();
+	private _registry = new Registry();
+	private _widgetHandles: RegistryLabel[] = [];
+	private _injectorHandles: RegistryLabel[] = [];
 
-	public add(registry: Registry, isDefault: boolean = false) {
-		if (isDefault) {
-			this._registries.push({ registry });
+	constructor() {
+		super();
+		this.own(this._registry);
+		this.own(this._baseRegistry);
+	}
+
+	public set base(baseRegistry: Registry) {
+		this._baseRegistry = baseRegistry;
+		this._widgetHandles = [];
+		this._injectorHandles = [];
+	}
+
+	public define(label: RegistryLabel, widget: any): void {
+		this._registry.define(label, widget);
+	}
+
+	public has(label: RegistryLabel): boolean {
+		return this._registry.has(label) || this._baseRegistry.has(label);
+	}
+
+	public hasInjector(label: RegistryLabel): boolean {
+		return this._registry.hasInjector(label) || this._baseRegistry.hasInjector(label);
+	}
+
+	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {
+		const item = this._registry.get<T>(label) || this._baseRegistry.get<T>(label);
+		if (item) {
+			return item;
 		}
-		else {
-			this._registries.unshift({ registry });
-		}
-	}
 
-	public remove(registry: Registry): boolean {
-		return this._registries.some((registryWrapper, i) => {
-			if (registryWrapper.registry === registry) {
-				registry.destroy();
-				this._registries.splice(i, 1);
-				return true;
-			}
-			return false;
-		});
-	}
+		if (this._widgetHandles.indexOf(label) === -1) {
+			const baseHandle = this._baseRegistry.on(label, (event: RegistryEventObject) => {
+				if (event.action === 'loaded') {
+					this.emit({ type: 'invalidate' });
+					baseHandle.destroy();
+				}
+			});
 
-	public replace(original: Registry, replacement: Registry): boolean {
-		return this._registries.some((registryWrapper, i) => {
-			if (registryWrapper.registry === original) {
-				original.destroy();
-				registryWrapper.registry = replacement;
-				return true;
-			}
-			return false;
-		});
-	}
+			const localHandle = this._registry.on(label, (event: RegistryEventObject) => {
+				if (event.action === 'loaded') {
+					this.emit({ type: 'invalidate' });
+					baseHandle.destroy();
+					localHandle.destroy();
+				}
+			});
 
-	public get defaultRegistry(): Registry | undefined {
-		if (this._registries.length) {
-			return this._registries[this._registries.length - 1].registry;
-		}
-	}
-
-	public has(widgetLabel: RegistryLabel): boolean {
-		return this._registries.some((registryWrapper) => {
-			return registryWrapper.registry.has(widgetLabel);
-		});
-	}
-
-	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
-		for (let i = 0; i < this._registries.length; i++) {
-			const registryWrapper = this._registries[i];
-			return registryWrapper.registry.getInjector<T>(label);
+			this._baseRegistry.own(baseHandle);
+			this._registry.own(localHandle);
+			this._widgetHandles.push(label);
 		}
 		return null;
 	}
 
-	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(widgetLabel: RegistryLabel): Constructor<T> | null {
-		for (let i = 0; i < this._registries.length; i++) {
-			const registryWrapper = this._registries[i];
-			const item = registryWrapper.registry.get<T>(widgetLabel);
-			if (item) {
-				return item;
-			}
-			else if (!registryWrapper.handle) {
-				registryWrapper.handle = registryWrapper.registry.on(widgetLabel, (event: RegistryEventObject) => {
-					if (event.action === 'loaded') {
-						this.emit({ type: 'invalidate' });
-						registryWrapper.handle.destroy();
-						registryWrapper.handle = undefined;
-					}
-				});
-			}
+	public getInjector(label: RegistryLabel): Injector | null {
+		const item = this._registry.getInjector(label) || this._baseRegistry.getInjector(label);
+		if (item) {
+			return item;
+		}
+		if (this._widgetHandles.indexOf(label) === -1) {
+			const baseHandle = this._baseRegistry.on(label, (event: RegistryEventObject) => {
+				if (event.action === 'loaded') {
+					this.emit({ type: 'invalidate' });
+					baseHandle.destroy();
+				}
+			});
+
+			const localHandle = this._registry.on(label, (event: RegistryEventObject) => {
+				if (event.action === 'loaded') {
+					this.emit({ type: 'invalidate' });
+					baseHandle.destroy();
+					localHandle.destroy();
+				}
+			});
+
+			this._baseRegistry.own(baseHandle);
+			this._registry.own(localHandle);
+			this._injectorHandles.push(label);
 		}
 		return null;
 	}
