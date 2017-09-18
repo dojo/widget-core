@@ -167,7 +167,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _decoratorCache: Map<string, any[]>;
 
-	private _registries: RegistryHandler;
+	private _registry: RegistryHandler;
 
 	/**
 	 * Map of functions properties for the bound function
@@ -204,14 +204,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
-		this._registries = new RegistryHandler();
+		this._registry = new RegistryHandler();
 		this._nodeHandler = new NodeHandler();
-		this.own(this._registries);
+		this.own(this._registry);
 		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 
-		this.own(this._registries.on('invalidate', this._boundInvalidate));
+		this.own(this._registry.on('invalidate', this._boundInvalidate));
 		this._checkOnElementUsage();
 	}
 
@@ -308,7 +308,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	protected setBaseRegistry(previousBaseRegistry: Registry, newBaseRegistry: Registry): void {
 		if (previousBaseRegistry !== newBaseRegistry) {
-			this.registries.base = newBaseRegistry;
+			this._registry.base = newBaseRegistry;
 			this.invalidate();
 		}
 	}
@@ -589,8 +589,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return property;
 	}
 
-	public get registries(): RegistryHandler {
-		return this._registries;
+	public get registry(): RegistryHandler {
+		return this._registry;
 	}
 
 	private _runBeforeProperties(properties: any) {
@@ -664,7 +664,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			let child: WidgetBaseInterface<WidgetProperties>;
 
 			if (!isWidgetBaseConstructor(widgetConstructor)) {
-				const item = this._registries.get(widgetConstructor);
+				const item = this._registry.get(widgetConstructor);
 				if (item === null) {
 					return null;
 				}

@@ -806,7 +806,7 @@ registerSuite({
 				}
 				render() {
 					if (this._defineItem) {
-						this.registries.define('my-header4', TestHeaderLocalWidget);
+						this.registry.define('my-header4', TestHeaderLocalWidget);
 					}
 					else {
 						this._defineItem = true;
@@ -943,7 +943,7 @@ registerSuite({
 			class TestWidget extends WidgetBase<any> {
 				constructor() {
 					super();
-					this.registries.define('my-header', TestHeaderWidget);
+					this.registry.define('my-header', TestHeaderWidget);
 				}
 
 				render() {

@@ -290,7 +290,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 		protected setBaseRegistry(previousBaseRegistry: Registry, newBaseRegistry: Registry = new Registry()): void {
 			if (previousBaseRegistry !== newBaseRegistry) {
-				this.registries.base = newBaseRegistry;
+				this.registry.base = newBaseRegistry;
 				this.own(newBaseRegistry);
 				this.invalidate();
 			}
