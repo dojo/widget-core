@@ -13,16 +13,12 @@ export class RegistryHandler extends Evented {
 	constructor() {
 		super();
 		this.own(this._registry);
-		this._registryWidgetLabelMap.set(this._registry, []);
-		this._registryInjectorLabelMap.set(this._registry, []);
 	}
 
 	public set base(baseRegistry: Registry) {
 		this._registryWidgetLabelMap.delete(this._baseRegistry);
 		this._registryInjectorLabelMap.delete(this._baseRegistry);
 		this._baseRegistry = baseRegistry;
-		this._registryWidgetLabelMap.set(baseRegistry, []);
-		this._registryInjectorLabelMap.set(baseRegistry, []);
 	}
 
 	public define(label: RegistryLabel, widget: Constructor<WidgetBaseInterface>): void {
@@ -56,7 +52,7 @@ export class RegistryHandler extends Evented {
 			}
 			else if (registeredLabels.indexOf(label) === -1) {
 				const handle = registry.on(label, (event: RegistryEventObject) => {
-					if (event.action === 'loaded') {
+					if (event.action === 'loaded' && registry.get(label) === event.item) {
 						this.emit({ type: 'invalidate' });
 					}
 				});
@@ -82,7 +78,7 @@ export class RegistryHandler extends Evented {
 			}
 			else if (registeredLabels.indexOf(label) === -1) {
 				const handle = registry.on(label, (event: RegistryEventObject) => {
-					if (event.action === 'loaded') {
+					if (event.action === 'loaded' && registry.getInjector(label) === event.item) {
 						this.emit({ type: 'invalidate' });
 					}
 				});
