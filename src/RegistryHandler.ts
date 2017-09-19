@@ -93,8 +93,12 @@ export class RegistryHandler extends Evented {
 
 	}
 
-	public define(label: RegistryLabel, widget: any): void {
+	public define(label: RegistryLabel, widget: Constructor<WidgetBaseInterface>): void {
 		this._registry.define(label, widget);
+	}
+
+	public defineInjector(label: RegistryLabel, injector: Injector): void {
+		this._registry.defineInjector(label, injector);
 	}
 
 	public has(label: RegistryLabel): boolean {
