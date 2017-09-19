@@ -107,6 +107,20 @@ registerSuite({
 				registry.emit({ type: 'global', action: 'other' });
 				assert.strictEqual(invalidateCount, 1);
 			},
+			'no `invalidate` events emitted once the with registry with the highest precedence has loaded'() {
+				const registryHandler = new RegistryHandler();
+				const registry = new Registry();
+				registryHandler.base = registry;
+				let invalidateCount = 0;
+				registryHandler.on('invalidate', () => {
+					invalidateCount++;
+				});
+				registryHandler.get('widget');
+				registryHandler.define('widget', LocalWidget);
+				assert.strictEqual(invalidateCount, 1);
+				registry.define('widget', GlobalWidget);
+				assert.strictEqual(invalidateCount, 1);
+			},
 			'ignores unknown event actions'() {
 				const registryHandler = new RegistryHandler();
 				const registry = new Registry();
@@ -214,6 +228,21 @@ registerSuite({
 				registryHandler.defineInjector('global', localInjector);
 				assert.strictEqual(invalidateCount, 1);
 				registry.emit({ type: 'global', action: 'other' });
+				assert.strictEqual(invalidateCount, 1);
+			},
+			'no `invalidate` events emitted once the with registry with the highest precedence has loaded'() {
+				const registryHandler = new RegistryHandler();
+				const registry = new Registry();
+				registryHandler.base = registry;
+				const localInjector = new Injector({});
+				let invalidateCount = 0;
+				registryHandler.on('invalidate', () => {
+					invalidateCount++;
+				});
+				registryHandler.getInjector('injector');
+				registryHandler.defineInjector('injector', localInjector);
+				assert.strictEqual(invalidateCount, 1);
+				registry.defineInjector('injector', globalInjector);
 				assert.strictEqual(invalidateCount, 1);
 			},
 			'ignores unknown event actions'() {

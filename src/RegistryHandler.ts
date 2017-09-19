@@ -52,7 +52,7 @@ export class RegistryHandler extends Evented {
 			}
 			else if (registeredLabels.indexOf(label) === -1) {
 				const handle = registry.on(label, (event: RegistryEventObject) => {
-					if (event.action === 'loaded' && registry.get(label) === event.item) {
+					if (event.action === 'loaded' && this.get(label) === event.item) {
 						this.emit({ type: 'invalidate' });
 					}
 				});
@@ -78,7 +78,7 @@ export class RegistryHandler extends Evented {
 			}
 			else if (registeredLabels.indexOf(label) === -1) {
 				const handle = registry.on(label, (event: RegistryEventObject) => {
-					if (event.action === 'loaded' && registry.getInjector(label) === event.item) {
+					if (event.action === 'loaded' && this.getInjector(label) === event.item) {
 						this.emit({ type: 'invalidate' });
 					}
 				});

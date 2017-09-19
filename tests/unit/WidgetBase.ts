@@ -1262,8 +1262,6 @@ registerSuite({
 			assert.isTrue(widgetTwoInstantiated);
 		}
 	},
-	'registry': {
-	},
 	'child invalidation invalidates parent'() {
 		let childInvalidate = () => {};
 		let childInvalidateCalled = false;
