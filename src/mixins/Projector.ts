@@ -163,7 +163,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _boundDoRender: () => void;
 		private _boundRender: Function;
 		private _projectorChildren: DNode[];
-		private _projectorProperties: this['properties'] = {} as any;
+		private _projectorProperties: this['properties'];
 		private _rootTagName: string;
 		private _attachType: AttachType;
 
@@ -284,10 +284,9 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public setProperties(properties: this['properties']): void {
-			const { registry: previousRegistry } = this._projectorProperties;
-			if (previousRegistry !== properties.registry) {
-				if (previousRegistry) {
-					previousRegistry.destroy();
+			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
+				if (this._projectorProperties.registry) {
+					this._projectorProperties.registry.destroy();
 				}
 				if (properties.registry) {
 					this.own(properties.registry);
