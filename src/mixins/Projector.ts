@@ -50,7 +50,7 @@ export interface ProjectorProperties {
 
 export interface ProjectorMixin<P> {
 
-	readonly properties: Readonly<P> & ProjectorProperties;
+	readonly properties: Readonly<P> & Readonly<ProjectorProperties>;
 
 	/**
 	 * Append the projector to the root.
@@ -147,11 +147,11 @@ function setDomNodes(vnode: VNode, domNode: Element | null = null) {
 	}
 }
 
-export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<Readonly<P> & ProjectorProperties>> {
+export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
 	class Projector extends Base {
 
 		public projectorState: ProjectorAttachState;
-		public properties: Readonly<P> & ProjectorProperties;
+		public properties: Readonly<P> & Readonly<ProjectorProperties>;
 
 		private _root: Element;
 		private _async = true;

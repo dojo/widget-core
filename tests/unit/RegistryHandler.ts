@@ -74,7 +74,7 @@ registerSuite({
 				registryHandler.get('global');
 				registryHandler.get('global');
 				registry.define('global', GlobalWidget);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 			},
 			'invalidates when primary registry emits loaded event even when widget is loaded in secondary registry'() {
 				const registryHandler = new RegistryHandler();
@@ -88,9 +88,9 @@ registerSuite({
 				registryHandler.get('global');
 				registryHandler.get('global');
 				registry.define('global', GlobalWidget);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 				registryHandler.define('global', LocalWidget);
-				assert.strictEqual(2, invalidateCount);
+				assert.strictEqual(invalidateCount, 2);
 			},
 			'no loaded event listeners once the widget is fully loaded (into primary registry)'() {
 				const registryHandler = new RegistryHandler();
@@ -103,9 +103,9 @@ registerSuite({
 
 				registryHandler.get('global');
 				registryHandler.define('global', LocalWidget);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 			},
 			'ignores unknown event actions'() {
 				const registryHandler = new RegistryHandler();
@@ -119,10 +119,10 @@ registerSuite({
 				registryHandler.base = registry;
 				registryHandler.get('global');
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(0, invalidateCount);
+				assert.strictEqual(invalidateCount, 0);
 				registryHandler.get('global', true);
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(0, invalidateCount);
+				assert.strictEqual(invalidateCount, 0);
 			}
 		}
 	},
@@ -182,7 +182,7 @@ registerSuite({
 				registryHandler.getInjector('global');
 				registryHandler.getInjector('global');
 				registry.defineInjector('global', globalInjector);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 			},
 			'invalidates when primary registry emits loaded event even when widget is loaded in secondary registry'() {
 				const registryHandler = new RegistryHandler();
@@ -197,9 +197,9 @@ registerSuite({
 				registryHandler.getInjector('global');
 				registryHandler.getInjector('global');
 				registry.defineInjector('global', globalInjector);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 				registryHandler.defineInjector('global', localInjector);
-				assert.strictEqual(2, invalidateCount);
+				assert.strictEqual(invalidateCount, 2);
 			},
 			'no loaded event listeners once the widget is fully loaded (into primary registry)'() {
 				const registryHandler = new RegistryHandler();
@@ -212,9 +212,9 @@ registerSuite({
 
 				registryHandler.getInjector('global');
 				registryHandler.defineInjector('global', localInjector);
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(1, invalidateCount);
+				assert.strictEqual(invalidateCount, 1);
 			},
 			'ignores unknown event actions'() {
 				const registryHandler = new RegistryHandler();
@@ -227,10 +227,10 @@ registerSuite({
 
 				registryHandler.getInjector('global');
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(0, invalidateCount);
+				assert.strictEqual(invalidateCount, 0);
 				registryHandler.getInjector('global', true);
 				registry.emit({ type: 'global', action: 'other' });
-				assert.strictEqual(0, invalidateCount);
+				assert.strictEqual(invalidateCount, 0);
 			}
 		}
 	}
