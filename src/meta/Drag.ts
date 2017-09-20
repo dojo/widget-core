@@ -39,11 +39,8 @@ const emptyResults = Object.freeze({
  * Return the x/y position for an event
  * @param e The MouseEvent or TouchEvent
  */
-function getPosition(e: MouseEvent & TouchEvent): Position {
-	return e.type.match(/^touch/) ? {
-		x: e.changedTouches[0].screenX,
-		y: e.changedTouches[0].screenY
-	} : {
+function getPosition(e: PointerEvent): Position {
+	return {
 		x: e.pageX,
 		y: e.pageY
 	};
@@ -74,7 +71,7 @@ class DragController {
 		}
 	}
 
-	private _onDragStart = (e: MouseEvent & TouchEvent) => {
+	private _onDragStart = (e: PointerEvent) => {
 		const data = this._getData(e.target as HTMLElement);
 		if (data) {
 			const { state, target } = data;
@@ -86,7 +83,7 @@ class DragController {
 		} // else, we are ignoring the event
 	}
 
-	private _onDrag = (e: MouseEvent & TouchEvent) => {
+	private _onDrag = (e: PointerEvent) => {
 		const { _dragging } = this;
 		if (!_dragging) {
 			return;
@@ -98,7 +95,7 @@ class DragController {
 		state.invalidate();
 	}
 
-	private _onDragStop = (e: MouseEvent & TouchEvent) => {
+	private _onDragStop = (e: PointerEvent) => {
 		const { _dragging } = this;
 		if (!_dragging) {
 			return;
@@ -116,12 +113,9 @@ class DragController {
 
 	constructor() {
 		const win: Window = global.window;
-		win.addEventListener('mousedown', this._onDragStart);
-		win.addEventListener('mousemove', this._onDrag, true);
-		win.addEventListener('mouseup', this._onDragStop, true);
-		win.addEventListener('touchstart', this._onDragStart);
-		win.addEventListener('touchmove', this._onDrag, true);
-		win.addEventListener('touchend', this._onDragStop, true);
+		win.addEventListener('pointerdown', this._onDragStart);
+		win.addEventListener('pointermove', this._onDrag, true);
+		win.addEventListener('pointerup', this._onDragStop, true);
 	}
 
 	public get(node: HTMLElement, invalidate: () => void): DragResults {
@@ -163,9 +157,7 @@ export default class Drag extends Base {
 	private boundInvalidate = this.invalidate.bind(this);
 
 	public get(key: string): Readonly<DragResults> {
-		this.requireNode(key);
-
-		const node = this.nodes.get(key);
+		const node = this.getNode(key);
 
 		// if we don't have a reference to the node yet, return an empty set of results
 		if (!node) {

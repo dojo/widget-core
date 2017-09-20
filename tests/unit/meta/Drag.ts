@@ -62,7 +62,7 @@ registerSuite({
 		document.body.removeChild(div);
 	},
 
-	'mouse dragging a node'() {
+	'pointer dragging a node'() {
 		const dragResults: DragResults[] = [];
 
 		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
@@ -88,7 +88,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mousedown', {
+		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
 				bubbles: true,
 				pageX: 100,
@@ -98,7 +98,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 110,
@@ -108,83 +108,11 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mouseup', {
+		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
 				bubbles: true,
 				pageX: 105,
 				pageY: 45
-			}
-		});
-
-		resolveRAF();
-
-		assert.deepEqual(dragResults, [
-			emptyResults,
-			emptyResults,
-			{
-				delta: { x: 0, y: 0 },
-				isDragging: true
-			}, {
-				delta: { x: 10, y: 5 },
-				isDragging: true
-			}, {
-				delta: { x: -5, y: -10 },
-				isDragging: false
-			}
-		], 'the stack of should represent a drag state');
-
-		widget.destroy();
-		document.body.removeChild(div);
-	},
-
-	'touch dragging a node'() {
-		const dragResults: DragResults[] = [];
-
-		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
-			render() {
-				dragResults.push(this.meta(Drag).get('root'));
-				return v('div', {
-					innerHTML: 'hello world',
-					key: 'root',
-					styles: {
-						width: '100px',
-						height: '100px'
-					}
-				});
-			}
-		}
-
-		const div = document.createElement('div');
-
-		document.body.appendChild(div);
-
-		const widget = new TestWidget();
-		widget.append(div);
-
-		resolveRAF();
-
-		sendEvent(div.firstChild as Element, 'touchstart', {
-			eventInit: {
-				bubbles: true,
-				changedTouches: [ { screenX: 100, screenY: 50 } ]
-			}
-		});
-
-		resolveRAF();
-
-		sendEvent(div.firstChild as Element, 'touchmove', {
-			eventInit: {
-				bubbles: true,
-				changedTouches: [ { screenX: 110, screenY: 55 } ]
-			}
-		});
-
-		resolveRAF();
-
-		sendEvent(div.firstChild as Element, 'touchend', {
-			eventInit: {
-				bubbles: true,
-				changedTouches: [ { screenX: 105, screenY: 45 } ]
 			}
 		});
 
@@ -235,7 +163,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mousedown', {
+		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
 				bubbles: true,
 				pageX: 100,
@@ -245,7 +173,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 105,
@@ -253,7 +181,7 @@ registerSuite({
 			}
 		});
 
-		sendEvent(div.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 110,
@@ -261,7 +189,7 @@ registerSuite({
 			}
 		});
 
-		sendEvent(div.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 115,
@@ -271,7 +199,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'mouseup', {
+		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
 				bubbles: true,
 				pageX: 120,
@@ -326,19 +254,21 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'touchmove', {
+		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
-				changedTouches: [ { screenX: 110, screenY: 55 } ]
+				pageX: 115,
+				pageY: 65
 			}
 		});
 
 		resolveRAF();
 
-		sendEvent(div.firstChild as Element, 'touchend', {
+		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
 				bubbles: true,
-				changedTouches: [ { screenX: 105, screenY: 45 } ]
+				pageX: 120,
+				pageY: 70
 			}
 		});
 
@@ -383,7 +313,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mousedown', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointerdown', {
 			eventInit: {
 				bubbles: true,
 				pageX: 100,
@@ -393,7 +323,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 110,
@@ -403,7 +333,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mouseup', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointerup', {
 			eventInit: {
 				bubbles: true,
 				pageX: 105,
@@ -466,7 +396,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mousedown', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointerdown', {
 			eventInit: {
 				bubbles: true,
 				pageX: 100,
@@ -476,7 +406,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mousemove', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointermove', {
 			eventInit: {
 				bubbles: true,
 				pageX: 110,
@@ -486,7 +416,7 @@ registerSuite({
 
 		resolveRAF();
 
-		sendEvent(div.firstChild!.firstChild as Element, 'mouseup', {
+		sendEvent(div.firstChild!.firstChild as Element, 'pointerup', {
 			eventInit: {
 				bubbles: true,
 				pageX: 105,
