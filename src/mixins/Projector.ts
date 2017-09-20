@@ -181,7 +181,9 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this._boundDoRender = this._doRender.bind(this);
 			this._boundRender = this.__render__.bind(this);
-			this.own(this.on('invalidated', this.scheduleRender));
+			this.own(this.on('invalidated', () => {
+				this.scheduleRender();
+			}));
 
 			this.root = document.body;
 			this.projectorState = ProjectorAttachState.Detached;
@@ -281,6 +283,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		public setChildren(children: DNode[]): void {
 			this._projectorChildren = [ ...children ];
 			super.__setChildren__(children);
+			this.emit({ type: 'invalidated' });
 		}
 
 		public setProperties(properties: this['properties']): void {
@@ -295,6 +298,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			this._projectorProperties = assign({}, properties);
 			super.__setCoreProperties__({ bind: this, baseRegistry: properties.registry });
 			super.__setProperties__(properties);
+			this.emit({ type: 'invalidated' });
 		}
 
 		public toHtml(): string {
@@ -333,11 +337,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 				}
 			}
 			return result;
-		}
-
-		protected invalidate(): void {
-			super.invalidate();
-			this.scheduleRender();
 		}
 
 		private _doRender() {
