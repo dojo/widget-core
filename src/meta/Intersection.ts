@@ -9,14 +9,14 @@ interface ExtendedIntersectionObserverEntry extends IntersectionObserverEntry {
 }
 
 interface IntersectionDetail extends IntersectionGetOptions {
-	entries: WeakMap<Element, ExtendedIntersectionObserverEntry>;
-	observer?: IntersectionObserver;
+	entries: WeakMap<Element, IntersectionResult>;
+	observer: IntersectionObserver;
 }
 
 export interface IntersectionGetOptions {
 	root?: string;
 	rootMargin?: string;
-	thresholds?: number[];
+	threshold?: number[];
 }
 
 export interface IntersectionResult {
@@ -34,10 +34,8 @@ export class Intersection extends Base {
 
 	public get(key: string, options: IntersectionGetOptions = {}): IntersectionResult {
 		let rootNode: HTMLElement | undefined;
-		const details = this._getDetails(options);
-
-		if (details.root) {
-			rootNode = this.getNode(details.root);
+		if (options.root) {
+			rootNode = this.getNode(options.root);
 			if (!rootNode) {
 				return defaultIntersection;
 			}
@@ -47,52 +45,41 @@ export class Intersection extends Base {
 			return defaultIntersection;
 		}
 
-		this._getIntersectionObserver(details, rootNode).observe(node);
-		const { intersectionRatio, isIntersecting } = details.entries.get(node) || defaultIntersection;
-		return {
-			intersectionRatio,
-			isIntersecting
-		};
+		const cacheKey = JSON.stringify(options);
+		let details = this._details.get(cacheKey);
+
+		if (!details) {
+			details = this._createDetails(options, rootNode);
+			details.observer.observe(node);
+		}
+
+		return details.entries.get(node) || defaultIntersection;
 	}
 
 	public has(key: string | number, options?: IntersectionGetOptions): boolean {
 		const node = this.getNode(key);
-		if (!node) {
-			return false;
-		}
-		return this._getDetails(options).entries.has(node);
+		const details = this._getDetails(options);
+		return Boolean(details && node && details.entries.has(node));
 	}
 
-	private _getDetails(options: IntersectionGetOptions = {}): IntersectionDetail {
-		const cacheKey = JSON.stringify(options);
-		let cached = this._details.get(cacheKey);
+	private _createDetails(options: IntersectionGetOptions, rootNode?: HTMLElement): IntersectionDetail {
+		const entries = new WeakMap<HTMLElement, ExtendedIntersectionObserverEntry>();
+		const observer = new global.IntersectionObserver(this._onIntersect(entries), options);
+		const details = { observer, entries, ...options };
 
-		if (!cached) {
-			const entries = new WeakMap<HTMLElement, ExtendedIntersectionObserverEntry>();
-			cached = { ...options, entries };
-			this._details.set(cacheKey, cached);
-		}
-		return cached;
-	}
-
-	private _getIntersectionObserver(details: IntersectionDetail, rootNode?: HTMLElement): IntersectionObserver {
-		if (details.observer) {
-			return details.observer;
-		}
-
-		const { rootMargin, thresholds } = details;
-		const options = { rootMargin, thresholds, root: rootNode };
-		const observer = new global.IntersectionObserver(this._onIntersect(details), options);
-
+		this._details.set(JSON.stringify(options), details);
 		this.own(createHandle(observer.disconnect));
-		details.observer = observer;
-		return observer;
+		return details;
 	}
 
-	private _onIntersect = (details: IntersectionDetail) => {
+	private _getDetails(options: IntersectionGetOptions = {}): IntersectionDetail | undefined {
+		return this._details.get(JSON.stringify(options));
+	}
+
+	private _onIntersect = (detailEntries: WeakMap<Element, IntersectionResult>) => {
 		return (entries: ExtendedIntersectionObserverEntry[]) => {
-			for (const entry of entries) {
-				details.entries.set(entry.target, entry);
+			for (const { intersectionRatio, isIntersecting, target } of entries) {
+				detailEntries.set(target, { intersectionRatio, isIntersecting });
 			}
 			this.invalidate();
 		};
