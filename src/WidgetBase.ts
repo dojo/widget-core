@@ -329,28 +329,48 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	public __setProperties__(originalProperties: this['properties']): void {
 		const properties = this._runBeforeProperties(originalProperties);
-		const changedPropertyKeys: string[] = [];
-		const allProperties = [ ...Object.keys(properties), ...Object.keys(this._properties) ];
-		const checkedProperties: string[] = [];
-		const diffPropertyResults: any = {};
+		const alwaysRender = this.getDecorator('alwaysRender').length > 0;
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
-		let runReactions = false;
 
+		let changedPropertyKeys: string[] = [];
+		let diffPropertyResults: any = {};
 		this._renderState = WidgetRenderState.PROPERTIES;
 
-		for (let i = 0; i < allProperties.length; i++) {
-			const propertyName = allProperties[i];
-			if (checkedProperties.indexOf(propertyName) > 0) {
-				continue;
+		if (alwaysRender) {
+			if (registeredDiffPropertyNames.length > 0) {
+				throw new Error('Widget marked as `alwayRender` but has custom diffs registered');
 			}
-			checkedProperties.push(propertyName);
-			const previousProperty = this._properties[propertyName];
-			const newProperty = this._bindFunctionProperty(properties[propertyName], this._coreProperties.bind);
-			if (registeredDiffPropertyNames.indexOf(propertyName) !== -1) {
-				runReactions = true;
-				const diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
-				for (let i = 0; i < diffFunctions.length; i++) {
-					const result = diffFunctions[i](previousProperty, newProperty);
+			changedPropertyKeys = Object.keys(properties);
+			diffPropertyResults = { ...properties };
+		}
+		else {
+			const allProperties = [ ...Object.keys(properties), ...Object.keys(this._properties) ];
+			const checkedProperties: string[] = [];
+			let runReactions = false;
+
+			for (let i = 0; i < allProperties.length; i++) {
+				const propertyName = allProperties[i];
+				if (checkedProperties.indexOf(propertyName) > 0) {
+					continue;
+				}
+				checkedProperties.push(propertyName);
+				const previousProperty = this._properties[propertyName];
+				const newProperty = this._bindFunctionProperty(properties[propertyName], this._coreProperties.bind);
+				if (registeredDiffPropertyNames.indexOf(propertyName) !== -1) {
+					runReactions = true;
+					const diffFunctions = this.getDecorator(`diffProperty:${propertyName}`);
+					for (let i = 0; i < diffFunctions.length; i++) {
+						const result = diffFunctions[i](previousProperty, newProperty);
+						if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
+							changedPropertyKeys.push(propertyName);
+						}
+						if (propertyName in properties) {
+							diffPropertyResults[propertyName] = result.value;
+						}
+					}
+				}
+				else {
+					const result = boundAuto(previousProperty, newProperty);
 					if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 						changedPropertyKeys.push(propertyName);
 					}
@@ -359,29 +379,20 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					}
 				}
 			}
-			else {
-				const result = boundAuto(previousProperty, newProperty);
-				if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
-					changedPropertyKeys.push(propertyName);
-				}
-				if (propertyName in properties) {
-					diffPropertyResults[propertyName] = result.value;
-				}
-			}
-		}
 
-		if (runReactions) {
-			this._mapDiffPropertyReactions(properties, changedPropertyKeys).forEach((args, reaction) => {
-				if (args.changed) {
-					reaction.call(this, args.previousProperties, args.newProperties);
-				}
-			});
+			if (runReactions) {
+				this._mapDiffPropertyReactions(properties, changedPropertyKeys).forEach((args, reaction) => {
+					if (args.changed) {
+						reaction.call(this, args.previousProperties, args.newProperties);
+					}
+				});
+			}
 		}
 
 		this._properties = diffPropertyResults;
 		this._changedPropertyKeys = changedPropertyKeys;
 
-		if (changedPropertyKeys.length > 0) {
+		if (changedPropertyKeys.length > 0 || alwaysRender) {
 			this.invalidate();
 		}
 	}

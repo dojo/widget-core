@@ -386,7 +386,6 @@ registerSuite({
 			});
 			assert.strictEqual(vnode, widget.__render__());
 		},
-
 		'properties that are deleted dont get returned'() {
 			const widget = new WidgetBase<any>();
 			widget.__setProperties__({
@@ -402,6 +401,33 @@ registerSuite({
 				c: 5
 			});
 
+			assert.deepEqual(widget.properties, { a: 4, c: 5 });
+		},
+		'properties implicitly removed cause an invalidate but are not set on properties'() {
+			@diffProperty('b', always)
+			class TestWidget extends WidgetBase<any> {
+				public invalidateCount = 0;
+				invalidate() {
+					this.invalidateCount++;
+					super.invalidate();
+				}
+			}
+			const widget = new TestWidget();
+			widget.__setProperties__({
+				a: 1,
+				b: 2,
+				c: 3
+			});
+
+			assert.strictEqual(widget.invalidateCount, 1);
+			assert.deepEqual(widget.properties, { a: 1, b: 2, c: 3 });
+
+			widget.__setProperties__({
+				a: 4,
+				c: 5
+			});
+
+			assert.strictEqual(widget.invalidateCount, 2);
 			assert.deepEqual(widget.properties, { a: 4, c: 5 });
 		}
 	},
