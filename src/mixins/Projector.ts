@@ -344,7 +344,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return result;
 		}
 
-		public invalidate() {
+		public invalidate(): void {
 			super.invalidate();
 		}
 
