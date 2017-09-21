@@ -129,6 +129,11 @@ export interface ProjectorMixin<P> {
 	 * The status of the projector
 	 */
 	readonly projectorState: ProjectorAttachState;
+
+	/**
+	 * Exposes invalidate for projector instances
+	 */
+	invalidate(): void;
 }
 
 /**
@@ -337,6 +342,10 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 				}
 			}
 			return result;
+		}
+
+		public invalidate() {
+			super.invalidate();
 		}
 
 		private _doRender() {
