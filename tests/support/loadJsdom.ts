@@ -31,6 +31,8 @@ global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
 
 global.cancelAnimationFrame = () => {};
 
+global.IntersectionObserver = function() {};
+
 export default doc;
 
 console.log('Loaded JSDOM...');
