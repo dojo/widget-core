@@ -769,8 +769,9 @@ registerSuite({
 	'scheduleRender not called on invalidate'() {
 		const projector = new BaseTestWidget();
 		const scheduleRender = spy(projector, 'scheduleRender');
+		projector.__setProperties__({});
 		projector.invalidate();
-		assert.isTrue(scheduleRender.called);
+		assert.isTrue(scheduleRender.notCalled);
 	},
 	'properties are reset to original state on render'() {
 		const testProperties = {
