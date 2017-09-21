@@ -45,9 +45,7 @@ export class Intersection extends Base {
 			return defaultIntersection;
 		}
 
-		const cacheKey = JSON.stringify(options);
-		let details = this._details.get(cacheKey);
-
+		let details = this._getDetails(options);
 		if (!details) {
 			details = this._createDetails(options, rootNode);
 			details.observer.observe(node);
