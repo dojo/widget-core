@@ -178,6 +178,9 @@ registerSuite({
 			assert.isTrue(invalidateStub.calledOnce);
 
 			intersection.get('foo', { root: 'root' });
+
+			assert.isTrue(intersectionObserver.calledOnce);
+			assert.strictEqual(intersectionObserver.firstCall.args[1].root, root);
 			assert.lengthOf(observers, 1);
 
 			const [ observer, callback ] = observers[0];

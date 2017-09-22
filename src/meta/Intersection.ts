@@ -64,7 +64,7 @@ export class Intersection extends Base {
 
 	private _createDetails(options: IntersectionGetOptions, rootNode?: HTMLElement): IntersectionDetail {
 		const entries = new WeakMap<HTMLElement, ExtendedIntersectionObserverEntry>();
-		const observer = new global.IntersectionObserver(this._onIntersect(entries), options);
+		const observer = new global.IntersectionObserver(this._onIntersect(entries), { ...options, root: rootNode });
 		const details = { observer, entries, ...options };
 
 		this._details.set(JSON.stringify(options), details);
