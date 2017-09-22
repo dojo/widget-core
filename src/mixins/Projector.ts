@@ -352,8 +352,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			if (this._projectorProperties) {
 				this.setProperties(this._projectorProperties);
 			}
-			const result = super.__render__() as VNode;
-			return result;
+			return super.__render__() as VNode;
 		}
 
 		public invalidate(): void {
