@@ -3,6 +3,7 @@ import WeakMap from '@dojo/shim/WeakMap';
 import Map from '@dojo/shim/Map';
 import { createHandle } from '@dojo/core/lang';
 import { Base } from './Base';
+import { WidgetMetaProperties } from './../interfaces';
 
 import 'intersection-observer';
 
@@ -32,8 +33,14 @@ const defaultIntersection: IntersectionResult = Object.freeze({
 });
 
 export class Intersection extends Base {
-	private readonly _details: Map<string, IntersectionDetail> = new Map();
+	private readonly _details = new Map<string, IntersectionDetail>();
 
+	/**
+	 * Return an `InteractionResult` for the requested key and options.
+	 *
+	 * @param key The key to return the intersection meta for
+	 * @param options The options for the request
+	 */
 	public get(key: string, options: IntersectionGetOptions = {}): IntersectionResult {
 		let rootNode: HTMLElement | undefined;
 		if (options.root) {
@@ -56,6 +63,12 @@ export class Intersection extends Base {
 		return details.entries.get(node) || defaultIntersection;
 	}
 
+	/**
+	 * Returns true if the node for the key has intersection details
+	 *
+	 * @param key The key to return the intersection meta for
+	 * @param options The options for the request
+	 */
 	public has(key: string | number, options?: IntersectionGetOptions): boolean {
 		const node = this.getNode(key);
 		const details = this._getDetails(options);
