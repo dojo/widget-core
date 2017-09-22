@@ -3,7 +3,6 @@ import WeakMap from '@dojo/shim/WeakMap';
 import Map from '@dojo/shim/Map';
 import { createHandle } from '@dojo/core/lang';
 import { Base } from './Base';
-import { WidgetMetaProperties } from './../interfaces';
 
 import 'intersection-observer';
 
