@@ -1,7 +1,8 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { v , w } from '../../src/d';
-import { diffProperty, WidgetBase } from '../../src/WidgetBase';
+import { WidgetBase } from '../../src/WidgetBase';
+import { diffProperty } from './../../src/decorators/diffProperty';
 import { always } from '../../src/diff';
 import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
@@ -52,7 +53,8 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
 		const widget = new TestWidgetContainer();
-		widget.__setProperties__({ foo: 'bar', registry });
+		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
+		widget.__setProperties__({ foo: 'bar' });
 		widget.__setChildren__([]);
 		widget.__render__();
 	},
@@ -70,7 +72,8 @@ registerSuite({
 		};
 		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
 		const widget = new TestWidgetContainer();
-		widget.__setProperties__({ foo: 'bar', registry });
+		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
+		widget.__setProperties__({ foo: 'bar' });
 		widget.__setChildren__([ child ]);
 		widget.__render__();
 	},
@@ -87,8 +90,7 @@ registerSuite({
 		};
 
 		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1', { getProperties });
-		const widget = createTestWidget(TestWidgetContainer, { foo: 'bar' });
-		widget.__setCoreProperties__({ registry });
+		const widget = createTestWidget(TestWidgetContainer, { foo: 'bar', registry });
 		const renderResult: any = widget.__render__();
 		assert.strictEqual(renderResult.vnodeSelector, 'test');
 	},
@@ -105,7 +107,7 @@ registerSuite({
 
 		}
 		const widget = new Parent();
-		widget.__setCoreProperties__({ bind: widget, registry });
+		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
 		widget.__setProperties__({ foo: 'bar'});
 		const renderResult = widget.__render__();
 		injector.set({ foo: 'bar' });

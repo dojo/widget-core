@@ -5,11 +5,14 @@ import { Handle } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
 import { VNode } from '@dojo/interfaces/vdom';
 import { ProjectionOptions } from '../interfaces';
-import { dom, h, Projection } from 'maquette';
+import { dom, Projection } from 'maquette';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
+import { afterRender } from './../decorators/afterRender';
+import { isHNode, v } from './../d';
+import { Registry } from './../Registry';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
 
 /**
@@ -43,9 +46,13 @@ export interface AttachOptions {
 	root?: Element;
 }
 
+export interface ProjectorProperties {
+	registry?: Registry;
+}
+
 export interface ProjectorMixin<P> {
 
-	readonly properties: Readonly<P>;
+	readonly properties: Readonly<P> & Readonly<ProjectorProperties>;
 
 	/**
 	 * Append the projector to the root.
@@ -124,6 +131,11 @@ export interface ProjectorMixin<P> {
 	 * The status of the projector
 	 */
 	readonly projectorState: ProjectorAttachState;
+
+	/**
+	 * Exposes invalidate for projector instances
+	 */
+	invalidate(): void;
 }
 
 /**
@@ -146,6 +158,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 	class Projector extends Base {
 
 		public projectorState: ProjectorAttachState;
+		public properties: Readonly<P> & Readonly<ProjectorProperties>;
 
 		private _root: Element;
 		private _async = true;
@@ -175,7 +188,9 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this._boundDoRender = this._doRender.bind(this);
 			this._boundRender = this.__render__.bind(this);
-			this.own(this.on('invalidated', this.scheduleRender));
+			this.own(this.on('invalidated', () => {
+				this.scheduleRender();
+			}));
 
 			this.root = document.body;
 			this.projectorState = ProjectorAttachState.Detached;
@@ -275,14 +290,22 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		public setChildren(children: DNode[]): void {
 			this._projectorChildren = [ ...children ];
 			super.__setChildren__(children);
+			this.emit({ type: 'invalidated' });
 		}
 
 		public setProperties(properties: this['properties']): void {
-			const baseProperties = this.__getCoreProperties__(properties);
+			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
+				if (this._projectorProperties.registry) {
+					this._projectorProperties.registry.destroy();
+				}
+				if (properties.registry) {
+					this.own(properties.registry);
+				}
+			}
 			this._projectorProperties = assign({}, properties);
-
-			super.__setCoreProperties__(baseProperties);
+			super.__setCoreProperties__({ bind: this, baseRegistry: properties.registry });
 			super.__setProperties__(properties);
+			this.emit({ type: 'invalidated' });
 		}
 
 		public toHtml(): string {
@@ -292,6 +315,36 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			return this._projection.domNode.outerHTML;
 		}
 
+		@afterRender()
+		public afterRender(result: DNode) {
+			let node = result;
+			if (Array.isArray(result) || typeof result === 'string' || result === null || result === undefined) {
+				if (!this._rootTagName) {
+					this._rootTagName = 'span';
+				}
+
+				node = v(this._rootTagName);
+				node.children = Array.isArray(result) ? result : [ result ];
+			}
+			else if (isHNode(node) && !this._rootTagName) {
+				this._rootTagName = node.tag;
+			}
+
+			if (isHNode(node)) {
+				if (this._rootTagName !== node.tag) {
+					if (this._attachType === AttachType.Merge) {
+						node.tag = this._rootTagName;
+					}
+					else {
+						node = v(this._rootTagName);
+						node.children = Array.isArray(result) ? result : [ result ];
+					}
+				}
+			}
+
+			return node;
+		}
+
 		public __render__(): VNode {
 			if (this._projectorChildren) {
 				this.setChildren(this._projectorChildren);
@@ -299,33 +352,11 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			if (this._projectorProperties) {
 				this.setProperties(this._projectorProperties);
 			}
-			let result = super.__render__();
-
-			if (Array.isArray(result) || typeof result === 'string' || result === null || result === undefined) {
-				if (!this._rootTagName) {
-					this._rootTagName = 'span';
-				}
-
-				result = h(this._rootTagName, {}, result);
-			}
-			else if (!this._rootTagName) {
-				this._rootTagName = result.vnodeSelector;
-			}
-
-			if (this._rootTagName !== result.vnodeSelector) {
-				if (this._attachType === AttachType.Merge) {
-					assign(result, { vnodeSelector: this._rootTagName });
-				}
-				else {
-					result = h(this._rootTagName, {}, result);
-				}
-			}
-			return result;
+			return super.__render__() as VNode;
 		}
 
-		protected invalidate(): void {
+		public invalidate(): void {
 			super.invalidate();
-			this.scheduleRender();
 		}
 
 		private _doRender() {

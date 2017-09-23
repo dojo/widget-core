@@ -1,34 +1,24 @@
-import { VNode } from '@dojo/interfaces/vdom';
-import Promise from '@dojo/shim/Promise';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { stub, spy, SinonStub } from 'sinon';
 import { v, w } from '../../src/d';
-import { Constructor, DNode, PropertyChangeRecord, Render } from '../../src/interfaces';
-import {
-	WidgetBase,
-	diffProperty,
-	afterRender,
-	beforeRender
-} from '../../src/WidgetBase';
-import { ignore, always, auto } from '../../src/diff';
+import { VNode } from '@dojo/interfaces/vdom';
+import { Constructor, DNode } from '../../src/interfaces';
+import { WidgetBase } from '../../src/WidgetBase';
 import Registry, { WIDGET_BASE_TYPE } from './../../src/Registry';
-import { ThemeableMixin } from './../../src/mixins/Themeable';
-import createTestWidget from './../support/createTestWidget';
 
-interface TestProperties {
-	id?: string;
-	foo: string;
-	bar?: null | string;
-	baz?: number;
-	qux?: boolean;
-}
+import { handleDecorator } from './../../src/decorators/handleDecorator';
+import createTestWidget from './../support/createTestWidget';
 
 let consoleStub: SinonStub;
 
 const registry = new Registry();
 
-const ThemableWidgetBase = ThemeableMixin(WidgetBase);
+function testDecorator(func?: Function) {
+	return handleDecorator((target, propertyKey) => {
+		target.addDecorator('test-decorator', func);
+	});
+}
 
 registerSuite({
 	name: 'WidgetBase',
@@ -42,24 +32,6 @@ registerSuite({
 		const widgetBase = new WidgetBase();
 		assert(widgetBase);
 		assert.isFunction(widgetBase.__render__);
-	},
-	'deprecated api warning'() {
-		class TestWidgetOne extends WidgetBase<any> {
-			onElementUpdated(element: Element, key: string) {
-
-			}
-			onElementCreated(element: Element, key: string) {
-
-			}
-		}
-		class TestWidgetTwo extends WidgetBase<any> {}
-
-		const name = (<any> TestWidgetOne).name || 'unknown';
-		new TestWidgetOne();
-		new TestWidgetTwo();
-		assert.isTrue(consoleStub.calledTwice);
-		assert.isTrue(consoleStub.firstCall.calledWith(`Usage of 'onElementCreated' has been deprecated and will be removed in a future version, see https://github.com/dojo/widget-core/issues/559 for details (${name})`));
-		assert.isTrue(consoleStub.secondCall.calledWith(`Usage of 'onElementUpdated' has been deprecated and will be removed in a future version, see https://github.com/dojo/widget-core/issues/559 for details (${name})`));
 	},
 	children() {
 		const expectedChild = v('div');
@@ -100,12 +72,8 @@ registerSuite({
 			let invalidateCalled = false;
 			let renderCount = 0;
 			class Foo extends WidgetBase<{ bar: string }> {
-				@diffProperty('bar', auto)
-				barDiff() {
-					this.invalidate();
-					return {
-						changed: false
-					};
+				invalidate() {
+					super.invalidate();
 				}
 				render() {
 					renderCount++;
@@ -119,7 +87,9 @@ registerSuite({
 			});
 			foo.__render__();
 			assert.equal(renderCount, 1);
-			foo.__setProperties__({ bar: 'qux' });
+			foo.__setCoreProperties__({ bind: foo, baseRegistry: registry });
+			foo.invalidate();
+			foo.__setProperties__({ bar: '' });
 			foo.__render__();
 			assert.equal(renderCount, 2);
 			assert.isFalse(invalidateCalled);
@@ -150,281 +120,6 @@ registerSuite({
 			const widget = new WidgetBase();
 			const renderedWidget = <VNode> (<any> widget).__render__();
 			assert.deepEqual(renderedWidget.vnodeSelector, 'div');
-	},
-	diffProperty: {
-		'decorator': {
-			'diff with no reaction'() {
-				let callCount = 0;
-				function diffFoo(previousProperty: any, newProperty: any) {
-					callCount++;
-					assert.equal(newProperty, 'bar');
-					return {
-						changed: true,
-						value: newProperty
-					};
-				}
-
-				@diffProperty('foo', diffFoo)
-				@diffProperty('bar', diffFoo)
-				class TestWidget extends WidgetBase<TestProperties> {}
-
-				const testWidget = new TestWidget();
-
-				testWidget.__setProperties__({ id: '', foo: 'bar' });
-				assert.equal(callCount, 1);
-			},
-			'diff with reaction': {
-				'reaction does not execute if no registered properties are changed'() {
-					let callCount = 0;
-					function customDiff(previousProperty: any, newProperty: any) {
-						callCount++;
-						return {
-							changed: false,
-							value: newProperty
-						};
-					}
-
-					class TestWidget extends WidgetBase<TestProperties> {
-
-						reactionCalled = false;
-
-						@diffProperty('foo', customDiff)
-						@diffProperty('id', customDiff)
-						protected onFooOrBarChanged(): void {
-							this.reactionCalled = true;
-						}
-					}
-					const testWidget = new TestWidget();
-					testWidget.__setProperties__({ id: '', foo: 'bar' });
-					assert.strictEqual(callCount, 2);
-					assert.isFalse(testWidget.reactionCalled);
-				},
-				'reaction executed when at least one registered properties is changed'() {
-					let callCount = 0;
-					function customDiff(previousProperty: any, newProperty: any) {
-						callCount++;
-						return {
-							changed: newProperty === 'bar' ? true : false,
-							value: newProperty
-						};
-					}
-
-					class TestWidget extends WidgetBase<TestProperties> {
-
-						reactionCalled = false;
-
-						@diffProperty('foo', customDiff)
-						@diffProperty('id', customDiff)
-						protected onFooOrBarChanged(): void {
-							this.reactionCalled = true;
-						}
-					}
-					const testWidget = new TestWidget();
-					testWidget.__setProperties__({ id: '', foo: 'bar' });
-					assert.strictEqual(callCount, 2);
-					assert.isTrue(testWidget.reactionCalled);
-				}
-			}
-		},
-		'non decorator': {
-			'diff with no reaction'() {
-				let callCount = 0;
-
-				function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
-					callCount++;
-					assert.equal(newProperty, 'bar');
-					return {
-						changed: false,
-						value: newProperty
-					};
-				}
-
-				class TestWidget extends WidgetBase<TestProperties> {
-					constructor() {
-						super();
-						diffProperty('foo', diffPropertyFoo)(this);
-					}
-				}
-
-				const testWidget = new TestWidget();
-				testWidget.__setProperties__({ id: '', foo: 'bar' });
-				assert.equal(callCount, 1);
-			},
-			'diff with reaction': {
-				'reaction does not execute if no registered properties are changed'() {
-					let callCount = 0;
-
-					function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
-						callCount++;
-						assert.equal(newProperty, 'bar');
-						return {
-							changed: false,
-							value: newProperty
-						};
-					}
-
-					class TestWidget extends WidgetBase<TestProperties> {
-						reactionCalled = false;
-						constructor() {
-							super();
-							diffProperty('foo', diffPropertyFoo, this.onFooPropertyChanged)(this);
-						}
-
-						onFooPropertyChanged(previousProperties: any, newProperties: any): void {
-							this.reactionCalled = true;
-						}
-					}
-
-					const testWidget = new TestWidget();
-					testWidget.__setProperties__({ id: '', foo: 'bar' });
-					assert.equal(callCount, 1);
-					assert.isFalse(testWidget.reactionCalled);
-				},
-				'reaction executed when at least one registered properties is changed'() {
-					let callCount = 0;
-
-					function customDiffProperty(previousProperty: string, newProperty: string): PropertyChangeRecord {
-						callCount++;
-						return {
-							changed: newProperty === 'bar' ? true : false,
-							value: newProperty
-						};
-					}
-
-					class TestWidget extends WidgetBase<TestProperties> {
-						reactionCalled = false;
-						constructor() {
-							super();
-							diffProperty('foo', customDiffProperty, this.onPropertyChanged)(this);
-							diffProperty('id', customDiffProperty, this.onPropertyChanged)(this);
-						}
-
-						onPropertyChanged(previousProperties: any, newProperties: any): void {
-							this.reactionCalled = true;
-						}
-					}
-
-					const testWidget = new TestWidget();
-					testWidget.__setProperties__({ id: '', foo: 'bar' });
-					assert.equal(callCount, 2);
-					assert.isTrue(testWidget.reactionCalled);
-				}
-			}
-		},
-		'decorators can be applied at instance level'() {
-			let renderCallCount = 0;
-
-			class TestWidget extends WidgetBase<any> {
-				constructor() {
-					super();
-
-					afterRender((node: DNode) => {
-						renderCallCount++;
-						return node;
-					})(this);
-				}
-
-				render() {
-					return v('div');
-				}
-			}
-
-			new TestWidget();
-			const widget2 = new TestWidget();
-			widget2.__render__();
-
-			assert.equal(renderCallCount, 1);
-		},
-		'multiple default decorators on the same method cause the first matching decorator to win'() {
-			@diffProperty('foo', ignore)
-			class TestWidget extends WidgetBase<TestProperties> { }
-
-			@diffProperty('foo', always)
-			class SubWidget extends TestWidget { }
-
-			const widget = new SubWidget();
-			const vnode = widget.__render__();
-
-			widget.__setProperties__({
-				foo: 'bar'
-			});
-
-			assert.notStrictEqual(vnode, widget.__render__());
-		},
-		'multiple custom decorators on the same method cause the first matching decorator to win'() {
-			const calls: string[] = [];
-
-			function diff1(prevProp: any, newProp: any): PropertyChangeRecord {
-				calls.push('diff1');
-				return {
-					changed: false,
-					value: newProp
-				};
-			}
-
-			function diff2(prevProp: any, newProp: any): PropertyChangeRecord {
-				calls.push('diff2');
-				return {
-					changed: false,
-					value: newProp
-				};
-			}
-
-			@diffProperty('foo', diff1)
-			class TestWidget extends WidgetBase<TestProperties> { }
-
-			@diffProperty('foo', diff2)
-			class SubWidget extends TestWidget { }
-
-			const widget = new SubWidget();
-			widget.__setProperties__({
-				id: '',
-				foo: 'bar'
-			});
-
-			assert.deepEqual(calls, ['diff1', 'diff2']);
-			assert.strictEqual(calls[0], 'diff1');
-			assert.strictEqual(calls[1], 'diff2');
-		},
-
-		'diffProperty properties are excluded from catch-all'() {
-			function customDiff() {
-				return {
-					changed: false,
-					value: ''
-				};
-			}
-			@diffProperty('foo', customDiff)
-			@diffProperty('id', customDiff)
-			class TestWidget extends WidgetBase<TestProperties> { }
-
-			const widget = new TestWidget();
-			const vnode = widget.__render__();
-
-			widget.__setProperties__({
-				foo: '',
-				id: ''
-			});
-			assert.strictEqual(vnode, widget.__render__());
-		},
-
-		'properties that are deleted dont get returned'() {
-			const widget = new WidgetBase<any>();
-			widget.__setProperties__({
-				a: 1,
-				b: 2,
-				c: 3
-			});
-
-			assert.deepEqual(widget.properties, { a: 1, b: 2, c: 3 });
-
-			widget.__setProperties__({
-				a: 4,
-				c: 5
-			});
-
-			assert.deepEqual(widget.properties, { a: 4, c: 5 });
-		}
 	},
 	setProperties: {
 		'widgets function properties are bound to the parent by default'() {
@@ -523,212 +218,11 @@ registerSuite({
 			assert.isTrue(testWidget.properties.functionIsBound);
 		}
 	},
-	beforeRender: {
-		decorator() {
-			let beforeRenderCount = 1;
-			type RenderFunction = () => DNode;
-			class TestWidget extends WidgetBase<any> {
-				@beforeRender()
-				firstAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
-					assert.strictEqual(beforeRenderCount++, 1);
-					return () => {
-						const rendered = renderFunction();
-						const clonedProperties = { ...properties };
-						return v('bar', clonedProperties, [ rendered, ...children ]);
-					};
-				}
-
-				@beforeRender()
-				secondAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
-					assert.strictEqual(beforeRenderCount++, 2);
-					return () => {
-						const rendered = renderFunction();
-						properties.bar = 'foo';
-						return v('qux', properties, [ rendered ]);
-					};
-				}
-			}
-
-			class ExtendedTestWidget extends TestWidget {
-				@beforeRender()
-				thirdAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
-					assert.strictEqual(beforeRenderCount, 3);
-					return renderFunction;
-				}
-
-				render() {
-					return v('foo', this.children);
-				}
-			}
-
-			const widget = new ExtendedTestWidget();
-			widget.__setChildren__([v('baz', { baz: 'qux' })]);
-			widget.__setProperties__({ foo: 'bar' });
-			const qux: any = widget.__render__();
-			assert.equal(qux.vnodeSelector, 'qux');
-			assert.deepEqual(qux.properties.bind, widget);
-			assert.equal(qux.properties.bar, 'foo');
-			assert.equal(qux.properties.foo, 'bar');
-			assert.lengthOf(qux.children, 1);
-			const bar = qux.children[0];
-			assert.equal(bar.vnodeSelector, 'bar');
-			assert.deepEqual(bar.properties.bind, widget);
-			assert.deepEqual(bar.properties.foo, 'bar');
-			assert.lengthOf(bar.children, 2);
-			const foo = bar.children[0];
-			assert.equal(foo.vnodeSelector, 'foo');
-			assert.deepEqual(foo.properties.bind, widget);
-			assert.lengthOf(foo.children, 1);
-			const baz1 = foo.children[0];
-			assert.equal(baz1.vnodeSelector, 'baz');
-			assert.deepEqual(baz1.properties.bind, widget);
-			assert.deepEqual(baz1.properties.baz, 'qux');
-			assert.lengthOf(baz1.children, 0);
-			const baz2 = bar.children[1];
-			assert.equal(baz2.vnodeSelector, 'baz');
-			assert.deepEqual(baz2.properties.bind, widget);
-			assert.deepEqual(baz2.properties.baz, 'qux');
-			assert.lengthOf(baz2.children, 0);
-		},
-		'class level decorator'() {
-			let beforeRenderCount = 0;
-
-			@beforeRender(function (renderFunc: Render) {
-				beforeRenderCount++;
-				return renderFunc;
-			})
-			class TestWidget extends WidgetBase<any> {
-			}
-
-			const widget = new TestWidget();
-			widget.__render__();
-			assert.strictEqual(beforeRenderCount, 1);
-		},
-		'Use previous render function when a beforeRender does not return a function'() {
-			class TestWidget extends WidgetBase {
-				@beforeRender()
-				protected firstBeforeRender(renderFunc: Render) {
-					return () => 'first render';
-				}
-
-				@beforeRender()
-				protected secondBeforeRender(renderFunc: Render) { }
-			}
-
-			const widget = new TestWidget();
-			const vNode = <VNode> widget.__render__();
-			assert.strictEqual(vNode, 'first render');
-			assert.isTrue(consoleStub.calledOnce);
-			assert.isTrue(consoleStub.calledWith('Render function not returned from beforeRender, using previous render'));
-		}
-	},
-	afterRender: {
-		decorator() {
-			let afterRenderCount = 1;
-			class TestWidget extends WidgetBase<any> {
-				@afterRender()
-				firstAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount++, 1);
-					return result;
-				}
-
-				@afterRender()
-				secondAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount++, 2);
-					return result;
-				}
-			}
-
-			class ExtendedTestWidget extends TestWidget {
-				@afterRender()
-				thirdAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount, 3);
-					return result;
-				}
-			}
-
-			const widget = new ExtendedTestWidget();
-			widget.__render__();
-			assert.strictEqual(afterRenderCount, 3);
-		},
-		'non decorator'() {
-			let afterRenderCount = 1;
-			class TestWidget extends WidgetBase<any> {
-
-				constructor() {
-					super();
-					afterRender()(this, 'firstAfterRender');
-					afterRender()(this, 'secondAfterRender');
-				}
-
-				firstAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount++, 1);
-					return result;
-				}
-
-				secondAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount++, 2);
-					return result;
-				}
-			}
-
-			class ExtendedTestWidget extends TestWidget {
-
-				constructor() {
-					super();
-					afterRender(this.thirdAfterRender)(this);
-				}
-
-				thirdAfterRender(result: DNode): DNode {
-					assert.strictEqual(afterRenderCount, 3);
-					return result;
-				}
-			}
-
-			const widget = new ExtendedTestWidget();
-			widget.__render__();
-			assert.strictEqual(afterRenderCount, 3);
-		},
-		'class level decorator'() {
-			let afterRenderCount = 0;
-
-			@afterRender(function (node: any) {
-				afterRenderCount++;
-				return node;
-			})
-			class TestWidget extends WidgetBase<any> {
-			}
-
-			const widget = new TestWidget();
-			widget.__render__();
-			assert.strictEqual(afterRenderCount, 1);
-		},
-		'class level without decorator'() {
-			let afterRenderCount = 0;
-
-			function afterRenderFn(node: any) {
-				afterRenderCount++;
-
-				return node;
-			}
-
-			class TestWidget extends WidgetBase<any> {
-				constructor() {
-					super();
-					afterRender(afterRenderFn)(this);
-				}
-			}
-
-			const widget = new TestWidget();
-			widget.__render__();
-			assert.strictEqual(afterRenderCount, 1);
-		}
-	},
 	'extendable'() {
 		let called = false;
 
 		function PropertyLogger() {
-			return afterRender(function(dNode: any) {
+			return testDecorator(function(dNode: any) {
 				called = true;
 				return dNode;
 			});
@@ -736,12 +230,151 @@ registerSuite({
 
 		@PropertyLogger()
 		class TestWidget extends WidgetBase {
+			public log() {
+				const testDecorators = this.getDecorator('test-decorator');
+				testDecorators[0]();
+			}
 		}
 
 		const widget = new TestWidget();
-		widget.__render__();
-
+		widget.log();
 		assert.strictEqual(called, true);
+	},
+	changedPropertyKeys() {
+		class TestWidget extends WidgetBase<any> {}
+		const widget = new TestWidget();
+		widget.__setProperties__({ foo: true });
+		assert.deepEqual(widget.changedPropertyKeys, [ 'foo' ]);
+		widget.__setProperties__({ foo: true });
+		assert.deepEqual(widget.changedPropertyKeys, []);
+		widget.__setProperties__({ foo: true });
+		widget.__setProperties__({ foo: true, bar: true });
+		assert.deepEqual(widget.changedPropertyKeys, [ 'bar' ]);
+		const changedPropertyKeys = widget.changedPropertyKeys;
+		changedPropertyKeys.push('bad key');
+		assert.notDeepEqual(changedPropertyKeys, widget.changedPropertyKeys);
+	},
+	'decorate rendered DNodes': {
+		'HNode': {
+			'single root node'() {
+				class TestWidget extends WidgetBase {
+					render() {
+						return v('div');
+					}
+				}
+				const widget = new TestWidget();
+				const result = widget.__render__() as VNode;
+				assert.strictEqual(result.properties!.bind, widget);
+				assert.isFunction(result.properties!.afterCreate);
+				assert.isFunction(result.properties!.afterUpdate);
+			},
+			'single root node with key'() {
+				class TestWidget extends WidgetBase {
+					render() {
+						return v('div', { key: '1' });
+					}
+				}
+				const widget = new TestWidget();
+				const result = widget.__render__() as VNode;
+				assert.strictEqual(result.properties!.bind, widget);
+				assert.isFunction(result.properties!.afterCreate);
+				assert.isFunction(result.properties!.afterUpdate);
+			},
+			'single root node with children'() {
+				class TestWidget extends WidgetBase {
+					render() {
+						return v('div', { key: '1' }, [
+							v('div'),
+							v('div', { key: '1' })
+						]);
+					}
+				}
+				const widget = new TestWidget();
+				const result = widget.__render__() as VNode;
+				assert.strictEqual(result.properties!.bind, widget);
+				assert.isFunction(result.properties!.afterCreate);
+				assert.isFunction(result.properties!.afterUpdate);
+
+				const childOne = result.children![0];
+				assert.strictEqual(childOne.properties!.bind, widget);
+				assert.isUndefined(childOne.properties!.afterCreate);
+				assert.isUndefined(childOne.properties!.afterUpdate);
+
+				const childTwo = result.children![1];
+				assert.strictEqual(childTwo.properties!.bind, widget);
+				assert.isFunction(childTwo.properties!.afterCreate);
+				assert.isFunction(childTwo.properties!.afterUpdate);
+			},
+			'Array root with mixed keys'() {
+				class TestWidget extends WidgetBase {
+					render() {
+						return [
+							v('div', { key: '1' }),
+							v('div'),
+							v('div', { key: '2' })
+						];
+
+					}
+				}
+				const widget = new TestWidget();
+				const results = widget.__render__() as VNode[];
+				for (let i = 0; i < results.length; i++) {
+					const result = results[i];
+					assert.strictEqual(result.properties!.bind, widget);
+					assert.isFunction(result.properties!.afterCreate);
+					assert.isFunction(result.properties!.afterUpdate);
+				}
+			},
+			'Array root with children'() {
+				class TestWidget extends WidgetBase {
+					render() {
+						return [
+							v('div', { key: '1' }, [
+								v('div')
+							]),
+							v('div', [
+								v('div', { key: '1' })
+							])
+						];
+
+					}
+				}
+				const widget = new TestWidget();
+				const results = widget.__render__() as VNode[];
+				const resultOne = results[0];
+				assert.strictEqual(resultOne.properties!.bind, widget);
+				assert.isFunction(resultOne.properties!.afterCreate);
+				assert.isFunction(resultOne.properties!.afterUpdate);
+				const resultOneChild = resultOne.children![0];
+				assert.strictEqual(resultOneChild.properties!.bind, widget);
+				assert.isUndefined(resultOneChild.properties!.afterCreate);
+				assert.isUndefined(resultOneChild.properties!.afterUpdate);
+				const resultTwo = results[1];
+				assert.strictEqual(resultTwo.properties!.bind, widget);
+				assert.isFunction(resultTwo.properties!.afterCreate);
+				assert.isFunction(resultTwo.properties!.afterUpdate);
+				const resultTwoChild = resultTwo.children![0];
+				assert.strictEqual(resultTwoChild.properties!.bind, widget);
+				assert.isFunction(resultTwoChild.properties!.afterCreate);
+				assert.isFunction(resultTwoChild.properties!.afterUpdate);
+			}
+		},
+		'WNode'() {
+			class ChildWidget extends WidgetBase {}
+			const setCorePropertiesSpy = spy(ChildWidget.prototype, '__setCoreProperties__');
+			class TestWidget extends WidgetBase {
+				render() {
+					return w(ChildWidget, {});
+				}
+			}
+			const widget = new TestWidget();
+			widget.__render__();
+			assert.isTrue(setCorePropertiesSpy.calledOnce);
+			assert.deepEqual(setCorePropertiesSpy.firstCall.args[0], {
+				bind: widget,
+				baseRegistry: undefined
+			});
+		}
 	},
 	render: {
 		'render with non widget children'() {
@@ -802,18 +435,24 @@ registerSuite({
 			assert.lengthOf(result.children, 1);
 		},
 		'locally defined widget in registry eventually replaces global one'() {
-			const localRegistry = new Registry();
-
 			class TestWidget extends WidgetBase<any> {
+				private _defineItem = false;
 				constructor() {
 					super();
-					this.registries.add(registry);
-					this.registries.add(localRegistry);
 				}
 				render() {
+					if (this._defineItem) {
+						this.registry.define('my-header4', TestHeaderLocalWidget);
+					}
+					else {
+						this._defineItem = true;
+					}
 					return v('div', [
-						w('my-header4', <any> undefined)
+						w('my-header4', {})
 					]);
+				}
+				invalidate() {
+					super.invalidate();
 				}
 			}
 
@@ -830,9 +469,10 @@ registerSuite({
 			}
 			registry.define('my-header4', TestHeaderWidget);
 			const myWidget = new TestWidget();
+			myWidget.__setCoreProperties__({ bind: myWidget, baseRegistry: registry });
 			let result = <any> myWidget.__render__();
 			assert.equal(result.children[0].vnodeSelector, 'global-header');
-			localRegistry.define('my-header4', TestHeaderLocalWidget);
+			myWidget.invalidate();
 			result = <any> myWidget.__render__();
 			assert.equal(result.children[0].vnodeSelector, 'local-header');
 		},
@@ -845,7 +485,7 @@ registerSuite({
 			};
 			registry.define('my-header', loadFunction);
 
-			class TestWidget extends WidgetBase<any> {
+			class TestWidget extends WidgetBase {
 				public invalidate() {
 					super.invalidate();
 				}
@@ -856,7 +496,7 @@ registerSuite({
 				}
 			}
 
-			class TestHeaderWidget extends WidgetBase<any> {
+			class TestHeaderWidget extends WidgetBase {
 				render() {
 					return v('header');
 				}
@@ -865,8 +505,7 @@ registerSuite({
 			let invalidateCount = 0;
 
 			const myWidget = new TestWidget();
-			myWidget.__setCoreProperties__({ registry });
-			myWidget.__setProperties__({ registry });
+			myWidget.__setCoreProperties__({ bind: myWidget, baseRegistry: registry });
 			myWidget.on('invalidated', () => {
 				invalidateCount++;
 			});
@@ -940,7 +579,7 @@ registerSuite({
 			class TestWidget extends WidgetBase<any> {
 				constructor() {
 					super();
-					this.registries.add(registry);
+					this.registry.define('my-header', TestHeaderWidget);
 				}
 
 				render() {
@@ -1259,194 +898,6 @@ registerSuite({
 			assert.isTrue(widgetTwoInstantiated);
 		}
 	},
-	'registry': {
-		'creates and uses a default registry when defaultRegistry & registry properties are not passed'() {
-			class ChildRegistryWidget extends ThemableWidgetBase { }
-
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-				render() {
-					return w(ChildRegistryWidget, {});
-				}
-				getCoreProperties(properties: any) {
-					return super.__getCoreProperties__(properties);
-				}
-			}
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
-			const widget = new RegistryWidget();
-			const properties = {};
-			const coreProperties = widget.getCoreProperties(properties);
-			widget.__setCoreProperties__(coreProperties);
-			widget.__setProperties__(properties);
-			widget.__render__();
-			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
-			assert.strictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
-		},
-		'creates but does not use a default registry when defaultRegistry is passed'() {
-			class ChildRegistryWidget extends ThemableWidgetBase { }
-
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-				render() {
-					return w(ChildRegistryWidget, {});
-				}
-				getCoreProperties(properties: any) {
-					return super.__getCoreProperties__(properties);
-				}
-			}
-			const defaultRegistry = new Registry();
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
-			const widget = new RegistryWidget();
-			widget.__setCoreProperties__({ defaultRegistry });
-			widget.__setProperties__({});
-			widget.__render__();
-			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
-			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
-			assert.strictEqual(childWidgetProperties.defaultRegistry, defaultRegistry);
-		},
-		'Uses registry property as defaultRegistry when a defaultRegistry property is not passed'() {
-			class ChildRegistryWidget extends ThemableWidgetBase { }
-
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-				render() {
-					return w(ChildRegistryWidget, {});
-				}
-				getCoreProperties(properties: any) {
-					return super.__getCoreProperties__(properties);
-				}
-			}
-			const registry = new Registry();
-			const childPropertiesSpy = spy(ChildRegistryWidget.prototype, '__setCoreProperties__');
-			const widget = new RegistryWidget();
-			const properties = { registry };
-			const coreProperties = widget.getCoreProperties(properties);
-			widget.__setCoreProperties__(coreProperties);
-			widget.__setProperties__(properties);
-			widget.__render__();
-			const childWidgetProperties = childPropertiesSpy.firstCall.args[0];
-			assert.notStrictEqual(childWidgetProperties.defaultRegistry, widget.getDefaultRegistry());
-			assert.strictEqual(childWidgetProperties.defaultRegistry, registry);
-		},
-		'Passing a different registry will replace the previous registry'() {
-			const registryOne = new Registry();
-			const registryTwo = new Registry();
-			const widget = new ThemableWidgetBase();
-			widget.__setCoreProperties__({ bind: widget, registry: registryOne });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registryOne);
-			widget.__setCoreProperties__({ bind: widget, registry: registryTwo });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registryTwo);
-		},
-		'Passing a different defaultRegistry will replace the previous defaultRegistry'() {
-			const registryOne = new Registry();
-			const registryTwo = new Registry();
-			const widget = new ThemableWidgetBase();
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry: registryOne });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registryOne);
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry: registryTwo });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registryTwo);
-		},
-		'Widgets default registry is used if the defaultRegistry is not passed on a subsequent render'() {
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-			}
-			const defaultRegistry = new Registry();
-			const widget = new RegistryWidget();
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, defaultRegistry);
-			widget.__setCoreProperties__({ bind: widget });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, widget.getDefaultRegistry());
-		},
-		'Widgets registry property is promoted to defaultRegistry if defaultRegistry is received a subsequent render'() {
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-			}
-			const defaultRegistry = new Registry();
-			const registry = new Registry();
-			const widget = new RegistryWidget();
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry, registry });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, defaultRegistry);
-			widget.__setCoreProperties__({ bind: widget, registry });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registry);
-		},
-		'Registry replaces widgets defaultRegistry when passed'() {
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-			}
-			const registry = new Registry();
-			const widget = new RegistryWidget();
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, widget.getDefaultRegistry());
-			widget.__setCoreProperties__({ bind: widget, registry });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, registry);
-		},
-		'Widgets defaultRegistry is used when neither registry or defaultRegistry is passed on subsequent renders'() {
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-			}
-			const defaultRegistry = new Registry();
-			const widget = new RegistryWidget();
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, defaultRegistry);
-			widget.__setCoreProperties__({ bind: widget });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, widget.getDefaultRegistry());
-			widget.__setCoreProperties__({ bind: widget, defaultRegistry: null });
-			widget.__render__();
-			assert.strictEqual(widget.registries.defaultRegistry, widget.getDefaultRegistry());
-		},
-		'Removes registry when not passed on subsequent renders'() {
-			class TestWidget extends WidgetBase {
-				render() {
-					return 'test';
-				}
-			}
-			class RegistryWidget extends ThemableWidgetBase {
-				getDefaultRegistry() {
-					return (<any> this)._defaultRegistry;
-				}
-				render() {
-					return w('test', {});
-				}
-			}
-			const registry = new Registry();
-			registry.define('test', TestWidget);
-			const widget = new RegistryWidget();
-			widget.__setCoreProperties__({ bind: widget, registry });
-			let node: any = widget.__render__();
-			assert.strictEqual(node, 'test');
-			widget.__setCoreProperties__({ bind: widget });
-			node = widget.__render__();
-			assert.isNull(node);
-			widget.__setCoreProperties__({ bind: widget, registry: null });
-			node = widget.__render__();
-			assert.isNull(node);
-		}
-	},
 	'child invalidation invalidates parent'() {
 		let childInvalidate = () => {};
 		let childInvalidateCalled = false;
@@ -1537,12 +988,8 @@ registerSuite({
 		assert.equal(foo, 1);
 	},
 	'decorators are cached'() {
+		@testDecorator()
 		class TestWidget extends WidgetBase<any> {
-			@afterRender()
-			running(result: DNode): DNode {
-				return result;
-			}
-
 			render() {
 				return v('div');
 			}
@@ -1555,40 +1002,31 @@ registerSuite({
 		const widget = new TestWidget();
 		const decoratorSpy = spy(widget, '_buildDecoratorList');
 
-		widget.callGetDecorator('afterRender');
+		widget.callGetDecorator('test-decorator');
 
 		// first call calls the method
 		assert.equal(decoratorSpy.callCount, 1);
-
-		widget.callGetDecorator('afterRender');
+		widget.callGetDecorator('test-decorator');
 
 		// second call is cached
 		assert.equal(decoratorSpy.callCount, 1);
 	},
 	'decorators applied to subclasses are not applied to base classes'() {
-		class TestWidget extends WidgetBase<any> {
-			@afterRender()
-			firstRender(result: DNode): DNode {
-				return result;
-			}
-
-			getAfterRenders(): Function[] {
-				return this.getDecorator('afterRender');
+		@testDecorator()
+		class TestWidget extends WidgetBase {
+			getTestDecorators(): Function[] {
+				return this.getDecorator('test-decorator');
 			}
 		}
 
-		class TestWidget2 extends TestWidget {
-			@afterRender()
-			secondRender(result: DNode): DNode {
-				return result;
-			}
-		}
+		@testDecorator()
+		class TestWidget2 extends TestWidget { }
 
 		const testWidget = new TestWidget();
 		const testWidget2 = new TestWidget2();
 
-		assert.equal(testWidget.getAfterRenders().length, 1);
-		assert.equal(testWidget2.getAfterRenders().length, 2);
+		assert.equal(testWidget.getTestDecorators().length, 1);
+		assert.equal(testWidget2.getTestDecorators().length, 2);
 	},
 	'decorator cache is populated when addDecorator is called after instantiation'() {
 		class TestWidget extends WidgetBase<any> {

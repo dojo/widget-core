@@ -6,13 +6,12 @@ import '@dojo/shim/Promise'; // Imported for side-effects
 import WeakMap from '@dojo/shim/WeakMap';
 import { Handle } from '@dojo/interfaces/core';
 import { isWNode, v, isHNode } from './d';
-import { auto, ignore } from './diff';
+import { auto } from './diff';
 import {
 	AfterRender,
 	BeforeProperties,
 	BeforeRender,
 	CoreProperties,
-	DiffPropertyFunction,
 	DiffPropertyReaction,
 	DNode,
 	Render,
@@ -25,7 +24,7 @@ import {
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE, Registry } from './Registry';
+import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './Registry';
 
 /**
  * Widget cache wrapper for instance management
@@ -57,72 +56,11 @@ interface ReactionFunctionConfig {
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
-
-/**
- * Decorator that can be used to register a function to run as an aspect to `render`
- */
-export function afterRender(method: Function): (target: any) => void;
-export function afterRender(): (target: any, propertyKey: string) => void;
-export function afterRender(method?: Function) {
-	return handleDecorator((target, propertyKey) => {
-		target.addDecorator('afterRender', propertyKey ? target[propertyKey] : method);
-	});
-}
-
-/**
- * Decorator that can be used to register a reducer function to run as an aspect before to `render`
- */
-export function beforeRender(method: Function): (target: any) => void;
-export function beforeRender(): (target: any, propertyKey: string) => void;
-export function beforeRender(method?: Function) {
-	return handleDecorator((target, propertyKey) => {
-		target.addDecorator('beforeRender', propertyKey ? target[propertyKey] : method);
-	});
-}
-
-/**
- * Decorator that can be used to register a function as a specific property diff
- *
- * @param propertyName  The name of the property of which the diff function is applied
- * @param diffType      The diff type, default is DiffType.AUTO.
- * @param diffFunction  A diff function to run if diffType if DiffType.CUSTOM
- */
-export function diffProperty(propertyName: string, diffFunction: DiffPropertyFunction, reactionFunction?: Function) {
-	return handleDecorator((target, propertyKey) => {
-		target.addDecorator(`diffProperty:${propertyName}`, diffFunction.bind(null));
-		target.addDecorator('registeredDiffProperty', propertyName);
-		if (reactionFunction || propertyKey) {
-			target.addDecorator('diffReaction', {
-				propertyName,
-				reaction: propertyKey ? target[propertyKey] : reactionFunction
-			});
-		}
-	});
-}
-
-/**
- * Generic decorator handler to take care of whether or not the decorator was called at the class level
- * or the method level.
- *
- * @param handler
- */
-export function handleDecorator(handler: (target: any, propertyKey?: string) => void) {
-	return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
-		if (typeof target === 'function') {
-			handler(target.prototype, undefined);
-		}
-		else {
-			handler(target, propertyKey);
-		}
-	};
-}
-
 const boundAuto = auto.bind(null);
 
 /**
  * Main widget base for all widgets to extend
  */
-@diffProperty('registry', ignore)
 export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends Evented implements WidgetBaseInterface<P, C> {
 
 	/**
@@ -150,10 +88,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _properties: P & WidgetProperties & { [index: string]: any };
 
+	/**
+	 * Array of property keys considered changed from the previous set properties
+	 */
+	private _changedPropertyKeys: string[] = [];
+
+	/**
+	 * Core properties widget base sets for all widget
+	 */
 	private _coreProperties: CoreProperties = {} as CoreProperties;
 
 	/**
-	 * cached chldren map for instance management
+	 * cached children map for instance management
 	 */
 	private _cachedChildrenMap: Map<string | number | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>;
 
@@ -167,7 +113,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _decoratorCache: Map<string, any[]>;
 
-	private _registries: RegistryHandler;
+	private _registry: RegistryHandler;
 
 	/**
 	 * Map of functions properties for the bound function
@@ -181,8 +127,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _boundRenderFunc: Render;
 
 	private _boundInvalidate: () => void;
-
-	private _defaultRegistry = new Registry();
 
 	private _nodeHandler: NodeHandler;
 
@@ -206,16 +150,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
-		this._registries = new RegistryHandler();
+		this._registry = new RegistryHandler();
 		this._nodeHandler = new NodeHandler();
-		this._registries.add(this._defaultRegistry, true);
-		this.own(this._registries);
+		this.own(this._registry);
 		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 
-		this.own(this._registries.on('invalidate', this._boundInvalidate));
-		this._checkOnElementUsage();
+		this.own(this._registry.on('invalidate', this._boundInvalidate));
 	}
 
 	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
@@ -309,50 +251,16 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	protected setRegistry(previousRegistry: Registry | undefined, newRegistry: Registry | undefined): void {
-		const { _registries, _defaultRegistry } = this;
-
-		if (_registries.defaultRegistry === _defaultRegistry && newRegistry) {
-			_registries.remove(_defaultRegistry);
-		}
-
-		if (previousRegistry && newRegistry) {
-			_registries.replace(previousRegistry, newRegistry);
-		}
-		else if (newRegistry) {
-			_registries.add(newRegistry);
-		}
-		else if (previousRegistry) {
-			_registries.remove(previousRegistry);
-		}
+	public get changedPropertyKeys(): string[] {
+		return [ ...this._changedPropertyKeys ];
 	}
 
-	protected setDefaultRegistry(previousRegistry: Registry | undefined, newRegistry: Registry | undefined): void {
-		const { _registries, _defaultRegistry } = this;
-		if (newRegistry === undefined && previousRegistry) {
-			_registries.remove(previousRegistry);
-			if (_registries.defaultRegistry === undefined) {
-				_registries.add(_defaultRegistry);
-			}
-		}
-		else if (newRegistry) {
-			const result = _registries.replace(previousRegistry || _defaultRegistry, newRegistry);
-			if (!result) {
-				_registries.add(newRegistry, true);
-			}
-		}
-	}
-
-	public __setCoreProperties__(coreProperties: CoreProperties) {
+	public __setCoreProperties__(coreProperties: CoreProperties): void {
 		this._renderState = WidgetRenderState.PROPERTIES;
-		const { registry, defaultRegistry } = coreProperties;
+		const { baseRegistry } = coreProperties;
 
-		if (this._coreProperties.registry !== registry) {
-			this.setRegistry(this._coreProperties.registry, registry);
-			this.invalidate();
-		}
-		if (this._coreProperties.defaultRegistry !== defaultRegistry) {
-			this.setDefaultRegistry(this._coreProperties.defaultRegistry, defaultRegistry);
+		if (this._coreProperties.baseRegistry !== baseRegistry) {
+			this._registry.base = baseRegistry;
 			this.invalidate();
 		}
 		this._coreProperties = coreProperties;
@@ -410,6 +318,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 
 		this._properties = diffPropertyResults;
+		this._changedPropertyKeys = changedPropertyKeys;
 
 		if (changedPropertyKeys.length > 0) {
 			this.invalidate();
@@ -470,7 +379,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (isHNode(node) || isWNode(node)) {
 				node.properties = node.properties || {};
 				if (isHNode(node)) {
-					if (rootNodes.indexOf(node) === -1 || node.properties.key) {
+					if (rootNodes.indexOf(node) !== -1 || node.properties.key) {
 						node.properties.afterCreate = this._afterCreateCallback;
 						node.properties.afterUpdate = this._afterUpdateCallback;
 					}
@@ -479,32 +388,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 					}
 				}
 				else {
-					const { defaultRegistry, registry } = this.__getCoreProperties__(node.properties);
-					node.coreProperties = node.coreProperties || {};
-
-					if (node.coreProperties.bind === undefined) {
-						node.coreProperties.bind = this;
-					}
-					node.coreProperties.defaultRegistry = defaultRegistry;
-					node.coreProperties.registry = registry;
+					node.coreProperties = {
+						bind: this,
+						baseRegistry: this._coreProperties.baseRegistry
+					};
 				}
 				nodes = [ ...nodes, ...node.children ];
 			}
 		}
-	}
-
-	protected __getCoreProperties__(properties: any): CoreProperties {
-		const {
-			registry
-		} = properties;
-		const {
-			defaultRegistry = registry || this._registries.defaultRegistry
-		} = this._coreProperties;
-
-		return {
-			registry,
-			defaultRegistry
-		};
 	}
 
 	protected invalidate(): void {
@@ -644,8 +535,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return property;
 	}
 
-	public get registries(): RegistryHandler {
-		return this._registries;
+	public get registry(): RegistryHandler {
+		return this._registry;
 	}
 
 	private _runBeforeProperties(properties: any) {
@@ -719,7 +610,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			let child: WidgetBaseInterface<WidgetProperties>;
 
 			if (!isWidgetBaseConstructor(widgetConstructor)) {
-				const item = this._registries.get(widgetConstructor);
+				const item = this._registry.get(widgetConstructor);
 				if (item === null) {
 					return null;
 				}
@@ -796,16 +687,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}
 			this._cachedChildrenMap.set(key, filteredCacheChildren);
 		});
-	}
-
-	private _checkOnElementUsage() {
-		const name = (<any> this).constructor.name || 'unknown';
-		if (this.onElementCreated !== WidgetBase.prototype.onElementCreated) {
-			console.warn(`Usage of 'onElementCreated' has been deprecated and will be removed in a future version, see https://github.com/dojo/widget-core/issues/559 for details (${name})`);
-		}
-		if (this.onElementUpdated !== WidgetBase.prototype.onElementUpdated) {
-			console.warn(`Usage of 'onElementUpdated' has been deprecated and will be removed in a future version, see https://github.com/dojo/widget-core/issues/559 for details (${name})`);
-		}
 	}
 }
 

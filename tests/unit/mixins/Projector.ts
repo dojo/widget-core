@@ -1,21 +1,18 @@
 import global from '@dojo/shim/global';
 import has from '@dojo/has/has';
-import '@dojo/shim/Promise';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy, stub, SinonStub } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
-import { beforeRender, WidgetBase } from '../../../src/WidgetBase';
+import { WidgetBase } from '../../../src/WidgetBase';
+import { beforeRender } from './../../../src/decorators/beforeRender';
+import { Registry } from './../../../src/Registry';
 
 const Event = global.window.Event;
 
-class BaseTestWidget extends ProjectorMixin(WidgetBase) {
-	public callInvalidate() {
-		this.invalidate();
-	}
-}
+class BaseTestWidget extends ProjectorMixin(WidgetBase) {}
 
 let result: any;
 
@@ -92,7 +89,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -111,7 +108,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = 'other text';
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'div');
 				assert.equal(vnode.text, 'other text');
@@ -128,7 +125,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -148,7 +145,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = null;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -165,7 +162,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -185,7 +182,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -233,7 +230,7 @@ registerSuite({
 				projector.sandbox();
 				assert.strictEqual(count, 1, 'render should have been called once');
 				assert.strictEqual(projector.root.firstChild!.textContent, '1', 'should have rendered "1"');
-				projector.callInvalidate();
+				projector.invalidate();
 				assert.strictEqual(count, 2, 'render should have been called synchronously');
 				assert.strictEqual(projector.root.firstChild!.textContent, '2', 'should have rendered "2"');
 				projector.destroy();
@@ -278,7 +275,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -299,7 +296,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = 'other text';
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'div');
 				assert.equal(vnode.text, 'other text');
@@ -318,7 +315,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -340,7 +337,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = null;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -359,7 +356,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
 				assert.isUndefined(vnode.text);
@@ -381,7 +378,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'h2');
 				assert.isUndefined(vnode.text);
@@ -430,7 +427,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.equal(vnode.text, 'other text');
@@ -448,7 +445,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = 'other text';
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.equal(vnode.text, 'other text');
@@ -467,7 +464,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.equal(vnode.text, 'other text');
@@ -486,7 +483,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = null;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
@@ -505,7 +502,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 
 				result = v('div', [ 'other text' ]);
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.equal(vnode.text, 'other text');
@@ -524,7 +521,7 @@ registerSuite({
 				assert.isUndefined(vnode.children);
 
 				result = undefined;
-				projector.callInvalidate();
+				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
 				assert.isUndefined(vnode.text);
@@ -745,11 +742,37 @@ registerSuite({
 
 		// projector.setProperties({ foo: true });
 	},
+	'registry destroyed when a new registry is received'() {
+		let registryDestroyedCount = 0;
+		class TestRegistry extends Registry {
+			destroy(): Promise<any> {
+				registryDestroyedCount++;
+				return super.destroy();
+			}
+		}
+		const projector = new BaseTestWidget();
+		projector.setProperties({ registry: new TestRegistry() });
+		assert.strictEqual(registryDestroyedCount, 0);
+		projector.setProperties({ registry: new TestRegistry() });
+		assert.strictEqual(registryDestroyedCount, 1);
+		projector.setProperties({ registry: undefined });
+		assert.strictEqual(registryDestroyedCount, 2);
+		projector.setProperties({ registry: new TestRegistry() });
+		projector.destroy();
+		assert.strictEqual(registryDestroyedCount, 3);
+	},
 	'scheduleRender on setting properties'() {
 		const projector = new BaseTestWidget();
 		const scheduleRender = spy(projector, 'scheduleRender');
 		projector.setProperties({ key: 'hello' });
 		assert.isTrue(scheduleRender.called);
+	},
+	'scheduleRender not called on invalidate'() {
+		const projector = new BaseTestWidget();
+		const scheduleRender = spy(projector, 'scheduleRender');
+		projector.__setProperties__({});
+		projector.invalidate();
+		assert.isTrue(scheduleRender.notCalled);
 	},
 	'properties are reset to original state on render'() {
 		const testProperties = {
@@ -771,7 +794,7 @@ registerSuite({
 		projector.setProperties(testProperties);
 		projector.setChildren(testChildren);
 		projector.__render__();
-		projector.callInvalidate();
+		projector.invalidate();
 		projector.__render__();
 	},
 	'invalidate on setting children'() {
@@ -878,7 +901,7 @@ registerSuite({
 			exitAnimation: 'fade-out'
 		}));
 
-		projector.callInvalidate();
+		projector.invalidate();
 
 		const domNode = document.getElementById('test-element')!;
 		assert.isNotNull(domNode);
@@ -889,7 +912,7 @@ registerSuite({
 		sendAnimationEndEvents(domNode!);
 
 		children = [];
-		projector.callInvalidate();
+		projector.invalidate();
 
 		assert.isTrue(domNode.classList.contains('fade-out'));
 		assert.isTrue(domNode.classList.contains('fade-out-active'));
@@ -923,7 +946,7 @@ registerSuite({
 			exitAnimationActive: 'active-fade-out'
 		}));
 
-		projector.callInvalidate();
+		projector.invalidate();
 
 		const domNode = document.getElementById('test-element')!;
 		assert.isNotNull(domNode);
@@ -934,7 +957,7 @@ registerSuite({
 		sendAnimationEndEvents(domNode);
 
 		children = [];
-		projector.callInvalidate();
+		projector.invalidate();
 
 		assert.isTrue(domNode.classList.contains('fade-out'));
 		assert.isTrue(domNode.classList.contains('active-fade-out'));
@@ -971,7 +994,7 @@ registerSuite({
 		assert.isNotNull(domNode);
 
 		children = [];
-		projector.callInvalidate();
+		projector.invalidate();
 
 		assert.isTrue(domNode.classList.contains('fade-out'));
 		assert.isTrue(domNode.classList.contains('fade-out-active'));
