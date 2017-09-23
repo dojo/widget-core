@@ -1,3 +1,4 @@
+import { deepAssign } from '@dojo/core/lang';
 import global from '@dojo/shim/global';
 import { assign } from '@dojo/shim/object';
 import WeakMap from '@dojo/shim/WeakMap';
@@ -27,29 +28,45 @@ export interface Position {
 	y: number;
 }
 
+function createNodeData(invalidate: () => void): NodeData {
+	return {
+		dragResults: deepAssign({}, emptyResults),
+		invalidate,
+		last: createPosition(),
+		start: createPosition()
+	};
+}
+
+/**
+ * Creates an empty position
+ */
+function createPosition(): Position {
+	return { x: 0, y: 0 };
+}
+
 /**
  * A frozen empty result object, frozen to ensure that no one downstream modifies it
  */
 const emptyResults = Object.freeze({
-	delta: Object.freeze({ x: 0, y: 0 }),
+	delta: Object.freeze(createPosition()),
 	isDragging: false
 });
 
 /**
  * Return the x/y position for an event
- * @param e The MouseEvent or TouchEvent
+ * @param event The pointer event
  */
-function getPosition(e: PointerEvent): Position {
+function getPosition(event: PointerEvent): Position {
 	return {
-		x: e.pageX,
-		y: e.pageY
+		x: event.pageX,
+		y: event.pageY
 	};
 }
 
 /**
  * Return the delta position between two positions
- * @param start The first posistion
- * @param current The second posistion
+ * @param start The first position
+ * @param current The second position
  */
 function getDelta(start: Position, current: Position): Position {
 	return {
@@ -78,7 +95,7 @@ class DragController {
 			this._dragging = target;
 			state.dragResults.isDragging = true;
 			state.last = state.start = getPosition(e);
-			state.dragResults.delta = { x: 0, y: 0 };
+			state.dragResults.delta = createPosition();
 			state.invalidate();
 		} // else, we are ignoring the event
 	}
@@ -114,6 +131,7 @@ class DragController {
 	constructor() {
 		const win: Window = global.window;
 		win.addEventListener('pointerdown', this._onDragStart);
+		// Use capture phase, to determine the right node target, as it will be top down versus bottom up
 		win.addEventListener('pointermove', this._onDrag, true);
 		win.addEventListener('pointerup', this._onDragStop, true);
 	}
@@ -122,15 +140,7 @@ class DragController {
 		const { _nodeMap } = this;
 		// first time we see a node, we will initialize its state
 		if (!_nodeMap.has(node)) {
-			_nodeMap.set(node, {
-				dragResults: {
-					delta: { x: 0, y: 0 },
-					isDragging: false
-				},
-				invalidate,
-				last: { x: 0, y: 0 },
-				start: { x: 0, y: 0 }
-			});
+			_nodeMap.set(node, createNodeData(invalidate));
 			return emptyResults;
 		}
 
@@ -144,7 +154,7 @@ class DragController {
 		// reset the delta after we have read any last delta while not dragging
 		if (!dragResults.isDragging && dragResults.delta.x !== 0 && dragResults.delta.y !== 0) {
 			// future reads of the delta will be blank
-			state.dragResults.delta = { x: 0, y: 0 };
+			state.dragResults.delta = createPosition();
 		}
 
 		return dragResults;
@@ -153,8 +163,8 @@ class DragController {
 
 const controller = new DragController();
 
-export default class Drag extends Base {
-	private boundInvalidate = this.invalidate.bind(this);
+export class Drag extends Base {
+	private _boundInvalidate: () => void = this.invalidate.bind(this);
 
 	public get(key: string): Readonly<DragResults> {
 		const node = this.getNode(key);
@@ -165,6 +175,8 @@ export default class Drag extends Base {
 		}
 
 		// otherwise we will ask the controller for our results
-		return controller.get(node, this.boundInvalidate);
+		return controller.get(node, this._boundInvalidate);
 	}
 }
+
+export default Drag;
