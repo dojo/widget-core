@@ -14,9 +14,7 @@ declare global {
 	}
 }
 
-export const REGISTRY_ITEM = Symbol(
-	'Identifier for an item from the Widget Registry.'
-);
+export const REGISTRY_ITEM = Symbol('Identifier for an item from the Widget Registry.');
 
 export class FromRegistry<P> {
 	static type = REGISTRY_ITEM;

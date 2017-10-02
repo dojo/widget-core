@@ -1,8 +1,4 @@
-import {
-	CustomElementDescriptor,
-	handleAttributeChanged,
-	initializeElement
-} from './customElements';
+import { CustomElementDescriptor, handleAttributeChanged, initializeElement } from './customElements';
 import { Constructor, WidgetProperties } from './interfaces';
 import { WidgetBase } from './WidgetBase';
 import { ProjectorMixin } from './mixins/Projector';
@@ -25,9 +21,7 @@ export interface CustomElementDescriptorFactory {
  *
  * @param descriptorFactory
  */
-export function registerCustomElement(
-	descriptorFactory: CustomElementDescriptorFactory
-) {
+export function registerCustomElement(descriptorFactory: CustomElementDescriptorFactory) {
 	const descriptor = descriptorFactory();
 
 	customElements.define(
@@ -50,11 +44,7 @@ export function registerCustomElement(
 				}
 			}
 
-			public attributeChangedCallback(
-				name: string,
-				oldValue: string | null,
-				newValue: string | null
-			) {
+			public attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
 				handleAttributeChanged(this, name, newValue, oldValue);
 			}
 
@@ -75,9 +65,7 @@ export function registerCustomElement(
 			}
 
 			static get observedAttributes(): string[] {
-				return (descriptor.attributes || []).map(
-					attribute => attribute.attributeName
-				);
+				return (descriptor.attributes || []).map(attribute => attribute.attributeName);
 			}
 		}
 	);

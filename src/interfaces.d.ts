@@ -1,11 +1,7 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
 import { EventTargettedObject } from '@dojo/interfaces/core';
-import {
-	VNode,
-	VNodeProperties,
-	ProjectionOptions as MaquetteProjectionOptions
-} from '@dojo/interfaces/vdom';
+import { VNode, VNodeProperties, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 
 /**
@@ -64,9 +60,7 @@ export type MouseMoveEventHandler = MouseEventHandler;
 export type MouseOutEventHandler = MouseEventHandler;
 export type MouseOverEventHandler = MouseEventHandler;
 export type MouseUpEventHandler = MouseEventHandler;
-export type MouseWheelEventHandler = (
-	event?: MouseWheelEvent | WheelEvent
-) => EventHandlerResult;
+export type MouseWheelEventHandler = (event?: MouseWheelEvent | WheelEvent) => EventHandlerResult;
 export type ScrollEventHandler = (event?: UIEvent) => EventHandlerResult;
 export type SubmitEventHandler = EventHandler;
 
@@ -83,9 +77,7 @@ export interface VirtualDomProperties {
 	 * @param element - Element that was just added to the DOM.
 	 * @param properties - The properties object that was supplied to the [[h]] method
 	 */
-	enterAnimation?:
-		| ((element: Element, properties?: VNodeProperties) => void)
-		| string;
+	enterAnimation?: ((element: Element, properties?: VNodeProperties) => void) | string;
 	/**
 	 * The animation to perform when this node is removed while its parent remains.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the projector using [[createProjector]].
@@ -96,13 +88,7 @@ export interface VirtualDomProperties {
 	 * You may use this function to remove the element when the animation is done.
 	 * @param properties - The properties object that was supplied to the [[h]] method that rendered this [[VNode]] the previous time.
 	 */
-	exitAnimation?:
-		| ((
-				element: Element,
-				removeElement: () => void,
-				properties?: VNodeProperties
-			) => void)
-		| string;
+	exitAnimation?: ((element: Element, removeElement: () => void, properties?: VNodeProperties) => void) | string;
 	/**
 	 * The animation to perform when the properties of this node change.
 	 * This also includes attributes, styles, css classes. This callback is also invoked when node contains only text and that text changes.
@@ -111,11 +97,7 @@ export interface VirtualDomProperties {
 	 * @param properties - The last properties object that was supplied to the [[h]] method
 	 * @param previousProperties - The previous properties object that was supplied to the [[h]] method
 	 */
-	updateAnimation?: (
-		element: Element,
-		properties?: VNodeProperties,
-		previousProperties?: VNodeProperties
-	) => void;
+	updateAnimation?: (element: Element, properties?: VNodeProperties, previousProperties?: VNodeProperties) => void;
 	/**
 	 * Callback that is executed after this node is added to the DOM. Child nodes and properties have
 	 * already been applied.
@@ -330,9 +312,7 @@ export interface HNode {
 /**
  * Wrapper for `w`
  */
-export interface WNode<
-	W extends WidgetBaseInterface = DefaultWidgetBaseInterface
-> {
+export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> {
 	/**
 	 * Constructor to create a widget or string constructor label
 	 */
@@ -388,24 +368,18 @@ export interface DiffPropertyReaction {
 /**
  * WidgetBase constructor type
  */
-export type WidgetBaseConstructor<
-	P extends WidgetProperties = WidgetProperties,
-	C extends DNode = DNode
-> = Constructor<WidgetBaseInterface<P, C>>;
+export type WidgetBaseConstructor<P extends WidgetProperties = WidgetProperties, C extends DNode = DNode> = Constructor<
+	WidgetBaseInterface<P, C>
+>;
 
 export interface DefaultWidgetBaseInterface
-	extends WidgetBaseInterface<
-			WidgetProperties,
-			DNode<DefaultWidgetBaseInterface>
-		> {}
+	extends WidgetBaseInterface<WidgetProperties, DNode<DefaultWidgetBaseInterface>> {}
 
 /**
  * The interface for WidgetBase
  */
-export interface WidgetBaseInterface<
-	P = WidgetProperties,
-	C extends DNode = DNode<DefaultWidgetBaseInterface>
-> extends Evented {
+export interface WidgetBaseInterface<P = WidgetProperties, C extends DNode = DNode<DefaultWidgetBaseInterface>>
+	extends Evented {
 	/**
 	 * Widget properties
 	 */
@@ -483,9 +457,7 @@ export interface Render {
  * Interface for beforeRender function
  */
 export interface BeforeRender {
-	(renderFunc: Render, properties: WidgetProperties, children: DNode[]):
-		| Render
-		| undefined;
+	(renderFunc: Render, properties: WidgetProperties, children: DNode[]): Render | undefined;
 }
 
 /**

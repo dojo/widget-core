@@ -148,15 +148,11 @@ export interface ProjectorMixin<P> {
 function setDomNodes(vnode: VNode, domNode: Element | null = null) {
 	vnode.domNode = domNode;
 	if (vnode.children && domNode) {
-		vnode.children.forEach((child, i) =>
-			setDomNodes(child, domNode.children[i])
-		);
+		vnode.children.forEach((child, i) => setDomNodes(child, domNode.children[i]));
 	}
 }
 
-export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
-	Base: T
-): T & Constructor<ProjectorMixin<P>> {
+export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
 	class Projector extends Base {
 		public projectorState: ProjectorAttachState;
 		public properties: Readonly<P> & Readonly<ProjectorProperties>;
@@ -240,11 +236,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 		}
 
 		public scheduleRender() {
-			if (
-				this.projectorState === ProjectorAttachState.Attached &&
-				!this._scheduled &&
-				!this._paused
-			) {
+			if (this.projectorState === ProjectorAttachState.Attached && !this._scheduled && !this._paused) {
 				if (this._async) {
 					this._scheduled = global.requestAnimationFrame(this._boundDoRender);
 				} else {
@@ -255,9 +247,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 
 		public set root(root: Element) {
 			if (this.projectorState === ProjectorAttachState.Attached) {
-				throw new Error(
-					'Projector already attached, cannot change root element'
-				);
+				throw new Error('Projector already attached, cannot change root element');
 			}
 			this._root = root;
 		}
@@ -304,10 +294,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 		}
 
 		public setProperties(properties: this['properties']): void {
-			if (
-				this._projectorProperties &&
-				this._projectorProperties.registry !== properties.registry
-			) {
+			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
 				if (this._projectorProperties.registry) {
 					this._projectorProperties.registry.destroy();
 				}
@@ -325,13 +312,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 		}
 
 		public toHtml(): string {
-			if (
-				this.projectorState !== ProjectorAttachState.Attached ||
-				!this._projection
-			) {
-				throw new Error(
-					'Projector is not attached, cannot return an HTML string of projection.'
-				);
+			if (this.projectorState !== ProjectorAttachState.Attached || !this._projection) {
+				throw new Error('Projector is not attached, cannot return an HTML string of projection.');
 			}
 			return this._projection.domNode.outerHTML;
 		}
@@ -339,12 +321,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 		@afterRender()
 		public afterRender(result: DNode) {
 			let node = result;
-			if (
-				Array.isArray(result) ||
-				typeof result === 'string' ||
-				result === null ||
-				result === undefined
-			) {
+			if (Array.isArray(result) || typeof result === 'string' || result === null || result === undefined) {
 				if (!this._rootTagName) {
 					this._rootTagName = 'span';
 				}
@@ -417,28 +394,16 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(
 
 			switch (type) {
 				case AttachType.Append:
-					this._projection = dom.append(
-						this.root,
-						this._boundRender(),
-						this._projectionOptions
-					);
+					this._projection = dom.append(this.root, this._boundRender(), this._projectionOptions);
 					break;
 				case AttachType.Merge:
 					this._rootTagName = this._root.tagName.toLowerCase();
 					const vnode: VNode = this._boundRender();
 					setDomNodes(vnode, this.root);
-					this._projection = dom.merge(
-						this.root,
-						vnode,
-						this._projectionOptions
-					);
+					this._projection = dom.merge(this.root, vnode, this._projectionOptions);
 					break;
 				case AttachType.Replace:
-					this._projection = dom.replace(
-						this.root,
-						this._boundRender(),
-						this._projectionOptions
-					);
+					this._projection = dom.replace(this.root, this._boundRender(), this._projectionOptions);
 					break;
 			}
 

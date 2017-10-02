@@ -40,10 +40,7 @@ export class Intersection extends Base {
 	 * @param key The key to return the intersection meta for
 	 * @param options The options for the request
 	 */
-	public get(
-		key: string,
-		options: IntersectionGetOptions = {}
-	): IntersectionResult {
+	public get(key: string, options: IntersectionGetOptions = {}): IntersectionResult {
 		let rootNode: HTMLElement | undefined;
 		if (options.root) {
 			rootNode = this.getNode(options.root);
@@ -77,18 +74,9 @@ export class Intersection extends Base {
 		return Boolean(details && node && details.entries.has(node));
 	}
 
-	private _createDetails(
-		options: IntersectionGetOptions,
-		rootNode?: HTMLElement
-	): IntersectionDetail {
-		const entries = new WeakMap<
-			HTMLElement,
-			ExtendedIntersectionObserverEntry
-		>();
-		const observer = new global.IntersectionObserver(
-			this._onIntersect(entries),
-			{ ...options, root: rootNode }
-		);
+	private _createDetails(options: IntersectionGetOptions, rootNode?: HTMLElement): IntersectionDetail {
+		const entries = new WeakMap<HTMLElement, ExtendedIntersectionObserverEntry>();
+		const observer = new global.IntersectionObserver(this._onIntersect(entries), { ...options, root: rootNode });
 		const details = { observer, entries, ...options };
 
 		this._details.set(JSON.stringify(options), details);
@@ -96,15 +84,11 @@ export class Intersection extends Base {
 		return details;
 	}
 
-	private _getDetails(
-		options: IntersectionGetOptions = {}
-	): IntersectionDetail | undefined {
+	private _getDetails(options: IntersectionGetOptions = {}): IntersectionDetail | undefined {
 		return this._details.get(JSON.stringify(options));
 	}
 
-	private _onIntersect = (
-		detailEntries: WeakMap<Element, IntersectionResult>
-	) => {
+	private _onIntersect = (detailEntries: WeakMap<Element, IntersectionResult>) => {
 		return (entries: ExtendedIntersectionObserverEntry[]) => {
 			for (const { intersectionRatio, isIntersecting, target } of entries) {
 				detailEntries.set(target, { intersectionRatio, isIntersecting });

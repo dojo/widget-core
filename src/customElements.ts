@@ -141,12 +141,7 @@ if (typeof customEventClass !== 'function') {
 	const customEvent = function(event: string, params: any) {
 		params = params || { bubbles: false, cancelable: false, detail: undefined };
 		const evt = document.createEvent('CustomEvent');
-		evt.initCustomEvent(
-			event,
-			params.bubbles,
-			params.cancelable,
-			params.detail
-		);
+		evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
 		return evt;
 	};
 
@@ -165,12 +160,7 @@ if (typeof customEventClass !== 'function') {
 export function initializeElement(element: CustomElement) {
 	let initialProperties: any = {};
 
-	const {
-		attributes = [],
-		events = [],
-		properties = [],
-		initialization
-	} = element.getDescriptor();
+	const { attributes = [], events = [], properties = [], initialization } = element.getDescriptor();
 
 	attributes.forEach(attribute => {
 		const attributeName = attribute.attributeName;
@@ -193,11 +183,7 @@ export function initializeElement(element: CustomElement) {
 				return element.getWidgetInstance().properties[propertyName];
 			},
 			set(value: any) {
-				const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(
-					attribute.attributeName,
-					value,
-					attribute
-				);
+				const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(attribute.attributeName, value, attribute);
 				element.getWidgetInstance().setProperties(
 					assign({}, element.getWidgetInstance().properties, {
 						[propertyName]: propertyValue
@@ -215,9 +201,7 @@ export function initializeElement(element: CustomElement) {
 
 		properties[propertyName] = {
 			get() {
-				const value = element.getWidgetInstance().properties[
-					widgetPropertyName
-				];
+				const value = element.getWidgetInstance().properties[widgetPropertyName];
 				return getValue ? getValue(value) : value;
 			},
 
@@ -252,9 +236,7 @@ export function initializeElement(element: CustomElement) {
 	// find children
 	let children: DNode[] = [];
 
-	arrayFrom(
-		element.children
-	).forEach((childNode: HTMLElement, index: number) => {
+	arrayFrom(element.children).forEach((childNode: HTMLElement, index: number) => {
 		const DomElement = DomWrapper(childNode);
 		children.push(
 			w(DomElement, {
@@ -301,11 +283,7 @@ export function handleAttributeChanged(
 
 	attributes.forEach(attribute => {
 		if (attribute.attributeName === name) {
-			const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(
-				name,
-				newValue,
-				attribute
-			);
+			const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(name, newValue, attribute);
 			element.getWidgetInstance().setProperties(
 				assign({}, element.getWidgetInstance().properties, {
 					[propertyName]: propertyValue

@@ -4,14 +4,8 @@
  *
  * @param handler
  */
-export function handleDecorator(
-	handler: (target: any, propertyKey?: string) => void
-) {
-	return function(
-		target: any,
-		propertyKey?: string,
-		descriptor?: PropertyDescriptor
-	) {
+export function handleDecorator(handler: (target: any, propertyKey?: string) => void) {
+	return function(target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
 		if (typeof target === 'function') {
 			handler(target.prototype, undefined);
 		} else {

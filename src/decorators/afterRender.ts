@@ -7,10 +7,7 @@ export function afterRender(method: Function): (target: any) => void;
 export function afterRender(): (target: any, propertyKey: string) => void;
 export function afterRender(method?: Function) {
 	return handleDecorator((target, propertyKey) => {
-		target.addDecorator(
-			'afterRender',
-			propertyKey ? target[propertyKey] : method
-		);
+		target.addDecorator('afterRender', propertyKey ? target[propertyKey] : method);
 	});
 }
 

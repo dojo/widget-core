@@ -3,22 +3,12 @@ import Map from '@dojo/shim/Map';
 import Symbol from '@dojo/shim/Symbol';
 import { Handle } from '@dojo/interfaces/core';
 import { BaseEventedEvents, Evented, EventObject } from '@dojo/core/Evented';
-import {
-	Constructor,
-	RegistryLabel,
-	WidgetBaseConstructor,
-	WidgetBaseInterface
-} from './interfaces';
+import { Constructor, RegistryLabel, WidgetBaseConstructor, WidgetBaseInterface } from './interfaces';
 import { Injector } from './Injector';
 
-export type WidgetBaseConstructorFunction = () => Promise<
-	WidgetBaseConstructor
->;
+export type WidgetBaseConstructorFunction = () => Promise<WidgetBaseConstructor>;
 
-export type RegistryItem =
-	| WidgetBaseConstructor
-	| Promise<WidgetBaseConstructor>
-	| WidgetBaseConstructorFunction;
+export type RegistryItem = WidgetBaseConstructor | Promise<WidgetBaseConstructor> | WidgetBaseConstructorFunction;
 
 /**
  * Widget base symbol type
@@ -35,10 +25,7 @@ export interface RegistryListener {
 }
 
 export interface RegistryEvents extends BaseEventedEvents {
-	(
-		type: RegistryLabel,
-		listener: RegistryListener | RegistryListener[]
-	): Handle;
+	(type: RegistryLabel, listener: RegistryListener | RegistryListener[]): Handle;
 }
 
 /**
@@ -59,9 +46,7 @@ export interface RegistryInterface {
 	 * @param widgetLabel The label of the widget to return
 	 * @returns The RegistryItem for the widgetLabel, `null` if no entry exists
 	 */
-	get<T extends WidgetBaseInterface = WidgetBaseInterface>(
-		label: RegistryLabel
-	): Constructor<T> | null;
+	get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null;
 
 	/**
 	 * Returns a boolean if an entry for the label exists
@@ -102,9 +87,7 @@ export interface RegistryInterface {
  * @param item the item to check
  * @returns true/false indicating if the item is a WidgetBaseConstructor
  */
-export function isWidgetBaseConstructor<T extends WidgetBaseInterface>(
-	item: any
-): item is Constructor<T> {
+export function isWidgetBaseConstructor<T extends WidgetBaseInterface>(item: any): item is Constructor<T> {
 	return Boolean(item && item._type === WIDGET_BASE_TYPE);
 }
 
@@ -141,9 +124,7 @@ export class Registry extends Evented implements RegistryInterface {
 		}
 
 		if (this._widgetRegistry.has(label)) {
-			throw new Error(
-				`widget has already been registered for '${label.toString()}'`
-			);
+			throw new Error(`widget has already been registered for '${label.toString()}'`);
 		}
 
 		this._widgetRegistry.set(label, item);
@@ -170,18 +151,14 @@ export class Registry extends Evented implements RegistryInterface {
 		}
 
 		if (this._injectorRegistry.has(label)) {
-			throw new Error(
-				`injector has already been registered for '${label.toString()}'`
-			);
+			throw new Error(`injector has already been registered for '${label.toString()}'`);
 		}
 
 		this._injectorRegistry.set(label, item);
 		this.emitLoadedEvent(label, item);
 	}
 
-	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(
-		label: RegistryLabel
-	): Constructor<T> | null {
+	public get<T extends WidgetBaseInterface = WidgetBaseInterface>(label: RegistryLabel): Constructor<T> | null {
 		if (!this.has(label)) {
 			return null;
 		}

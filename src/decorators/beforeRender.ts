@@ -7,10 +7,7 @@ export function beforeRender(method: Function): (target: any) => void;
 export function beforeRender(): (target: any, propertyKey: string) => void;
 export function beforeRender(method?: Function) {
 	return handleDecorator((target, propertyKey) => {
-		target.addDecorator(
-			'beforeRender',
-			propertyKey ? target[propertyKey] : method
-		);
+		target.addDecorator('beforeRender', propertyKey ? target[propertyKey] : method);
 	});
 }
 

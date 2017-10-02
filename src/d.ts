@@ -26,9 +26,9 @@ export const HNODE = Symbol('Identifier for a HNode.');
 /**
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
-export function isWNode<
-	W extends WidgetBaseInterface = DefaultWidgetBaseInterface
->(child: DNode<W>): child is WNode<W> {
+export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(
+	child: DNode<W>
+): child is WNode<W> {
 	return Boolean(child && typeof child !== 'string' && child.type === WNODE);
 }
 
@@ -47,11 +47,7 @@ export function isHNode(child: DNode): child is HNode {
  *
  * If no predicate is supplied then the modifier will be executed on all nodes.
  */
-export function decorate(
-	dNodes: DNode,
-	modifier: (dNode: DNode) => void,
-	predicate?: (dNode: DNode) => boolean
-): DNode;
+export function decorate(dNodes: DNode, modifier: (dNode: DNode) => void, predicate?: (dNode: DNode) => boolean): DNode;
 export function decorate(
 	dNodes: DNode[],
 	modifier: (dNode: DNode) => void,
@@ -101,11 +97,7 @@ export function w<W extends WidgetBaseInterface>(
 /**
  * Wrapper function for calls to create hyperscript, lazily executes the hyperscript creation
  */
-export function v(
-	tag: string,
-	properties: VirtualDomProperties,
-	children?: DNode[]
-): HNode;
+export function v(tag: string, properties: VirtualDomProperties, children?: DNode[]): HNode;
 export function v(tag: string, children: DNode[]): HNode;
 export function v(tag: string): HNode;
 export function v(
@@ -130,11 +122,7 @@ export function v(
 		tag,
 		children,
 		properties,
-		render(this: {
-			tag: string;
-			vNodes: VNode[];
-			properties: VNodeProperties;
-		}) {
+		render(this: { tag: string; vNodes: VNode[]; properties: VNodeProperties }) {
 			return h(this.tag, this.properties, this.vNodes);
 		},
 		type: HNODE
