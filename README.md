@@ -709,7 +709,7 @@ The currently supported options:
 |-|-|
 |`onAttached`|A callback that is called when the wrapped DOM is flowed into the virtual DOM|
 
-For example, if we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we don not want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
+For example, if we want to integrate a 3rd party library where we need to pass the component factory a _root_ element and then flow that into our virtual DOM.  In this situation we do not want to create the component until the widget is being flowed into the DOM, so `onAttached` is used to perform the creation of the component:
 
 ```ts
 import { w } from '@dojo/widget-core/d';
