@@ -320,10 +320,7 @@ registerSuite({
 			'Array root with children'() {
 				class TestWidget extends WidgetBase {
 					render() {
-						return [
-							v('div', { key: '1' }, [v('div')]),
-							v('div', [v('div', { key: '1' })])
-						];
+						return [v('div', { key: '1' }, [v('div')]), v('div', [v('div', { key: '1' })])];
 					}
 				}
 				const widget = new TestWidget();
@@ -348,10 +345,7 @@ registerSuite({
 		},
 		WNode() {
 			class ChildWidget extends WidgetBase {}
-			const setCorePropertiesSpy = spy(
-				ChildWidget.prototype,
-				'__setCoreProperties__'
-			);
+			const setCorePropertiesSpy = spy(ChildWidget.prototype, '__setCoreProperties__');
 			class TestWidget extends WidgetBase {
 				render() {
 					return w(ChildWidget, {});
@@ -377,10 +371,7 @@ registerSuite({
 			const widget: any = new TestWidget();
 			const result = <VNode>widget.__render__();
 			assert.lengthOf(result.children, 1);
-			assert.strictEqual(
-				result.children && result.children[0].vnodeSelector,
-				'header'
-			);
+			assert.strictEqual(result.children && result.children[0].vnodeSelector, 'header');
 		},
 		'lazily defined widget in registry renders when ready'() {
 			class TestWidget extends WidgetBase<any> {
@@ -590,10 +581,7 @@ registerSuite({
 			const result = <VNode>widget.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
-			assert.strictEqual(
-				result.children![0].children![0].vnodeSelector,
-				'section'
-			);
+			assert.strictEqual(result.children![0].children![0].vnodeSelector, 'section');
 		},
 		'render with a text node children'() {
 			class TestWidget extends WidgetBase<any> {
@@ -644,14 +632,8 @@ registerSuite({
 			assert.instanceOf(result.properties!.bind, InnerWidget);
 			assert.strictEqual(result.children![0].properties!.bind, widget);
 			assert.instanceOf(result.children![0].properties!.bind, TestWidget);
-			assert.strictEqual(
-				result.children![0].children![0].properties!.bind,
-				widget
-			);
-			assert.instanceOf(
-				result.children![0].children![0].properties!.bind,
-				TestWidget
-			);
+			assert.strictEqual(result.children![0].children![0].properties!.bind, widget);
+			assert.instanceOf(result.children![0].children![0].properties!.bind, TestWidget);
 		},
 		'render with multiple text node children'() {
 			class TestWidget extends WidgetBase<any> {
@@ -689,9 +671,7 @@ registerSuite({
 
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					const properties = this.properties.classes
-						? { classes: this.properties.classes }
-						: {};
+					const properties = this.properties.classes ? { classes: this.properties.classes } : {};
 
 					return v('div', [
 						this.properties.hide ? null : w(TestChildWidget, properties),
@@ -707,8 +687,7 @@ registerSuite({
 			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
 			assert.lengthOf(firstRenderResult.children, 4);
-			const firstRenderChild: any =
-				firstRenderResult.children && firstRenderResult.children[0];
+			const firstRenderChild: any = firstRenderResult.children && firstRenderResult.children[0];
 			assert.strictEqual(firstRenderChild.vnodeSelector, 'footer');
 
 			widget.invalidate();
@@ -717,8 +696,7 @@ registerSuite({
 			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
 			assert.lengthOf(secondRenderResult.children, 4);
-			const secondRenderChild: any =
-				secondRenderResult.children && secondRenderResult.children[0];
+			const secondRenderChild: any = secondRenderResult.children && secondRenderResult.children[0];
 			assert.strictEqual(secondRenderChild.vnodeSelector, 'footer');
 
 			widget.__setProperties__(<any>{ hide: true });
@@ -736,16 +714,14 @@ registerSuite({
 			assert.strictEqual(countWidgetCreated, 8);
 			assert.strictEqual(countWidgetDestroyed, 4);
 			assert.lengthOf(lastRenderResult.children, 4);
-			const lastRenderChild: any =
-				lastRenderResult.children && lastRenderResult.children[0];
+			const lastRenderChild: any = lastRenderResult.children && lastRenderResult.children[0];
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
 			class TestWidgetOne extends WidgetBase<any> {}
 			class TestWidgetTwo extends WidgetBase<any> {}
 			const widgetName = (<any>TestWidgetTwo).name;
-			let warnMsg =
-				'It is recommended to provide a unique "key" property when using the same widget multiple times';
+			let warnMsg = 'It is recommended to provide a unique "key" property when using the same widget multiple times';
 
 			if (widgetName) {
 				warnMsg = `It is recommended to provide a unique "key" property when using the same widget (${widgetName}) multiple times`;
@@ -753,11 +729,7 @@ registerSuite({
 
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						w(TestWidgetOne, {}),
-						w(TestWidgetTwo, {}),
-						w(TestWidgetTwo, {})
-					]);
+					return v('div', [w(TestWidgetOne, {}), w(TestWidgetTwo, {}), w(TestWidgetTwo, {})]);
 				}
 			}
 
@@ -862,11 +834,7 @@ registerSuite({
 			}
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						renderWidgetOne
-							? w(WidgetOne, { key: '1' })
-							: w(WidgetTwo, { key: '1' })
-					]);
+					return v('div', [renderWidgetOne ? w(WidgetOne, { key: '1' }) : w(WidgetTwo, { key: '1' })]);
 				}
 			}
 
@@ -1021,15 +989,7 @@ registerSuite({
 
 		const testWidget = new TestWidget();
 
-		assert.equal(
-			testWidget.getDecoratorCount('beforeRender'),
-			1,
-			'beforeRender = 0 (existing) + 1'
-		);
-		assert.equal(
-			testWidget.getDecoratorCount('afterRender'),
-			1,
-			'afterRender = 0 (existing) + 1'
-		);
+		assert.equal(testWidget.getDecoratorCount('beforeRender'), 1, 'beforeRender = 0 (existing) + 1');
+		assert.equal(testWidget.getDecoratorCount('afterRender'), 1, 'afterRender = 0 (existing) + 1');
 	}
 });

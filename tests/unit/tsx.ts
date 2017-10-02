@@ -32,18 +32,13 @@ registerSuite({
 		},
 		'tsx generate a WNode from a RegistryWrapper'() {
 			const RegistryWrapper = fromRegistry<WidgetProperties>('tag');
-			const node: WNode = <WNode>tsx(RegistryWrapper, { hello: 'world' }, [
-				'child'
-			]);
+			const node: WNode = <WNode>tsx(RegistryWrapper, { hello: 'world' }, ['child']);
 			assert.deepEqual(node.widgetConstructor, 'tag');
 			assert.deepEqual(node.properties, { hello: 'world' });
 			assert.deepEqual(node.children, ['child']);
 		},
 		'children arrays are spread correctly'() {
-			const node: HNode = <HNode>tsx('div', { hello: 'world' }, [
-				'child',
-				['child-2', ['child-3']]
-			]);
+			const node: HNode = <HNode>tsx('div', { hello: 'world' }, ['child', ['child-2', ['child-3']]]);
 			assert.deepEqual(node.tag, 'div');
 			assert.deepEqual(node.properties, { hello: 'world' });
 			assert.deepEqual(node.children, ['child', 'child-2', 'child-3']);

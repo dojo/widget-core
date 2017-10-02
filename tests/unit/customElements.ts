@@ -1,10 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import {
-	initializeElement,
-	handleAttributeChanged,
-	CustomElementDescriptor
-} from '../../src/customElements';
+import { initializeElement, handleAttributeChanged, CustomElementDescriptor } from '../../src/customElements';
 import { WidgetBase } from '../../src/WidgetBase';
 import global from '@dojo/shim/global';
 import { assign } from '@dojo/core/lang';
@@ -12,10 +8,7 @@ import * as projector from '../../src/mixins/Projector';
 import * as sinon from 'sinon';
 import { v } from '../../src/d';
 
-function createFakeElement(
-	attributes: any,
-	descriptor: CustomElementDescriptor
-): any {
+function createFakeElement(attributes: any, descriptor: CustomElementDescriptor): any {
 	let widgetInstance: WidgetBase<any> | null;
 	let events: Event[] = [];
 	let removedChildren: any[] = [];

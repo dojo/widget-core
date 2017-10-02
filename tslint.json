@@ -4,7 +4,7 @@
 		"tslint-config-prettier"
 	],
 	"rules": {
-		"prettier": [ true, { "singleQuote": true, "useTabs": true }],
+		"prettier": [ true, { "singleQuote": true, "useTabs": true, "printWidth": "120" }],
 		"align": false,
 		"ban": [],
 		"class-name": true,

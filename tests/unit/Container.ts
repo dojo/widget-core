@@ -93,11 +93,7 @@ registerSuite({
 			assert.deepEqual(properties.children, []);
 		};
 
-		const TestWidgetContainer = Container<TestWidget>(
-			'test-widget',
-			'test-state-1',
-			{ getProperties }
-		);
+		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1', { getProperties });
 		const widget = createTestWidget(TestWidgetContainer, {
 			foo: 'bar',
 			registry

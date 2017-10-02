@@ -23,10 +23,7 @@ registerSuite({
 		registry.defineInjector('inject-two', injectorTwo);
 	},
 	beforeProperties() {
-		function getProperties(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getProperties(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
 
@@ -37,16 +34,10 @@ registerSuite({
 		assert.strictEqual(widget.getWidgetUnderTest().properties.foo, 'bar');
 	},
 	'multiple injectors'() {
-		function getPropertiesOne(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getPropertiesOne(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
-		function getPropertiesTwo(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getPropertiesTwo(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
 
@@ -59,10 +50,7 @@ registerSuite({
 	},
 	'payload are only attached once'() {
 		let invalidateCount = 0;
-		function getProperties(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getProperties(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
 
@@ -77,16 +65,10 @@ registerSuite({
 		assert.strictEqual(invalidateCount, 1);
 	},
 	'programmatic registration'() {
-		function getPropertiesOne(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getPropertiesOne(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
-		function getPropertiesTwo(
-			payload: any,
-			properties: WidgetProperties
-		): WidgetProperties {
+		function getPropertiesTwo(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
 		}
 

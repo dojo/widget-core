@@ -114,12 +114,7 @@ export default function sendEvent<I extends EventInit>(
 		}
 	}
 
-	const {
-		eventClass = 'CustomEvent',
-		eventInit = {} as EventInit,
-		selector = ''
-	} =
-		options || {};
+	const { eventClass = 'CustomEvent', eventInit = {} as EventInit, selector = '' } = options || {};
 	let event: CustomEvent;
 	assign(eventInit, {
 		bubbles: 'bubbles' in eventInit ? eventInit.bubbles : true,
@@ -128,10 +123,7 @@ export default function sendEvent<I extends EventInit>(
 	const { bubbles, cancelable, ...initProps } = eventInit;
 	if (has('customevent-constructor')) {
 		const ctorName = eventClass in window ? eventClass : 'CustomEvent';
-		event = new ((<any>window)[ctorName] as typeof CustomEvent)(
-			type,
-			eventInit
-		);
+		event = new ((<any>window)[ctorName] as typeof CustomEvent)(type, eventInit);
 	} else {
 		/* because the arity varies too greatly to be able to properly call all the event types, we will
 		 * only support CustomEvent for those platforms that don't support event constructors, which is
@@ -149,9 +141,7 @@ export default function sendEvent<I extends EventInit>(
 		if (selectorTarget) {
 			dispatchEvent(selectorTarget, event);
 		} else {
-			throw new Error(
-				`Cannot resolve to an element with selector "${selector}"`
-			);
+			throw new Error(`Cannot resolve to an element with selector "${selector}"`);
 		}
 	} else {
 		dispatchEvent(target, event);

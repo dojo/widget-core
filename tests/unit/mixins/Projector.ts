@@ -5,10 +5,7 @@ import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { spy, stub, SinonStub } from 'sinon';
 import { v } from '../../../src/d';
-import {
-	ProjectorMixin,
-	ProjectorAttachState
-} from '../../../src/mixins/Projector';
+import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { beforeRender } from './../../../src/decorators/beforeRender';
 import { Registry } from './../../../src/Registry';
@@ -74,18 +71,11 @@ registerSuite({
 
 				projector.append();
 
-				assert.strictEqual(
-					document.body.childNodes.length,
-					childNodeLength + 1,
-					'child should have been added'
-				);
+				assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
 				const child = <HTMLElement>document.body.lastChild;
 				assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
 				assert.strictEqual(child.tagName.toLowerCase(), 'div');
-				assert.strictEqual(
-					(<HTMLElement>child.firstChild).tagName.toLowerCase(),
-					'h2'
-				);
+				assert.strictEqual((<HTMLElement>child.firstChild).tagName.toLowerCase(), 'h2');
 			},
 			'string root node'() {
 				result = 'my string';
@@ -215,30 +205,15 @@ registerSuite({
 
 				projector.sandbox();
 
-				assert.strictEqual(
-					document.body.childNodes.length,
-					childNodeLength,
-					'No nodes should be added to body'
-				);
-				assert.instanceOf(
-					projector.root,
-					global.window.DocumentFragment,
-					'the root should be a document fragment'
-				);
+				assert.strictEqual(document.body.childNodes.length, childNodeLength, 'No nodes should be added to body');
+				assert.instanceOf(projector.root, global.window.DocumentFragment, 'the root should be a document fragment');
 				const child = projector.root.firstChild as HTMLElement;
 				assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
 				assert.strictEqual(child.tagName.toLocaleLowerCase(), 'div');
-				assert.strictEqual(
-					(child.firstChild as HTMLElement).tagName.toLocaleLowerCase(),
-					'h2'
-				);
+				assert.strictEqual((child.firstChild as HTMLElement).tagName.toLocaleLowerCase(), 'h2');
 
 				projector.destroy();
-				assert.strictEqual(
-					projector.root,
-					document.body,
-					'Root should be reverted to document.body'
-				);
+				assert.strictEqual(projector.root, document.body, 'Root should be reverted to document.body');
 			},
 			'operates synchronously'() {
 				let count = 0;
@@ -251,22 +226,10 @@ registerSuite({
 
 				projector.sandbox();
 				assert.strictEqual(count, 1, 'render should have been called once');
-				assert.strictEqual(
-					projector.root.firstChild!.textContent,
-					'1',
-					'should have rendered "1"'
-				);
+				assert.strictEqual(projector.root.firstChild!.textContent, '1', 'should have rendered "1"');
 				projector.invalidate();
-				assert.strictEqual(
-					count,
-					2,
-					'render should have been called synchronously'
-				);
-				assert.strictEqual(
-					projector.root.firstChild!.textContent,
-					'2',
-					'should have rendered "2"'
-				);
+				assert.strictEqual(count, 2, 'render should have been called synchronously');
+				assert.strictEqual(projector.root.firstChild!.textContent, '2', 'should have rendered "2"');
 				projector.destroy();
 			},
 			'accepts other documents'() {
@@ -275,10 +238,7 @@ registerSuite({
 				} as any;
 				const projector = new BaseTestWidget();
 				projector.sandbox(doc);
-				assert.isTrue(
-					doc.createDocumentFragment.called,
-					'createDocumentFragment should have been called'
-				);
+				assert.isTrue(doc.createDocumentFragment.called, 'createDocumentFragment should have been called');
 				projector.destroy();
 			}
 		},
@@ -294,11 +254,7 @@ registerSuite({
 
 				projector.replace();
 
-				assert.strictEqual(
-					document.body.childNodes.length,
-					1,
-					'child should have been added'
-				);
+				assert.strictEqual(document.body.childNodes.length, 1, 'child should have been added');
 				const child = <HTMLElement>document.body.lastChild;
 				assert.strictEqual(child.innerHTML, 'foo');
 				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
@@ -447,11 +403,7 @@ registerSuite({
 
 				projector.merge(div);
 
-				assert.strictEqual(
-					div.childNodes.length,
-					1,
-					'child should have been added'
-				);
+				assert.strictEqual(div.childNodes.length, 1, 'child should have been added');
 				const child = <HTMLElement>div.lastChild;
 				assert.strictEqual(child.innerHTML, 'foo');
 				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
@@ -601,11 +553,7 @@ registerSuite({
 				const childElementCount = root.childElementCount;
 				const select = root.childNodes[3] as HTMLSelectElement;
 				const button = root.childNodes[5] as HTMLButtonElement;
-				assert.strictEqual(
-					(root.childNodes[3] as HTMLSelectElement).value,
-					'bar',
-					'bar should be selected'
-				);
+				assert.strictEqual((root.childNodes[3] as HTMLSelectElement).value, 'bar', 'bar should be selected');
 				const onchangeListener = spy();
 				const onclickListener = spy();
 				const projector = new class extends BaseTestWidget {
@@ -633,15 +581,9 @@ registerSuite({
 										onchange: onchangeListener
 									},
 									[
-										v('option', { value: 'foo', selected: true }, [
-											'label foo'
-										]),
-										v('option', { value: 'bar', selected: false }, [
-											'label bar'
-										]),
-										v('option', { value: 'baz', selected: false }, [
-											'label baz'
-										])
+										v('option', { value: 'foo', selected: true }, ['label foo']),
+										v('option', { value: 'bar', selected: false }, ['label bar']),
+										v('option', { value: 'baz', selected: false }, ['label baz'])
 									]
 								),
 								v(
@@ -658,40 +600,18 @@ registerSuite({
 					}
 				}();
 				projector.merge(root);
-				assert.strictEqual(
-					root.className,
-					'foo bar',
-					'should have added bar class'
-				);
-				assert.strictEqual(
-					root.childElementCount,
-					childElementCount,
-					'should have the same number of children'
-				);
-				assert.strictEqual(
-					select,
-					root.childNodes[3],
-					'should have been reused'
-				);
-				assert.strictEqual(
-					button,
-					root.childNodes[5],
-					'should have been reused'
-				);
+				assert.strictEqual(root.className, 'foo bar', 'should have added bar class');
+				assert.strictEqual(root.childElementCount, childElementCount, 'should have the same number of children');
+				assert.strictEqual(select, root.childNodes[3], 'should have been reused');
+				assert.strictEqual(button, root.childNodes[5], 'should have been reused');
 				assert.isFalse(select.disabled, 'select should be enabled');
 				assert.isFalse(button.disabled, 'button shound be enabled');
 
 				assert.strictEqual(select.value, 'foo', 'foo should be selected');
 				assert.strictEqual(select.children.length, 3, 'should have 3 children');
 
-				assert.isFalse(
-					onchangeListener.called,
-					'onchangeListener should not have been called'
-				);
-				assert.isFalse(
-					onclickListener.called,
-					'onclickListener should not have been called'
-				);
+				assert.isFalse(onchangeListener.called, 'onchangeListener should not have been called');
+				assert.isFalse(onclickListener.called, 'onclickListener should not have been called');
 
 				const changeEvent = document.createEvent('Event');
 				changeEvent.initEvent('change', true, true);
@@ -699,18 +619,12 @@ registerSuite({
 				// that firefox doesn't generally dispatch this event until the element is blurred
 				// which is different than other browsers.  Either way this is not material to testing
 				// the functionality of this test, so calling the listener directly.
-				assert.isTrue(
-					onchangeListener.called,
-					'onchangeListener should have been called'
-				);
+				assert.isTrue(onchangeListener.called, 'onchangeListener should have been called');
 
 				const clickEvent = document.createEvent('CustomEvent');
 				clickEvent.initEvent('click', true, true);
 				button.dispatchEvent(clickEvent);
-				assert.isTrue(
-					onclickListener.called,
-					'onclickListener should have been called'
-				);
+				assert.isTrue(onclickListener.called, 'onclickListener should have been called');
 
 				document.body.removeChild(iframe);
 			}
@@ -783,10 +697,7 @@ registerSuite({
 
 			projector.append();
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
-			assert.strictEqual(
-				projector.toHtml(),
-				(projector.root.lastChild as Element).outerHTML
-			);
+			assert.strictEqual(projector.toHtml(), (projector.root.lastChild as Element).outerHTML);
 			projector.destroy();
 		},
 		replaced() {
@@ -798,10 +709,7 @@ registerSuite({
 
 			projector.replace(div);
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
-			assert.strictEqual(
-				projector.toHtml(),
-				(document.body.lastChild as Element).outerHTML
-			);
+			assert.strictEqual(projector.toHtml(), (document.body.lastChild as Element).outerHTML);
 			projector.destroy();
 		},
 		merged() {
@@ -813,10 +721,7 @@ registerSuite({
 
 			projector.merge(div);
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
-			assert.strictEqual(
-				projector.toHtml(),
-				(projector.root as Element).outerHTML
-			);
+			assert.strictEqual(projector.toHtml(), (projector.root as Element).outerHTML);
 			projector.destroy();
 		},
 		'not attached throws'() {
@@ -935,11 +840,7 @@ registerSuite({
 		const root = document.createElement('div');
 		const projector = new BaseTestWidget();
 		const promise = projector.append(root);
-		assert.strictEqual(
-			promise,
-			projector.append(),
-			'same promise should be returned'
-		);
+		assert.strictEqual(promise, projector.append(), 'same promise should be returned');
 	},
 	'setRoot throws when already attached'() {
 		const projector = new BaseTestWidget();

@@ -48,10 +48,7 @@ registerSuite({
 					assert.fail();
 				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.equal(
-						error.message,
-						'widget has already been registered for `my-widget`'
-					);
+					assert.equal(error.message, 'widget has already been registered for `my-widget`');
 				}
 			},
 			'throw an error using a previously registered factory symbol label'() {
@@ -63,10 +60,7 @@ registerSuite({
 					assert.fail();
 				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.include(
-						error.message,
-						'widget has already been registered for'
-					);
+					assert.include(error.message, 'widget has already been registered for');
 					assert.include(error.message, 'symbol registry label');
 				}
 			}
@@ -89,9 +83,7 @@ registerSuite({
 				class TestWidget extends WidgetBase<{ foo: string }> {}
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('test-widget', TestWidget);
-				const RegistryTestWidget = factoryRegistry.get<TestWidget>(
-					'test-widget'
-				);
+				const RegistryTestWidget = factoryRegistry.get<TestWidget>('test-widget');
 				assert.isNotNull(RegistryTestWidget);
 				const widget = new RegistryTestWidget!();
 				// demonstrates the design time typing
@@ -175,10 +167,7 @@ registerSuite({
 					assert.fail();
 				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.equal(
-						error.message,
-						'injector has already been registered for `my-injector`'
-					);
+					assert.equal(error.message, 'injector has already been registered for `my-injector`');
 				}
 			},
 			'throw an error using a previously registered factory symbol label'() {
@@ -190,10 +179,7 @@ registerSuite({
 					assert.fail();
 				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.include(
-						error.message,
-						'injector has already been registered for'
-					);
+					assert.include(error.message, 'injector has already been registered for');
 					assert.include(error.message, 'symbol registry label');
 				}
 			}

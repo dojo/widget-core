@@ -74,19 +74,13 @@ registerSuite({
 			let messages = localized.localizeBundle(bundle);
 
 			assert.isFunction(messages.format);
-			assert.strictEqual(
-				messages.format('welcome', { name: 'Bill' }),
-				'Welcome, Bill!'
-			);
+			assert.strictEqual(messages.format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
 
 			switchLocale('fr');
 
 			return i18n(bundle, 'fr').then(() => {
 				messages = localized.localizeBundle(bundle);
-				assert.strictEqual(
-					messages.format('welcome', { name: 'Jean' }),
-					'Bienvenue, Jean!'
-				);
+				assert.strictEqual(messages.format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
 			});
 		}
 	},
@@ -108,10 +102,7 @@ registerSuite({
 
 			switchLocale('fr');
 
-			assert.isFalse(
-				(<any>localized).invalidate.called,
-				'Widget not invalidated.'
-			);
+			assert.isFalse((<any>localized).invalidate.called, 'Widget not invalidated.');
 		}
 	},
 	'does not decorate properties for wNode'() {

@@ -9,10 +9,7 @@ registerSuite({
 	beforeEach(this: any) {
 		const { browserName, browser, version } = this.remote.session.capabilities;
 		skip = false;
-		if (
-			(browser === 'iPhone' && version === '9.1') ||
-			(browserName === 'safari' && version === '9.1.3')
-		) {
+		if ((browser === 'iPhone' && version === '9.1') || (browserName === 'safari' && version === '9.1.3')) {
 			skip = true;
 		}
 	},
@@ -55,9 +52,7 @@ registerSuite({
 				assert.isTrue(buttonClicked);
 			});
 	},
-	'updates the correct instance when multiple or the same custom elements are used'(
-		this: any
-	) {
+	'updates the correct instance when multiple or the same custom elements are used'(this: any) {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -81,16 +76,11 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findById('testButton')
 			.end()
-			.execute(
-				'document.querySelector("test-button").setAttribute("label", "greetings")'
-			)
+			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
 			.then(
 				pollUntil<any>(
 					function() {
-						return (
-							(<any>document).querySelector('test-button > button')
-								.innerHTML === 'greetings world'
-						);
+						return (<any>document).querySelector('test-button > button').innerHTML === 'greetings world';
 					},
 					undefined,
 					1000
@@ -107,16 +97,11 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findByCssSelector('no-attributes > button')
 			.end()
-			.execute(
-				'document.querySelector("no-attributes").buttonLabel = "greetings"'
-			)
+			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
 			.then(
 				pollUntil<any>(
 					function() {
-						return (
-							(<any>document).querySelector('no-attributes > button')
-								.innerHTML === 'greetings'
-						);
+						return (<any>document).querySelector('no-attributes > button').innerHTML === 'greetings';
 					},
 					undefined,
 					1000
@@ -136,10 +121,7 @@ registerSuite({
 			.then(
 				pollUntil<any>(
 					function() {
-						return (
-							(<any>document).querySelector('#manualButton > button')
-								.innerHTML === 'manual'
-						);
+						return (<any>document).querySelector('#manualButton > button').innerHTML === 'manual';
 					},
 					undefined,
 					1000
@@ -159,10 +141,7 @@ registerSuite({
 			.then(
 				pollUntil<any>(
 					function() {
-						return (
-							(<any>document).querySelector('#reinitButton > button')
-								.innerHTML === 'test'
-						);
+						return (<any>document).querySelector('#reinitButton > button').innerHTML === 'test';
 					},
 					undefined,
 					1000

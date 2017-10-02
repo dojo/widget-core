@@ -89,10 +89,7 @@ registerSuite({
 		'diff with no reaction'() {
 			let callCount = 0;
 
-			function diffPropertyFoo(
-				previousProperty: string,
-				newProperty: string
-			): PropertyChangeRecord {
+			function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
 				callCount++;
 				assert.equal(newProperty, 'bar');
 				return {
@@ -116,10 +113,7 @@ registerSuite({
 			'reaction does not execute if no registered properties are changed'() {
 				let callCount = 0;
 
-				function diffPropertyFoo(
-					previousProperty: string,
-					newProperty: string
-				): PropertyChangeRecord {
+				function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
 					callCount++;
 					assert.equal(newProperty, 'bar');
 					return {
@@ -132,15 +126,10 @@ registerSuite({
 					reactionCalled = false;
 					constructor() {
 						super();
-						diffProperty('foo', diffPropertyFoo, this.onFooPropertyChanged)(
-							this
-						);
+						diffProperty('foo', diffPropertyFoo, this.onFooPropertyChanged)(this);
 					}
 
-					onFooPropertyChanged(
-						previousProperties: any,
-						newProperties: any
-					): void {
+					onFooPropertyChanged(previousProperties: any, newProperties: any): void {
 						this.reactionCalled = true;
 					}
 				}
@@ -153,10 +142,7 @@ registerSuite({
 			'reaction executed when at least one registered properties is changed'() {
 				let callCount = 0;
 
-				function customDiffProperty(
-					previousProperty: string,
-					newProperty: string
-				): PropertyChangeRecord {
+				function customDiffProperty(previousProperty: string, newProperty: string): PropertyChangeRecord {
 					callCount++;
 					return {
 						changed: newProperty === 'bar' ? true : false,
@@ -168,12 +154,8 @@ registerSuite({
 					reactionCalled = false;
 					constructor() {
 						super();
-						diffProperty('foo', customDiffProperty, this.onPropertyChanged)(
-							this
-						);
-						diffProperty('id', customDiffProperty, this.onPropertyChanged)(
-							this
-						);
+						diffProperty('foo', customDiffProperty, this.onPropertyChanged)(this);
+						diffProperty('id', customDiffProperty, this.onPropertyChanged)(this);
 					}
 
 					onPropertyChanged(previousProperties: any, newProperties: any): void {

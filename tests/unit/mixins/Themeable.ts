@@ -31,28 +31,20 @@ import createTestWidget from './../../support/createTestWidget';
 let testRegistry: Registry;
 
 @theme(baseThemeClasses1)
-class TestWidget extends ThemeableMixin(WidgetBase)<
-	ThemeableProperties<typeof baseThemeClasses1>
-> {}
+class TestWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties<typeof baseThemeClasses1>> {}
 
 @theme(baseThemeClasses2)
 class SubClassTestWidget extends TestWidget {}
 
 @theme(baseThemeClasses1)
 @theme(baseThemeClasses2)
-class StackedTestWidget extends ThemeableMixin(WidgetBase)<
-	ThemeableProperties
-> {}
+class StackedTestWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties> {}
 
 @theme(baseThemeClasses3)
 @theme(baseThemeClasses1)
-class DuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<
-	ThemeableProperties
-> {}
+class DuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties> {}
 
-class NonDecoratorDuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<
-	ThemeableProperties
-> {
+class NonDecoratorDuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties> {
 	constructor() {
 		super();
 		theme(baseThemeClasses1)(this);
@@ -97,9 +89,7 @@ registerSuite({
 			const themeableInstance = new TestWidget();
 			const { class1 } = baseThemeClasses1;
 			const newClassName = 'newClassName';
-			const flaggedClasses = themeableInstance
-				.classes(class1, newClassName)
-				.get();
+			const flaggedClasses = themeableInstance.classes(class1, newClassName).get();
 
 			assert.deepEqual(flaggedClasses, {
 				[baseThemeClasses1.class1]: true
@@ -139,9 +129,7 @@ registerSuite({
 		'should filter out falsy params passed to classes function'() {
 			const themeableInstance = new TestWidget();
 			const { class1, class2 } = baseThemeClasses1;
-			const flaggedClasses = themeableInstance
-				.classes(class1, null, class2, null, '')
-				.get();
+			const flaggedClasses = themeableInstance.classes(class1, null, class2, null, '').get();
 			assert.deepEqual(flaggedClasses, {
 				[baseThemeClasses1.class1]: true,
 				[baseThemeClasses1.class2]: true
@@ -274,9 +262,7 @@ registerSuite({
 				'adjoined classed should both be true on first call'
 			);
 
-			const flaggedClassesSecondCall = themeableInstance
-				.classes(class1, class2)
-				.get();
+			const flaggedClassesSecondCall = themeableInstance.classes(class1, class2).get();
 			assert.deepEqual(
 				flaggedClassesSecondCall,
 				{
@@ -291,9 +277,7 @@ registerSuite({
 		'can invoke result instead of using .get()'() {
 			const themeableInstance = new TestWidget();
 			const fixedClassName = 'fixedClassName';
-			const flaggedClasses = themeableInstance
-				.classes()
-				.fixed(fixedClassName)();
+			const flaggedClasses = themeableInstance.classes().fixed(fixedClassName)();
 			assert.deepEqual(flaggedClasses, {
 				[fixedClassName]: true
 			});
@@ -358,9 +342,7 @@ registerSuite({
 				const { class1, class2 } = baseThemeClasses1;
 				const { class3, class4 } = baseThemeClasses2;
 				const themeableInstance = new SubClassTestWidget();
-				const flaggedClasses = themeableInstance
-					.classes(class1, class2, class3, class4)
-					.get();
+				const flaggedClasses = themeableInstance.classes(class1, class2, class3, class4).get();
 				assert.deepEqual(flaggedClasses, {
 					[class1]: true,
 					[class2]: true,
@@ -372,9 +354,7 @@ registerSuite({
 				const { class1, class2 } = baseThemeClasses1;
 				const { class3, class4 } = baseThemeClasses2;
 				const themeableInstance = new StackedTestWidget();
-				const flaggedClasses = themeableInstance
-					.classes(class1, class2, class3, class4)
-					.get();
+				const flaggedClasses = themeableInstance.classes(class1, class2, class3, class4).get();
 				assert.deepEqual(flaggedClasses, {
 					[class1]: true,
 					[class2]: true,
@@ -403,9 +383,7 @@ registerSuite({
 				const { class1, class2 } = baseThemeClasses1;
 				const { class3, class4 } = baseThemeClasses2;
 				const themeableInstance = new SubClassTestWidget();
-				const flaggedClasses = themeableInstance
-					.classes(class1, class2, class3, class4)
-					.get();
+				const flaggedClasses = themeableInstance.classes(class1, class2, class3, class4).get();
 				assert.deepEqual(flaggedClasses, {
 					[class1]: true,
 					[class2]: true,
@@ -417,9 +395,7 @@ registerSuite({
 				const { class1, class2 } = baseThemeClasses1;
 				const { class3, class4 } = baseThemeClasses2;
 				const themeableInstance = new StackedTestWidget();
-				const flaggedClasses = themeableInstance
-					.classes(class1, class2, class3, class4)
-					.get();
+				const flaggedClasses = themeableInstance.classes(class1, class2, class3, class4).get();
 				assert.deepEqual(flaggedClasses, {
 					[class1]: true,
 					[class2]: true,
@@ -485,10 +461,7 @@ registerSuite({
 			assert.deepEqual(vNode.properties.classes, { baseClass1: true });
 		},
 		'setting the theme invalidates all "Themeable" widgets and the new theme is used'() {
-			const themeInjectorContext = registerThemeInjector(
-				testTheme1,
-				testRegistry
-			);
+			const themeInjectorContext = registerThemeInjector(testTheme1, testRegistry);
 			class InjectedTheme extends TestWidget {
 				render() {
 					return v('div', { classes: this.classes(baseThemeClasses1.class1) });
@@ -497,10 +470,7 @@ registerSuite({
 
 			class MultipleThemedWidgets extends WidgetBase {
 				render() {
-					return v('div', [
-						w(InjectedTheme, { key: '1' }),
-						w(InjectedTheme, { key: '2' })
-					]);
+					return v('div', [w(InjectedTheme, { key: '1' }), w(InjectedTheme, { key: '2' })]);
 				}
 			}
 
@@ -552,9 +522,7 @@ registerSuite({
 
 				render() {
 					const { class1 } = baseThemeClasses1;
-					return v('div', [
-						v('div', { classes: this.classes(class1).fixed(fixedClassName) })
-					]);
+					return v('div', [v('div', { classes: this.classes(class1).fixed(fixedClassName) })]);
 				}
 			}
 

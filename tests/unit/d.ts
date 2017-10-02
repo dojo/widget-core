@@ -58,9 +58,7 @@ registerSuite({
 			assert.isFalse(isHNode(dNode));
 		},
 		'create WNode wrapper using constructor with children'() {
-			const dNode = w(TestWidget, { required: true }, [
-				w(TestChildWidget, { myChildProperty: '' })
-			]);
+			const dNode = w(TestWidget, { required: true }, [w(TestChildWidget, { myChildProperty: '' })]);
 
 			assert.equal(dNode.type, WNODE);
 			assert.deepEqual(dNode.widgetConstructor, TestWidget);
@@ -128,10 +126,7 @@ registerSuite({
 			assert.lengthOf(hNode.children, 0);
 			const render = hNode.render();
 			assert.equal(render.vnodeSelector, 'div');
-			assert.equal(
-				render.properties && render.properties.innerHTML,
-				'Hello World'
-			);
+			assert.equal(render.properties && render.properties.innerHTML, 'Hello World');
 			assert.equal(hNode.type, HNODE);
 			assert.isTrue(isHNode(hNode));
 			assert.isFalse(isWNode(hNode));
