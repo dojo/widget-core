@@ -2,34 +2,50 @@ import { PropertyChangeRecord } from './interfaces';
 import { WIDGET_BASE_TYPE } from './Registry';
 
 function isObjectOrArray(value: any): boolean {
-	return Object.prototype.toString.call(value) === '[object Object]' || Array.isArray(value);
+	return (
+		Object.prototype.toString.call(value) === '[object Object]' ||
+		Array.isArray(value)
+	);
 }
 
-export function always(previousProperty: any, newProperty: any): PropertyChangeRecord {
+export function always(
+	previousProperty: any,
+	newProperty: any
+): PropertyChangeRecord {
 	return {
 		changed: true,
 		value: newProperty
 	};
 }
 
-export function ignore(previousProperty: any, newProperty: any): PropertyChangeRecord {
+export function ignore(
+	previousProperty: any,
+	newProperty: any
+): PropertyChangeRecord {
 	return {
 		changed: false,
 		value: newProperty
 	};
 }
 
-export function reference(previousProperty: any, newProperty: any): PropertyChangeRecord {
+export function reference(
+	previousProperty: any,
+	newProperty: any
+): PropertyChangeRecord {
 	return {
 		changed: previousProperty !== newProperty,
 		value: newProperty
 	};
 }
 
-export function shallow(previousProperty: any, newProperty: any): PropertyChangeRecord {
+export function shallow(
+	previousProperty: any,
+	newProperty: any
+): PropertyChangeRecord {
 	let changed = false;
 
-	const validOldProperty = previousProperty && isObjectOrArray(previousProperty);
+	const validOldProperty =
+		previousProperty && isObjectOrArray(previousProperty);
 	const validNewProperty = newProperty && isObjectOrArray(newProperty);
 
 	if (!validOldProperty || !validNewProperty) {
@@ -44,9 +60,8 @@ export function shallow(previousProperty: any, newProperty: any): PropertyChange
 
 	if (previousKeys.length !== newKeys.length) {
 		changed = true;
-	}
-	else {
-		changed = newKeys.some((key) => {
+	} else {
+		changed = newKeys.some(key => {
 			return newProperty[key] !== previousProperty[key];
 		});
 	}
@@ -56,20 +71,20 @@ export function shallow(previousProperty: any, newProperty: any): PropertyChange
 	};
 }
 
-export function auto(previousProperty: any, newProperty: any): PropertyChangeRecord {
+export function auto(
+	previousProperty: any,
+	newProperty: any
+): PropertyChangeRecord {
 	let result;
 	if (typeof newProperty === 'function') {
 		if (newProperty._type === WIDGET_BASE_TYPE) {
 			result = reference(previousProperty, newProperty);
-		}
-		else {
+		} else {
 			result = ignore(previousProperty, newProperty);
 		}
-	}
-	else if (isObjectOrArray(newProperty)) {
+	} else if (isObjectOrArray(newProperty)) {
 		result = shallow(previousProperty, newProperty);
-	}
-	else {
+	} else {
 		result = reference(previousProperty, newProperty);
 	}
 	return result;

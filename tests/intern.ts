@@ -32,8 +32,11 @@ export const maxConcurrency = 5;
 export const tunnel = 'BrowserStackTunnel';
 
 // Support running unit tests from a web server that isn't the intern proxy
-export const initialBaseUrl: string | null = (function () {
-	if (typeof location !== 'undefined' && location.pathname.indexOf('__intern/') > -1) {
+export const initialBaseUrl: string | null = (function() {
+	if (
+		typeof location !== 'undefined' &&
+		location.pathname.indexOf('__intern/') > -1
+	) {
 		return '/';
 	}
 	return null;
@@ -58,16 +61,28 @@ export const loaderOptions = {
 		{ name: '@dojo', location: 'node_modules/@dojo' },
 		{ name: 'cldr-data', location: 'node_modules/cldr-data' },
 		{ name: 'cldrjs', location: 'node_modules/cldrjs' },
-		{ name: 'globalize', location: 'node_modules/globalize', main: 'dist/globalize' },
-		{ name: 'maquette', location: 'node_modules/maquette/dist', main: 'maquette' },
+		{
+			name: 'globalize',
+			location: 'node_modules/globalize',
+			main: 'dist/globalize'
+		},
+		{
+			name: 'maquette',
+			location: 'node_modules/maquette/dist',
+			main: 'maquette'
+		},
 		{ name: 'pepjs', location: 'node_modules/pepjs/dist', main: 'pep' },
-		{ name: 'intersection-observer', location: 'node_modules/intersection-observer', main: 'intersection-observer' },
-		{ name: 'grunt-dojo2', location: 'node_modules/grunt-dojo2'},
+		{
+			name: 'intersection-observer',
+			location: 'node_modules/intersection-observer',
+			main: 'intersection-observer'
+		},
+		{ name: 'grunt-dojo2', location: 'node_modules/grunt-dojo2' },
 		{ name: 'sinon', location: 'node_modules/sinon/pkg', main: 'sinon' }
 	],
 	map: {
 		globalize: {
-			'cldr': 'cldrjs/dist/cldr',
+			cldr: 'cldrjs/dist/cldr',
 			'cldr/event': 'cldrjs/dist/cldr/event',
 			'cldr/supplemental': 'cldrjs/dist/cldr/supplemental',
 			'cldr/unresolved': 'cldrjs/dist/cldr/unresolved'
@@ -76,10 +91,10 @@ export const loaderOptions = {
 };
 
 // Non-functional test suite(s) to run in each browser
-export const suites = [ 'tests/unit/all' ];
+export const suites = ['tests/unit/all'];
 
 // Functional test suite(s) to run in each browser once non-functional tests are completed
-export const functionalSuites = [ 'tests/functional/all' ];
+export const functionalSuites = ['tests/functional/all'];
 
 // A regular expression matching URLs to files that should not be included in code coverage analysis
 export const excludeInstrumentation = /(?:node_modules|bower_components|tests|examples)[\/\\]/;

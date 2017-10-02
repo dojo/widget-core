@@ -9,7 +9,7 @@ registerSuite({
 	name: 'tsx',
 	'create a registry wrapper'() {
 		const RegistryWrapper = fromRegistry<WidgetProperties>('tag');
-		assert.strictEqual((<any> RegistryWrapper).type, REGISTRY_ITEM);
+		assert.strictEqual((<any>RegistryWrapper).type, REGISTRY_ITEM);
 		const registryWrapper = new RegistryWrapper();
 		assert.strictEqual(registryWrapper.name, 'tag');
 		// These will always be undefined but show the type inference of properties.
@@ -18,41 +18,46 @@ registerSuite({
 	},
 	tsx: {
 		'tsx generate a HNode'() {
-			const node: HNode = <HNode> tsx('div', { hello: 'world' }, [ 'child' ]);
+			const node: HNode = <HNode>tsx('div', { hello: 'world' }, ['child']);
 			assert.deepEqual(node.tag, 'div');
 			assert.deepEqual(node.properties, { hello: 'world' });
-			assert.deepEqual(node.children, [ 'child' ]);
+			assert.deepEqual(node.children, ['child']);
 			assert.strictEqual(node.type, HNODE);
 		},
 		'tsx generate a WNode'() {
-			const node: WNode = <WNode> tsx(WidgetBase, { hello: 'world' }, [ 'child' ]);
+			const node: WNode = <WNode>tsx(WidgetBase, { hello: 'world' }, ['child']);
 			assert.deepEqual(node.widgetConstructor, WidgetBase);
 			assert.deepEqual(node.properties, { hello: 'world' });
-			assert.deepEqual(node.children, [ 'child' ]);
+			assert.deepEqual(node.children, ['child']);
 		},
 		'tsx generate a WNode from a RegistryWrapper'() {
 			const RegistryWrapper = fromRegistry<WidgetProperties>('tag');
-			const node: WNode = <WNode> tsx(RegistryWrapper, { hello: 'world' }, [ 'child' ]);
+			const node: WNode = <WNode>tsx(RegistryWrapper, { hello: 'world' }, [
+				'child'
+			]);
 			assert.deepEqual(node.widgetConstructor, 'tag');
 			assert.deepEqual(node.properties, { hello: 'world' });
-			assert.deepEqual(node.children, [ 'child' ]);
+			assert.deepEqual(node.children, ['child']);
 		},
 		'children arrays are spread correctly'() {
-			const node: HNode = <HNode> tsx('div', { hello: 'world' }, [ 'child', [ 'child-2', [ 'child-3' ] ] ]);
+			const node: HNode = <HNode>tsx('div', { hello: 'world' }, [
+				'child',
+				['child-2', ['child-3']]
+			]);
 			assert.deepEqual(node.tag, 'div');
 			assert.deepEqual(node.properties, { hello: 'world' });
-			assert.deepEqual(node.children, [ 'child', 'child-2', 'child-3' ]);
+			assert.deepEqual(node.children, ['child', 'child-2', 'child-3']);
 			assert.strictEqual(node.type, HNODE);
 		},
 		'defaults properties to empty object'() {
-			const node: HNode = <HNode> tsx('div');
+			const node: HNode = <HNode>tsx('div');
 			assert.deepEqual(node.tag, 'div');
 			assert.deepEqual(node.properties, {});
 			assert.deepEqual(node.children, []);
 			assert.strictEqual(node.type, HNODE);
 		},
 		'defaults `null` properties to empty object'() {
-			const node: HNode = <HNode> tsx('div', <any> null);
+			const node: HNode = <HNode>tsx('div', <any>null);
 			assert.deepEqual(node.tag, 'div');
 			assert.deepEqual(node.properties, {});
 			assert.deepEqual(node.children, []);

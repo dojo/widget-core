@@ -44,7 +44,6 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.__setProperties__({});
 		assert.strictEqual(widget.properties.key, 'foo');
-
 	},
 	'programmatic beforeProperties'() {
 		function beforeOne(properties: WidgetProperties): WidgetProperties {

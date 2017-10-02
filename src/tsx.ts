@@ -14,7 +14,9 @@ declare global {
 	}
 }
 
-export const REGISTRY_ITEM = Symbol('Identifier for an item from the Widget Registry.');
+export const REGISTRY_ITEM = Symbol(
+	'Identifier for an item from the Widget Registry.'
+);
 
 export class FromRegistry<P> {
 	static type = REGISTRY_ITEM;
@@ -33,9 +35,8 @@ export function fromRegistry<P>(tag: string): Constructor<FromRegistry<P>> {
 function spreadChildren(children: any[], child: any): any[] {
 	if (Array.isArray(child)) {
 		return child.reduce(spreadChildren, children);
-	}
-	else {
-		return [ ...children, child ];
+	} else {
+		return [...children, child];
 	}
 }
 
@@ -44,12 +45,10 @@ export function tsx(tag: any, properties = {}, ...children: any[]): DNode {
 	properties = properties === null ? {} : properties;
 	if (typeof tag === 'string') {
 		return v(tag, properties, children);
-	}
-	else if (tag.type === REGISTRY_ITEM) {
+	} else if (tag.type === REGISTRY_ITEM) {
 		const registryItem = new tag();
 		return w(registryItem.name, properties, children);
-	}
-	else {
+	} else {
 		return w(tag, properties, children);
 	}
 }

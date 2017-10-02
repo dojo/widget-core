@@ -1,7 +1,11 @@
 import { assign } from '@dojo/core/lang';
 import { find } from '@dojo/shim/array';
 import Map from '@dojo/shim/Map';
-import { ClassesFunction, Constructor, WidgetProperties } from './../interfaces';
+import {
+	ClassesFunction,
+	Constructor,
+	WidgetProperties
+} from './../interfaces';
 import { Registry } from './../Registry';
 import { Injector } from './../Injector';
 import { inject } from './../decorators/inject';
@@ -73,7 +77,6 @@ export const INJECTED_THEME_KEY = Symbol('theme');
  * Interface for the ThemeableMixin
  */
 export interface ThemeableMixin<T = ClassNames> {
-
 	/**
 	 * Processes all the possible classes for the instance with setting the passed class names to
 	 * true.
@@ -89,8 +92,8 @@ export interface ThemeableMixin<T = ClassNames> {
 /**
  * Decorator for base css classes
  */
-export function theme (theme: {}) {
-	return handleDecorator((target) => {
+export function theme(theme: {}) {
+	return handleDecorator(target => {
 		target.addDecorator('baseThemeClasses', theme);
 	});
 }
@@ -106,8 +109,7 @@ function splitClassStrings(classes: string[]): string[] {
 	return classes.reduce((splitClasses: string[], className) => {
 		if (className.indexOf(' ') > -1) {
 			splitClasses.push(...className.split(' '));
-		}
-		else {
+		} else {
 			splitClasses.push(className);
 		}
 		return splitClasses;
@@ -135,12 +137,15 @@ function createClassNameObject(classNames: string[], applied: boolean) {
  * @requires
  */
 function createThemeClassesLookup(classes: ClassNames[]): ClassNames {
-	return classes.reduce((currentClassNames, baseClass) => {
-		Object.keys(baseClass).forEach((key: string) => {
-			currentClassNames[baseClass[key]] = key;
-		});
-		return currentClassNames;
-	}, <ClassNames> {});
+	return classes.reduce(
+		(currentClassNames, baseClass) => {
+			Object.keys(baseClass).forEach((key: string) => {
+				currentClassNames[baseClass[key]] = key;
+			});
+			return currentClassNames;
+		},
+		<ClassNames>{}
+	);
 }
 
 /**
@@ -153,7 +158,10 @@ function createThemeClassesLookup(classes: ClassNames[]): ClassNames {
  *
  * @returns the theme injector used to set the theme
  */
-export function registerThemeInjector(theme: any, themeRegistry: Registry): Injector {
+export function registerThemeInjector(
+	theme: any,
+	themeRegistry: Registry
+): Injector {
 	const themeInjector = new Injector(theme);
 	themeRegistry.defineInjector(INJECTED_THEME_KEY, themeInjector);
 	return themeInjector;
@@ -162,17 +170,23 @@ export function registerThemeInjector(theme: any, themeRegistry: Registry): Inje
 /**
  * Function that returns a class decorated with with Themeable functionality
  */
-export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProperties<E>>>>(Base: T): Constructor<ThemeableMixin<E>> & T {
+export function ThemeableMixin<
+	E,
+	T extends Constructor<WidgetBase<ThemeableProperties<E>>>
+>(Base: T): Constructor<ThemeableMixin<E>> & T {
 	@inject({
 		name: INJECTED_THEME_KEY,
-		getProperties: (theme: Theme, properties: ThemeableProperties): ThemeableProperties  => {
-		if (!properties.theme) {
-			return { theme };
+		getProperties: (
+			theme: Theme,
+			properties: ThemeableProperties
+		): ThemeableProperties => {
+			if (!properties.theme) {
+				return { theme };
+			}
+			return {};
 		}
-		return {};
-	}})
+	})
 	class Themeable extends Base {
-
 		public properties: ThemeableProperties<E>;
 
 		/**
@@ -198,7 +212,10 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		/**
 		 * Map of registered classes
 		 */
-		private _registeredClassesMap: Map<string, ClassNameFlags> = new Map<string, ClassNameFlags>();
+		private _registeredClassesMap: Map<string, ClassNameFlags> = new Map<
+			string,
+			ClassNameFlags
+		>();
 
 		/**
 		 * Loaded theme
@@ -231,14 +248,19 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 				classes: classNames,
 				fixedClasses: [],
 				fixed(this: ClassesFunctionChain, ...classNames: (string | null)[]) {
-					const filteredClassNames = <string[]> classNames.filter((className) => className !== null);
+					const filteredClassNames = <string[]>classNames.filter(
+						className => className !== null
+					);
 					this.fixedClasses.push(...filteredClassNames);
 					return this;
 				},
 				get: classesGetter
 			};
 
-			return assign(classesGetter.bind(classesFunctionChain), classesFunctionChain);
+			return assign(
+				classesGetter.bind(classesFunctionChain),
+				classesFunctionChain
+			);
 		}
 
 		/**
@@ -253,19 +275,24 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		/**
 		 * Get theme class object from classNames
 		 */
-		private _getThemeClasses(classNames: string[]): ClassNameFlags  {
+		private _getThemeClasses(classNames: string[]): ClassNameFlags {
 			return classNames
-				.filter((className) => !!className)
+				.filter(className => !!className)
 				.reduce((appliedClasses: {}, className: string) => {
 					if (!this._baseThemeClassesReverseLookup[className]) {
-						console.warn(`Class name: ${className} not found, use chained 'fixed' method instead`);
+						console.warn(
+							`Class name: ${className} not found, use chained 'fixed' method instead`
+						);
 						return appliedClasses;
 					}
 					className = this._baseThemeClassesReverseLookup[className];
 					if (!this._registeredClassesMap.has(className)) {
 						this._registerThemeClass(className);
 					}
-					return assign(appliedClasses, this._registeredClassesMap.get(className));
+					return assign(
+						appliedClasses,
+						this._registeredClassesMap.get(className)
+					);
 				}, {});
 		}
 
@@ -295,15 +322,24 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		 */
 		private _registerThemeClass(className: string) {
 			const { properties: { extraClasses = {} } } = this;
-			const themeClass = this._theme[className] ? this._theme[className] : this._getBaseThemeClass(className);
+			const themeClass = this._theme[className]
+				? this._theme[className]
+				: this._getBaseThemeClass(className);
 			const extraClassesClassNames = extraClasses[className];
-			const extraClassesClassNamesArray = extraClassesClassNames ? extraClassesClassNames.split(' ') : [];
-			const cssClassNames = themeClass.split(' ').concat(extraClassesClassNamesArray);
-			const classesObject = cssClassNames.reduce((classesObject, cssClassName) => {
-				classesObject[cssClassName] = true;
-				this._allClasses[cssClassName] = false;
-				return classesObject;
-			}, <any> {});
+			const extraClassesClassNamesArray = extraClassesClassNames
+				? extraClassesClassNames.split(' ')
+				: [];
+			const cssClassNames = themeClass
+				.split(' ')
+				.concat(extraClassesClassNamesArray);
+			const classesObject = cssClassNames.reduce(
+				(classesObject, cssClassName) => {
+					classesObject[cssClassName] = true;
+					this._allClasses[cssClassName] = false;
+					return classesObject;
+				},
+				<any>{}
+			);
 			this._registeredClassesMap.set(className, classesObject);
 		}
 
@@ -311,16 +347,24 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		 * Recalculate registered classes for current theme.
 		 */
 		private _recalculateThemeClasses() {
-			const { properties: { injectedTheme = {}, theme = injectedTheme } } = this;
+			const {
+				properties: { injectedTheme = {}, theme = injectedTheme }
+			} = this;
 			if (!this._registeredBaseThemes) {
-				this._registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ].reverse();
+				this._registeredBaseThemes = [
+					...this.getDecorator('baseThemeClasses')
+				].reverse();
 				this._checkForDuplicates();
 			}
-			const registeredBaseThemeKeys = this._registeredBaseThemes.map((registeredBaseThemeClasses) => {
-				return registeredBaseThemeClasses[THEME_KEY];
-			});
+			const registeredBaseThemeKeys = this._registeredBaseThemes.map(
+				registeredBaseThemeClasses => {
+					return registeredBaseThemeClasses[THEME_KEY];
+				}
+			);
 
-			this._baseThemeClassesReverseLookup = createThemeClassesLookup(this._registeredBaseThemes);
+			this._baseThemeClassesReverseLookup = createThemeClassesLookup(
+				this._registeredBaseThemes
+			);
 			this._theme = registeredBaseThemeKeys.reduce((baseTheme, themeKey) => {
 				return assign(baseTheme, theme[themeKey]);
 			}, {});
@@ -335,9 +379,12 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		 * Find the base theme class for the class name
 		 */
 		private _getBaseThemeClass(className: string): string {
-			const registeredBaseTheme = find(this._registeredBaseThemes, (registeredBaseThemeClasses) => {
-				return Boolean(registeredBaseThemeClasses[className]);
-			});
+			const registeredBaseTheme = find(
+				this._registeredBaseThemes,
+				registeredBaseThemeClasses => {
+					return Boolean(registeredBaseThemeClasses[className]);
+				}
+			);
 			return (registeredBaseTheme && registeredBaseTheme[className]) || '';
 		}
 
@@ -345,17 +392,22 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		 * Check for duplicates across the registered base themes.
 		 */
 		private _checkForDuplicates(): void {
-			this._registeredBaseThemes.forEach((registeredBaseThemeClasses, index) => {
-				Object.keys(registeredBaseThemeClasses).some((key) => {
-					return this._isDuplicate(key, registeredBaseThemeClasses);
-				});
-			});
+			this._registeredBaseThemes.forEach(
+				(registeredBaseThemeClasses, index) => {
+					Object.keys(registeredBaseThemeClasses).some(key => {
+						return this._isDuplicate(key, registeredBaseThemeClasses);
+					});
+				}
+			);
 		}
 
 		/**
 		 * Search for the class name in other base themes
 		 */
-		private _isDuplicate(key: string, originatingBaseTheme: ClassNames): boolean {
+		private _isDuplicate(
+			key: string,
+			originatingBaseTheme: ClassNames
+		): boolean {
 			let duplicate = false;
 			if (key !== THEME_KEY) {
 				for (let i = 0; i < this._registeredBaseThemes.length; i++) {
@@ -363,7 +415,9 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 						continue;
 					}
 					if (this._registeredBaseThemes[i][key]) {
-						console.warn(`Duplicate base theme class key '${key}' detected, this could cause unexpected results`);
+						console.warn(
+							`Duplicate base theme class key '${key}' detected, this could cause unexpected results`
+						);
 						duplicate = true;
 						break;
 					}

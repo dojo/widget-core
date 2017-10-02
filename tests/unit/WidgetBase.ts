@@ -42,14 +42,14 @@ registerSuite({
 		assert.lengthOf(widget.children, 1);
 		assert.strictEqual(widget.children[0], expectedChild);
 	},
-	'invalidate': {
+	invalidate: {
 		'should emit event and mark as dirty when invalidating during idle'() {
 			let invalidateCalled = false;
 			let renderCount = 0;
 			class Foo extends WidgetBase {
 				render() {
 					renderCount++;
-					return v('div', [ 'hello world ' ]);
+					return v('div', ['hello world ']);
 				}
 
 				callInvalidate() {
@@ -77,7 +77,7 @@ registerSuite({
 				}
 				render() {
 					renderCount++;
-					return v('div', [ 'hello world ' ]);
+					return v('div', ['hello world ']);
 				}
 			}
 
@@ -101,7 +101,7 @@ registerSuite({
 				render() {
 					this.invalidate();
 					renderCount++;
-					return v('div', [ 'hello world ' ]);
+					return v('div', ['hello world ']);
 				}
 			}
 
@@ -117,9 +117,9 @@ registerSuite({
 		}
 	},
 	'Applies div as default tag'() {
-			const widget = new WidgetBase();
-			const renderedWidget = <VNode> (<any> widget).__render__();
-			assert.deepEqual(renderedWidget.vnodeSelector, 'div');
+		const widget = new WidgetBase();
+		const renderedWidget = <VNode>(<any>widget).__render__();
+		assert.deepEqual(renderedWidget.vnodeSelector, 'div');
 	},
 	setProperties: {
 		'widgets function properties are bound to the parent by default'() {
@@ -218,7 +218,7 @@ registerSuite({
 			assert.isTrue(testWidget.properties.functionIsBound);
 		}
 	},
-	'extendable'() {
+	extendable() {
 		let called = false;
 
 		function PropertyLogger() {
@@ -244,18 +244,18 @@ registerSuite({
 		class TestWidget extends WidgetBase<any> {}
 		const widget = new TestWidget();
 		widget.__setProperties__({ foo: true });
-		assert.deepEqual(widget.changedPropertyKeys, [ 'foo' ]);
+		assert.deepEqual(widget.changedPropertyKeys, ['foo']);
 		widget.__setProperties__({ foo: true });
 		assert.deepEqual(widget.changedPropertyKeys, []);
 		widget.__setProperties__({ foo: true });
 		widget.__setProperties__({ foo: true, bar: true });
-		assert.deepEqual(widget.changedPropertyKeys, [ 'bar' ]);
+		assert.deepEqual(widget.changedPropertyKeys, ['bar']);
 		const changedPropertyKeys = widget.changedPropertyKeys;
 		changedPropertyKeys.push('bad key');
 		assert.notDeepEqual(changedPropertyKeys, widget.changedPropertyKeys);
 	},
 	'decorate rendered DNodes': {
-		'HNode': {
+		HNode: {
 			'single root node'() {
 				class TestWidget extends WidgetBase {
 					render() {
@@ -283,10 +283,7 @@ registerSuite({
 			'single root node with children'() {
 				class TestWidget extends WidgetBase {
 					render() {
-						return v('div', { key: '1' }, [
-							v('div'),
-							v('div', { key: '1' })
-						]);
+						return v('div', { key: '1' }, [v('div'), v('div', { key: '1' })]);
 					}
 				}
 				const widget = new TestWidget();
@@ -308,12 +305,7 @@ registerSuite({
 			'Array root with mixed keys'() {
 				class TestWidget extends WidgetBase {
 					render() {
-						return [
-							v('div', { key: '1' }),
-							v('div'),
-							v('div', { key: '2' })
-						];
-
+						return [v('div', { key: '1' }), v('div'), v('div', { key: '2' })];
 					}
 				}
 				const widget = new TestWidget();
@@ -329,14 +321,9 @@ registerSuite({
 				class TestWidget extends WidgetBase {
 					render() {
 						return [
-							v('div', { key: '1' }, [
-								v('div')
-							]),
-							v('div', [
-								v('div', { key: '1' })
-							])
+							v('div', { key: '1' }, [v('div')]),
+							v('div', [v('div', { key: '1' })])
 						];
-
 					}
 				}
 				const widget = new TestWidget();
@@ -359,9 +346,12 @@ registerSuite({
 				assert.isFunction(resultTwoChild.properties!.afterUpdate);
 			}
 		},
-		'WNode'() {
+		WNode() {
 			class ChildWidget extends WidgetBase {}
-			const setCorePropertiesSpy = spy(ChildWidget.prototype, '__setCoreProperties__');
+			const setCorePropertiesSpy = spy(
+				ChildWidget.prototype,
+				'__setCoreProperties__'
+			);
 			class TestWidget extends WidgetBase {
 				render() {
 					return w(ChildWidget, {});
@@ -380,23 +370,22 @@ registerSuite({
 		'render with non widget children'() {
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						v('header')
-					]);
+					return v('div', [v('header')]);
 				}
 			}
 
 			const widget: any = new TestWidget();
-			const result = <VNode> widget.__render__();
+			const result = <VNode>widget.__render__();
 			assert.lengthOf(result.children, 1);
-			assert.strictEqual(result.children && result.children[0].vnodeSelector, 'header');
+			assert.strictEqual(
+				result.children && result.children[0].vnodeSelector,
+				'header'
+			);
 		},
 		'lazily defined widget in registry renders when ready'() {
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						w('my-header3', <any> undefined)
-					]);
+					return v('div', [w('my-header3', <any>undefined)]);
 				}
 			}
 
@@ -406,7 +395,7 @@ registerSuite({
 				}
 			}
 			const myWidget: any = createTestWidget(TestWidget, { registry });
-			let result = <VNode> myWidget.__render__();
+			let result = <VNode>myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			registry.define('my-header3', TestHeaderWidget);
 			result = myWidget.__render__();
@@ -416,9 +405,7 @@ registerSuite({
 			const myHeader = Symbol();
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						w(myHeader, <any> undefined)
-					]);
+					return v('div', [w(myHeader, <any>undefined)]);
 				}
 			}
 
@@ -428,7 +415,7 @@ registerSuite({
 				}
 			}
 			const myWidget: any = createTestWidget(TestWidget, { registry });
-			let result = <VNode> myWidget.__render__();
+			let result = <VNode>myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 			registry.define(myHeader, TestHeaderWidget);
 			result = myWidget.__render__();
@@ -443,13 +430,10 @@ registerSuite({
 				render() {
 					if (this._defineItem) {
 						this.registry.define('my-header4', TestHeaderLocalWidget);
-					}
-					else {
+					} else {
 						this._defineItem = true;
 					}
-					return v('div', [
-						w('my-header4', {})
-					]);
+					return v('div', [w('my-header4', {})]);
 				}
 				invalidate() {
 					super.invalidate();
@@ -469,17 +453,20 @@ registerSuite({
 			}
 			registry.define('my-header4', TestHeaderWidget);
 			const myWidget = new TestWidget();
-			myWidget.__setCoreProperties__({ bind: myWidget, baseRegistry: registry });
-			let result = <any> myWidget.__render__();
+			myWidget.__setCoreProperties__({
+				bind: myWidget,
+				baseRegistry: registry
+			});
+			let result = <any>myWidget.__render__();
 			assert.equal(result.children[0].vnodeSelector, 'global-header');
 			myWidget.invalidate();
-			result = <any> myWidget.__render__();
+			result = <any>myWidget.__render__();
 			assert.equal(result.children[0].vnodeSelector, 'local-header');
 		},
 		'async factories only initialise once'() {
 			let resolveFunction: any;
 			const loadFunction = () => {
-				return new Promise<Constructor<WidgetBase>>((resolve) => {
+				return new Promise<Constructor<WidgetBase>>(resolve => {
 					resolveFunction = resolve;
 				});
 			};
@@ -490,9 +477,7 @@ registerSuite({
 					super.invalidate();
 				}
 				render() {
-					return v('div', [
-						w('my-header', <any> undefined)
-					]);
+					return v('div', [w('my-header', <any>undefined)]);
 				}
 			}
 
@@ -505,12 +490,15 @@ registerSuite({
 			let invalidateCount = 0;
 
 			const myWidget = new TestWidget();
-			myWidget.__setCoreProperties__({ bind: myWidget, baseRegistry: registry });
+			myWidget.__setCoreProperties__({
+				bind: myWidget,
+				baseRegistry: registry
+			});
 			myWidget.on('invalidated', () => {
 				invalidateCount++;
 			});
 
-			let result = <VNode> myWidget.__render__();
+			let result = <VNode>myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 
 			myWidget.invalidate();
@@ -520,10 +508,10 @@ registerSuite({
 
 			resolveFunction(TestHeaderWidget);
 
-			const promise = new Promise((resolve) => setTimeout(resolve, 100));
+			const promise = new Promise(resolve => setTimeout(resolve, 100));
 			return promise.then(() => {
 				assert.equal(invalidateCount, 3);
-				result = <VNode> myWidget.__render__();
+				result = <VNode>myWidget.__render__();
 				assert.lengthOf(result.children, 1);
 				assert.strictEqual(result.children![0].vnodeSelector, 'header');
 			});
@@ -531,7 +519,7 @@ registerSuite({
 		'render with async factory'() {
 			let resolveFunction: any;
 			const loadFunction = () => {
-				return new Promise<Constructor<WidgetBase>>((resolve) => {
+				return new Promise<Constructor<WidgetBase>>(resolve => {
 					resolveFunction = resolve;
 				});
 			};
@@ -539,9 +527,7 @@ registerSuite({
 
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						w('my-header1', {})
-					]);
+					return v('div', [w('my-header1', {})]);
 				}
 			}
 
@@ -553,13 +539,13 @@ registerSuite({
 
 			const myWidget = createTestWidget(TestWidget, { registry });
 
-			let result = <VNode> myWidget.__render__();
+			let result = <VNode>myWidget.__render__();
 			assert.lengthOf(result.children, 0);
 
 			resolveFunction(TestHeaderWidget);
-			return new Promise((resolve) => {
+			return new Promise(resolve => {
 				myWidget.on('invalidated', () => {
-					result = <VNode> myWidget.__render__();
+					result = <VNode>myWidget.__render__();
 					assert.lengthOf(result.children, 1);
 					assert.strictEqual(result.children![0].vnodeSelector, 'header');
 					resolve();
@@ -583,60 +569,54 @@ registerSuite({
 				}
 
 				render() {
-					return v('div', [
-						w('my-header', <any> undefined)
-					]);
+					return v('div', [w('my-header', <any>undefined)]);
 				}
 			}
 
 			const myWidget: any = new TestWidget();
 
-			let result = <VNode> myWidget.__render__();
+			let result = <VNode>myWidget.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
 		},
 		'render with nested children'() {
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [
-						v('header', [
-							v('section')
-						])
-					]);
+					return v('div', [v('header', [v('section')])]);
 				}
 			}
 
 			const widget: any = new TestWidget();
-			const result = <VNode> widget.__render__();
+			const result = <VNode>widget.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.strictEqual(result.children![0].vnodeSelector, 'header');
-			assert.strictEqual(result.children![0].children![0].vnodeSelector, 'section');
+			assert.strictEqual(
+				result.children![0].children![0].vnodeSelector,
+				'section'
+			);
 		},
 		'render with a text node children'() {
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [ 'I am a text node' ]);
+					return v('div', ['I am a text node']);
 				}
 			}
 
 			const widget: any = new TestWidget();
-			const result = <VNode> widget.__render__();
+			const result = <VNode>widget.__render__();
 			assert.isUndefined(result.children);
 			assert.equal(result.text, 'I am a text node');
 		},
 		'render returns array'() {
 			class TestChildWidget extends WidgetBase {
 				render() {
-					return [
-						v('div', [ 'text' ]),
-						v('span', { key: 'span' })
-					];
+					return [v('div', ['text']), v('span', { key: 'span' })];
 				}
 			}
 
 			class TestWidget extends WidgetBase {
 				render() {
-					return v('div', [ w(TestChildWidget, {}) ]);
+					return v('div', [w(TestChildWidget, {})]);
 				}
 			}
 
@@ -650,37 +630,38 @@ registerSuite({
 			assert.strictEqual(result.children![1].properties.key, 'span');
 		},
 		'instance gets passed to VNodeProperties as bind to widget and all children'() {
-
 			class InnerWidget extends WidgetBase {}
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return w(InnerWidget, {}, [
-						v('header', [
-							v('section')
-						])
-					]);
+					return w(InnerWidget, {}, [v('header', [v('section')])]);
 				}
 			}
 
 			const widget: any = new TestWidget();
-			const result = <VNode> widget.__render__();
+			const result = <VNode>widget.__render__();
 			assert.lengthOf(result.children, 1);
 			assert.notStrictEqual(result.properties!.bind, widget);
 			assert.instanceOf(result.properties!.bind, InnerWidget);
 			assert.strictEqual(result.children![0].properties!.bind, widget);
 			assert.instanceOf(result.children![0].properties!.bind, TestWidget);
-			assert.strictEqual(result.children![0].children![0].properties!.bind, widget);
-			assert.instanceOf(result.children![0].children![0].properties!.bind, TestWidget);
+			assert.strictEqual(
+				result.children![0].children![0].properties!.bind,
+				widget
+			);
+			assert.instanceOf(
+				result.children![0].children![0].properties!.bind,
+				TestWidget
+			);
 		},
 		'render with multiple text node children'() {
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					return v('div', [ 'I am a text node', 'Second text node' ]);
+					return v('div', ['I am a text node', 'Second text node']);
 				}
 			}
 
 			const widget: any = new TestWidget();
-			const result = <VNode> widget.__render__();
+			const result = <VNode>widget.__render__();
 			assert.isUndefined(result.text);
 			assert.lengthOf(result.children, 2);
 			assert.strictEqual(result.children![0].text, 'I am a text node');
@@ -708,7 +689,9 @@ registerSuite({
 
 			class TestWidget extends WidgetBase<any> {
 				render() {
-					const properties = this.properties.classes ? { classes: this.properties.classes } : {};
+					const properties = this.properties.classes
+						? { classes: this.properties.classes }
+						: {};
 
 					return v('div', [
 						this.properties.hide ? null : w(TestChildWidget, properties),
@@ -720,48 +703,52 @@ registerSuite({
 			}
 
 			const widget: any = new TestWidget();
-			const firstRenderResult = <VNode> widget.__render__();
+			const firstRenderResult = <VNode>widget.__render__();
 			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
 			assert.lengthOf(firstRenderResult.children, 4);
-			const firstRenderChild: any = firstRenderResult.children && firstRenderResult.children[0];
+			const firstRenderChild: any =
+				firstRenderResult.children && firstRenderResult.children[0];
 			assert.strictEqual(firstRenderChild.vnodeSelector, 'footer');
 
 			widget.invalidate();
 
-			const secondRenderResult = <VNode> widget.__render__();
+			const secondRenderResult = <VNode>widget.__render__();
 			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 0);
 			assert.lengthOf(secondRenderResult.children, 4);
-			const secondRenderChild: any = secondRenderResult.children && secondRenderResult.children[0];
+			const secondRenderChild: any =
+				secondRenderResult.children && secondRenderResult.children[0];
 			assert.strictEqual(secondRenderChild.vnodeSelector, 'footer');
 
-			widget.__setProperties__(<any> { hide: true });
+			widget.__setProperties__(<any>{ hide: true });
 			widget.invalidate();
 
-			const thirdRenderResult = <VNode> widget.__render__();
+			const thirdRenderResult = <VNode>widget.__render__();
 			assert.strictEqual(countWidgetCreated, 4);
 			assert.strictEqual(countWidgetDestroyed, 4);
 			assert.lengthOf(thirdRenderResult.children, 0);
 
-			widget.__setProperties__(<any> { hide: false });
+			widget.__setProperties__(<any>{ hide: false });
 			widget.invalidate();
 
-			const lastRenderResult = <VNode> widget.__render__();
+			const lastRenderResult = <VNode>widget.__render__();
 			assert.strictEqual(countWidgetCreated, 8);
 			assert.strictEqual(countWidgetDestroyed, 4);
 			assert.lengthOf(lastRenderResult.children, 4);
-			const lastRenderChild: any = lastRenderResult.children && lastRenderResult.children[0];
+			const lastRenderChild: any =
+				lastRenderResult.children && lastRenderResult.children[0];
 			assert.strictEqual(lastRenderChild.vnodeSelector, 'footer');
 		},
 		'render with multiple children of the same type without an id'() {
 			class TestWidgetOne extends WidgetBase<any> {}
 			class TestWidgetTwo extends WidgetBase<any> {}
-			const widgetName = (<any> TestWidgetTwo).name;
-			let warnMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times';
+			const widgetName = (<any>TestWidgetTwo).name;
+			let warnMsg =
+				'It is recommended to provide a unique "key" property when using the same widget multiple times';
 
 			if (widgetName) {
-				warnMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times`;
+				warnMsg = `It is recommended to provide a unique "key" property when using the same widget (${widgetName}) multiple times`;
 			}
 
 			class TestWidget extends WidgetBase<any> {
@@ -785,41 +772,37 @@ registerSuite({
 		},
 		'__render__ with updated array properties'() {
 			const properties = {
-				items: [
-					'a', 'b'
-				]
+				items: ['a', 'b']
 			};
 
 			const myWidget = new WidgetBase<any>();
 			myWidget.__setProperties__(properties);
-			assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b' ]);
+			assert.deepEqual((<any>myWidget.properties).items, ['a', 'b']);
 			properties.items.push('c');
 			myWidget.__setProperties__(properties);
-			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b', 'c' ]);
+			assert.deepEqual((<any>myWidget.properties).items, ['a', 'b', 'c']);
 			properties.items.push('d');
 			myWidget.__setProperties__(properties);
-			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b', 'c', 'd' ]);
+			assert.deepEqual((<any>myWidget.properties).items, ['a', 'b', 'c', 'd']);
 		},
 		'__render__ with internally updated array state'() {
 			const properties = {
-				items: [
-					'a', 'b'
-				]
+				items: ['a', 'b']
 			};
 
 			const myWidget: any = new WidgetBase();
 			myWidget.__setProperties__(properties);
 			myWidget.__render__();
-			assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b' ]);
-			myWidget.__setProperties__(<any> { items: [ 'a', 'b', 'c'] });
+			assert.deepEqual((<any>myWidget.properties).items, ['a', 'b']);
+			myWidget.__setProperties__(<any>{ items: ['a', 'b', 'c'] });
 			myWidget.__render__();
-			assert.deepEqual((<any> myWidget.properties).items , [ 'a', 'b', 'c' ]);
+			assert.deepEqual((<any>myWidget.properties).items, ['a', 'b', 'c']);
 		},
 		'__render__() and invalidate()'() {
 			const widgetBase: any = new WidgetBase();
 			widgetBase.__setProperties__({ id: 'foo', label: 'foo' });
-			const result1 = <VNode> widgetBase.__render__();
-			const result2 = <VNode> widgetBase.__render__();
+			const result1 = <VNode>widgetBase.__render__();
+			const result2 = <VNode>widgetBase.__render__();
 			widgetBase.invalidate();
 			const result3 = widgetBase.__render__();
 			const result4 = widgetBase.__render__();
@@ -847,12 +830,8 @@ registerSuite({
 						w(TestChildWidget, {}),
 						v('div', {}, [
 							'text',
-							w(TestChildWidget, {}, [
-								w(TestChildWidget, {})
-							]),
-							v('div', {}, [
-								w(TestChildWidget, {})
-							])
+							w(TestChildWidget, {}, [w(TestChildWidget, {})]),
+							v('div', {}, [w(TestChildWidget, {})])
 						]),
 						w(TestChildWidget, {})
 					]);
@@ -884,7 +863,9 @@ registerSuite({
 			class TestWidget extends WidgetBase<any> {
 				render() {
 					return v('div', [
-						renderWidgetOne ? w(WidgetOne, { key: '1' }) : w(WidgetTwo, { key: '1' })
+						renderWidgetOne
+							? w(WidgetOne, { key: '1' })
+							: w(WidgetTwo, { key: '1' })
 					]);
 				}
 			}
@@ -915,9 +896,7 @@ registerSuite({
 
 		class Widget extends WidgetBase<any> {
 			render(): any {
-				return v('div', [
-					w(TestChildWidget, {})
-				]);
+				return v('div', [w(TestChildWidget, {})]);
 			}
 			invalidate() {
 				super.invalidate();
@@ -927,7 +906,7 @@ registerSuite({
 
 		const widget = new Widget();
 
-		(<any> widget).__render__();
+		(<any>widget).__render__();
 		childInvalidate();
 		assert.isTrue(childInvalidateCalled);
 		assert.isTrue(parentInvalidateCalled);
@@ -952,9 +931,7 @@ registerSuite({
 
 			render() {
 				this.foo++;
-				return w(ContainerWidget, {}, [
-					w(FooWidget, { foo: this.foo })
-				]);
+				return w(ContainerWidget, {}, [w(FooWidget, { foo: this.foo })]);
 			}
 		}
 
@@ -1020,7 +997,7 @@ registerSuite({
 		}
 
 		@testDecorator()
-		class TestWidget2 extends TestWidget { }
+		class TestWidget2 extends TestWidget {}
 
 		const testWidget = new TestWidget();
 		const testWidget2 = new TestWidget2();
@@ -1044,7 +1021,15 @@ registerSuite({
 
 		const testWidget = new TestWidget();
 
-		assert.equal(testWidget.getDecoratorCount('beforeRender'), 1, 'beforeRender = 0 (existing) + 1');
-		assert.equal(testWidget.getDecoratorCount('afterRender'), 1, 'afterRender = 0 (existing) + 1');
+		assert.equal(
+			testWidget.getDecoratorCount('beforeRender'),
+			1,
+			'beforeRender = 0 (existing) + 1'
+		);
+		assert.equal(
+			testWidget.getDecoratorCount('afterRender'),
+			1,
+			'afterRender = 0 (existing) + 1'
+		);
 	}
 });

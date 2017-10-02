@@ -121,23 +121,32 @@ export interface CustomElement extends HTMLElement {
 	setWidgetInstance(instance: ProjectorMixin<any>): void;
 }
 
-function getWidgetPropertyFromAttribute(attributeName: string, attributeValue: string | null, descriptor: CustomElementAttributeDescriptor): [ string, any ] {
+function getWidgetPropertyFromAttribute(
+	attributeName: string,
+	attributeValue: string | null,
+	descriptor: CustomElementAttributeDescriptor
+): [string, any] {
 	let { propertyName = attributeName, value = attributeValue } = descriptor;
 
 	if (typeof value === 'function') {
 		value = value(attributeValue);
 	}
 
-	return [ propertyName, value ];
+	return [propertyName, value];
 }
 
 let customEventClass = global.CustomEvent;
 
 if (typeof customEventClass !== 'function') {
-	const customEvent = function (event: string, params: any) {
+	const customEvent = function(event: string, params: any) {
 		params = params || { bubbles: false, cancelable: false, detail: undefined };
 		const evt = document.createEvent('CustomEvent');
-		evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+		evt.initCustomEvent(
+			event,
+			params.bubbles,
+			params.cancelable,
+			params.detail
+		);
 		return evt;
 	};
 
@@ -156,13 +165,22 @@ if (typeof customEventClass !== 'function') {
 export function initializeElement(element: CustomElement) {
 	let initialProperties: any = {};
 
-	const { attributes = [], events = [], properties = [], initialization } = element.getDescriptor();
+	const {
+		attributes = [],
+		events = [],
+		properties = [],
+		initialization
+	} = element.getDescriptor();
 
 	attributes.forEach(attribute => {
 		const attributeName = attribute.attributeName;
 
-		const [ propertyName, propertyValue ] = getWidgetPropertyFromAttribute(attributeName, element.getAttribute(attributeName), attribute);
-		initialProperties[ propertyName ] = propertyValue;
+		const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(
+			attributeName,
+			element.getAttribute(attributeName),
+			attribute
+		);
+		initialProperties[propertyName] = propertyValue;
 	});
 
 	let customProperties: PropertyDescriptorMap = {};
@@ -170,15 +188,21 @@ export function initializeElement(element: CustomElement) {
 	attributes.reduce((properties, attribute) => {
 		const { propertyName = attribute.attributeName } = attribute;
 
-		properties[ propertyName ] = {
+		properties[propertyName] = {
 			get() {
-				return element.getWidgetInstance().properties[ propertyName ];
+				return element.getWidgetInstance().properties[propertyName];
 			},
 			set(value: any) {
-				const [ propertyName, propertyValue ] = getWidgetPropertyFromAttribute(attribute.attributeName, value, attribute);
-				element.getWidgetInstance().setProperties(assign({}, element.getWidgetInstance().properties, {
-					[propertyName]: propertyValue
-				}));
+				const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(
+					attribute.attributeName,
+					value,
+					attribute
+				);
+				element.getWidgetInstance().setProperties(
+					assign({}, element.getWidgetInstance().properties, {
+						[propertyName]: propertyValue
+					})
+				);
 			}
 		};
 
@@ -189,18 +213,20 @@ export function initializeElement(element: CustomElement) {
 		const { propertyName, getValue, setValue } = property;
 		const { widgetPropertyName = propertyName } = property;
 
-		properties[ propertyName ] = {
+		properties[propertyName] = {
 			get() {
-				const value = element.getWidgetInstance().properties[ widgetPropertyName ];
+				const value = element.getWidgetInstance().properties[
+					widgetPropertyName
+				];
 				return getValue ? getValue(value) : value;
 			},
 
 			set(value: any) {
-				element.getWidgetInstance().setProperties(assign(
-					{},
-					element.getWidgetInstance().properties,
-					{ [widgetPropertyName]: setValue ? setValue(value) : value }
-				));
+				element.getWidgetInstance().setProperties(
+					assign({}, element.getWidgetInstance().properties, {
+						[widgetPropertyName]: setValue ? setValue(value) : value
+					})
+				);
 			}
 		};
 
@@ -210,25 +236,31 @@ export function initializeElement(element: CustomElement) {
 	Object.defineProperties(element, customProperties);
 
 	// define events
-	events.forEach((event) => {
+	events.forEach(event => {
 		const { propertyName, eventName } = event;
 
-		initialProperties[ propertyName ] = (event: any) => {
-			element.dispatchEvent(new customEventClass(eventName, {
-				bubbles: false,
-				detail: event
-			}));
+		initialProperties[propertyName] = (event: any) => {
+			element.dispatchEvent(
+				new customEventClass(eventName, {
+					bubbles: false,
+					detail: event
+				})
+			);
 		};
 	});
 
 	// find children
 	let children: DNode[] = [];
 
-	arrayFrom(element.children).forEach((childNode: HTMLElement, index: number) => {
+	arrayFrom(
+		element.children
+	).forEach((childNode: HTMLElement, index: number) => {
 		const DomElement = DomWrapper(childNode);
-		children.push(w(DomElement, {
-			key: `child-${index}`
-		}));
+		children.push(
+			w(DomElement, {
+				key: `child-${index}`
+			})
+		);
 	});
 
 	if (initialization) {
@@ -259,17 +291,26 @@ export function initializeElement(element: CustomElement) {
  * @param newValue    The new value of the attribute
  * @param oldValue    The old value of the attribute
  */
-export function handleAttributeChanged(element: CustomElement, name: string, newValue: string | null, oldValue: string | null) {
+export function handleAttributeChanged(
+	element: CustomElement,
+	name: string,
+	newValue: string | null,
+	oldValue: string | null
+) {
 	const attributes = element.getDescriptor().attributes || [];
 
-	attributes.forEach((attribute) => {
+	attributes.forEach(attribute => {
 		if (attribute.attributeName === name) {
-			const [ propertyName, propertyValue ] = getWidgetPropertyFromAttribute(name, newValue, attribute);
-			element.getWidgetInstance().setProperties(assign(
-				{},
-				element.getWidgetInstance().properties,
-				{ [propertyName]: propertyValue }
-			));
+			const [propertyName, propertyValue] = getWidgetPropertyFromAttribute(
+				name,
+				newValue,
+				attribute
+			);
+			element.getWidgetInstance().setProperties(
+				assign({}, element.getWidgetInstance().properties, {
+					[propertyName]: propertyValue
+				})
+			);
 		}
 	});
 }

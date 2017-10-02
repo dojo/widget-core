@@ -10,7 +10,7 @@ import { fetchCldrData } from '../../support/util';
 import { w } from './../../../src/d';
 import { ThemeableMixin } from './../../../src/mixins/Themeable';
 
-class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> { }
+class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> {}
 
 let localized: any;
 
@@ -23,7 +23,7 @@ registerSuite({
 
 		if (localized) {
 			localized.destroy();
-			localized = <any> null;
+			localized = <any>null;
 		}
 	},
 
@@ -74,13 +74,19 @@ registerSuite({
 			let messages = localized.localizeBundle(bundle);
 
 			assert.isFunction(messages.format);
-			assert.strictEqual(messages.format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
+			assert.strictEqual(
+				messages.format('welcome', { name: 'Bill' }),
+				'Welcome, Bill!'
+			);
 
 			switchLocale('fr');
 
 			return i18n(bundle, 'fr').then(() => {
 				messages = localized.localizeBundle(bundle);
-				assert.strictEqual(messages.format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
+				assert.strictEqual(
+					messages.format('welcome', { name: 'Jean' }),
+					'Bienvenue, Jean!'
+				);
 			});
 		}
 	},
@@ -92,7 +98,7 @@ registerSuite({
 
 			switchLocale('fr');
 
-			assert.isTrue((<any> localized).invalidate.called, 'Widget invalidated.');
+			assert.isTrue((<any>localized).invalidate.called, 'Widget invalidated.');
 		},
 
 		'Does not update when `locale` property is set'() {
@@ -102,7 +108,10 @@ registerSuite({
 
 			switchLocale('fr');
 
-			assert.isFalse((<any> localized).invalidate.called, 'Widget not invalidated.');
+			assert.isFalse(
+				(<any>localized).invalidate.called,
+				'Widget not invalidated.'
+			);
 		}
 	},
 	'does not decorate properties for wNode'() {
@@ -113,18 +122,18 @@ registerSuite({
 		}
 
 		localized = new LocalizedExtended();
-		localized.__setProperties__({locale: 'ar-JO'});
+		localized.__setProperties__({ locale: 'ar-JO' });
 
-		const result = <VNode> localized.__render__();
+		const result = <VNode>localized.__render__();
 		assert.isOk(result);
 		assert.isNull(result.properties!['lang']);
 	},
-	'`properties.locale` updates the widget node\'s `lang` property': {
+	'`properties.locale` updates the widget nodes `lang` property': {
 		'when non-empty'() {
 			localized = new Localized();
-			localized.__setProperties__({locale: 'ar-JO'});
+			localized.__setProperties__({ locale: 'ar-JO' });
 
-			const result = <VNode> localized.__render__();
+			const result = <VNode>localized.__render__();
 			assert.isOk(result);
 			assert.strictEqual(result.properties!['lang'], 'ar-JO');
 		},

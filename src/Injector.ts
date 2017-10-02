@@ -1,7 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
 
 export class Injector<T = any> extends Evented {
-
 	private _payload: T;
 
 	constructor(payload: T) {

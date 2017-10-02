@@ -6,18 +6,20 @@ import Intersection from '../../../src/meta/Intersection';
 import { NodeHandler } from './../../../src/NodeHandler';
 
 let intersectionObserver: any;
-const observers: ([ object, Function ])[] = [];
+const observers: ([object, Function])[] = [];
 
 registerSuite({
 	name: 'meta - Intersection',
 
 	beforeEach() {
-		intersectionObserver = stub(global, 'IntersectionObserver', function (callback: any) {
+		intersectionObserver = stub(global, 'IntersectionObserver', function(
+			callback: any
+		) {
 			const observer = {
 				observe: stub(),
 				takeRecords: stub().returns([])
 			};
-			observers.push([ observer, callback ]);
+			observers.push([observer, callback]);
 			return observer;
 		});
 	},
@@ -60,20 +62,25 @@ registerSuite({
 			nodeHandler.add(element, { key: 'root' });
 
 			intersection.get('root');
-			const [ observer, callback ] = observers[0];
+			const [observer, callback] = observers[0];
 
-			callback([{
-				target: element,
-				intersectionRatio: 0.1,
-				isIntersecting: true
-			}], observer);
+			callback(
+				[
+					{
+						target: element,
+						intersectionRatio: 0.1,
+						isIntersecting: true
+					}
+				],
+				observer
+			);
 
 			const hasIntersectionInfo = intersection.has('root');
 			assert.isTrue(hasIntersectionInfo);
 		}
 	},
 	get: {
-		'intersections'() {
+		intersections() {
 			const nodeHandler = new NodeHandler();
 			const onSpy = spy(nodeHandler, 'on');
 
@@ -131,27 +138,43 @@ registerSuite({
 
 			assert.isFalse(onSpy.called);
 
-			const [ observer, callback ] = observers[0];
+			const [observer, callback] = observers[0];
 
-			callback([{
-				target: element,
-				intersectionRatio: 0.1,
-				isIntersecting: true
-			}], observer);
+			callback(
+				[
+					{
+						target: element,
+						intersectionRatio: 0.1,
+						isIntersecting: true
+					}
+				],
+				observer
+			);
 
 			assert.isTrue(invalidateStub.calledTwice);
 			const result = intersection.get('root');
-			assert.deepEqual(result, { intersectionRatio: 0.1, isIntersecting: true });
-
-			callback([{
-				target: element,
+			assert.deepEqual(result, {
 				intersectionRatio: 0.1,
-				isIntersecting: false
-			}], observer);
+				isIntersecting: true
+			});
+
+			callback(
+				[
+					{
+						target: element,
+						intersectionRatio: 0.1,
+						isIntersecting: false
+					}
+				],
+				observer
+			);
 
 			assert.isTrue(invalidateStub.calledThrice);
 			const resultTwo = intersection.get('root');
-			assert.deepEqual(resultTwo, { intersectionRatio: 0.1, isIntersecting: false });
+			assert.deepEqual(resultTwo, {
+				intersectionRatio: 0.1,
+				isIntersecting: false
+			});
 		},
 		'intersections calls waits for root node before invalidating'() {
 			const nodeHandler = new NodeHandler();
@@ -183,17 +206,25 @@ registerSuite({
 			assert.strictEqual(intersectionObserver.firstCall.args[1].root, root);
 			assert.lengthOf(observers, 1);
 
-			const [ observer, callback ] = observers[0];
+			const [observer, callback] = observers[0];
 
-			callback([{
-				target: element,
-				intersectionRatio: 0.1,
-				isIntersecting: true
-			}], observer);
+			callback(
+				[
+					{
+						target: element,
+						intersectionRatio: 0.1,
+						isIntersecting: true
+					}
+				],
+				observer
+			);
 
 			assert.isTrue(invalidateStub.calledTwice);
 			const result = intersection.get('foo', { root: 'root' });
-			assert.deepEqual(result, { intersectionRatio: 0.1, isIntersecting: true });
+			assert.deepEqual(result, {
+				intersectionRatio: 0.1,
+				isIntersecting: true
+			});
 		},
 		'observers are cached for details'() {
 			const nodeHandler = new NodeHandler();
@@ -207,11 +238,11 @@ registerSuite({
 			nodeHandler.add(root, { key: 'root' });
 			intersection.get('foo');
 			assert.lengthOf(observers, 1);
-			intersection.get('foo', { root: 'root'});
+			intersection.get('foo', { root: 'root' });
 			assert.lengthOf(observers, 2);
 			intersection.get('foo');
 			assert.lengthOf(observers, 2);
-			intersection.get('foo', { root: 'root'});
+			intersection.get('foo', { root: 'root' });
 			assert.lengthOf(observers, 2);
 		}
 	}

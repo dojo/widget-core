@@ -13,7 +13,7 @@ interface TestProperties {
 
 registerSuite({
 	name: 'decorators/diffProperty',
-	'decorator': {
+	decorator: {
 		'diff with no reaction'() {
 			let callCount = 0;
 			function diffFoo(previousProperty: any, newProperty: any) {
@@ -46,7 +46,6 @@ registerSuite({
 				}
 
 				class TestWidget extends WidgetBase<TestProperties> {
-
 					reactionCalled = false;
 
 					@diffProperty('foo', customDiff)
@@ -71,7 +70,6 @@ registerSuite({
 				}
 
 				class TestWidget extends WidgetBase<TestProperties> {
-
 					reactionCalled = false;
 
 					@diffProperty('foo', customDiff)
@@ -91,7 +89,10 @@ registerSuite({
 		'diff with no reaction'() {
 			let callCount = 0;
 
-			function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
+			function diffPropertyFoo(
+				previousProperty: string,
+				newProperty: string
+			): PropertyChangeRecord {
 				callCount++;
 				assert.equal(newProperty, 'bar');
 				return {
@@ -115,7 +116,10 @@ registerSuite({
 			'reaction does not execute if no registered properties are changed'() {
 				let callCount = 0;
 
-				function diffPropertyFoo(previousProperty: string, newProperty: string): PropertyChangeRecord {
+				function diffPropertyFoo(
+					previousProperty: string,
+					newProperty: string
+				): PropertyChangeRecord {
 					callCount++;
 					assert.equal(newProperty, 'bar');
 					return {
@@ -128,10 +132,15 @@ registerSuite({
 					reactionCalled = false;
 					constructor() {
 						super();
-						diffProperty('foo', diffPropertyFoo, this.onFooPropertyChanged)(this);
+						diffProperty('foo', diffPropertyFoo, this.onFooPropertyChanged)(
+							this
+						);
 					}
 
-					onFooPropertyChanged(previousProperties: any, newProperties: any): void {
+					onFooPropertyChanged(
+						previousProperties: any,
+						newProperties: any
+					): void {
 						this.reactionCalled = true;
 					}
 				}
@@ -144,7 +153,10 @@ registerSuite({
 			'reaction executed when at least one registered properties is changed'() {
 				let callCount = 0;
 
-				function customDiffProperty(previousProperty: string, newProperty: string): PropertyChangeRecord {
+				function customDiffProperty(
+					previousProperty: string,
+					newProperty: string
+				): PropertyChangeRecord {
 					callCount++;
 					return {
 						changed: newProperty === 'bar' ? true : false,
@@ -156,8 +168,12 @@ registerSuite({
 					reactionCalled = false;
 					constructor() {
 						super();
-						diffProperty('foo', customDiffProperty, this.onPropertyChanged)(this);
-						diffProperty('id', customDiffProperty, this.onPropertyChanged)(this);
+						diffProperty('foo', customDiffProperty, this.onPropertyChanged)(
+							this
+						);
+						diffProperty('id', customDiffProperty, this.onPropertyChanged)(
+							this
+						);
 					}
 
 					onPropertyChanged(previousProperties: any, newProperties: any): void {
@@ -174,10 +190,10 @@ registerSuite({
 	},
 	'multiple default decorators on the same method cause the first matching decorator to win'() {
 		@diffProperty('foo', ignore)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		@diffProperty('foo', always)
-		class SubWidget extends TestWidget { }
+		class SubWidget extends TestWidget {}
 
 		const widget = new SubWidget();
 		const vnode = widget.__render__();
@@ -208,10 +224,10 @@ registerSuite({
 		}
 
 		@diffProperty('foo', diff1)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		@diffProperty('foo', diff2)
-		class SubWidget extends TestWidget { }
+		class SubWidget extends TestWidget {}
 
 		const widget = new SubWidget();
 		widget.__setProperties__({
@@ -233,7 +249,7 @@ registerSuite({
 		}
 		@diffProperty('foo', customDiff)
 		@diffProperty('id', customDiff)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		const widget = new TestWidget();
 		const vnode = widget.__render__();

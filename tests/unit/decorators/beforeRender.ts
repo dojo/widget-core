@@ -22,29 +22,41 @@ registerSuite({
 		type RenderFunction = () => DNode;
 		class TestWidget extends WidgetBase<any> {
 			@beforeRender()
-			firstAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
+			firstAfterRender(
+				renderFunction: RenderFunction,
+				properties: any,
+				children: DNode[]
+			): RenderFunction {
 				assert.strictEqual(beforeRenderCount++, 1);
 				return () => {
 					const rendered = renderFunction();
 					const clonedProperties = { ...properties };
-					return v('bar', clonedProperties, [ rendered, ...children ]);
+					return v('bar', clonedProperties, [rendered, ...children]);
 				};
 			}
 
 			@beforeRender()
-			secondAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
+			secondAfterRender(
+				renderFunction: RenderFunction,
+				properties: any,
+				children: DNode[]
+			): RenderFunction {
 				assert.strictEqual(beforeRenderCount++, 2);
 				return () => {
 					const rendered = renderFunction();
 					properties.bar = 'foo';
-					return v('qux', properties, [ rendered ]);
+					return v('qux', properties, [rendered]);
 				};
 			}
 		}
 
 		class ExtendedTestWidget extends TestWidget {
 			@beforeRender()
-			thirdAfterRender(renderFunction: RenderFunction, properties: any, children: DNode[]): RenderFunction {
+			thirdAfterRender(
+				renderFunction: RenderFunction,
+				properties: any,
+				children: DNode[]
+			): RenderFunction {
 				assert.strictEqual(beforeRenderCount, 3);
 				return renderFunction;
 			}
@@ -86,12 +98,11 @@ registerSuite({
 	'class level decorator'() {
 		let beforeRenderCount = 0;
 
-		@beforeRender(function (renderFunc: Render) {
+		@beforeRender(function(renderFunc: Render) {
 			beforeRenderCount++;
 			return renderFunc;
 		})
-		class TestWidget extends WidgetBase<any> {
-		}
+		class TestWidget extends WidgetBase<any> {}
 
 		const widget = new TestWidget();
 		widget.__render__();
@@ -105,13 +116,17 @@ registerSuite({
 			}
 
 			@beforeRender()
-			protected secondBeforeRender(renderFunc: Render) { }
+			protected secondBeforeRender(renderFunc: Render) {}
 		}
 
 		const widget = new TestWidget();
 		const vNode = widget.__render__();
 		assert.strictEqual(vNode, 'first render');
 		assert.isTrue(consoleStub.calledOnce);
-		assert.isTrue(consoleStub.calledWith('Render function not returned from beforeRender, using previous render'));
+		assert.isTrue(
+			consoleStub.calledWith(
+				'Render function not returned from beforeRender, using previous render'
+			)
+		);
 	}
 });

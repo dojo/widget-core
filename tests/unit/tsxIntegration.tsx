@@ -18,22 +18,22 @@ registerSuite({
 			render() {
 				const { hello } = this.properties;
 				return (
-					<header classes={{ background: true }} >
-						<div>{ hello }</div>
+					<header classes={{ background: true }}>
+						<div>{hello}</div>
 					</header>
 				);
 			}
 		}
 		class Bar extends WidgetBase<any> {
 			render() {
-				return <Foo hello='world' />;
+				return <Foo hello="world" />;
 			}
 		}
 
 		class Qux extends WidgetBase<any> {
 			render() {
 				const LazyFoo = fromRegistry<FooProperties>('LazyFoo');
-				return <LazyFoo hello='cool' />;
+				return <LazyFoo hello="cool" />;
 			}
 		}
 

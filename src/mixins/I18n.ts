@@ -73,9 +73,10 @@ export interface I18nMixin {
 	properties: I18nProperties;
 }
 
-export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<I18nMixin> {
+export function I18nMixin<T extends Constructor<WidgetBase<any>>>(
+	Base: T
+): T & Constructor<I18nMixin> {
 	class I18n extends Base {
-
 		public properties: I18nProperties;
 
 		constructor(...args: any[]) {
@@ -94,15 +95,20 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 			});
 		}
 
-		public localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T> {
+		public localizeBundle<T extends Messages>(
+			bundle: Bundle<T>
+		): LocalizedMessages<T> {
 			const { locale } = this.properties;
 			const messages = this._getLocaleMessages(bundle) || bundle.messages;
 
-			return assign(Object.create({
-				format(key: string, options?: any) {
-					return formatMessage(bundle.bundlePath, key, options, locale);
-				}
-			}), messages) as LocalizedMessages<T>;
+			return assign(
+				Object.create({
+					format(key: string, options?: any) {
+						return formatMessage(bundle.bundlePath, key, options, locale);
+					}
+				}),
+				messages
+			) as LocalizedMessages<T>;
 		}
 
 		@afterRender()

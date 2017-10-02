@@ -1,7 +1,11 @@
 import { WidgetBase } from './../../src/WidgetBase';
 import { w } from './../../src/d';
 import { Registry } from './../../src/Registry';
-import { Constructor, VirtualDomNode, WidgetBaseInterface } from './../../src/interfaces';
+import {
+	Constructor,
+	VirtualDomNode,
+	WidgetBaseInterface
+} from './../../src/interfaces';
 
 interface TestWidget<W extends WidgetBase> extends WidgetBaseInterface {
 	getWidgetUnderTest(): W;
@@ -24,7 +28,7 @@ function createTestWidget<W extends WidgetBase>(
 		private _renderResult: VirtualDomNode | VirtualDomNode[];
 
 		getAttribute(key: string): any {
-			return (<any> this)[key];
+			return (<any>this)[key];
 		}
 
 		setProperties(properties: W['properties'] & { registry: Registry }): void {
@@ -44,7 +48,7 @@ function createTestWidget<W extends WidgetBase>(
 		}
 
 		getWidgetUnderTest(): W {
-			return (<any> this)._cachedChildrenMap.get(component)[0].child;
+			return (<any>this)._cachedChildrenMap.get(component)[0].child;
 		}
 
 		render() {
@@ -54,8 +58,11 @@ function createTestWidget<W extends WidgetBase>(
 		get renderResult(): VirtualDomNode | VirtualDomNode[] {
 			return this._renderResult;
 		}
-	};
-	testWidget.__setCoreProperties__({ baseRegistry: registry, bind: testWidget });
+	}();
+	testWidget.__setCoreProperties__({
+		baseRegistry: registry,
+		bind: testWidget
+	});
 	testWidget.__render__();
 	return testWidget;
 }
