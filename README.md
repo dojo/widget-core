@@ -76,7 +76,7 @@ The following returns the `HNode` example from above from the `render` function:
 
 ```ts
 class HelloDojo extends WidgetBase {
-    protected render(): DNode {
+    protected render() {
         return v('div', [ 'Hello, Dojo 2!' ]);
     }
 }
@@ -123,7 +123,7 @@ interface MyProperties extends WidgetProperties {
 }
 
 class Hello extends WidgetBase<MyProperties> {
-    protected render(): DNode {
+    protected render() {
         const { name } = this.properties;
 
         return v('div', [ `Hello, ${name}` ]);
@@ -143,7 +143,7 @@ Consider the previous `Hello` widget that we created:
 
 ```ts
 class App extends WidgetBase {
-    protected render(): DNode {
+    protected render() {
         return v('div', [
             w(Hello, { name: 'Bill' }),
             w(Hello, { name: 'Bob' }),
@@ -171,7 +171,7 @@ Splitting widgets into multiple smaller widgets is easy and helps to add extende
 Consider the following `List` widget, which has a simple property interface of an array of items consisting of `content: string` and `highlighted: boolean`.
 
 ```ts
-interface ListProperties extends WidgetProperties {
+interface ListProperties {
     items: {
         id: string;
         content: string;
@@ -199,7 +199,7 @@ The `List` widget works as expected and displays the list in the browser but is 
 To extend the `List` API with an event that needs to be called when an item is clicked with the item's `id`, we first update the properties interface:
 
 ```ts
-interface ListProperties extends WidgetProperties {
+interface ListProperties {
     items: {
         id: string;
         content: string;
@@ -216,7 +216,7 @@ This would mean a new function would be created every render but Dojo 2 does not
 To resolve this, the list item can be extracted into a separate widget:
 
 ```ts
-interface ListItemProperties extends WidgetProperties {
+interface ListItemProperties {
     id: string;
     content: string;
     highlighted: boolean;
@@ -231,7 +231,7 @@ class ListItem extends WidgetBase<ListItemProperties> {
         this.properties.onItemClick(id);
     }
 
-    protected render(): DNode {
+    protected render() {
         const { id, content, highlighted } = this.properties;
         const classes = highlighted ? { highlighted: true } : { highlighted: false };
 
@@ -243,7 +243,7 @@ class ListItem extends WidgetBase<ListItemProperties> {
 Using the `ListItem` we can simplify the `List` slightly and also add the `onclick` functionality that we required:
 
 ```ts
-interface ListProperties extends WidgetProperties {
+interface ListProperties {
     items: {
         id: string;
         content: string;
@@ -333,7 +333,7 @@ import { ThemeableMixin, theme } from '@dojo/widget-core/mixins/Themeable';
 
 @theme(css)
 export default class MyWidget extends ThemeableMixin(WidgetBase) {
-    protected render(): DNode {
+    protected render() {
         return v('div', { classes: this.classes(css.root).fixed(css.rootFixed) });
     }
 }
@@ -414,7 +414,7 @@ If no locale is set, then the default locale, as set by [`@dojo/i18n`](https://g
 const MyWidgetBase = I18nMixin(WidgetBase);
 
 class I18nWidget extends MyWidgetBase<I18nWidgetProperties> {
-    render: function () {
+    render() {
         // Load the "greetings" messages for the current locale. If the locale-specific
         // messages have not been loaded yet, then the default messages are returned,
         // and the widget will be invalidated once the locale-specific messages have
@@ -518,7 +518,7 @@ class MyWidget extends WidgetBase<MyProperties> {
 For non-decorator environments (Either JavaScript/ES6 or a TypeScript project that does not have the experimental decorators configuration set to true in the `tsconfig`), the functions need to be registered in the constructor using the `addDecorator` API with `diffProperty` as the key.
 
 ```ts
-class MyWidget extends WidgetBase<WidgetProperties> {
+class MyWidget extends WidgetBase {
 
     constructor() {
         super();
@@ -569,7 +569,7 @@ class MyWidget extends WidgetBase {
         return w(MyActualChildWidget, {};)
     }
 }
-
+```
 
 ### Lifecycle Hooks
 
@@ -696,6 +696,7 @@ constructor() {
     afterRender(this.myAfterRender)(this);
     diffProperty('myProperty', this.myPropertyDiff)(this);
 }
+```
 
 ### `DOMWrapper`
 
