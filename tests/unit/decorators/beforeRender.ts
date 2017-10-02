@@ -27,7 +27,7 @@ registerSuite({
 				return () => {
 					const rendered = renderFunction();
 					const clonedProperties = { ...properties };
-					return v('bar', clonedProperties, [ rendered, ...children ]);
+					return v('bar', clonedProperties, [rendered, ...children]);
 				};
 			}
 
@@ -37,7 +37,7 @@ registerSuite({
 				return () => {
 					const rendered = renderFunction();
 					properties.bar = 'foo';
-					return v('qux', properties, [ rendered ]);
+					return v('qux', properties, [rendered]);
 				};
 			}
 		}
@@ -86,12 +86,11 @@ registerSuite({
 	'class level decorator'() {
 		let beforeRenderCount = 0;
 
-		@beforeRender(function (renderFunc: Render) {
+		@beforeRender(function(renderFunc: Render) {
 			beforeRenderCount++;
 			return renderFunc;
 		})
-		class TestWidget extends WidgetBase<any> {
-		}
+		class TestWidget extends WidgetBase<any> {}
 
 		const widget = new TestWidget();
 		widget.__render__();
@@ -105,7 +104,7 @@ registerSuite({
 			}
 
 			@beforeRender()
-			protected secondBeforeRender(renderFunc: Render) { }
+			protected secondBeforeRender(renderFunc: Render) {}
 		}
 
 		const widget = new TestWidget();

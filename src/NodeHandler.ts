@@ -14,7 +14,6 @@ export enum NodeEventType {
 }
 
 export class NodeHandler extends Evented implements NodeHandlerInterface {
-
 	private _nodeMap = new Map<string, HTMLElement>();
 
 	public get(key: string): HTMLElement | undefined {

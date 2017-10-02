@@ -107,8 +107,13 @@ export interface VirtualDomProperties {
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children that were created.
 	 */
-	afterCreate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties,
-	children: VNode[]): void;
+	afterCreate?(
+		element: Element,
+		projectionOptions: ProjectionOptions,
+		vnodeSelector: string,
+		properties: VNodeProperties,
+		children: VNode[]
+	): void;
 	/**
 	 * Callback that is executed every time this node may have been updated. Child nodes and properties
 	 * have already been updated.
@@ -118,8 +123,13 @@ export interface VirtualDomProperties {
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children for this node.
 	 */
-	afterUpdate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties,
-	children: VNode[]): void;
+	afterUpdate?(
+		element: Element,
+		projectionOptions: ProjectionOptions,
+		vnodeSelector: string,
+		properties: VNodeProperties,
+		children: VNode[]
+	): void;
 	/**
 	 * Bind should not be defined.
 	 */
@@ -134,9 +144,11 @@ export interface VirtualDomProperties {
 	 * An object literal like `{important:true}` which allows css classes, like `important` to be added and removed
 	 * dynamically. Can also take a function, that must return an object literal.
 	 */
-	readonly classes?: {
-		[index: string]: boolean | null | undefined;
-	} | ClassesFunction;
+	readonly classes?:
+		| {
+				[index: string]: boolean | null | undefined;
+			}
+		| ClassesFunction;
 	/**
 	 * An object literal like `{height:'100px'}` which allows styles to be changed dynamically. All values must be strings.
 	 */
@@ -225,7 +237,6 @@ export type RegistryLabel = string | symbol;
  * Base widget properties
  */
 export interface WidgetProperties {
-
 	/**
 	 * The key for a widget. Used to differentiate uniquely identify child widgets for
 	 * rendering and instance management
@@ -237,7 +248,6 @@ export interface WidgetProperties {
  * Widget properties that require a key
  */
 export interface KeyedWidgetProperties extends WidgetProperties {
-
 	/**
 	 * The key for a widget. Used to differentiate uniquely identify child widgets for
 	 * rendering and instance management
@@ -249,7 +259,6 @@ export interface KeyedWidgetProperties extends WidgetProperties {
  *
  */
 interface CoreProperties {
-
 	/**
 	 * The default registry for the projection
 	 */
@@ -333,7 +342,12 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 /**
  * union type for all possible return types from render
  */
-export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W> | string | null | undefined;
+export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> =
+	| HNode
+	| WNode<W>
+	| string
+	| null
+	| undefined;
 
 /**
  * Property Change record for specific property diff functions
@@ -354,19 +368,18 @@ export interface DiffPropertyReaction {
 /**
  * WidgetBase constructor type
  */
-export type WidgetBaseConstructor<
-	P extends WidgetProperties = WidgetProperties,
-	C extends DNode = DNode> = Constructor<WidgetBaseInterface<P, C>>;
+export type WidgetBaseConstructor<P extends WidgetProperties = WidgetProperties, C extends DNode = DNode> = Constructor<
+	WidgetBaseInterface<P, C>
+>;
 
-export interface DefaultWidgetBaseInterface extends WidgetBaseInterface<WidgetProperties, DNode<DefaultWidgetBaseInterface>> {}
+export interface DefaultWidgetBaseInterface
+	extends WidgetBaseInterface<WidgetProperties, DNode<DefaultWidgetBaseInterface>> {}
 
 /**
  * The interface for WidgetBase
  */
-export interface WidgetBaseInterface<
-	P = WidgetProperties,
-	C extends DNode = DNode<DefaultWidgetBaseInterface>> extends Evented {
-
+export interface WidgetBaseInterface<P = WidgetProperties, C extends DNode = DNode<DefaultWidgetBaseInterface>>
+	extends Evented {
 	/**
 	 * Widget properties
 	 */
@@ -451,7 +464,7 @@ export interface BeforeRender {
  * Interface for afterRender function
  */
 export interface AfterRender {
-	(dNode: DNode | DNode []): DNode | DNode[];
+	(dNode: DNode | DNode[]): DNode | DNode[];
 }
 
 /**

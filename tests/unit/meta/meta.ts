@@ -164,9 +164,7 @@ registerSuite({
 
 		class TestWidget extends ProjectorMixin(WidgetBase) {
 			render() {
-				return v('div', { key: 'foo' }, [
-					v('div', { key: 'bar' }, [ 'hello world' ])
-				]);
+				return v('div', { key: 'foo' }, [v('div', { key: 'bar' }, ['hello world'])]);
 			}
 
 			getMeta() {
@@ -212,10 +210,7 @@ registerSuite({
 
 		class TestWidget extends ProjectorMixin(WidgetBase) {
 			render() {
-				return [
-					v('div', { key: 'foo' }),
-					v('div', { key: 'bar' })
-				];
+				return [v('div', { key: 'foo' }), v('div', { key: 'bar' })];
 			}
 
 			getMeta() {

@@ -103,8 +103,18 @@ registerSuite({
 	'Will return element dimensions if node is loaded'() {
 		const nodeHandler = new NodeHandler();
 
-		const offset = { offsetHeight: 10, offsetLeft: 10, offsetTop: 10, offsetWidth: 10 };
-		const scroll = { scrollHeight: 10, scrollLeft: 10, scrollTop: 10, scrollWidth: 10 };
+		const offset = {
+			offsetHeight: 10,
+			offsetLeft: 10,
+			offsetTop: 10,
+			offsetWidth: 10
+		};
+		const scroll = {
+			scrollHeight: 10,
+			scrollLeft: 10,
+			scrollTop: 10,
+			scrollWidth: 10
+		};
 		const position = { bottom: 10, left: 10, right: 10, top: 10 };
 		const size = { width: 10, height: 10 };
 

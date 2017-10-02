@@ -6,6 +6,4 @@ export const tunnelOptions = {
 	port: '4444'
 };
 
-export const environments = [
-	{ browserName: 'chrome' }
-];
+export const environments = [{ browserName: 'chrome' }];

@@ -1,6 +1,6 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { v , w } from '../../src/d';
+import { v, w } from '../../src/d';
 import { WidgetBase } from '../../src/WidgetBase';
 import { diffProperty } from './../../src/decorators/diffProperty';
 import { always } from '../../src/diff';
@@ -51,7 +51,9 @@ registerSuite({
 			assert.deepEqual(properties.properties, { foo: 'bar', registry });
 			assert.deepEqual(properties.children, []);
 		};
-		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
+		const TestWidgetContainer = Container(TestWidget, 'test-state-1', {
+			getProperties
+		});
 		const widget = new TestWidgetContainer();
 		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
 		widget.__setProperties__({ foo: 'bar' });
@@ -70,11 +72,13 @@ registerSuite({
 			assert.lengthOf(properties.children, 1);
 			assert.deepEqual(properties.children[0], child);
 		};
-		const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
+		const TestWidgetContainer = Container(TestWidget, 'test-state-1', {
+			getProperties
+		});
 		const widget = new TestWidgetContainer();
 		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
 		widget.__setProperties__({ foo: 'bar' });
-		widget.__setChildren__([ child ]);
+		widget.__setChildren__([child]);
 		widget.__render__();
 	},
 	'container for registry item'() {
@@ -90,7 +94,10 @@ registerSuite({
 		};
 
 		const TestWidgetContainer = Container<TestWidget>('test-widget', 'test-state-1', { getProperties });
-		const widget = createTestWidget(TestWidgetContainer, { foo: 'bar', registry });
+		const widget = createTestWidget(TestWidgetContainer, {
+			foo: 'bar',
+			registry
+		});
 		const renderResult: any = widget.__render__();
 		assert.strictEqual(renderResult.vnodeSelector, 'test');
 	},
@@ -104,11 +111,10 @@ registerSuite({
 				const { foo } = this.properties;
 				return w(ChildContainer, { foo });
 			}
-
 		}
 		const widget = new Parent();
 		widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
-		widget.__setProperties__({ foo: 'bar'});
+		widget.__setProperties__({ foo: 'bar' });
 		const renderResult = widget.__render__();
 		injector.set({ foo: 'bar' });
 		const injectorUpdatedRenderResult = widget.__render__();

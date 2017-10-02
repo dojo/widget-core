@@ -32,7 +32,7 @@ registerSuite({
 		nodeHandler.clear();
 		assert.isFalse(nodeHandler.has('foo'));
 	},
-	'events': {
+	events: {
 		beforeEach() {
 			elementStub.reset();
 			widgetStub.reset();

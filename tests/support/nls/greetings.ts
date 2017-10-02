@@ -5,7 +5,7 @@ import has from '@dojo/has/has';
 // this case, `node_modules/@dojo/loader/loader.min.js'.
 const basePath = has('host-node') ? '../../_build/' : '';
 const bundlePath = `${basePath}tests/support/nls/greetings`;
-const locales = [ 'fr' ];
+const locales = ['fr'];
 
 const messages = {
 	hello: 'Hello',

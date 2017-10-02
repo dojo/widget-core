@@ -25,13 +25,18 @@ export const eventHandlers = [
 	'onsubmit'
 ];
 
-export default function eventHandlerInterceptor(this: Projector<any>, propertyName: string, eventHandler: Function, domNode: Element, properties: VNodeProperties) {
+export default function eventHandlerInterceptor(
+	this: Projector<any>,
+	propertyName: string,
+	eventHandler: Function,
+	domNode: Element,
+	properties: VNodeProperties
+) {
 	if (includes(eventHandlers, propertyName)) {
 		return function(this: Node, ...args: any[]) {
 			return eventHandler.apply(properties.bind || this, args);
 		};
-	}
-	else {
+	} else {
 		// remove "on" from event name
 		const eventName = propertyName.substr(2);
 		domNode.addEventListener(eventName, (...args: any[]) => {

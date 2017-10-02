@@ -59,7 +59,7 @@ registerSuite({
 
 		sendEvent(div.firstChild as Element, 'click');
 
-		assert.deepEqual(results, [ true ], 'should have been called and the target matched');
+		assert.deepEqual(results, [true], 'should have been called and the target matched');
 
 		widget.destroy();
 		document.body.removeChild(div);
@@ -74,15 +74,19 @@ registerSuite({
 			}
 
 			render() {
-				return v('div', {
-					key: 'root',
-					onclick: this._onclick
-				}, [
-					v('div', {
-						innerHTML: 'Hello World',
-						root: 'child'
-					})
-				]);
+				return v(
+					'div',
+					{
+						key: 'root',
+						onclick: this._onclick
+					},
+					[
+						v('div', {
+							innerHTML: 'Hello World',
+							root: 'child'
+						})
+					]
+				);
 			}
 		}
 
@@ -101,7 +105,7 @@ registerSuite({
 			}
 		});
 
-		assert.deepEqual(results, [ false ], 'should have been called and the target not matching');
+		assert.deepEqual(results, [false], 'should have been called and the target not matching');
 
 		widget.destroy();
 		document.body.removeChild(div);
@@ -120,15 +124,19 @@ registerSuite({
 			}
 
 			render() {
-				return v('div', {
-					key: 'root',
-					onclick: this._onclick
-				}, [
-					v('div', {
-						innerHTML: this._renderSecond ? 'child2' : 'child1',
-						key: this._renderSecond ? 'child2' : 'child1'
-					})
-				]);
+				return v(
+					'div',
+					{
+						key: 'root',
+						onclick: this._onclick
+					},
+					[
+						v('div', {
+							innerHTML: this._renderSecond ? 'child2' : 'child1',
+							key: this._renderSecond ? 'child2' : 'child1'
+						})
+					]
+				);
 			}
 		}
 
@@ -155,7 +163,7 @@ registerSuite({
 			}
 		});
 
-		assert.deepEqual(results, [ true, false, false, true ], 'should have been called twice and keys changed');
+		assert.deepEqual(results, [true, false, false, true], 'should have been called twice and keys changed');
 
 		widget.destroy();
 		document.body.removeChild(div);

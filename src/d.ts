@@ -26,15 +26,17 @@ export const HNODE = Symbol('Identifier for a HNode.');
 /**
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
-export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: DNode<W>): child is WNode<W> {
-	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
+export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(
+	child: DNode<W>
+): child is WNode<W> {
+	return Boolean(child && typeof child !== 'string' && child.type === WNODE);
 }
 
 /**
  * Helper function that returns true if the `DNode` is a `HNode` using the `type` property
  */
 export function isHNode(child: DNode): child is HNode {
-	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
+	return Boolean(child && typeof child !== 'string' && child.type === HNODE);
 }
 
 /**
@@ -46,10 +48,22 @@ export function isHNode(child: DNode): child is HNode {
  * If no predicate is supplied then the modifier will be executed on all nodes.
  */
 export function decorate(dNodes: DNode, modifier: (dNode: DNode) => void, predicate?: (dNode: DNode) => boolean): DNode;
-export function decorate(dNodes: DNode[], modifier: (dNode: DNode) => void, predicate?: (dNode: DNode) => boolean): DNode[];
-export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => void, predicate?: (dNode: DNode) => boolean): DNode | DNode[];
-export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => void, predicate?: (dNode: DNode) => boolean): DNode | DNode[] {
-	let nodes = Array.isArray(dNodes) ? [ ...dNodes ] : [ dNodes ];
+export function decorate(
+	dNodes: DNode[],
+	modifier: (dNode: DNode) => void,
+	predicate?: (dNode: DNode) => boolean
+): DNode[];
+export function decorate(
+	dNodes: DNode | DNode[],
+	modifier: (dNode: DNode) => void,
+	predicate?: (dNode: DNode) => boolean
+): DNode | DNode[];
+export function decorate(
+	dNodes: DNode | DNode[],
+	modifier: (dNode: DNode) => void,
+	predicate?: (dNode: DNode) => boolean
+): DNode | DNode[] {
+	let nodes = Array.isArray(dNodes) ? [...dNodes] : [dNodes];
 	while (nodes.length) {
 		const node = nodes.pop();
 		if (node) {
@@ -57,7 +71,7 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
 				modifier(node);
 			}
 			if ((isWNode(node) || isHNode(node)) && node.children) {
-				nodes = [ ...nodes, ...node.children ];
+				nodes = [...nodes, ...node.children];
 			}
 		}
 	}
@@ -67,8 +81,11 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
 /**
  * Wrapper function for calls to create a widget.
  */
-export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<W> | RegistryLabel, properties: W['properties'], children: W['children'] = []): WNode<W> {
-
+export function w<W extends WidgetBaseInterface>(
+	widgetConstructor: Constructor<W> | RegistryLabel,
+	properties: W['properties'],
+	children: W['children'] = []
+): WNode<W> {
 	return {
 		children,
 		widgetConstructor,
@@ -83,27 +100,31 @@ export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<
 export function v(tag: string, properties: VirtualDomProperties, children?: DNode[]): HNode;
 export function v(tag: string, children: DNode[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: DNode[] = []): HNode {
-		let properties: VirtualDomProperties = propertiesOrChildren;
+export function v(
+	tag: string,
+	propertiesOrChildren: VirtualDomProperties | DNode[] = {},
+	children: DNode[] = []
+): HNode {
+	let properties: VirtualDomProperties = propertiesOrChildren;
 
-		if (Array.isArray(propertiesOrChildren)) {
-			children = propertiesOrChildren;
-			properties = {};
-		}
+	if (Array.isArray(propertiesOrChildren)) {
+		children = propertiesOrChildren;
+		properties = {};
+	}
 
-		let { classes } = properties;
-		if (typeof classes === 'function') {
-			classes = classes();
-			properties = assign(properties, { classes });
-		}
+	let { classes } = properties;
+	if (typeof classes === 'function') {
+		classes = classes();
+		properties = assign(properties, { classes });
+	}
 
-		return {
-			tag,
-			children,
-			properties,
-			render(this: { tag: string, vNodes: VNode[], properties: VNodeProperties }) {
-				return h(this.tag, this.properties, this.vNodes);
-			},
-			type: HNODE
-		};
+	return {
+		tag,
+		children,
+		properties,
+		render(this: { tag: string; vNodes: VNode[]; properties: VNodeProperties }) {
+			return h(this.tag, this.properties, this.vNodes);
+		},
+		type: HNODE
+	};
 }

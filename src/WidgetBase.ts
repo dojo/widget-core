@@ -53,7 +53,10 @@ interface ReactionFunctionConfig {
 	reaction: DiffPropertyReaction;
 }
 
-export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
+export type BoundFunctionData = {
+	boundFunc: (...args: any[]) => any;
+	scope: any;
+};
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
 const boundAuto = auto.bind(null);
@@ -61,8 +64,8 @@ const boundAuto = auto.bind(null);
 /**
  * Main widget base for all widgets to extend
  */
-export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends Evented implements WidgetBaseInterface<P, C> {
-
+export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends Evented
+	implements WidgetBaseInterface<P, C> {
 	/**
 	 * static identifier
 	 */
@@ -101,7 +104,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	/**
 	 * cached children map for instance management
 	 */
-	private _cachedChildrenMap: Map<string | number | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>;
+	private _cachedChildrenMap: Map<
+		string | number | Promise<WidgetBaseConstructor> | WidgetBaseConstructor,
+		WidgetCacheWrapper[]
+	>;
 
 	/**
 	 * map of specific property diff functions
@@ -146,10 +152,16 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 		this._children = [];
 		this._decoratorCache = new Map<string, any[]>();
-		this._properties = <P> {};
-		this._cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>();
+		this._properties = <P>{};
+		this._cachedChildrenMap = new Map<
+			string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor,
+			WidgetCacheWrapper[]
+		>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
-		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
+		this._bindFunctionPropertyMap = new WeakMap<
+			(...args: any[]) => any,
+			{ boundFunc: (...args: any[]) => any; scope: any }
+		>();
 		this._registry = new RegistryHandler();
 		this._nodeHandler = new NodeHandler();
 		this.own(this._registry);
@@ -200,14 +212,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
+	private _addElementToNodeHandler(
+		element: HTMLElement,
+		projectionOptions: ProjectionOptions,
+		properties: VNodeProperties
+	) {
 		const isRootNode = !properties.key || this._rootNodeKeys.indexOf(properties.key) > -1;
 		const hasKey = !!properties.key;
 		let isLastRootNode = false;
 
 		if (isRootNode) {
 			this._currentRootNode++;
-			isLastRootNode = (this._currentRootNode === this._numRootNodes);
+			isLastRootNode = this._currentRootNode === this._numRootNodes;
 
 			if (this._projectorAttachEvent === undefined) {
 				this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered', () => {
@@ -219,8 +235,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 		if (isLastRootNode) {
 			this._nodeHandler.addRoot(element, properties);
-		}
-		else if (hasKey) {
+		} else if (hasKey) {
 			this._nodeHandler.add(element, properties);
 		}
 	}
@@ -252,7 +267,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public get changedPropertyKeys(): string[] {
-		return [ ...this._changedPropertyKeys ];
+		return [...this._changedPropertyKeys];
 	}
 
 	public __setCoreProperties__(coreProperties: CoreProperties): void {
@@ -269,7 +284,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	public __setProperties__(originalProperties: this['properties']): void {
 		const properties = this._runBeforeProperties(originalProperties);
 		const changedPropertyKeys: string[] = [];
-		const allProperties = [ ...Object.keys(properties), ...Object.keys(this._properties) ];
+		const allProperties = [...Object.keys(properties), ...Object.keys(this._properties)];
 		const checkedProperties: string[] = [];
 		const diffPropertyResults: any = {};
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
@@ -297,8 +312,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 						diffPropertyResults[propertyName] = result.value;
 					}
 				}
-			}
-			else {
+			} else {
 				const result = boundAuto(previousProperty, newProperty);
 				if (result.changed && changedPropertyKeys.indexOf(propertyName) === -1) {
 					changedPropertyKeys.push(propertyName);
@@ -357,10 +371,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	private _decorateNodes(node: DNode | DNode[]) {
-		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
+		let nodes = Array.isArray(node) ? [...node] : [node];
 
 		this._numRootNodes = nodes.length;
-		this._currentRootNode =  0;
+		this._currentRootNode = 0;
 		const rootNodes: DNode[] = [];
 		this._rootNodeKeys = [];
 
@@ -384,16 +398,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 						node.properties.afterUpdate = this._afterUpdateCallback;
 					}
 					if (node.properties.bind === undefined) {
-						(<any> node.properties).bind = this;
+						(<any>node.properties).bind = this;
 					}
-				}
-				else {
+				} else {
 					node.coreProperties = {
 						bind: this,
 						baseRegistry: this._coreProperties.baseRegistry
 					};
 				}
-				nodes = [ ...nodes, ...node.children ];
+				nodes = [...nodes, ...node.children];
 			}
 		}
 	}
@@ -405,11 +418,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				type: 'invalidated',
 				target: this
 			});
-		}
-		else if (this._renderState === WidgetRenderState.PROPERTIES) {
+		} else if (this._renderState === WidgetRenderState.PROPERTIES) {
 			this._dirty = true;
-		}
-		else if (this._renderState === WidgetRenderState.CHILDREN) {
+		} else if (this._renderState === WidgetRenderState.CHILDREN) {
 			this._dirty = true;
 		}
 	}
@@ -425,7 +436,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 * @param value The value of the decorator
 	 */
 	protected addDecorator(decoratorKey: string, value: any): void {
-		value = Array.isArray(value) ? value : [ value ];
+		value = Array.isArray(value) ? value : [value];
 		if (this.hasOwnProperty('constructor')) {
 			let decoratorList = decoratorMap.get(this.constructor);
 			if (!decoratorList) {
@@ -439,10 +450,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				decoratorList.set(decoratorKey, specificDecoratorList);
 			}
 			specificDecoratorList.push(...value);
-		}
-		else {
+		} else {
 			const decorators = this.getDecorator(decoratorKey);
-			this._decoratorCache.set(decoratorKey, [ ...decorators, ...value ]);
+			this._decoratorCache.set(decoratorKey, [...decorators, ...value]);
 		}
 	}
 
@@ -493,7 +503,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return allDecorators;
 	}
 
-	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: string[]): Map<Function, ReactionFunctionArguments> {
+	private _mapDiffPropertyReactions(
+		newProperties: any,
+		changedPropertyKeys: string[]
+	): Map<Function, ReactionFunctionArguments> {
 		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
 
 		return reactionFunctions.reduce((reactionPropertyMap, { reaction, propertyName }) => {
@@ -513,7 +526,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			reactionPropertyMap.set(reaction, reactionArguments);
 			return reactionPropertyMap;
 		}, new Map<Function, ReactionFunctionArguments>());
-
 	}
 
 	/**
@@ -542,9 +554,15 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	private _runBeforeProperties(properties: any) {
 		const beforeProperties: BeforeProperties[] = this.getDecorator('beforeProperties');
 		if (beforeProperties.length > 0) {
-			return beforeProperties.reduce((properties, beforePropertiesFunction) => {
-				return { ...properties, ...beforePropertiesFunction.call(this, properties) };
-			}, { ...properties });
+			return beforeProperties.reduce(
+				(properties, beforePropertiesFunction) => {
+					return {
+						...properties,
+						...beforePropertiesFunction.call(this, properties)
+					};
+				},
+				{ ...properties }
+			);
 		}
 		return properties;
 	}
@@ -599,7 +617,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 
 		if (Array.isArray(dNode)) {
-			return dNode.map((node) => this._dNodeToVNode(node));
+			return dNode.map(node => this._dNodeToVNode(node));
 		}
 
 		if (isWNode(dNode)) {
@@ -614,7 +632,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				if (item === null) {
 					return null;
 				}
-				widgetConstructor = <WidgetBaseConstructor> item;
+				widgetConstructor = <WidgetBaseConstructor>item;
 			}
 
 			const childrenMapKey = key || widgetConstructor;
@@ -632,8 +650,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			if (cachedChild !== undefined) {
 				child = cachedChild.child;
 				cachedChild.used = true;
-			}
-			else {
+			} else {
 				child = new widgetConstructor();
 				child.own(child.on('invalidated', this._boundInvalidate));
 				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
@@ -643,8 +660,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			child.__setCoreProperties__(coreProperties);
 			child.__setProperties__(properties);
 			if (typeof childrenMapKey !== 'string' && cachedChildren.length > 1) {
-				const widgetName = (<any> childrenMapKey).name;
-				let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times';
+				const widgetName = (<any>childrenMapKey).name;
+				let errorMsg = 'It is recommended to provide a unique `key` property when using the same widget multiple times';
 
 				if (widgetName) {
 					errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times`;

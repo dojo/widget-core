@@ -13,7 +13,6 @@ export type DomWrapper = Constructor<WidgetBase<DomWrapperProperties>>;
 
 export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): DomWrapper {
 	return class extends WidgetBase<DomWrapperProperties> {
-
 		public __render__(): VNode {
 			const vNode = super.__render__() as VNode;
 			vNode.domNode = domNode;

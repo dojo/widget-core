@@ -25,8 +25,7 @@ class MyWidget extends BaseTestWidget {
 function dispatchEvent(element: Element, eventType: string) {
 	try {
 		element.dispatchEvent(new CustomEvent(eventType));
-	}
-	catch (e) {
+	} catch (e) {
 		const event = document.createEvent('CustomEvent');
 		event.initCustomEvent(eventType, false, false, {});
 		element.dispatchEvent(event);
@@ -57,26 +56,26 @@ registerSuite({
 	afterEach() {
 		if (projector) {
 			projector.destroy();
-			projector = <any> undefined;
+			projector = <any>undefined;
 		}
 		rafStub.restore();
 		cancelRafStub.restore();
 	},
 	'attach to projector': {
-		'append': {
-			'standard'() {
+		append: {
+			standard() {
 				const childNodeLength = document.body.childNodes.length;
 				projector = new BaseTestWidget();
 
-				projector.setChildren([ v('h2', [ 'foo' ] ) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.append();
 
 				assert.strictEqual(document.body.childNodes.length, childNodeLength + 1, 'child should have been added');
-				const child = <HTMLElement> document.body.lastChild;
+				const child = <HTMLElement>document.body.lastChild;
 				assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
 				assert.strictEqual(child.tagName.toLowerCase(), 'div');
-				assert.strictEqual(( <HTMLElement> child.firstChild).tagName.toLowerCase(), 'h2');
+				assert.strictEqual((<HTMLElement>child.firstChild).tagName.toLowerCase(), 'h2');
 			},
 			'string root node'() {
 				result = 'my string';
@@ -88,7 +87,7 @@ registerSuite({
 				assert.equal(vnode.text, result);
 				assert.isUndefined(vnode.children);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -98,7 +97,7 @@ registerSuite({
 				assert.equal(vnode.children![0].text, 'other text');
 			},
 			'string root node after an initial render'() {
-				result = v('div', [ 'my string' ]);
+				result = v('div', ['my string']);
 				projector = new MyWidget();
 
 				projector.append();
@@ -124,7 +123,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -132,10 +131,9 @@ registerSuite({
 				assert.lengthOf(vnode.children, 1);
 				assert.equal(vnode.children![0].vnodeSelector, 'div');
 				assert.equal(vnode.children![0].text, 'other text');
-
 			},
 			'null root node after an initial render'() {
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.append();
@@ -161,7 +159,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -169,10 +167,9 @@ registerSuite({
 				assert.lengthOf(vnode.children, 1);
 				assert.equal(vnode.children![0].vnodeSelector, 'div');
 				assert.equal(vnode.children![0].text, 'other text');
-
 			},
 			'undefined root node after an initial render'() {
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.append();
@@ -189,7 +186,7 @@ registerSuite({
 				assert.lengthOf(vnode.children, 0);
 			},
 			'array root node'() {
-				result = [ v('h2', [ 'my string' ]) ];
+				result = [v('h2', ['my string'])];
 				projector = new MyWidget();
 
 				projector.append();
@@ -200,11 +197,11 @@ registerSuite({
 				assert.strictEqual(vnode.children[0].text, 'my string');
 			}
 		},
-		'sandbox': {
-			'attaching'() {
+		sandbox: {
+			attaching() {
 				const childNodeLength = document.body.childNodes.length;
 				projector = new BaseTestWidget();
-				projector.setChildren([ v('h2', [ 'foo' ]) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.sandbox();
 
@@ -221,9 +218,9 @@ registerSuite({
 			'operates synchronously'() {
 				let count = 0;
 				const projector = new class extends BaseTestWidget {
-					render () {
+					render() {
 						count++;
-						return v('div', [ String(count) ]);
+						return v('div', [String(count)]);
 					}
 				}();
 
@@ -245,20 +242,20 @@ registerSuite({
 				projector.destroy();
 			}
 		},
-		'replace': {
-			'standard'() {
+		replace: {
+			standard() {
 				const projector = new class extends BaseTestWidget {
 					render() {
 						return v('body', this.children);
 					}
 				}();
 
-				projector.setChildren([ v('h2', [ 'foo' ] ) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.replace();
 
 				assert.strictEqual(document.body.childNodes.length, 1, 'child should have been added');
-				const child = <HTMLElement> document.body.lastChild;
+				const child = <HTMLElement>document.body.lastChild;
 				assert.strictEqual(child.innerHTML, 'foo');
 				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
 			},
@@ -274,7 +271,7 @@ registerSuite({
 				assert.equal(vnode.text, result);
 				assert.isUndefined(vnode.children);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -286,7 +283,7 @@ registerSuite({
 			'string root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('div', [ 'my string' ]);
+				result = v('div', ['my string']);
 				projector = new MyWidget();
 
 				projector.replace(root);
@@ -314,7 +311,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -322,12 +319,11 @@ registerSuite({
 				assert.lengthOf(vnode.children, 1);
 				assert.equal(vnode.children![0].vnodeSelector, 'div');
 				assert.equal(vnode.children![0].text, 'other text');
-
 			},
 			'null root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.replace(root);
@@ -355,7 +351,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'span');
@@ -363,12 +359,11 @@ registerSuite({
 				assert.lengthOf(vnode.children, 1);
 				assert.equal(vnode.children![0].vnodeSelector, 'div');
 				assert.equal(vnode.children![0].text, 'other text');
-
 			},
 			'undefined root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.replace(root);
@@ -387,7 +382,7 @@ registerSuite({
 			'array root node'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = [ v('h2', [ 'my string' ]) ];
+				result = [v('h2', ['my string'])];
 				projector = new MyWidget();
 
 				projector.replace(root);
@@ -398,18 +393,18 @@ registerSuite({
 				assert.strictEqual(vnode.children[0].text, 'my string');
 			}
 		},
-		'merge': {
-			'standard'() {
+		merge: {
+			standard() {
 				const div = document.createElement('div');
 				document.body.appendChild(div);
 				const projector = new BaseTestWidget();
 
-				projector.setChildren([ v('h2', [ 'foo' ] ) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.merge(div);
 
 				assert.strictEqual(div.childNodes.length, 1, 'child should have been added');
-				const child = <HTMLElement> div.lastChild;
+				const child = <HTMLElement>div.lastChild;
 				assert.strictEqual(child.innerHTML, 'foo');
 				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
 				document.body.removeChild(div);
@@ -426,7 +421,7 @@ registerSuite({
 				assert.equal(vnode.text, result);
 				assert.isUndefined(vnode.children);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
@@ -435,7 +430,7 @@ registerSuite({
 			'string root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('div', [ 'my string' ]);
+				result = v('div', ['my string']);
 				projector = new MyWidget();
 
 				projector.merge(root);
@@ -463,7 +458,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
@@ -473,7 +468,7 @@ registerSuite({
 			'null root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.merge(root);
@@ -501,7 +496,7 @@ registerSuite({
 				assert.isUndefined(vnode.text);
 				assert.lengthOf(vnode.children, 0);
 
-				result = v('div', [ 'other text' ]);
+				result = v('div', ['other text']);
 				projector.invalidate();
 				vnode = projector.__render__() as VNode;
 				assert.equal(vnode.vnodeSelector, 'my-app');
@@ -511,7 +506,7 @@ registerSuite({
 			'undefined root node after an initial render'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = v('h2', [ 'my string' ]);
+				result = v('h2', ['my string']);
 				projector = new MyWidget();
 
 				projector.merge(root);
@@ -530,7 +525,7 @@ registerSuite({
 			'array root node'() {
 				const root = document.createElement('my-app');
 				document.body.appendChild(root);
-				result = [ v('h2', [ 'my string' ]) ];
+				result = [v('h2', ['my string'])];
 				projector = new MyWidget();
 
 				projector.merge(root);
@@ -563,29 +558,45 @@ registerSuite({
 				const onclickListener = spy();
 				const projector = new class extends BaseTestWidget {
 					render() {
-						return v('div', {
-							classes: { foo: true, bar: true }
-						}, [
-							v('label', {
-								for: 'baz'
-							}, [ 'Select Me:' ]),
-							v('select', {
-								type: 'text',
-								name: 'baz',
-								id: 'baz',
-								disabled: false,
-								onchange: onchangeListener
-							}, [
-								v('option', { value: 'foo', selected: true }, [ 'label foo' ]),
-								v('option', { value: 'bar', selected: false }, [ 'label bar' ]),
-								v('option', { value: 'baz', selected: false }, [ 'label baz' ])
-							]),
-							v('button', {
-								type: 'button',
-								disabled: false,
-								onclick: onclickListener
-							}, [ 'Click Me!' ])
-						]);
+						return v(
+							'div',
+							{
+								classes: { foo: true, bar: true }
+							},
+							[
+								v(
+									'label',
+									{
+										for: 'baz'
+									},
+									['Select Me:']
+								),
+								v(
+									'select',
+									{
+										type: 'text',
+										name: 'baz',
+										id: 'baz',
+										disabled: false,
+										onchange: onchangeListener
+									},
+									[
+										v('option', { value: 'foo', selected: true }, ['label foo']),
+										v('option', { value: 'bar', selected: false }, ['label bar']),
+										v('option', { value: 'baz', selected: false }, ['label baz'])
+									]
+								),
+								v(
+									'button',
+									{
+										type: 'button',
+										disabled: false,
+										onclick: onclickListener
+									},
+									['Click Me!']
+								)
+							]
+						);
 					}
 				}();
 				projector.merge(root);
@@ -605,9 +616,9 @@ registerSuite({
 				const changeEvent = document.createEvent('Event');
 				changeEvent.initEvent('change', true, true);
 				select.onchange(changeEvent); // firefox doesn't like to dispatch this event, either due to trust issues or
-											// that firefox doesn't generally dispatch this event until the element is blurred
-											// which is different than other browsers.  Either way this is not material to testing
-											// the functionality of this test, so calling the listener directly.
+				// that firefox doesn't generally dispatch this event until the element is blurred
+				// which is different than other browsers.  Either way this is not material to testing
+				// the functionality of this test, so calling the listener directly.
 				assert.isTrue(onchangeListener.called, 'onchangeListener should have been called');
 
 				const clickEvent = document.createEvent('CustomEvent');
@@ -626,7 +637,7 @@ registerSuite({
 		projector.root = root;
 		assert.equal(projector.root, root);
 	},
-	'pause'() {
+	pause() {
 		const projector = new BaseTestWidget();
 
 		projector.append();
@@ -644,12 +655,12 @@ registerSuite({
 		projector.pause();
 		assert.isTrue(cancelRafStub.called);
 	},
-	'resume'() {
+	resume() {
 		const projector = new BaseTestWidget();
 		spy(projector, 'scheduleRender');
-		assert.isFalse((<any> projector.scheduleRender).called);
+		assert.isFalse((<any>projector.scheduleRender).called);
 		projector.resume();
-		assert.isTrue((<any> projector.scheduleRender).called);
+		assert.isTrue((<any>projector.scheduleRender).called);
 	},
 	'get projector state'() {
 		const projector = new BaseTestWidget();
@@ -660,7 +671,7 @@ registerSuite({
 		projector.destroy();
 		assert.equal(projector.projectorState, ProjectorAttachState.Detached);
 	},
-	'async': {
+	async: {
 		'can set async mode on projector'() {
 			const projector = new BaseTestWidget();
 			assert.isTrue(projector.async);
@@ -670,39 +681,43 @@ registerSuite({
 		'cannot set async mode on projector that is already attached'() {
 			const projector = new BaseTestWidget();
 			projector.append();
-			assert.throws(() => {
-				projector.async = false;
-			}, Error, 'Projector already attached, cannot change async mode');
+			assert.throws(
+				() => {
+					projector.async = false;
+				},
+				Error,
+				'Projector already attached, cannot change async mode'
+			);
 		}
 	},
 	'toHtml()': {
-		'appended'() {
+		appended() {
 			const projector = new BaseTestWidget();
-			projector.setChildren([ v('h2', [ 'foo' ]) ]);
+			projector.setChildren([v('h2', ['foo'])]);
 
 			projector.append();
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
 			assert.strictEqual(projector.toHtml(), (projector.root.lastChild as Element).outerHTML);
 			projector.destroy();
 		},
-		'replaced'() {
+		replaced() {
 			const div = document.createElement('div');
 			document.body.appendChild(div);
 
 			const projector = new BaseTestWidget();
-			projector.setChildren([ v('h2', [ 'foo' ]) ]);
+			projector.setChildren([v('h2', ['foo'])]);
 
 			projector.replace(div);
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
 			assert.strictEqual(projector.toHtml(), (document.body.lastChild as Element).outerHTML);
 			projector.destroy();
 		},
-		'merged'() {
+		merged() {
 			const div = document.createElement('div');
 			document.body.appendChild(div);
 
 			const projector = new BaseTestWidget();
-			projector.setChildren([ v('h2', [ 'foo' ]) ]);
+			projector.setChildren([v('h2', ['foo'])]);
 
 			projector.merge(div);
 			assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
@@ -711,12 +726,16 @@ registerSuite({
 		},
 		'not attached throws'() {
 			const projector = new BaseTestWidget();
-			assert.throws(() => {
-				projector.toHtml();
-			}, Error, 'Projector is not attached, cannot return an HTML string of projection.');
+			assert.throws(
+				() => {
+					projector.toHtml();
+				},
+				Error,
+				'Projector is not attached, cannot return an HTML string of projection.'
+			);
 		}
 	},
-	'destroy'() {
+	destroy() {
 		const projector = new BaseTestWidget();
 		const maquetteProjectorStopSpy = spy(projector, 'pause');
 
@@ -778,9 +797,8 @@ registerSuite({
 		const testProperties = {
 			key: 'bar'
 		};
-		const testChildren = [ v('div') ];
+		const testChildren = [v('div')];
 		class TestWidget extends BaseTestWidget {
-
 			@beforeRender()
 			protected updateProperties(renderFunc: any, props: any, children: any) {
 				assert.deepEqual(props, testProperties);
@@ -801,7 +819,7 @@ registerSuite({
 		const projector = new BaseTestWidget();
 		const scheduleRender = spy(projector, 'scheduleRender');
 
-		projector.setChildren([ v('div') ]);
+		projector.setChildren([v('div')]);
 		assert.isTrue(scheduleRender.called);
 	},
 	'invalidate before attached'() {
@@ -818,7 +836,7 @@ registerSuite({
 		projector.invalidate();
 		assert.isTrue(rafStub.called);
 	},
-	'reattach'() {
+	reattach() {
 		const root = document.createElement('div');
 		const projector = new BaseTestWidget();
 		const promise = projector.append(root);
@@ -829,16 +847,24 @@ registerSuite({
 		const div = document.createElement('div');
 		projector.root = div;
 		projector.append();
-		assert.throws(() => {
-			projector.root = document.body;
-		}, Error, 'already attached');
+		assert.throws(
+			() => {
+				projector.root = document.body;
+			},
+			Error,
+			'already attached'
+		);
 	},
 	'sandbox throws when already attached'() {
 		const projector = new BaseTestWidget();
 		projector.append();
-		assert.throws(() => {
-			projector.sandbox();
-		}, Error, 'Projector already attached, cannot create sandbox');
+		assert.throws(
+			() => {
+				projector.sandbox();
+			},
+			Error,
+			'Projector already attached, cannot create sandbox'
+		);
 	},
 	'can attach an event handler'() {
 		let domEvent: any;
@@ -895,11 +921,13 @@ registerSuite({
 		projector.async = false;
 		projector.append();
 
-		children.push(v('div', {
-			id: 'test-element',
-			enterAnimation: 'fade-in',
-			exitAnimation: 'fade-out'
-		}));
+		children.push(
+			v('div', {
+				id: 'test-element',
+				enterAnimation: 'fade-in',
+				exitAnimation: 'fade-out'
+			})
+		);
 
 		projector.invalidate();
 
@@ -938,13 +966,15 @@ registerSuite({
 		projector.async = false;
 		projector.append();
 
-		children.push(v('div', {
-			id: 'test-element',
-			enterAnimation: 'fade-in',
-			enterAnimationActive: 'active-fade-in',
-			exitAnimation: 'fade-out',
-			exitAnimationActive: 'active-fade-out'
-		}));
+		children.push(
+			v('div', {
+				id: 'test-element',
+				enterAnimation: 'fade-in',
+				enterAnimationActive: 'active-fade-in',
+				exitAnimation: 'fade-out',
+				exitAnimationActive: 'active-fade-out'
+			})
+		);
 
 		projector.invalidate();
 

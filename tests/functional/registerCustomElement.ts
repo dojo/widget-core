@@ -18,7 +18,7 @@ registerSuite({
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findById('testButton');
 	},
@@ -27,7 +27,7 @@ registerSuite({
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findById('testButton')
 			.then((element: any) => {
@@ -42,7 +42,7 @@ registerSuite({
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findByCssSelector('#testButton > button')
 			.click()
@@ -57,7 +57,7 @@ registerSuite({
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findById('testButton-2')
 			.then((element: any) => {
@@ -72,53 +72,81 @@ registerSuite({
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findById('testButton')
 			.end()
 			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
-			.then(pollUntil<any>(function () {
-				return (<any> document).querySelector('test-button > button').innerHTML === 'greetings world';
-			}, undefined, 1000), undefined);
+			.then(
+				pollUntil<any>(
+					function() {
+						return (<any>document).querySelector('test-button > button').innerHTML === 'greetings world';
+					},
+					undefined,
+					1000
+				),
+				undefined
+			);
 	},
 	'setting custom element properties updates widget'(this: any) {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findByCssSelector('no-attributes > button')
 			.end()
 			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
-			.then(pollUntil<any>(function () {
-				return (<any> document).querySelector('no-attributes > button').innerHTML === 'greetings';
-			}, undefined, 1000), undefined);
+			.then(
+				pollUntil<any>(
+					function() {
+						return (<any>document).querySelector('no-attributes > button').innerHTML === 'greetings';
+					},
+					undefined,
+					1000
+				),
+				undefined
+			);
 	},
 	'creating elements manually works'(this: any) {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findByCssSelector('#manualButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
-				return (<any> document).querySelector('#manualButton > button').innerHTML === 'manual';
-			}, undefined, 1000), undefined);
+			.then(
+				pollUntil<any>(
+					function() {
+						return (<any>document).querySelector('#manualButton > button').innerHTML === 'manual';
+					},
+					undefined,
+					1000
+				),
+				undefined
+			);
 	},
 	'elements readded to the DOM are only initialized once'(this: any) {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
 		return this.remote
-			.get((<any> require).toUrl('./support/registerCustomElement.html'))
+			.get((<any>require).toUrl('./support/registerCustomElement.html'))
 			.setFindTimeout(1000)
 			.findByCssSelector('#reinitButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
-				return (<any> document).querySelector('#reinitButton > button').innerHTML === 'test';
-			}, undefined, 1000), undefined);
+			.then(
+				pollUntil<any>(
+					function() {
+						return (<any>document).querySelector('#reinitButton > button').innerHTML === 'test';
+					},
+					undefined,
+					1000
+				),
+				undefined
+			);
 	}
 });

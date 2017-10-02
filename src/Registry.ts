@@ -32,7 +32,6 @@ export interface RegistryEvents extends BaseEventedEvents {
  * Widget Registry Interface
  */
 export interface RegistryInterface {
-
 	/**
 	 * Define a WidgetRegistryItem against a label
 	 *
@@ -96,7 +95,6 @@ export function isWidgetBaseConstructor<T extends WidgetBaseInterface>(item: any
  * The Registry implementation
  */
 export class Registry extends Evented implements RegistryInterface {
-
 	public on: RegistryEvents;
 
 	/**
@@ -109,7 +107,10 @@ export class Registry extends Evented implements RegistryInterface {
 	/**
 	 * Emit loaded event for registry label
 	 */
-	private emitLoadedEvent(widgetLabel: RegistryLabel, item: WidgetBaseConstructorFunction | WidgetBaseConstructor | Injector): void {
+	private emitLoadedEvent(
+		widgetLabel: RegistryLabel,
+		item: WidgetBaseConstructorFunction | WidgetBaseConstructor | Injector
+	): void {
 		this.emit({
 			type: widgetLabel,
 			action: 'loaded',
@@ -129,15 +130,17 @@ export class Registry extends Evented implements RegistryInterface {
 		this._widgetRegistry.set(label, item);
 
 		if (item instanceof Promise) {
-			item.then((widgetCtor) => {
-				this._widgetRegistry.set(label, widgetCtor);
-				this.emitLoadedEvent(label, widgetCtor);
-				return widgetCtor;
-			}, (error) => {
-				throw error;
-			});
-		}
-		else {
+			item.then(
+				widgetCtor => {
+					this._widgetRegistry.set(label, widgetCtor);
+					this.emitLoadedEvent(label, widgetCtor);
+					return widgetCtor;
+				},
+				error => {
+					throw error;
+				}
+			);
+		} else {
 			this.emitLoadedEvent(label, item);
 		}
 	}
@@ -170,16 +173,19 @@ export class Registry extends Evented implements RegistryInterface {
 			return null;
 		}
 
-		const promise = (<WidgetBaseConstructorFunction> item)();
+		const promise = (<WidgetBaseConstructorFunction>item)();
 		this._widgetRegistry.set(label, promise);
 
-		promise.then((widgetCtor) => {
-			this._widgetRegistry.set(label, widgetCtor);
-			this.emitLoadedEvent(label, widgetCtor);
-			return widgetCtor;
-		}, (error) => {
-			throw error;
-		});
+		promise.then(
+			widgetCtor => {
+				this._widgetRegistry.set(label, widgetCtor);
+				this.emitLoadedEvent(label, widgetCtor);
+				return widgetCtor;
+			},
+			error => {
+				throw error;
+			}
+		);
 
 		return null;
 	}

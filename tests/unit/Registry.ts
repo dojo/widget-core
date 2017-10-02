@@ -9,7 +9,7 @@ const testInjector = new Injector({});
 
 registerSuite({
 	name: 'Registry',
-	'api'() {
+	api() {
 		const factoryRegistry = new Registry();
 
 		assert.isFunction(factoryRegistry.define);
@@ -19,8 +19,8 @@ registerSuite({
 		assert.isFunction(factoryRegistry.hasInjector);
 		assert.isFunction(factoryRegistry.getInjector);
 	},
-	'Widget': {
-		'has'() {
+	Widget: {
+		has() {
 			const factoryRegistry = new Registry();
 			assert.isFalse(factoryRegistry.has('my-widget'));
 			factoryRegistry.define('my-widget', WidgetBase);
@@ -46,10 +46,9 @@ registerSuite({
 				try {
 					factoryRegistry.define('my-widget', WidgetBase);
 					assert.fail();
-				}
-				catch (error) {
+				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.equal(error.message, 'widget has already been registered for \'my-widget\'');
+					assert.equal(error.message, 'widget has already been registered for `my-widget`');
 				}
 			},
 			'throw an error using a previously registered factory symbol label'() {
@@ -59,8 +58,7 @@ registerSuite({
 				try {
 					factoryRegistry.define(myWidget, WidgetBase);
 					assert.fail();
-				}
-				catch (error) {
+				} catch (error) {
 					assert.isTrue(error instanceof Error);
 					assert.include(error.message, 'widget has already been registered for');
 					assert.include(error.message, 'symbol registry label');
@@ -82,7 +80,7 @@ registerSuite({
 				assert.strictEqual(factory, WidgetBase);
 			},
 			'get allows a generic to passed that defines the type of registry item'() {
-				class TestWidget extends WidgetBase<{foo: string}> {}
+				class TestWidget extends WidgetBase<{ foo: string }> {}
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('test-widget', TestWidget);
 				const RegistryTestWidget = factoryRegistry.get<TestWidget>('test-widget');
@@ -98,7 +96,7 @@ registerSuite({
 			},
 			'replaces promise with result on resolution'() {
 				let resolveFunction: any;
-				const promise: any = new Promise((resolve) => {
+				const promise: any = new Promise(resolve => {
 					resolveFunction = resolve;
 				});
 				const factoryRegistry = new Registry();
@@ -114,7 +112,7 @@ registerSuite({
 				let resolveFunction: any;
 				let promise: any;
 				const lazyFactory = () => {
-					promise = new Promise((resolve) => {
+					promise = new Promise(resolve => {
 						resolveFunction = resolve;
 					});
 					return promise;
@@ -141,18 +139,20 @@ registerSuite({
 				factoryRegistry.define('my-widget', lazyFactory);
 				factoryRegistry.get('my-widget');
 				rejectFunc(new Error('reject error'));
-				return promise.then(() => {
-					assert.fail();
-				},
-				(error) => {
-					assert.isTrue(error instanceof Error);
-					assert.equal(error.message, 'reject error');
-				});
+				return promise.then(
+					() => {
+						assert.fail();
+					},
+					error => {
+						assert.isTrue(error instanceof Error);
+						assert.equal(error.message, 'reject error');
+					}
+				);
 			}
 		}
 	},
-	'Injector': {
-		'has'() {
+	Injector: {
+		has() {
 			const factoryRegistry = new Registry();
 			assert.isFalse(factoryRegistry.hasInjector('my-injector'));
 			factoryRegistry.defineInjector('my-injector', testInjector);
@@ -165,10 +165,9 @@ registerSuite({
 				try {
 					factoryRegistry.defineInjector('my-injector', testInjector);
 					assert.fail();
-				}
-				catch (error) {
+				} catch (error) {
 					assert.isTrue(error instanceof Error);
-					assert.equal(error.message, 'injector has already been registered for \'my-injector\'');
+					assert.equal(error.message, 'injector has already been registered for `my-injector`');
 				}
 			},
 			'throw an error using a previously registered factory symbol label'() {
@@ -178,8 +177,7 @@ registerSuite({
 				try {
 					factoryRegistry.defineInjector(myInjector, testInjector);
 					assert.fail();
-				}
-				catch (error) {
+				} catch (error) {
 					assert.isTrue(error instanceof Error);
 					assert.include(error.message, 'injector has already been registered for');
 					assert.include(error.message, 'symbol registry label');

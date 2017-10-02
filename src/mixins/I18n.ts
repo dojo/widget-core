@@ -1,12 +1,6 @@
 /* tslint:disable:interface-name */
 import { assign } from '@dojo/core/lang';
-import i18n, {
-	Bundle,
-	formatMessage,
-	getCachedMessages,
-	Messages,
-	observeLocale
-} from '@dojo/i18n/i18n';
+import i18n, { Bundle, formatMessage, getCachedMessages, Messages, observeLocale } from '@dojo/i18n/i18n';
 import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { Constructor, DNode, WidgetProperties } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
@@ -75,7 +69,6 @@ export interface I18nMixin {
 
 export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<I18nMixin> {
 	class I18n extends Base {
-
 		public properties: I18nProperties;
 
 		constructor(...args: any[]) {
@@ -98,11 +91,14 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 			const { locale } = this.properties;
 			const messages = this._getLocaleMessages(bundle) || bundle.messages;
 
-			return assign(Object.create({
-				format(key: string, options?: any) {
-					return formatMessage(bundle.bundlePath, key, options, locale);
-				}
-			}), messages) as LocalizedMessages<T>;
+			return assign(
+				Object.create({
+					format(key: string, options?: any) {
+						return formatMessage(bundle.bundlePath, key, options, locale);
+					}
+				}),
+				messages
+			) as LocalizedMessages<T>;
 		}
 
 		@afterRender()
