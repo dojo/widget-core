@@ -535,7 +535,7 @@ class MyWidget extends WidgetBase {
 
 The `Registry` provides a mechanism to define widgets and injectors (see the [`Containers & Injectors`](#containers--injectors) section), that can be dynamically/lazily loaded on request. Once the registry widget is loaded all widgets that need the newly loaded widget will be invalidated and re-rendered automatically.
 
-A main registry can be provided to the `projector`, which will be automatically passed to all widgets within the tree (referred to as `baseRegistry`). Each widget also gets access to a private `Registry` instance that can be used to define registry items the are scoped to the widget. The locally defined registry items are considered a higher precedence than an item registered in the `baseRegistry`.
+A main registry can be provided to the `projector`, which will be automatically passed to all widgets within the tree (referred to as `baseRegistry`). Each widget also gets access to a private `Registry` instance that can be used to define registry items that are scoped to the widget. The locally defined registry items are considered a higher precedence than an item registered in the `baseRegistry`.
 
 ```ts
 import { Registry } from '@dojo/widget-core/Registry';
