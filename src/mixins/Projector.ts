@@ -361,9 +361,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 		public invalidate(): void {
 			super.invalidate();
-			if (this.isDirty) {
-				this.scheduleRender();
-			}
+			this.scheduleRender();
 		}
 
 		private _doRender() {

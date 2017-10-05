@@ -251,10 +251,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return this._properties;
 	}
 
-	protected get isDirty(): boolean {
-		return this._dirty;
-	}
-
 	public get changedPropertyKeys(): string[] {
 		return [ ...this._changedPropertyKeys ];
 	}
