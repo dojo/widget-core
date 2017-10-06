@@ -314,7 +314,12 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 			const { properties: { injectedTheme = {}, theme = injectedTheme } } = this;
 			if (!this._registeredBaseThemes) {
 				this._registeredBaseThemes = [ ...this.getDecorator('baseThemeClasses') ];
-				this._checkForDuplicates();
+				if (this._registeredBaseThemes.length > 0) {
+					this._checkForDuplicates();
+				}
+				else {
+					console.warn('Base CSS has not been registered using `@theme` for themeable widget.');
+				}
 			}
 			const registeredBaseThemeKeys = this._registeredBaseThemes.map((registeredBaseThemeClasses) => {
 				return registeredBaseThemeClasses[THEME_KEY];
