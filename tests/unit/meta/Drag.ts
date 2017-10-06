@@ -362,7 +362,7 @@ registerSuite({
 		document.body.removeChild(div);
 	},
 
-	'non draggable node'() {
+	'dragging untracked node should not report results'() {
 		const dragResults: DragResults[] = [];
 
 		class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
@@ -380,7 +380,7 @@ registerSuite({
 						key: 'child1'
 					}),
 					v('div', {
-						innerHTML: 'Hello Wolrd',
+						innerHTML: 'Hello World',
 						key: 'child2'
 					})
 				]);
