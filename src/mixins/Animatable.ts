@@ -38,7 +38,7 @@ export interface AnimationProperties {
 	timing?: AnimationTimingProperties;
 }
 
-class AnimationPlayer extends MetaBase {
+export class AnimationPlayer extends MetaBase {
 
 	private _animationMap = new Map<string, any>();
 

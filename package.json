@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "intersection-observer": "^0.4.2",
-    "pepjs": "^0.4.2"
+    "pepjs": "^0.4.2",
+    "web-animations-js": "^2.3.1"
   }
 }
