@@ -75,10 +75,6 @@ export class AnimationPlayer extends MetaBase {
 			player.playbackRate = playbackRate;
 		}
 
-		if (finish) {
-			player.finish();
-		}
-
 		if (reverse) {
 			player.reverse();
 		}
@@ -115,6 +111,9 @@ export class AnimationPlayer extends MetaBase {
 		const node = this.getNode(key);
 
 		if (node) {
+			if (!Array.isArray(animateProperties)) {
+				animateProperties = [ animateProperties ];
+			}
 			animateProperties.forEach((properties) => {
 				properties = typeof properties === 'function' ? properties() : properties;
 
