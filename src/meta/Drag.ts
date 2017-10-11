@@ -147,12 +147,26 @@ class DragController {
 		}
 	}
 
-	private _onDragStart = (e: PointerEvent) => {
-		const data = this._getData(e.target as HTMLElement);
+	private _onDragStart = (event: PointerEvent) => {
+		const { _dragging } = this;
+		if (!event.isPrimary && _dragging) {
+			// we have a second touch going on here, while we are dragging, so we aren't really dragging, so we
+			// will close this down
+			const state = this._nodeMap.get(_dragging)!;
+			state.dragResults.isDragging = false;
+			state.invalidate();
+			this._dragging = undefined;
+			return;
+		}
+		if (event.button !== 0) {
+			// it isn't the primary button that is being clicked, so we will ignore this
+			return;
+		}
+		const data = this._getData(event.target as HTMLElement);
 		if (data) {
 			const { state, target } = data;
 			this._dragging = target;
-			state.last = state.start = getPositionMatrix(e);
+			state.last = state.start = getPositionMatrix(event);
 			state.dragResults.delta = createPosition();
 			state.dragResults.start = deepAssign({}, state.start);
 			state.dragResults.isDragging = true;
@@ -160,14 +174,14 @@ class DragController {
 		} // else, we are ignoring the event
 	}
 
-	private _onDrag = (e: PointerEvent) => {
+	private _onDrag = (event: PointerEvent) => {
 		const { _dragging } = this;
 		if (!_dragging) {
 			return;
 		}
 		// state cannot be unset, using ! operator
 		const state = this._nodeMap.get(_dragging)!;
-		state.last = getPositionMatrix(e);
+		state.last = getPositionMatrix(event);
 		state.dragResults.delta = getDelta(state.start, state.last);
 		if (!state.dragResults.start) {
 			state.dragResults.start = deepAssign({}, state.start);
@@ -175,14 +189,14 @@ class DragController {
 		state.invalidate();
 	}
 
-	private _onDragStop = (e: PointerEvent) => {
+	private _onDragStop = (event: PointerEvent) => {
 		const { _dragging } = this;
 		if (!_dragging) {
 			return;
 		}
 		// state cannot be unset, using ! operator
 		const state = this._nodeMap.get(_dragging)!;
-		state.last = getPositionMatrix(e);
+		state.last = getPositionMatrix(event);
 		state.dragResults.delta = getDelta(state.start, state.last);
 		if (!state.dragResults.start) {
 			state.dragResults.start = deepAssign({}, state.start);
