@@ -16,9 +16,8 @@ interface TestWidgetProperties extends WidgetProperties {
 }
 
 class TestWidget extends AnimatableMixin(WidgetBase)<TestWidgetProperties> {
-	render() {
-		const {
-			animate = true,
+	protected getAnimation(): {} | undefined | (() => {}) {
+		const { animate = true,
 			controls = {},
 			timing = {},
 			effects = [
@@ -26,15 +25,19 @@ class TestWidget extends AnimatableMixin(WidgetBase)<TestWidgetProperties> {
 				{ height: '10px' }
 			] } = this.properties;
 
+		return animate ? {
+			id: 'animation',
+			effects,
+			controls,
+			timing
+		} : undefined;
+	}
+
+	render() {
 		return v('div', {}, [
 			v('div', {
 				key: 'animated',
-				animate: animate ? {
-					id: 'animation',
-					effects,
-					controls,
-					timing
-				} : undefined
+				animate: this.getAnimation()
 			}),
 			v('div', {
 				key: 'nonAnimated'
@@ -44,6 +47,26 @@ class TestWidget extends AnimatableMixin(WidgetBase)<TestWidgetProperties> {
 
 	getMeta() {
 		return this.meta(AnimationPlayer);
+	}
+}
+
+class PropertyFunctionWidget extends TestWidget {
+	getAnimation() {
+		const { controls = {},
+			timing = {},
+			effects = [
+				{ height: '0px' },
+				{ height: '10px' }
+			] } = this.properties;
+
+		return function () {
+			return {
+				id: 'animation',
+				effects,
+				controls,
+				timing
+			};
+		};
 	}
 }
 
@@ -309,6 +332,22 @@ registerSuite({
 
 			widget.__render__();
 			assert.isTrue(onFinishStub.calledOnce);
+		},
+		'can return a function instead of properties object'() {
+			const widget = new PropertyFunctionWidget();
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			assert.isTrue(keyframeCtorStub.calledOnce);
+			assert.isTrue(keyframeCtorStub.firstCall.calledWithMatch(
+				metaNode,
+				[
+					{ height: '0px' },
+					{ height: '10px' }
+				],
+				{}
+			));
 		}
 	}
 });
