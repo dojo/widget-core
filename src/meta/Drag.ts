@@ -154,9 +154,7 @@ class DragController {
 			this._dragging = target;
 			state.last = state.start = getPositionMatrix(e);
 			state.dragResults.delta = createPosition();
-			if (!state.dragResults.start) {
-				state.dragResults.start = deepAssign({}, state.start);
-			}
+			state.dragResults.start = deepAssign({}, state.start);
 			state.dragResults.isDragging = true;
 			state.invalidate();
 		} // else, we are ignoring the event
