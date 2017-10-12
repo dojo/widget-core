@@ -231,8 +231,8 @@ class DragController {
 		// clear the start state
 		delete state.dragResults.start;
 
-		// reset the delta after we have read any last delta while not dragging
-		if (!dragResults.isDragging && dragResults.delta.x !== 0 && dragResults.delta.y !== 0) {
+		// reset the delta after we have read, as any future reads should have an empty delta
+		if (dragResults.delta.x !== 0 && dragResults.delta.y !== 0) {
 			// future reads of the delta will be blank
 			state.dragResults.delta = createPosition();
 		}
