@@ -37,7 +37,8 @@ registerSuite({
 	},
 
 	'mouse drag'(this: any) {
-		if (!this.remote.session.capabilities.mouseEnabled) {
+		const { browser, mouseEnabled } = this.remote.session.capabilities;
+		if (!mouseEnabled || browser === 'iPhone' || browser === 'iPad') {
 			this.skip('Not mouse enabled device');
 		}
 		return this.remote
