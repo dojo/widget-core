@@ -1,7 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
-import { VNodeProperties } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
-import { NodeHandlerInterface } from './interfaces';
+import { NodeHandlerInterface, VirtualDomProperties } from './interfaces';
 
 /**
  * Enum to identify the type of event.
@@ -25,13 +24,13 @@ export class NodeHandler extends Evented implements NodeHandlerInterface {
 		return this._nodeMap.has(key);
 	}
 
-	public add(element: HTMLElement, properties: VNodeProperties): void {
+	public add(element: HTMLElement, properties: VirtualDomProperties): void {
 		const key = String(properties.key);
 		this._nodeMap.set(key, element);
 		this.emit({ type: key });
 	}
 
-	public addRoot(element: HTMLElement, properties: VNodeProperties): void {
+	public addRoot(element: HTMLElement, properties: VirtualDomProperties): void {
 		if (properties && properties.key) {
 			this.add(element, properties);
 		}
