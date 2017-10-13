@@ -51,8 +51,9 @@ function same(dnode1: DNode, dnode2: DNode) {
 			if (dnode1.properties.key !== dnode2.properties.key) {
 				return false;
 			}
+			return dnode1.properties.bind === dnode2.properties.bind;
 		}
-		return true;
+		return !dnode1.properties && !dnode2.properties;
 	}
 	else if (isWNode(dnode1) && isWNode(dnode2)) {
 		if (dnode1.widgetConstructor !== dnode2.widgetConstructor) {
@@ -413,12 +414,25 @@ function updateChildren(dnode: DNode, domNode: Node, oldChildren: DNode[] | unde
 				oldIndex = findOldIndex + 1;
 			}
 			else {
-				let insertBefore: HNode | undefined;
-				if (oldIndex < oldChildrenLength) {
-					insertBefore = oldChildren[oldIndex] as HNode;
+				let insertBefore: Node | undefined = undefined;
+				let child: DNode = oldChildren[oldIndex];
+				if (child) {
+					while (insertBefore === undefined) {
+						if (isWNode(child)) {
+							if (child.rendered) {
+								child = child.rendered && child.rendered[0];
+							}
+							else {
+								break;
+							}
+						}
+						else {
+							insertBefore = child.domNode;
+						}
+					}
 				}
 
-				createDom(newChild, domNode, insertBefore ? insertBefore.domNode : undefined, projectionOptions, isWNode(dnode) ? dnode.instance : undefined);
+				createDom(newChild, domNode, insertBefore, projectionOptions, isWNode(dnode) ? dnode.instance : undefined);
 				nodeAdded(newChild, transitions);
 				checkDistinguishable(newChildren, newIndex, dnode, 'added');
 			}
@@ -445,19 +459,14 @@ function addChildren(domNode: Node, children: DNode[] | undefined, projectionOpt
 	}
 }
 
-function initPropertiesAndChildren(domNode: Node, dnode: DNode, projectionOptions: ProjectionOptions) {
-	if (isWNode(dnode)) {
-		addChildren(domNode, dnode.rendered, projectionOptions);
+function initPropertiesAndChildren(domNode: Node, dnode: HNode, projectionOptions: ProjectionOptions) {
+	addChildren(domNode, dnode.children, projectionOptions);
+	if (dnode.text) {
+		domNode.textContent = dnode.text;
 	}
-	else {
-		addChildren(domNode, dnode.children, projectionOptions); // children before properties, needed for value property of <select>.
-		if (dnode.text) {
-			domNode.textContent = dnode.text;
-		}
-		setProperties(domNode, dnode.properties, projectionOptions);
-		if (dnode.properties && dnode.properties.afterCreate) {
-			dnode.properties.afterCreate.apply(dnode.properties.bind || dnode.properties, [domNode as Element, projectionOptions, dnode.tag, dnode.properties, dnode.children]);
-		}
+	setProperties(domNode, dnode.properties, projectionOptions);
+	if (dnode.properties && dnode.properties.afterCreate) {
+		dnode.properties.afterCreate.apply(dnode.properties.bind || dnode.properties, [domNode as Element, projectionOptions, dnode.tag, dnode.properties, dnode.children]);
 	}
 }
 
