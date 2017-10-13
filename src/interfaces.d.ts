@@ -298,12 +298,17 @@ export interface HNode {
 	 * The type of node
 	 */
 	type: symbol;
+
+	text?: string;
+
+	domNode?: Element | Text;
 }
 
 /**
  * Wrapper for `w`
  */
 export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> {
+	[index: string]: any;
 	/**
 	 * Constructor to create a widget or string constructor label
 	 */
@@ -402,7 +407,7 @@ export interface WidgetBaseInterface<
 	/**
 	 * Main internal function for dealing with widget rendering
 	 */
-	__render__(): VirtualDomNode | VirtualDomNode[];
+	__render__(): DNode | DNode[];
 }
 
 /**

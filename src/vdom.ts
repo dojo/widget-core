@@ -1,3 +1,6 @@
+import { DNode, HNode } from './interfaces';
+import { isWNode, isHNode } from './d';
+
 /**
  * A virtual representation of a DOM Node. Maquette assumes that [[VNode]] objects are never modified externally.
  * Instances of [[VNode]] can be created using [[h]].
@@ -360,17 +363,28 @@ let extend = <T>(base: T, overrides: any): T => {
 
 // Hyperscript helper functions
 
-let same = (vnode1: VNode, vnode2: VNode) => {
-	if (vnode1.vnodeSelector !== vnode2.vnodeSelector) {
-		return false;
-	}
-	if (vnode1.properties && vnode2.properties) {
-		if (vnode1.properties.key !== vnode2.properties.key) {
+let same = (vnode1: DNode, vnode2: DNode) => {
+	if (isHNode(vnode1) && isHNode(vnode2)) {
+		if (vnode1.tag !== vnode2.tag) {
 			return false;
 		}
-		return vnode1.properties.bind === vnode2.properties.bind;
+		if (vnode1.properties && vnode2.properties) {
+			if (vnode1.properties.key !== vnode2.properties.key) {
+				return false;
+			}
+			return vnode1.properties.bind === vnode2.properties.bind;
+		}
+		return !vnode1.properties && !vnode2.properties;
 	}
-	return !vnode1.properties && !vnode2.properties;
+	else if (isWNode(vnode1) && isWNode(vnode2)) {
+		if (vnode1.properties.key === vnode2.properties.key) {
+			return true;
+		}
+		else if (vnode1.widgetConstructor === vnode2.widgetConstructor) {
+			return true;
+		}
+	}
+	return false;
 };
 
 let toTextVNode = (data: any): VNode => {
@@ -595,13 +609,10 @@ let updateProperties = function(domNode: Node, previousProperties: VNodeProperti
 	return propertiesUpdated;
 };
 
-let findIndexOfChild = function(children: VNode[], sameAs: VNode, start: number) {
-	if (sameAs.vnodeSelector !== '') {
-		// Never scan for text-nodes
-		for (let i = start; i < children.length; i++) {
-			if (same(children[i], sameAs)) {
-				return i;
-			}
+let findIndexOfChild = function(children: DNode[], sameAs: DNode, start: number) {
+	for (let i = start; i < children.length; i++) {
+		if (same(children[i], sameAs)) {
+			return i;
 		}
 	}
 	return -1;
@@ -620,29 +631,43 @@ let nodeAdded = function(vNode: VNode, transitions: TransitionStrategy) {
 	}
 };
 
-let nodeToRemove = function(vNode: VNode, transitions: TransitionStrategy) {
-	let domNode: Node = vNode.domNode!;
-	if (vNode.properties) {
-		let exitAnimation = vNode.properties.exitAnimation;
-		if (exitAnimation) {
-			(domNode as HTMLElement).style.pointerEvents = 'none';
-			let removeDomNode = function() {
-				if (domNode.parentNode) {
-					domNode.parentNode.removeChild(domNode);
-				}
-			};
-			if (typeof exitAnimation === 'function') {
-				exitAnimation(domNode as Element, removeDomNode, vNode.properties);
-				return;
-			} else {
-				transitions.exit(vNode.domNode as Element, vNode.properties, exitAnimation as string, removeDomNode);
-				return;
+let nodeToRemove = function(dnode: DNode, transitions: TransitionStrategy) {
+
+	if (isWNode(dnode)) {
+		dnode.instance.destroy();
+		for (let i = 0; i < dnode.rendered.length; i++) {
+			const child = dnode.rendered[i];
+			if (isHNode(child)) {
+				child.domNode!.parentNode!.removeChild(child.domNode!);
 			}
 		}
+
 	}
-	if (domNode.parentNode) {
-		domNode.parentNode.removeChild(domNode);
+	else if (isHNode(dnode)) {
+		let domNode: Node = dnode.domNode!;
+		/*if (dnode.properties) {
+			let exitAnimation = dnode.properties.exitAnimation;
+			if (exitAnimation) {
+				(domNode as HTMLElement).style.pointerEvents = 'none';
+				let removeDomNode = function() {
+					if (domNode.parentNode) {
+						domNode.parentNode.removeChild(domNode);
+					}
+				};
+				if (typeof exitAnimation === 'function') {
+					exitAnimation(domNode as Element, removeDomNode, dnode.properties);
+					return;
+				} else {
+					transitions.exit(dnode.domNode as Element, dnode.properties, exitAnimation as string, removeDomNode);
+					return;
+				}
+			}
+		}*/
+		if (domNode.parentNode) {
+			domNode.parentNode.removeChild(domNode);
+		}
 	}
+
 };
 
 let checkDistinguishable = function(childNodes: VNode[], indexToCheck: number, parentVNode: VNode, operation: string) {
@@ -670,15 +695,15 @@ let checkDistinguishable = function(childNodes: VNode[], indexToCheck: number, p
 	}
 };
 
-let createDom: (vnode: VNode, parentNode: Node, insertBefore: Node | null | undefined, projectionOptions: ProjectionOptions) => void;
-let updateDom: (previous: VNode, vnode: VNode, projectionOptions: ProjectionOptions) => boolean;
+/*let createDom: (dnode: DNode, parentNode: Node, insertBefore: Node | null | undefined, projectionOptions: ProjectionOptions) => void;*/
+/*let updateDom: (previous: VNode, vnode: VNode, projectionOptions: ProjectionOptions) => boolean;*/
 
-let updateChildren = function(vnode: VNode, domNode: Node, oldChildren: VNode[] | undefined, newChildren: VNode[] | undefined, projectionOptions: ProjectionOptions) {
+let updateChildren = function(dnode: DNode, domNode: Node, oldChildren: DNode[] | undefined, newChildren: DNode[] | undefined, projectionOptions: ProjectionOptions) {
 	if (oldChildren === newChildren) {
 		return false;
 	}
-	oldChildren = oldChildren || emptyArray;
-	newChildren = newChildren || emptyArray;
+	oldChildren = oldChildren || [];
+	newChildren = newChildren || [];
 	let oldChildrenLength = oldChildren.length;
 	let newChildrenLength = newChildren.length;
 	let transitions = projectionOptions.transitions!;
@@ -691,7 +716,7 @@ let updateChildren = function(vnode: VNode, domNode: Node, oldChildren: VNode[] 
 		let oldChild = (oldIndex < oldChildrenLength) ? oldChildren[oldIndex] : undefined;
 		let newChild = newChildren[newIndex];
 		if (oldChild !== undefined && same(oldChild, newChild)) {
-			textUpdated = updateDom(oldChild, newChild, projectionOptions) || textUpdated;
+			textUpdated = updateDom(oldChild, newChild, projectionOptions, domNode) || textUpdated;
 			oldIndex++;
 		} else {
 			let findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
@@ -699,15 +724,15 @@ let updateChildren = function(vnode: VNode, domNode: Node, oldChildren: VNode[] 
 				// Remove preceding missing children
 				for (i = oldIndex; i < findOldIndex; i++) {
 					nodeToRemove(oldChildren[i], transitions);
-					checkDistinguishable(oldChildren, i, vnode, 'removed');
+					checkDistinguishable(oldChildren, i, dnode, 'removed');
 				}
-				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions) || textUpdated;
+				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, domNode) || textUpdated;
 				oldIndex = findOldIndex + 1;
 			} else {
 				// New child
 				createDom(newChild, domNode, (oldIndex < oldChildrenLength) ? oldChildren[oldIndex].domNode : undefined, projectionOptions);
 				nodeAdded(newChild, transitions);
-				checkDistinguishable(newChildren, newIndex, vnode, 'added');
+				checkDistinguishable(newChildren, newIndex, dnode, 'added');
 			}
 		}
 		newIndex++;
@@ -716,13 +741,13 @@ let updateChildren = function(vnode: VNode, domNode: Node, oldChildren: VNode[] 
 		// Remove child fragments
 		for (i = oldIndex; i < oldChildrenLength; i++) {
 			nodeToRemove(oldChildren[i], transitions);
-			checkDistinguishable(oldChildren, i, vnode, 'removed');
+			checkDistinguishable(oldChildren, i, dnode, 'removed');
 		}
 	}
 	return textUpdated;
 };
 
-let addChildren = function(domNode: Node, children: VNode[] | undefined, projectionOptions: ProjectionOptions) {
+let addChildren = function(domNode: Node, children: DNode[] | undefined, projectionOptions: ProjectionOptions) {
 	if (!children) {
 		return;
 	}
@@ -731,114 +756,159 @@ let addChildren = function(domNode: Node, children: VNode[] | undefined, project
 	}
 };
 
-let initPropertiesAndChildren = function(domNode: Node, vnode: VNode, projectionOptions: ProjectionOptions) {
-	addChildren(domNode, vnode.children, projectionOptions); // children before properties, needed for value property of <select>.
-	if (vnode.text) {
-		domNode.textContent = vnode.text;
+let initPropertiesAndChildren = function(domNode: Node, dnode: DNode, projectionOptions: ProjectionOptions) {
+	if (isWNode(dnode)) {
+		addChildren(domNode, dnode.rendered, projectionOptions); // children before properties, needed for value property of <select>.
 	}
-	setProperties(domNode, vnode.properties, projectionOptions);
-	if (vnode.properties && vnode.properties.afterCreate) {
-		vnode.properties.afterCreate.apply(vnode.properties.bind || vnode.properties, [domNode as Element, projectionOptions, vnode.vnodeSelector, vnode.properties, vnode.children]);
+	else if (isHNode(dnode)) {
+		addChildren(domNode, dnode.children, projectionOptions); // children before properties, needed for value property of <select>.
+		if (dnode.text) {
+			domNode.textContent = dnode.text;
+		}
+		setProperties(domNode, dnode.properties, projectionOptions);
+		if (dnode.properties && dnode.properties.afterCreate) {
+			dnode.properties.afterCreate.apply(dnode.properties.bind || dnode.properties, [domNode as Element, projectionOptions, dnode.dnodeSelector, dnode.properties, dnode.children]);
+		}
 	}
 };
 
-createDom = function(vnode, parentNode, insertBefore, projectionOptions) {
+const createDom = function(dnode: DNode, parentNode: any, insertBefore: any, projectionOptions: any, parentInstance: any) {
 	let domNode: Node | undefined, i: number, c: string, start = 0, type: string, found: string;
-	let vnodeSelector = vnode.vnodeSelector;
-	let doc = parentNode.ownerDocument;
-	if (vnodeSelector === '') {
-		domNode = vnode.domNode = doc.createTextNode(vnode.text!);
-		if (insertBefore !== undefined) {
-			parentNode.insertBefore(domNode, insertBefore);
+	if (isWNode(dnode)) {
+		// widget constructor or registry item
+		let { widgetConstructor } = dnode as any;
+		let instance: any;
+
+		instance = new widgetConstructor();
+		parentInstance && parentInstance.own(instance);
+		parentInstance && instance.on('invalidate', () => {
+			parentInstance.invalidate();
+		});
+		dnode.instance = instance;
+		instance.__setCoreProperties__(dnode.coreProperties);
+		instance.__setProperties__(dnode.properties);
+		instance.__setChildren__(dnode.children);
+		const rendered = instance.__render__();
+
+		dnode.rendered = Array.isArray(rendered) ? rendered : [ rendered ];
+		initPropertiesAndChildren(parentNode, dnode, projectionOptions);
+
+		//__render__
+	}
+	else if (isHNode(dnode)) {
+		// I am string/null/undefined/HNode
+		let hnodeSelector = dnode.tag;
+		let doc = parentNode.ownerDocument;
+		if (hnodeSelector === '') {
+			domNode = dnode.domNode = doc.createTextNode(dnode.text!);
+			if (insertBefore !== undefined) {
+				parentNode.insertBefore(domNode, insertBefore);
+			} else {
+				parentNode.appendChild(domNode);
+			}
 		} else {
-			parentNode.appendChild(domNode);
-		}
-	} else {
-		for (i = 0; i <= vnodeSelector.length; ++i) {
-			c = vnodeSelector.charAt(i);
-			if (i === vnodeSelector.length || c === '.' || c === '#') {
-				type = vnodeSelector.charAt(start - 1);
-				found = vnodeSelector.slice(start, i);
-				if (type === '.') {
-					(domNode as HTMLElement).classList.add(found);
-				} else if (type === '#') {
-					(domNode as Element).id = found;
-				} else {
-					if (found === 'svg') {
-						projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
-					}
-					if (projectionOptions.namespace !== undefined) {
-						domNode = vnode.domNode = doc.createElementNS(projectionOptions.namespace, found);
+			for (i = 0; i <= hnodeSelector.length; ++i) {
+				c = hnodeSelector.charAt(i);
+				if (i === hnodeSelector.length || c === '.' || c === '#') {
+					type = hnodeSelector.charAt(start - 1);
+					found = hnodeSelector.slice(start, i);
+					if (type === '.') {
+						(domNode as HTMLElement).classList.add(found);
+					} else if (type === '#') {
+						(domNode as Element).id = found;
 					} else {
-						domNode = vnode.domNode = (vnode.domNode || doc.createElement(found));
-						if (found === 'input' && vnode.properties && vnode.properties.type !== undefined) {
-							// IE8 and older don't support setting input type after the DOM Node has been added to the document
-							(domNode as Element).setAttribute('type', vnode.properties.type);
+						if (found === 'svg') {
+							projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
+						}
+						if (projectionOptions.namespace !== undefined) {
+							domNode = dnode.domNode = doc.createElementNS(projectionOptions.namespace, found);
+						} else {
+							domNode = dnode.domNode = (dnode.domNode || doc.createElement(found));
+							if (found === 'input' && dnode.properties && dnode.properties.type !== undefined) {
+								// IE8 and older don't support setting input type after the DOM Node has been added to the document
+								(domNode as Element).setAttribute('type', dnode.properties.type);
+							}
+						}
+						if (insertBefore !== undefined) {
+							parentNode.insertBefore(domNode, insertBefore);
+						} else if (domNode.parentNode !== parentNode) {
+							parentNode.appendChild(domNode);
 						}
 					}
-					if (insertBefore !== undefined) {
-						parentNode.insertBefore(domNode, insertBefore);
-					} else if (domNode.parentNode !== parentNode) {
-						parentNode.appendChild(domNode);
-					}
+					start = i + 1;
 				}
-				start = i + 1;
 			}
+			initPropertiesAndChildren(domNode!, dnode, projectionOptions);
 		}
-		initPropertiesAndChildren(domNode!, vnode, projectionOptions);
 	}
 };
 
-updateDom = function(previous, vnode, projectionOptions) {
-	let domNode = previous.domNode!;
-	let textUpdated = false;
-	if (previous === vnode) {
-		return false; // By contract, VNode objects may not be modified anymore after passing them to maquette
+const updateDom = function(previous: any, dnode: DNode, projectionOptions: ProjectorOptions, parentNode: any) {
+	if (previous === dnode || !dnode) {
+		return false; // By contract, dnode objects may not be modified anymore after passing them to maquette
 	}
-	let updated = false;
-	if (vnode.vnodeSelector === '') {
-		if (vnode.text !== previous.text) {
-			let newVNode = domNode.ownerDocument.createTextNode(vnode.text!);
-			domNode.parentNode!.replaceChild(newVNode, domNode);
-			vnode.domNode = newVNode;
-			textUpdated = true;
-			return textUpdated;
-		}
-	} else {
-		if (vnode.vnodeSelector.lastIndexOf('svg', 0) === 0) { // lastIndexOf(needle,0)===0 means StartsWith
-			projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
-		}
-		if (previous.text !== vnode.text) {
-			updated = true;
-			if (vnode.text === undefined) {
-				domNode.removeChild(domNode.firstChild!); // the only textnode presumably
-			} else {
-				domNode.textContent = vnode.text;
+	if (isWNode(dnode)) {
+		dnode.instance = previous.instance;
+		dnode.instance.__setCoreProperties__(dnode.coreProperties);
+		dnode.instance.__setProperties__(dnode.properties);
+		dnode.instance.__setChildren__(dnode.children);
+		const rendered = dnode.instance.__render__();
+		dnode.rendered = Array.isArray(rendered) ? rendered : [ rendered ];
+
+		updateChildren(dnode, parentNode, previous.rendered, dnode.rendered, projectionOptions) || false;
+	}
+	else if (isHNode(dnode)) {
+		let domNode = previous.domNode!;
+		let textUpdated = false;
+		let updated = false;
+		if (dnode.tag === '') {
+			if (dnode.text !== previous.text) {
+				let newdnode = domNode.ownerDocument.createTextNode(dnode.text!);
+				domNode.parentNode!.replaceChild(newdnode, domNode);
+				dnode.domNode = newdnode;
+				textUpdated = true;
+				return textUpdated;
+			}
+		} else {
+			if (dnode.tag.lastIndexOf('svg', 0) === 0) { // lastIndexOf(needle,0)===0 means StartsWith
+				projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
+			}
+			if (previous.text !== dnode.text) {
+				updated = true;
+				if (dnode.text === undefined) {
+					domNode.removeChild(domNode.firstChild!); // the only textnode presumably
+				} else {
+					domNode.textContent = dnode.text;
+				}
+			}
+			updated = updateChildren(dnode, domNode, previous.children, dnode.children, projectionOptions) || updated;
+			updated = updateProperties(domNode, previous.properties, dnode.properties, projectionOptions) || updated;
+			if (dnode.properties && dnode.properties.afterUpdate) {
+				dnode.properties.afterUpdate.apply(dnode.properties.bind || dnode.properties, [ domNode as Element, projectionOptions, dnode.tag, dnode.properties, dnode.children]);
 			}
 		}
-		updated = updateChildren(vnode, domNode, previous.children, vnode.children, projectionOptions) || updated;
-		updated = updateProperties(domNode, previous.properties, vnode.properties, projectionOptions) || updated;
-		if (vnode.properties && vnode.properties.afterUpdate) {
-			vnode.properties.afterUpdate.apply(vnode.properties.bind || vnode.properties, [ domNode as Element, projectionOptions, vnode.vnodeSelector, vnode.properties, vnode.children]);
+		if (updated && dnode.properties && dnode.properties.updateAnimation) {
+			dnode.properties.updateAnimation(domNode as Element, dnode.properties, previous.properties);
 		}
+		dnode.domNode = previous.domNode;
+		return textUpdated;
 	}
-	if (updated && vnode.properties && vnode.properties.updateAnimation) {
-		vnode.properties.updateAnimation(domNode as Element, vnode.properties, previous.properties);
-	}
-	vnode.domNode = previous.domNode;
-	return textUpdated;
+
+
+
+
 };
 
-let createProjection = function(vnode: VNode, projectionOptions: ProjectionOptions): Projection {
+let createProjection = function(dnode: any, projectionOptions: ProjectionOptions): any {
 	return {
-		update: function(updatedVnode: VNode) {
-			if (vnode.vnodeSelector !== updatedVnode.vnodeSelector) {
+		update: function(updatedVnode: HNode) {
+			if (dnode.tag !== updatedVnode.tag) {
 				throw new Error('The selector for the root VNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
 			}
-			updateDom(vnode, updatedVnode, projectionOptions);
-			vnode = updatedVnode;
+			updateDom(dnode, updatedVnode, projectionOptions, dnode.domNode);
+			dnode = updatedVnode;
 		},
-		domNode: vnode.domNode as Element
+		domNode: (dnode as any).domNode as Element
 	};
 };
 
@@ -944,11 +1014,11 @@ export let dom = {
 	 * @param projectionOptions - Options to be used to create and update the projection.
 	 * @returns The [[Projection]] which also contains the DOM Node that was created.
 	 */
-	create: function(vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
+	/*create: function(vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		createDom(vnode, document.createElement('div'), undefined, projectionOptions);
 		return createProjection(vnode, projectionOptions);
-	},
+	},*/
 
 	/**
 	 * Appends a new child node to the DOM which is generated from a [[VNode]].
@@ -959,11 +1029,14 @@ export let dom = {
 	 * @param projectionOptions - Options to be used to create and update the [[Projection]].
 	 * @returns The [[Projection]] that was created.
 	 */
-	append: function(parentNode: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
+	append: function(parentNode: Element, dnode: DNode, projectionOptions?: ProjectionOptions): Projection {
+
+debugger;
+
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		createDom(vnode, parentNode, undefined, projectionOptions);
-		return createProjection(vnode, projectionOptions);
-	},
+		createDom(dnode, parentNode, undefined, projectionOptions, null);
+		return createProjection(dnode, projectionOptions);
+	}
 
 	/**
 	 * Inserts a new DOM node which is generated from a [[VNode]].
@@ -974,11 +1047,11 @@ export let dom = {
 	 * @param projectionOptions - Options to be used to create and update the projection, see [[createProjector]].
 	 * @returns The [[Projection]] that was created.
 	 */
-	insertBefore: function(beforeNode: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
+	/*insertBefore: function(beforeNode: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		createDom(vnode, beforeNode.parentNode!, beforeNode, projectionOptions);
 		return createProjection(vnode, projectionOptions);
-	},
+	},*/
 
 	/**
 	 * Merges a new DOM node which is generated from a [[VNode]] with an existing DOM Node.
@@ -991,12 +1064,12 @@ export let dom = {
 	 * @param projectionOptions - Options to be used to create and update the projection, see [[createProjector]].
 	 * @returns The [[Projection]] that was created.
 	 */
-	merge: function(element: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
+	/*merge: function(element: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		vnode.domNode = element;
 		initPropertiesAndChildren(element, vnode, projectionOptions);
 		return createProjection(vnode, projectionOptions);
-	},
+	},*/
 
 	/**
 	 * Replaces an existing DOM node with a node generated from a [[VNode]].
@@ -1007,12 +1080,12 @@ export let dom = {
 	 * @param projectionOptions - Options to be used to create and update the [[Projection]].
 	 * @returns The [[Projection]] that was created.
 	 */
-	replace: function(element: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
+	/*replace: function(element: Element, vnode: VNode, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		createDom(vnode, element.parentNode!, element, projectionOptions);
 		element.parentNode!.removeChild(element);
 		return createProjection(vnode, projectionOptions);
-	}
+	}*/
 };
 
 /**

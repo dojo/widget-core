@@ -15,7 +15,6 @@ import {
 	DiffPropertyReaction,
 	DNode,
 	Render,
-	VirtualDomNode,
 	WidgetMetaBase,
 	WidgetMetaConstructor,
 	WidgetBaseConstructor,
@@ -77,11 +76,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 * marker indicating if the widget requires a render
 	 */
 	private _dirty: boolean;
-
-	/**
-	 * cachedVNode from previous render
-	 */
-	private _cachedVNode?: VirtualDomNode | VirtualDomNode[];
 
 	/**
 	 * internal widget properties
@@ -337,23 +331,16 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	public __render__(): VirtualDomNode | VirtualDomNode[] {
+	public __render__(): DNode | DNode[] {
 		this._renderState = WidgetRenderState.RENDER;
-		if (this._dirty === true || this._cachedVNode === undefined) {
-			this._dirty = false;
-			const render = this._runBeforeRenders();
-			let dNode = render();
-			dNode = this.runAfterRenders(dNode);
-			this._decorateNodes(dNode);
-			const widget = this._dNodeToVNode(dNode);
-			this._manageDetachedChildren();
-			this._nodeHandler.clear();
-			this._cachedVNode = widget;
-			this._renderState = WidgetRenderState.IDLE;
-			return widget;
-		}
+		this._dirty = false;
+		const render = this._runBeforeRenders();
+		let dNode = render();
+		dNode = this.runAfterRenders(dNode);
+		this._decorateNodes(dNode);
+		this._nodeHandler.clear();
 		this._renderState = WidgetRenderState.IDLE;
-		return this._cachedVNode;
+		return dNode;
 	}
 
 	private _decorateNodes(node: DNode | DNode[]) {
@@ -584,111 +571,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			}, dNode);
 		}
 		return dNode;
-	}
-
-	/**
-	 * Process a structure of DNodes into VNodes, string or null. `null` results are filtered.
-	 *
-	 * @param dNode the dnode to process
-	 * @returns a VNode, string or null
-	 */
-	private _dNodeToVNode(dNode: DNode): VirtualDomNode;
-	private _dNodeToVNode(dNode: DNode[]): VirtualDomNode[];
-	private _dNodeToVNode(dNode: DNode | DNode[]): VirtualDomNode | VirtualDomNode[];
-	private _dNodeToVNode(dNode: DNode | DNode[]): VirtualDomNode | VirtualDomNode[] {
-		if (typeof dNode === 'string' || dNode === null || dNode === undefined) {
-			return dNode;
-		}
-
-		if (Array.isArray(dNode)) {
-			return dNode.map((node) => this._dNodeToVNode(node));
-		}
-
-		if (isWNode(dNode)) {
-			const { children, properties, coreProperties } = dNode;
-			const { key } = properties;
-
-			let { widgetConstructor } = dNode;
-			let child: WidgetBaseInterface<WidgetProperties>;
-
-			if (!isWidgetBaseConstructor(widgetConstructor)) {
-				const item = this._registry.get(widgetConstructor);
-				if (item === null) {
-					return null;
-				}
-				widgetConstructor = <WidgetBaseConstructor> item;
-			}
-
-			const childrenMapKey = key || widgetConstructor;
-			let cachedChildren = this._cachedChildrenMap.get(childrenMapKey) || [];
-			let cachedChild: WidgetCacheWrapper | undefined;
-
-			for (let i = 0; i < cachedChildren.length; i++) {
-				const cachedChildWrapper = cachedChildren[i];
-				if (cachedChildWrapper.widgetConstructor === widgetConstructor && cachedChildWrapper.used === false) {
-					cachedChild = cachedChildWrapper;
-					break;
-				}
-			}
-
-			if (cachedChild !== undefined) {
-				child = cachedChild.child;
-				cachedChild.used = true;
-			}
-			else {
-				child = new widgetConstructor();
-				child.own(child.on('invalidated', this._boundInvalidate));
-				cachedChildren = [...cachedChildren, { child, widgetConstructor, used: true }];
-				this._cachedChildrenMap.set(childrenMapKey, cachedChildren);
-				this.own(child);
-			}
-			child.__setCoreProperties__(coreProperties);
-			child.__setProperties__(properties);
-			if (typeof childrenMapKey !== 'string' && cachedChildren.length > 1) {
-				const widgetName = (<any> childrenMapKey).name;
-				let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times';
-
-				if (widgetName) {
-					errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times`;
-				}
-
-				console.warn(errorMsg);
-				this.emit({ type: 'error', target: this, error: new Error(errorMsg) });
-			}
-
-			child.__setChildren__(children);
-			return child.__render__();
-		}
-
-		dNode.vNodes = [];
-		for (let i = 0; i < dNode.children.length; i++) {
-			const child = dNode.children[i];
-			if (child === null || child === undefined) {
-				continue;
-			}
-			dNode.vNodes.push(this._dNodeToVNode(child));
-		}
-
-		return dNode.render();
-	}
-
-	/**
-	 * Manage widget instances after render processing
-	 */
-	private _manageDetachedChildren(): void {
-		this._cachedChildrenMap.forEach((cachedChildren, key) => {
-			const filteredCacheChildren: WidgetCacheWrapper[] = [];
-			for (let i = 0; i < cachedChildren.length; i++) {
-				const cachedChild = cachedChildren[i];
-				if (cachedChild.used === false) {
-					cachedChild.child.destroy();
-					continue;
-				}
-				cachedChild.used = false;
-				filteredCacheChildren.push(cachedChild);
-			}
-			this._cachedChildrenMap.set(key, filteredCacheChildren);
-		});
 	}
 }
 
