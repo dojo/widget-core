@@ -1,3 +1,4 @@
+import { Evented } from '@dojo/core/Evented';
 import { DNode, HNode, VirtualDomProperties } from './interfaces';
 import { isWNode, isHNode } from './d';
 
@@ -9,6 +10,7 @@ export interface TransitionStrategy {
 export interface ProjectorOptions {
 	readonly transitions?: TransitionStrategy;
 	styleApplyer?(domNode: HTMLElement, styleName: string, value: string): void;
+	nodeEvent?: Evented;
 }
 
 export interface ProjectionOptions extends ProjectorOptions {
@@ -578,30 +580,30 @@ const createProjection = function(dnode: HNode, projectionOptions: ProjectionOpt
 };
 
 export const dom = {
-	create: function(hnode: HNode, projectionOptions?: ProjectionOptions): Projection {
+	create: function(hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		createDom(hnode, document.createElement('div'), undefined, projectionOptions, null);
+		createDom(hnode, document.createElement('div'), undefined, projectionOptions, instance);
 		return createProjection(hnode, projectionOptions);
 	},
-	append: function(parentNode: Element, hnode: HNode, projectionOptions?: ProjectionOptions): Projection {
+	append: function(parentNode: Element, hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		createDom(hnode, parentNode, undefined, projectionOptions, null);
+		createDom(hnode, parentNode, undefined, projectionOptions, instance);
 		return createProjection(hnode, projectionOptions);
 	},
-	insertBefore: function(beforeNode: Element, hnode: HNode, projectionOptions?: ProjectionOptions): Projection {
+	insertBefore: function(beforeNode: Element, hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		createDom(hnode, beforeNode.parentNode!, beforeNode, projectionOptions, null);
+		createDom(hnode, beforeNode.parentNode!, beforeNode, projectionOptions, instance);
 		return createProjection(hnode, projectionOptions);
 	},
-	merge: function(element: Element, hnode: HNode, projectionOptions?: ProjectionOptions): Projection {
+	merge: function(element: Element, hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		hnode.domNode = element;
 		initPropertiesAndChildren(element, hnode, projectionOptions);
 		return createProjection(hnode, projectionOptions);
 	},
-	replace: function(element: Element, hnode: HNode, projectionOptions?: ProjectionOptions): Projection {
+	replace: function(element: Element, hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		createDom(hnode, element.parentNode!, element, projectionOptions, null);
+		createDom(hnode, element.parentNode!, element, projectionOptions, instance);
 		element.parentNode!.removeChild(element);
 		return createProjection(hnode, projectionOptions);
 	}
