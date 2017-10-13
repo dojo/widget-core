@@ -12,7 +12,7 @@ registerSuite({
 		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
-			.setFindTimeout(1000)
+			.setFindTimeout(10000)
 			.findById('results')
 			.pressFinger(50, 50)
 			.sleep(100)
@@ -42,7 +42,7 @@ registerSuite({
 		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
-			.setFindTimeout(1000)
+			.setFindTimeout(10000)
 			.findById('results')
 			.moveMouseTo(50, 50)
 			.pressMouseButton()
