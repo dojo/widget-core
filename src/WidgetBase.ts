@@ -1,5 +1,4 @@
 import { Evented } from '@dojo/core/Evented';
-import { VNodeProperties } from '@dojo/interfaces/vdom';
 import { ProjectionOptions } from './interfaces';
 import Map from '@dojo/shim/Map';
 import '@dojo/shim/Promise'; // Imported for side-effects
@@ -17,22 +16,13 @@ import {
 	Render,
 	WidgetMetaBase,
 	WidgetMetaConstructor,
-	WidgetBaseConstructor,
 	WidgetBaseInterface,
-	WidgetProperties
+	WidgetProperties,
+	VirtualDomProperties
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
 import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './Registry';
-
-/**
- * Widget cache wrapper for instance management
- */
-interface WidgetCacheWrapper {
-	child: WidgetBaseInterface<WidgetProperties>;
-	widgetConstructor: WidgetBaseConstructor;
-	used: boolean;
-}
 
 enum WidgetRenderState {
 	IDLE = 1,
@@ -92,10 +82,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	 */
 	private _coreProperties: CoreProperties = {} as CoreProperties;
 
-	/**
-	 * cached children map for instance management
-	 */
-	private _cachedChildrenMap: Map<string | number | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>;
+	private _cachedDNode: DNode | DNode[];
 
 	/**
 	 * map of specific property diff functions
@@ -141,7 +128,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._children = [];
 		this._decoratorCache = new Map<string, any[]>();
 		this._properties = <P> {};
-		this._cachedChildrenMap = new Map<string | Promise<WidgetBaseConstructor> | WidgetBaseConstructor, WidgetCacheWrapper[]>();
 		this._diffPropertyFunctionMap = new Map<string, string>();
 		this._bindFunctionPropertyMap = new WeakMap<(...args: any[]) => any, { boundFunc: (...args: any[]) => any, scope: any }>();
 		this._registry = new RegistryHandler();
@@ -175,7 +161,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
-		properties: VNodeProperties
+		properties: VirtualDomProperties
 	): void {
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementCreated(element, String(properties.key));
@@ -188,13 +174,13 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		element: HTMLElement,
 		projectionOptions: ProjectionOptions,
 		vnodeSelector: string,
-		properties: VNodeProperties
+		properties: VirtualDomProperties
 	): void {
 		this._addElementToNodeHandler(element, projectionOptions, properties);
 		this.onElementUpdated(element, String(properties.key));
 	}
 
-	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VNodeProperties) {
+	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VirtualDomProperties) {
 		const isRootNode = !properties.key || this._rootNodeKeys.indexOf(properties.key) > -1;
 		const hasKey = !!properties.key;
 		let isLastRootNode = false;
@@ -332,15 +318,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __render__(): DNode | DNode[] {
-		this._renderState = WidgetRenderState.RENDER;
-		this._dirty = false;
-		const render = this._runBeforeRenders();
-		let dNode = render();
-		dNode = this.runAfterRenders(dNode);
-		this._decorateNodes(dNode);
-		this._nodeHandler.clear();
-		this._renderState = WidgetRenderState.IDLE;
-		return dNode;
+		if (this._dirty || !this._cachedDNode) {
+			this._renderState = WidgetRenderState.RENDER;
+			this._dirty = false;
+			const render = this._runBeforeRenders();
+			let dNode = render();
+			dNode = this.runAfterRenders(dNode);
+			this._decorateNodes(dNode);
+			this._nodeHandler.clear();
+			this._renderState = WidgetRenderState.IDLE;
+			this._cachedDNode = dNode;
+		}
+		return this._cachedDNode;
 	}
 
 	private _decorateNodes(node: DNode | DNode[]) {
