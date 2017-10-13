@@ -96,17 +96,17 @@ const DEFAULT_PROJECTION_OPTIONS: ProjectionOptions = {
 	}
 };
 
-const applyDefaultProjectionOptions = (projectorOptions?: ProjectionOptions) => {
+function applyDefaultProjectionOptions(projectorOptions?: ProjectionOptions) {
 	return extend(DEFAULT_PROJECTION_OPTIONS, projectorOptions);
-};
+}
 
-const checkStyleValue = (styleValue: Object) => {
+function checkStyleValue(styleValue: Object) {
 	if (typeof styleValue !== 'string') {
 		throw new Error('Style values must be strings');
 	}
-};
+}
 
-const setProperties = function(domNode: Node, properties: VirtualDomProperties | undefined, projectionOptions: ProjectionOptions) {
+function setProperties(domNode: Node, properties: VirtualDomProperties | undefined, projectionOptions: ProjectionOptions) {
 	if (!properties) {
 		return;
 	}
@@ -177,9 +177,9 @@ const setProperties = function(domNode: Node, properties: VirtualDomProperties |
 			}
 		}
 	}
-};
+}
 
-const updateProperties = function(domNode: Node, previousProperties: VirtualDomProperties | undefined, properties: VirtualDomProperties | undefined, projectionOptions: ProjectionOptions) {
+function updateProperties(domNode: Node, previousProperties: VirtualDomProperties | undefined, properties: VirtualDomProperties | undefined, projectionOptions: ProjectionOptions) {
 	if (!properties) {
 		return;
 	}
@@ -282,18 +282,18 @@ const updateProperties = function(domNode: Node, previousProperties: VirtualDomP
 		}
 	}
 	return propertiesUpdated;
-};
+}
 
-const findIndexOfChild = function(children: DNode[], sameAs: DNode, start: number) {
+function findIndexOfChild(children: DNode[], sameAs: DNode, start: number) {
 	for (let i = start; i < children.length; i++) {
 		if (same(children[i], sameAs)) {
 			return i;
 		}
 	}
 	return -1;
-};
+}
 
-const nodeAdded = function(dnode: DNode, transitions: TransitionStrategy) {
+function nodeAdded(dnode: DNode, transitions: TransitionStrategy) {
 	if (isHNode(dnode) && dnode.properties) {
 		const enterAnimation = dnode.properties.enterAnimation;
 		if (enterAnimation) {
@@ -305,9 +305,9 @@ const nodeAdded = function(dnode: DNode, transitions: TransitionStrategy) {
 			}
 		}
 	}
-};
+}
 
-const nodeToRemove = function(dnode: DNode, transitions: TransitionStrategy) {
+function nodeToRemove(dnode: DNode, transitions: TransitionStrategy) {
 	if (isWNode(dnode)) {
 		dnode.instance && dnode.instance.destroy();
 		const rendered = dnode.rendered || emptyArray ;
@@ -321,7 +321,7 @@ const nodeToRemove = function(dnode: DNode, transitions: TransitionStrategy) {
 			}
 		}
 	}
-	else if (isHNode(dnode)) {
+	else {
 		const domNode: Node = dnode.domNode!;
 		if (dnode.properties) {
 			const exitAnimation = dnode.properties.exitAnimation;
@@ -346,30 +346,31 @@ const nodeToRemove = function(dnode: DNode, transitions: TransitionStrategy) {
 			domNode.parentNode.removeChild(domNode);
 		}
 	}
+}
 
-};
-
-const checkDistinguishable = function(childNodes: DNode[], indexToCheck: number, parentDNode: DNode, operation: string) {
-
+function checkDistinguishable(childNodes: DNode[], indexToCheck: number, parentDNode: DNode, operation: string) {
 	const childNode = childNodes[indexToCheck];
-	if (isHNode(childNode)) {
-		if (childNode.tag === '') {
-			return; // Text nodes need not be distinguishable
-		}
-		const properties = childNode.properties;
-		const key = properties && properties.key;
+	if (isHNode(childNode) && childNode.tag === '') {
+		return; // Text nodes need not be distinguishable
+	}
+	const properties = childNode.properties;
+	const key = properties && properties.key;
 
-		if (!key) {
-			for (let i = 0; i < childNodes.length; i++) {
-				if (i !== indexToCheck) {
-					const node = childNodes[i];
-					if (same(node, childNode)) {
+	if (!key) {
+		for (let i = 0; i < childNodes.length; i++) {
+			if (i !== indexToCheck) {
+				const node = childNodes[i];
+				if (same(node, childNode)) {
+					if (isWNode(childNode)) {
+						console.warn('key those widgets');
+					}
+					else {
 						if (operation === 'added') {
-							throw new Error('parentDNode.tag' + ' had a ' + childNode.tag + ' child ' +
+							throw new Error((parentDNode as HNode).tag + ' had a ' + childNode.tag + ' child ' +
 								'added, but there is now more than one. You must add unique key properties to make them distinguishable.');
 						}
 						else {
-							throw new Error('parentDNode.tag' + ' had a ' + childNode.tag + ' child ' +
+							throw new Error((parentDNode as HNode).tag + ' had a ' + childNode.tag + ' child ' +
 								'removed, but there were more than one. You must add unique key properties to make them distinguishable.');
 						}
 					}
@@ -377,9 +378,9 @@ const checkDistinguishable = function(childNodes: DNode[], indexToCheck: number,
 			}
 		}
 	}
-};
+}
 
-const updateChildren = function(dnode: DNode, domNode: Node, oldChildren: DNode[] | undefined, newChildren: DNode[] | undefined, projectionOptions: ProjectionOptions) {
+function updateChildren(dnode: DNode, domNode: Node, oldChildren: DNode[] | undefined, newChildren: DNode[] | undefined, projectionOptions: ProjectionOptions) {
 	if (oldChildren === newChildren) {
 		return false;
 	}
@@ -432,23 +433,23 @@ const updateChildren = function(dnode: DNode, domNode: Node, oldChildren: DNode[
 		}
 	}
 	return textUpdated;
-};
+}
 
-const addChildren = function(domNode: Node, children: DNode[] | undefined, projectionOptions: ProjectionOptions, insertBefore?: any) {
+function addChildren(domNode: Node, children: DNode[] | undefined, projectionOptions: ProjectionOptions, insertBefore?: Node) {
 	if (!children) {
 		return;
 	}
 	for (let i = 0; i < children.length; i++) {
 		const child = children[i];
-		createDom(child, domNode, insertBefore, projectionOptions, isWNode(child) ? child.instance : null);
+		createDom(child, domNode, insertBefore, projectionOptions, isWNode(child) ? child.instance : undefined);
 	}
-};
+}
 
-const initPropertiesAndChildren = function(domNode: Node, dnode: DNode, projectionOptions: ProjectionOptions) {
+function initPropertiesAndChildren(domNode: Node, dnode: DNode, projectionOptions: ProjectionOptions) {
 	if (isWNode(dnode)) {
 		addChildren(domNode, dnode.rendered, projectionOptions);
 	}
-	else if (isHNode(dnode)) {
+	else {
 		addChildren(domNode, dnode.children, projectionOptions); // children before properties, needed for value property of <select>.
 		if (dnode.text) {
 			domNode.textContent = dnode.text;
@@ -458,9 +459,9 @@ const initPropertiesAndChildren = function(domNode: Node, dnode: DNode, projecti
 			dnode.properties.afterCreate.apply(dnode.properties.bind || dnode.properties, [domNode as Element, projectionOptions, dnode.tag, dnode.properties, dnode.children]);
 		}
 	}
-};
+}
 
-const createDom = function(dnode: DNode, parentNode: any, insertBefore: any, projectionOptions: any, parentInstance: any) {
+function createDom(dnode: DNode, parentNode: Node, insertBefore: Node | undefined, projectionOptions: ProjectionOptions, parentInstance: any) {
 	let domNode: Node | undefined;
 	if (isWNode(dnode)) {
 		// widget constructor or registry item
@@ -479,7 +480,7 @@ const createDom = function(dnode: DNode, parentNode: any, insertBefore: any, pro
 		dnode.rendered = Array.isArray(rendered) ? rendered : [ rendered ];
 		addChildren(parentNode, dnode.rendered, projectionOptions, insertBefore);
 	}
-	else if (isHNode(dnode)) {
+	else {
 		const hnodeSelector = dnode.tag;
 		const doc = parentNode.ownerDocument;
 		if (hnodeSelector === '') {
@@ -510,9 +511,9 @@ const createDom = function(dnode: DNode, parentNode: any, insertBefore: any, pro
 			initPropertiesAndChildren(domNode!, dnode, projectionOptions);
 		}
 	}
-};
+}
 
-const updateDom = function(previous: any, dnode: DNode, projectionOptions: ProjectorOptions, parentNode: any) {
+function updateDom(previous: any, dnode: DNode, projectionOptions: ProjectorOptions, parentNode: Node) {
 	if (previous === dnode) {
 		return false;
 	}
@@ -526,7 +527,7 @@ const updateDom = function(previous: any, dnode: DNode, projectionOptions: Proje
 
 		updateChildren(dnode, parentNode, previous.rendered, dnode.rendered, projectionOptions) || false;
 	}
-	else if (isHNode(dnode)) {
+	else {
 		const domNode = previous.domNode!;
 		let textUpdated = false;
 		let updated = false;
@@ -564,20 +565,20 @@ const updateDom = function(previous: any, dnode: DNode, projectionOptions: Proje
 		dnode.domNode = previous.domNode;
 		return textUpdated;
 	}
-};
+}
 
-const createProjection = function(dnode: HNode, projectionOptions: ProjectionOptions): any {
+function createProjection(dnode: HNode, projectionOptions: ProjectionOptions): Projection {
 	return {
 		update: function(updatedVnode: HNode) {
 			if (dnode.tag !== updatedVnode.tag) {
-				throw new Error('The selector for the root VNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
+				throw new Error('The tag for the root VNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
 			}
-			updateDom(dnode, updatedVnode, projectionOptions, dnode.domNode);
+			updateDom(dnode, updatedVnode, projectionOptions, dnode.domNode as Element);
 			dnode = updatedVnode;
 		},
-		domNode: (dnode as any).domNode as Element
+		domNode: dnode.domNode as Element
 	};
-};
+}
 
 export const dom = {
 	create: function(hnode: HNode, instance: any, projectionOptions?: ProjectionOptions): Projection {

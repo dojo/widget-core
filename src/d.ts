@@ -24,14 +24,14 @@ export const HNODE = Symbol('Identifier for a HNode.');
 /**
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
-export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: DNode<W>): child is WNode<W> {
+export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: any): child is WNode<W> {
 	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
 }
 
 /**
  * Helper function that returns true if the `DNode` is a `HNode` using the `type` property
  */
-export function isHNode(child: DNode): child is HNode {
+export function isHNode(child: any): child is HNode {
 	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
 }
 
@@ -67,8 +67,10 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
  */
 export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<W> | RegistryLabel, properties: W['properties'], children: W['children'] = []): WNode<W> {
 
+	children = children.filter((child) => child !== null && child !== undefined);
+
 	return {
-		children,
+		children: children as DNode[],
 		widgetConstructor,
 		properties,
 		type: WNODE
@@ -89,10 +91,10 @@ let toTextHNode = (data: any): HNode => {
 /**
  * Wrapper function for calls to create hyperscript, lazily executes the hyperscript creation
  */
-export function v(tag: string, properties: VirtualDomProperties, children?: DNode[]): HNode;
-export function v(tag: string, children: DNode[]): HNode;
+export function v(tag: string, properties: VirtualDomProperties, children?: (DNode | null | undefined | string)[]): HNode;
+export function v(tag: string, children: (DNode | null | undefined | string)[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: DNode[] = []): HNode {
+export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: (DNode | null | undefined | string)[] = []): HNode {
 		let properties: VirtualDomProperties = propertiesOrChildren;
 
 		if (Array.isArray(propertiesOrChildren)) {
@@ -112,7 +114,7 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNod
 
 		return {
 			tag,
-			children,
+			children: children as DNode[],
 			properties,
 			type: HNODE
 		};

@@ -262,18 +262,9 @@ interface CoreProperties {
 }
 
 /**
- * Virtual DOM Node type
- */
-export type VirtualDomNode = VNode | string | null | undefined;
-
-/**
  * Wrapper for v
  */
 export interface HNode {
-	/**
-	 * Array of processed VNode children.
-	 */
-	vNodes?: (VirtualDomNode[] | VirtualDomNode)[];
 	/**
 	 * Specified children
 	 */
@@ -321,7 +312,7 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	/**
 	 * DNode children
 	 */
-	children: W['children'];
+	children: DNode[];
 
 	/**
 	 * The type of node
@@ -336,7 +327,7 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 /**
  * union type for all possible return types from render
  */
-export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W> | string | null | undefined;
+export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W>;
 
 /**
  * Property Change record for specific property diff functions
