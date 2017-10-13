@@ -58,6 +58,9 @@ registerSuite({
 
 		assert.deepEqual(dragResults, [ emptyResults, emptyResults ], 'should have been called twice, both empty results');
 
+		assert.strictEqual((div.firstChild as HTMLElement).getAttribute('touch-action'), 'none', 'Should have set touch-action attribute to none');
+		assert.strictEqual((div.firstChild as HTMLElement).style.touchAction, 'none', 'Should have set touch-action type to none');
+
 		widget.destroy();
 		document.body.removeChild(div);
 	},

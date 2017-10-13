@@ -134,6 +134,17 @@ function getDelta(start: PositionMatrix, current: PositionMatrix): Position {
 	};
 }
 
+/**
+ * Sets the `touch-action` on nodes so that PointerEvents are always emitted for the node
+ * @param node The node to init
+ */
+function initNode(node: HTMLElement): void {
+	// Ensure that the node has `touch-action` none
+	node.style.touchAction = 'none';
+	// PEP requires an attribute of `touch-action` to be set on the element
+	node.setAttribute('touch-action', 'none');
+}
+
 class DragController {
 	private _nodeMap = new WeakMap<HTMLElement, NodeData>();
 	private _dragging: HTMLElement | undefined = undefined;
@@ -216,9 +227,10 @@ class DragController {
 
 	public get(node: HTMLElement, invalidate: () => void): DragResults {
 		const { _nodeMap } = this;
-		// first time we see a node, we will initialize its state
+		// first time we see a node, we will initialize its state and properties
 		if (!_nodeMap.has(node)) {
 			_nodeMap.set(node, createNodeData(invalidate));
+			initNode(node);
 			return emptyResults;
 		}
 
