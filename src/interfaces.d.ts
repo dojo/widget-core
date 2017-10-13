@@ -1,7 +1,7 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
 import { EventTargettedObject } from '@dojo/interfaces/core';
-import { VNode, VNodeProperties, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
+import { VNode, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 
 /**
@@ -77,7 +77,7 @@ export interface VirtualDomProperties {
 	 * @param element - Element that was just added to the DOM.
 	 * @param properties - The properties object that was supplied to the [[h]] method
 	 */
-	enterAnimation?: ((element: Element, properties?: VNodeProperties) => void) | string;
+	enterAnimation?: ((element: Element, properties?: VirtualDomProperties) => void) | string;
 	/**
 	 * The animation to perform when this node is removed while its parent remains.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the projector using [[createProjector]].
@@ -88,7 +88,7 @@ export interface VirtualDomProperties {
 	 * You may use this function to remove the element when the animation is done.
 	 * @param properties - The properties object that was supplied to the [[h]] method that rendered this [[VNode]] the previous time.
 	 */
-	exitAnimation?: ((element: Element, removeElement: () => void, properties?: VNodeProperties) => void) | string;
+	exitAnimation?: ((element: Element, removeElement: () => void, properties?: VirtualDomProperties) => void) | string;
 	/**
 	 * The animation to perform when the properties of this node change.
 	 * This also includes attributes, styles, css classes. This callback is also invoked when node contains only text and that text changes.
@@ -97,7 +97,7 @@ export interface VirtualDomProperties {
 	 * @param properties - The last properties object that was supplied to the [[h]] method
 	 * @param previousProperties - The previous properties object that was supplied to the [[h]] method
 	 */
-	updateAnimation?: (element: Element, properties?: VNodeProperties, previousProperties?: VNodeProperties) => void;
+	updateAnimation?: (element: Element, properties?: VirtualDomProperties, previousProperties?: VirtualDomProperties) => void;
 	/**
 	 * Callback that is executed after this node is added to the DOM. Child nodes and properties have
 	 * already been applied.
@@ -107,7 +107,7 @@ export interface VirtualDomProperties {
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children that were created.
 	 */
-	afterCreate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties,
+	afterCreate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VirtualDomProperties,
 	children: VNode[]): void;
 	/**
 	 * Callback that is executed every time this node may have been updated. Child nodes and properties
@@ -118,7 +118,7 @@ export interface VirtualDomProperties {
 	 * @param properties - The properties passed to the [[h]] function.
 	 * @param children - The children for this node.
 	 */
-	afterUpdate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VNodeProperties,
+	afterUpdate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VirtualDomProperties,
 	children: VNode[]): void;
 	/**
 	 * Bind should not be defined.
@@ -280,11 +280,6 @@ export interface HNode {
 	children: DNode[];
 
 	/**
-	 * render function that wraps returns VNode
-	 */
-	render<T>(options?: { bind?: T }): VNode;
-
-	/**
 	 * The properties used to create the VNode
 	 */
 	properties: VirtualDomProperties;
@@ -308,7 +303,6 @@ export interface HNode {
  * Wrapper for `w`
  */
 export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> {
-	[index: string]: any;
 	/**
 	 * Constructor to create a widget or string constructor label
 	 */
@@ -333,6 +327,10 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	 * The type of node
 	 */
 	type: symbol;
+
+	instance?: W;
+
+	rendered?: DNode[];
 }
 
 /**
@@ -427,9 +425,9 @@ export interface WidgetMetaConstructor<T extends WidgetMetaBase> {
 export interface NodeHandlerInterface extends Evented {
 	get(key: string | number): HTMLElement | undefined;
 	has(key: string | number): boolean;
-	add(element: HTMLElement, properties: VNodeProperties): void;
-	addRoot(element: HTMLElement, properties: VNodeProperties): void;
-	addProjector(element: HTMLElement, properties: VNodeProperties): void;
+	add(element: HTMLElement, properties: VirtualDomProperties): void;
+	addRoot(element: HTMLElement, properties: VirtualDomProperties): void;
+	addProjector(element: HTMLElement, properties: VirtualDomProperties): void;
 	clear(): void;
 }
 
