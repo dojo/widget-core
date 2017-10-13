@@ -1,7 +1,5 @@
 import { assign } from '@dojo/core/lang';
-import { VNode } from '@dojo/interfaces/vdom';
 import Symbol from '@dojo/shim/Symbol';
-import { h, VNodeProperties } from 'maquette';
 import {
 	Constructor,
 	DefaultWidgetBaseInterface,
@@ -77,6 +75,17 @@ export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<
 	};
 }
 
+let toTextHNode = (data: any): HNode => {
+	return {
+		tag: '',
+		properties: {},
+		children: [],
+		text: data.toString(),
+		domNode: undefined,
+		type: HNODE
+	};
+};
+
 /**
  * Wrapper function for calls to create hyperscript, lazily executes the hyperscript creation
  */
@@ -97,13 +106,14 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNod
 			properties = assign(properties, { classes });
 		}
 
+		children = children
+			.filter((child) => child !== null && child !== undefined)
+			.map((child) => typeof child === 'string' ? toTextHNode(child) : child);
+
 		return {
 			tag,
 			children,
 			properties,
-			render(this: { tag: string, vNodes: VNode[], properties: VNodeProperties }) {
-				return h(this.tag, this.properties, this.vNodes);
-			},
 			type: HNODE
 		};
 }
