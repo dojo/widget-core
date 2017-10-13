@@ -1,7 +1,7 @@
-import { WidgetBase } from './../../src/WidgetBase';
-import { w } from './../../src/d';
-import { Registry } from './../../src/Registry';
-import { Constructor, VirtualDomNode, WidgetBaseInterface } from './../../src/interfaces';
+import { WidgetBase } from '../../src/WidgetBase';
+import { w } from '../../src/d';
+import { Registry } from '../../src/Registry';
+import { Constructor, VirtualDomNode, WidgetBaseInterface } from '../../src/interfaces';
 
 interface TestWidget<W extends WidgetBase> extends WidgetBaseInterface {
 	getWidgetUnderTest(): W;

@@ -1,17 +1,16 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
-import pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+import intern from 'intern';
+
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
+import pollUntil from '@theintern/leadfoot/helpers/pollUntil';
 
 let skip: boolean;
 
-registerSuite({
-	name: 'registerCustomElement',
+registerSuite('registerCustomElement', {
+
 	beforeEach(this: any) {
 		const { browserName, browser, version } = this.remote.session.capabilities;
-		skip = false;
-		if ((browser === 'iPhone' && version === '9.1') || (browserName === 'safari' && version === '9.1.3')) {
-			skip = true;
-		}
+		skip = (browser === 'iPhone' && version === '9.1') || (browserName === 'safari' && version === '9.1.3');
 	},
 	'custom elements are registered'(this: any) {
 		if (skip) {
@@ -77,7 +76,7 @@ registerSuite({
 			.findById('testButton')
 			.end()
 			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('test-button > button').innerHTML === 'greetings world';
 			}, undefined, 1000), undefined);
 	},
@@ -91,7 +90,7 @@ registerSuite({
 			.findByCssSelector('no-attributes > button')
 			.end()
 			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('no-attributes > button').innerHTML === 'greetings';
 			}, undefined, 1000), undefined);
 	},
@@ -104,7 +103,7 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findByCssSelector('#manualButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('#manualButton > button').innerHTML === 'manual';
 			}, undefined, 1000), undefined);
 	},
@@ -117,7 +116,7 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findByCssSelector('#reinitButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('#reinitButton > button').innerHTML === 'test';
 			}, undefined, 1000), undefined);
 	}

@@ -1,18 +1,17 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 
-import { PropertyChangeRecord } from './../../../src/interfaces';
-import { always, ignore } from './../../../src/diff';
-import { diffProperty } from './../../../src/decorators/diffProperty';
-import { WidgetBase } from './../../../src/WidgetBase';
+import { PropertyChangeRecord } from '../../../src/interfaces';
+import { always, ignore } from '../../../src/diff';
+import { diffProperty } from '../../../src/decorators/diffProperty';
+import { WidgetBase } from '../../../src/WidgetBase';
 
 interface TestProperties {
 	id?: string;
 	foo: string;
 }
 
-registerSuite({
-	name: 'decorators/diffProperty',
+registerSuite('decorators/diffProperty', {
 	'decorator': {
 		'diff with no reaction'() {
 			let callCount = 0;

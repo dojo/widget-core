@@ -1,6 +1,7 @@
 import global from '@dojo/shim/global';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { stub, spy } from 'sinon';
 import Dimensions from '../../../src/meta/Dimensions';
 import NodeHandler from '../../../src/NodeHandler';
@@ -33,14 +34,12 @@ const defaultDimensions = {
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(i).args[0]();
+		rAF.getCall(i).args[ 0 ]();
 	}
 	rAF.reset();
 }
 
-registerSuite({
-	name: 'meta - Dimensions',
-
+registerSuite('meta - Dimensions', {
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
 	},
@@ -49,86 +48,91 @@ registerSuite({
 		rAF.restore();
 	},
 
-	'Will return default dimensions if node not loaded'() {
-		const nodeHandler = new NodeHandler();
+	tests: {
+		'Will return default dimensions if node not loaded'() {
+			const nodeHandler = new NodeHandler();
 
-		const dimensions = new Dimensions({
-			invalidate: () => {},
-			nodeHandler
-		});
+			const dimensions = new Dimensions({
+				invalidate: () => {
+				},
+				nodeHandler
+			});
 
-		assert.deepEqual(dimensions.get('foo'), defaultDimensions);
-	},
-	'Will create event listener for node if not yet loaded'() {
-		const nodeHandler = new NodeHandler();
-		const onSpy = spy(nodeHandler, 'on');
+			assert.deepEqual(dimensions.get('foo'), defaultDimensions);
+		},
+		'Will create event listener for node if not yet loaded'() {
+			const nodeHandler = new NodeHandler();
+			const onSpy = spy(nodeHandler, 'on');
 
-		const dimensions = new Dimensions({
-			invalidate: () => {},
-			nodeHandler
-		});
+			const dimensions = new Dimensions({
+				invalidate: () => {
+				},
+				nodeHandler
+			});
 
-		dimensions.get('foo');
-		assert.isTrue(onSpy.calledOnce);
-		assert.isTrue(onSpy.firstCall.calledWith('foo'));
-	},
-	'Will call invalidate when awaited node is available'() {
-		const nodeHandler = new NodeHandler();
-		const onSpy = spy(nodeHandler, 'on');
-		const invalidateStub = stub();
+			dimensions.get('foo');
+			assert.isTrue(onSpy.calledOnce);
+			assert.isTrue(onSpy.firstCall.calledWith('foo'));
+		},
+		'Will call invalidate when awaited node is available'() {
+			const nodeHandler = new NodeHandler();
+			const onSpy = spy(nodeHandler, 'on');
+			const invalidateStub = stub();
 
-		const dimensions = new Dimensions({
-			invalidate: invalidateStub,
-			nodeHandler
-		});
+			const dimensions = new Dimensions({
+				invalidate: invalidateStub,
+				nodeHandler
+			});
 
-		dimensions.get('foo');
-		assert.isTrue(onSpy.calledOnce);
-		assert.isTrue(onSpy.firstCall.calledWith('foo'));
+			dimensions.get('foo');
+			assert.isTrue(onSpy.calledOnce);
+			assert.isTrue(onSpy.firstCall.calledWith('foo'));
 
-		const element = document.createElement('div');
-		const getRectSpy = spy(element, 'getBoundingClientRect');
+			const element = document.createElement('div');
+			const getRectSpy = spy(element, 'getBoundingClientRect');
 
-		nodeHandler.add(element, { key: 'foo' });
+			nodeHandler.add(element, { key: 'foo' });
 
-		resolveRAF();
-		assert.isTrue(invalidateStub.calledOnce);
+			resolveRAF();
+			assert.isTrue(invalidateStub.calledOnce);
 
-		onSpy.reset();
-		dimensions.get('foo');
+			onSpy.reset();
+			dimensions.get('foo');
 
-		assert.isFalse(onSpy.called);
-		assert.isTrue(getRectSpy.calledOnce);
-	},
-	'Will return element dimensions if node is loaded'() {
-		const nodeHandler = new NodeHandler();
+			assert.isFalse(onSpy.called);
+			assert.isTrue(getRectSpy.calledOnce);
+		},
+		'Will return element dimensions if node is loaded'() {
+			const nodeHandler = new NodeHandler();
 
-		const offset = { offsetHeight: 10, offsetLeft: 10, offsetTop: 10, offsetWidth: 10 };
-		const scroll = { scrollHeight: 10, scrollLeft: 10, scrollTop: 10, scrollWidth: 10 };
-		const position = { bottom: 10, left: 10, right: 10, top: 10 };
-		const size = { width: 10, height: 10 };
+			const offset = { offsetHeight: 10, offsetLeft: 10, offsetTop: 10, offsetWidth: 10 };
+			const scroll = { scrollHeight: 10, scrollLeft: 10, scrollTop: 10, scrollWidth: 10 };
+			const position = { bottom: 10, left: 10, right: 10, top: 10 };
+			const size = { width: 10, height: 10 };
 
-		const element = {
-			...offset,
-			...scroll,
-			getBoundingClientRect: stub().returns({
-				...position,
-				...size
-			})
-		};
+			const element = {
+				...offset,
+				...scroll,
+				getBoundingClientRect: stub().returns({
+					...position,
+					...size
+				})
+			};
 
-		nodeHandler.add(element as any, { key: 'foo' });
+			nodeHandler.add(element as any, { key: 'foo' });
 
-		const dimensions = new Dimensions({
-			invalidate: () => {},
-			nodeHandler
-		});
+			const dimensions = new Dimensions({
+				invalidate: () => {
+				},
+				nodeHandler
+			});
 
-		assert.deepEqual(dimensions.get('foo'), {
-			offset: { height: 10, left: 10, top: 10, width: 10 },
-			scroll: { height: 10, left: 10, top: 10, width: 10 },
-			position,
-			size
-		});
+			assert.deepEqual(dimensions.get('foo'), {
+				offset: { height: 10, left: 10, top: 10, width: 10 },
+				scroll: { height: 10, left: 10, top: 10, width: 10 },
+				position,
+				size
+			});
+		}
 	}
 });

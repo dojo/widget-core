@@ -1,22 +1,22 @@
 import i18n, { invalidate, switchLocale, systemLocale } from '@dojo/i18n/i18n';
 import { VNode } from '@dojo/interfaces/vdom';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import * as sinon from 'sinon';
 import { I18nMixin, I18nProperties } from '../../../src/mixins/I18n';
 import { WidgetBase } from '../../../src/WidgetBase';
 import bundle from '../../support/nls/greetings';
 import { fetchCldrData } from '../../support/util';
-import { w } from './../../../src/d';
-import { ThemeableMixin } from './../../../src/mixins/Themeable';
+import { w } from '../../../src/d';
+import { ThemeableMixin } from '../../../src/mixins/Themeable';
 
-class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> { }
+class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> {
+}
 
 let localized: any;
 
-registerSuite({
-	name: 'mixins/I18nMixin',
-
+registerSuite('mixins/I18nMixin', {
 	afterEach() {
 		invalidate();
 		switchLocale(systemLocale);
@@ -27,142 +27,145 @@ registerSuite({
 		}
 	},
 
-	setup() {
+	before() {
 		return fetchCldrData();
 	},
 
-	api() {
-		const localized = new Localized();
-		assert(localized);
-		assert.isFunction(localized.localizeBundle);
-	},
+	tests: {
 
-	'.localizeBundle()': {
-		'Returns default messages when locale bundle not loaded'() {
-			switchLocale('fr');
-
-			localized = new Localized();
-			const messages = localized.localizeBundle(bundle);
-
-			assert.strictEqual(messages.hello, 'Hello');
-			assert.strictEqual(messages.goodbye, 'Goodbye');
+		api() {
+			const localized = new Localized();
+			assert(localized);
+			assert.isFunction(localized.localizeBundle);
 		},
 
-		'Uses `properties.locale` when available'() {
-			localized = new Localized();
-			localized.__setProperties__({ locale: 'fr' });
-			return i18n(bundle, 'fr').then(() => {
+		'.localizeBundle()': {
+			'Returns default messages when locale bundle not loaded'() {
+				switchLocale('fr');
+
+				localized = new Localized();
 				const messages = localized.localizeBundle(bundle);
-				assert.strictEqual(messages.hello, 'Bonjour');
-				assert.strictEqual(messages.goodbye, 'Au revoir');
-			});
-		},
 
-		'Uses default locale when no locale is set'() {
-			switchLocale('fr');
+				assert.strictEqual(messages.hello, 'Hello');
+				assert.strictEqual(messages.goodbye, 'Goodbye');
+			},
 
-			localized = new Localized();
-			return i18n(bundle, 'fr').then(() => {
-				const messages = localized.localizeBundle(bundle);
-				assert.strictEqual(messages.hello, 'Bonjour');
-				assert.strictEqual(messages.goodbye, 'Au revoir');
-			});
-		},
+			'Uses `properties.locale` when available'() {
+				localized = new Localized();
+				localized.__setProperties__({ locale: 'fr' });
+				return i18n(bundle, 'fr').then(() => {
+					const messages = localized.localizeBundle(bundle);
+					assert.strictEqual(messages.hello, 'Bonjour');
+					assert.strictEqual(messages.goodbye, 'Au revoir');
+				});
+			},
 
-		'Returns an object with a `format` method'() {
-			localized = new Localized();
-			let messages = localized.localizeBundle(bundle);
+			'Uses default locale when no locale is set'() {
+				switchLocale('fr');
 
-			assert.isFunction(messages.format);
-			assert.strictEqual(messages.format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
+				localized = new Localized();
+				return i18n(bundle, 'fr').then(() => {
+					const messages = localized.localizeBundle(bundle);
+					assert.strictEqual(messages.hello, 'Bonjour');
+					assert.strictEqual(messages.goodbye, 'Au revoir');
+				});
+			},
 
-			switchLocale('fr');
+			'Returns an object with a `format` method'() {
+				localized = new Localized();
+				let messages = localized.localizeBundle(bundle);
 
-			return i18n(bundle, 'fr').then(() => {
-				messages = localized.localizeBundle(bundle);
-				assert.strictEqual(messages.format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
-			});
-		}
-	},
+				assert.isFunction(messages.format);
+				assert.strictEqual(messages.format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
 
-	'root locale switching': {
-		'Updates when no `locale` property is set'() {
-			localized = new Localized();
-			sinon.spy(localized, 'invalidate');
+				switchLocale('fr');
 
-			switchLocale('fr');
-
-			assert.isTrue((<any> localized).invalidate.called, 'Widget invalidated.');
-		},
-
-		'Does not update when `locale` property is set'() {
-			localized = new Localized();
-			localized.__setProperties__({ locale: 'en' });
-			sinon.spy(localized, 'invalidate');
-
-			switchLocale('fr');
-
-			assert.isFalse((<any> localized).invalidate.called, 'Widget not invalidated.');
-		}
-	},
-	'does not decorate properties for wNode'() {
-		class LocalizedExtended extends Localized {
-			render() {
-				return w(Localized, {});
+				return i18n(bundle, 'fr').then(() => {
+					messages = localized.localizeBundle(bundle);
+					assert.strictEqual(messages.format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
+				});
 			}
-		}
+		},
 
-		localized = new LocalizedExtended();
-		localized.__setProperties__({locale: 'ar-JO'});
+		'root locale switching': {
+			'Updates when no `locale` property is set'() {
+				localized = new Localized();
+				sinon.spy(localized, 'invalidate');
 
-		const result = <VNode> localized.__render__();
-		assert.isOk(result);
-		assert.isNull(result.properties!['lang']);
-	},
-	'`properties.locale` updates the widget node\'s `lang` property': {
-		'when non-empty'() {
-			localized = new Localized();
-			localized.__setProperties__({locale: 'ar-JO'});
+				switchLocale('fr');
+
+				assert.isTrue((<any> localized).invalidate.called, 'Widget invalidated.');
+			},
+
+			'Does not update when `locale` property is set'() {
+				localized = new Localized();
+				localized.__setProperties__({ locale: 'en' });
+				sinon.spy(localized, 'invalidate');
+
+				switchLocale('fr');
+
+				assert.isFalse((<any> localized).invalidate.called, 'Widget not invalidated.');
+			}
+		},
+		'does not decorate properties for wNode'() {
+			class LocalizedExtended extends Localized {
+				render() {
+					return w(Localized, {});
+				}
+			}
+
+			localized = new LocalizedExtended();
+			localized.__setProperties__({ locale: 'ar-JO' });
 
 			const result = <VNode> localized.__render__();
 			assert.isOk(result);
-			assert.strictEqual(result.properties!['lang'], 'ar-JO');
+			assert.isNull(result.properties![ 'lang' ]);
+		},
+		'`properties.locale` updates the widget node\'s `lang` property': {
+			'when non-empty'() {
+				localized = new Localized();
+				localized.__setProperties__({ locale: 'ar-JO' });
+
+				const result = <VNode> localized.__render__();
+				assert.isOk(result);
+				assert.strictEqual(result.properties![ 'lang' ], 'ar-JO');
+			},
+
+			'when empty'() {
+				localized = new Localized();
+
+				const result = localized.__render__();
+				assert.isOk(result);
+				assert.isNull(result.properties![ 'lang' ]);
+			}
 		},
 
-		'when empty'() {
-			localized = new Localized();
+		'`properties.rtl`': {
+			'The `dir` attribute is "rtl" when true'() {
+				localized = new Localized();
+				localized.__setProperties__({ rtl: true });
 
-			const result = localized.__render__();
-			assert.isOk(result);
-			assert.isNull(result.properties!['lang']);
-		}
-	},
+				const result = localized.__render__();
+				assert.isOk(result);
+				assert.strictEqual(result.properties![ 'dir' ], 'rtl');
+			},
 
-	'`properties.rtl`': {
-		'The `dir` attribute is "rtl" when true'() {
-			localized = new Localized();
-			localized.__setProperties__({ rtl: true });
+			'The `dir` attribute is "ltr" when false'() {
+				localized = new Localized();
+				localized.__setProperties__({ rtl: false });
 
-			const result = localized.__render__();
-			assert.isOk(result);
-			assert.strictEqual(result.properties!['dir'], 'rtl');
-		},
+				const result = localized.__render__();
+				assert.isOk(result);
+				assert.strictEqual(result.properties![ 'dir' ], 'ltr');
+			},
 
-		'The `dir` attribute is "ltr" when false'() {
-			localized = new Localized();
-			localized.__setProperties__({ rtl: false });
+			'The `dir` attribute is not set when not a boolean.'() {
+				localized = new Localized();
 
-			const result = localized.__render__();
-			assert.isOk(result);
-			assert.strictEqual(result.properties!['dir'], 'ltr');
-		},
-
-		'The `dir` attribute is not set when not a boolean.'() {
-			localized = new Localized();
-
-			const result = localized.__render__();
-			assert.isOk(result);
-			assert.isNull(result.properties!['dir']);
+				const result = localized.__render__();
+				assert.isOk(result);
+				assert.isNull(result.properties![ 'dir' ]);
+			}
 		}
 	}
 });

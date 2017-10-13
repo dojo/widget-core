@@ -1,0 +1,113 @@
+{
+	"environments": [
+		{ "browserName": "node" }
+	],
+	"functionalSuites": [
+		"./_build/tests/functional/**/*.js",
+		"!./_build/tests/functional/support/**"
+	],
+	"loader": {
+		"script": "dojo2",
+		"options": {
+			"packages": [
+				{ "name": "src", "location": "_build/src" },
+				{ "name": "tests", "location": "_build/tests" },
+				{ "name": "node_modules", "location": "_build/node_modules" },
+				{ "name": "dojo", "location": "node_modules/intern/browser_modules/dojo" },
+				{ "name": "@dojo", "location": "node_modules/@dojo" },
+				{ "name": "cldr-data", "location": "node_modules/cldr-data" },
+				{ "name": "cldrjs", "location": "node_modules/cldrjs" },
+				{ "name": "globalize", "location": "node_modules/globalize", "main": "dist/globalize" },
+				{ "name": "maquette", "location": "node_modules/maquette/dist", "main": "maquette" },
+				{ "name": "pepjs", "location": "node_modules/pepjs/dist", "main": "pep" },
+				{ "name": "intersection-observer", "location": "node_modules/intersection-observer", "main": "intersection-observer" },
+				{ "name": "grunt-dojo2", "location": "node_modules/grunt-dojo2"},
+				{ "name": "sinon", "location": "node_modules/sinon/pkg", "main": "sinon" }
+			],
+			"map": {
+				"globalize": {
+					"cldr": "cldrjs/dist/cldr",
+					"cldr/event": "cldrjs/dist/cldr/event",
+					"cldr/supplemental": "cldrjs/dist/cldr/supplemental",
+					"cldr/unresolved": "cldrjs/dist/cldr/unresolved"
+				}
+			}
+		}
+	},
+	"browser": {
+		"suites": [
+			"./_build/tests/unit/**/*.js"
+		]
+	},
+	"node" : {
+		"suites": [
+//  trying plugin			"./_build/tests/support/loadJsdom.js",
+			"./_build/tests/unit/**/*.js"
+		],
+		"plugins": [
+			"./_build/tests/support/nodeDomPlugin.js"
+		]
+	},
+	"configs": {
+		"coverage": {
+			"coverage": [
+				"./_build/src/**/*.js"
+			]
+		},
+		"remoteCapabilities": {
+			"project": "Dojo 2",
+			"name": "@dojo/widget-core"
+		},
+		"local": {
+			"extends": [ "coverage" ],
+			"tunnel": "selenium",
+			"environments+": [
+				{ "browserName": "chrome" }
+			]
+		},
+		"browserstack": {
+			"extends": [ "coverage", "remoteCapabilities" ],
+
+			"tunnel": "browserstack",
+			"capabilities+": {
+				"browserstack.debug": false
+			},
+			"environments+": [
+				{ "browserName": "internet explorer", "version": "11" },
+				{ "browserName": "edge" },
+				{ "browserName": "firefox", "platform": "WINDOWS" },
+				{ "browserName": "chrome", "platform": "WINDOWS" },
+				{ "browserName": "safari", "version": "9.1", "platform": "MAC" }
+				// BrowserStack uses iOS 9.1 and some of the tests fail.  I looks like a missing locale problem
+				// { "browserName": "iPhone" }
+			]
+		},
+		"saucelabs": {
+			"extends": [ "coverage", "remoteCapabilities" ],
+
+			"tunnel": "saucelabs",
+			"capabilities+": {
+				"fixSessionCapabilities": false
+			},
+
+			"defaultTimeout": 10000,
+			"environments+": [
+				{ "browserName": "internet explorer", "version": [ "11.0" ], "platform": "Windows 7" },
+				// Tests completing successfully but hanging on saucelabs
+				/*{ browserName: "MicrosoftEdge", platform: "Windows 10" },*/
+				/* Pin Firefox to a specific version due to issues with current versions of Intern
+				 * and Firefox */
+				{ "browserName": "firefox", "version": "43", "platform": "Windows 10" },
+				{ "browserName": "chrome", "platform": "Windows 10" }
+				// Disable Safari 9 because of timing issues when running the tests.
+				// See <https://github.com/dojo/widgets/issues/5>.
+				// { browserName: "safari", version: "9.0", platform: "OS X 10.11" },
+				// Android platforms currently failing travis as saucelabs is not returning within a reasonable time
+				// { browserName: "android", version: "5.1" }
+				// skip IOS browser tests because they hang in Sauce (ongoing issue)
+				// { browserName: "iphone", version: "9.3" }
+			],
+			"maxConcurrency": 4
+		}
+	}
+}

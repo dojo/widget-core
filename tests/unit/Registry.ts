@@ -1,14 +1,13 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
-import Registry from './../../src/Registry';
-import { WidgetBase } from './../../src/WidgetBase';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
+import Registry from '../../src/Registry';
+import { WidgetBase } from '../../src/WidgetBase';
 import Promise from '@dojo/shim/Promise';
-import { Injector } from './../../src/Injector';
+import { Injector } from '../../src/Injector';
 
 const testInjector = new Injector({});
 
-registerSuite({
-	name: 'Registry',
+registerSuite('Registry', {
 	'api'() {
 		const factoryRegistry = new Registry();
 
