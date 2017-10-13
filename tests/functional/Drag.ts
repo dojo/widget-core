@@ -12,7 +12,7 @@ registerSuite({
 		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
-			.setFindTimeout(10000)
+			.setFindTimeout(5000)
 			.findById('results')
 			.pressFinger(50, 50)
 			.sleep(100)
@@ -37,13 +37,16 @@ registerSuite({
 	},
 
 	'mouse drag'(this: any) {
-		const { browser, mouseEnabled } = this.remote.session.capabilities;
+		const { browser, browserName, mouseEnabled } = this.remote.session.capabilities;
 		if (!mouseEnabled || browser === 'iPhone' || browser === 'iPad') {
 			this.skip('Not mouse enabled device');
 		}
+		if (browserName === 'MicrosoftEdge') {
+			this.skip('For some reason, findById not working on Edge ATM.');
+		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
-			.setFindTimeout(10000)
+			.setFindTimeout(5000)
 			.findById('results')
 			.moveMouseTo(50, 50)
 			.pressMouseButton()

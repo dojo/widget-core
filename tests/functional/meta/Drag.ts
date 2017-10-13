@@ -16,7 +16,7 @@ class DragExample extends WidgetBase {
 				'user-select': 'none',
 				width: '200px'
 			}
-		}, [ v('pre#results', {}, [ JSON.stringify(dragResults, null, '  ') ]) ]);
+		}, [ v('pre', { id: 'results' }, [ JSON.stringify(dragResults, null, '  ') ]) ]);
 	}
 }
 
