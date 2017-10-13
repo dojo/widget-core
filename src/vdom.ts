@@ -525,7 +525,7 @@ function updateDom(previous: any, dnode: DNode, projectionOptions: ProjectorOpti
 		const rendered = previous.instance.__render__();
 		dnode.rendered = Array.isArray(rendered) ? rendered : [ rendered ];
 
-		updateChildren(dnode, parentNode, previous.rendered, dnode.rendered, projectionOptions) || false;
+		updateChildren(dnode, parentNode, previous.rendered, dnode.rendered, projectionOptions);
 	}
 	else {
 		const domNode = previous.domNode!;

@@ -60,7 +60,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	/**
 	 * children array
 	 */
-	private _children: (C | null)[];
+	private _children: C[];
 
 	/**
 	 * marker indicating if the widget requires a render
@@ -305,11 +305,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	public get children(): (C | null)[] {
+	public get children(): C[] {
 		return this._children;
 	}
 
-	public __setChildren__(children: (C | null)[]): void {
+	public __setChildren__(children: C[]): void {
 		this._renderState = WidgetRenderState.CHILDREN;
 		if (this._children.length > 0 || children.length > 0) {
 			this._children = children;
