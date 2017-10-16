@@ -268,7 +268,7 @@ export interface HNode {
 	/**
 	 * Specified children
 	 */
-	children: DNode[];
+	children?: DNode[];
 
 	/**
 	 * The properties used to create the VNode

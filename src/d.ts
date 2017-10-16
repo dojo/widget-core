@@ -25,14 +25,14 @@ export const HNODE = Symbol('Identifier for a HNode.');
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
 export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: any): child is WNode<W> {
-	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
+	return Boolean(child && child.type === WNODE);
 }
 
 /**
  * Helper function that returns true if the `DNode` is a `HNode` using the `type` property
  */
 export function isHNode(child: any): child is HNode {
-	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
+	return Boolean(child && child.type === HNODE);
 }
 
 /**
@@ -81,8 +81,8 @@ let toTextHNode = (data: any): HNode => {
 	return {
 		tag: '',
 		properties: {},
-		children: [],
-		text: data.toString(),
+		children: undefined,
+		text: `${data}`,
 		domNode: undefined,
 		type: HNODE
 	};
@@ -94,27 +94,41 @@ let toTextHNode = (data: any): HNode => {
 export function v(tag: string, properties: VirtualDomProperties, children?: (DNode | null | undefined | string)[]): HNode;
 export function v(tag: string, children: (DNode | null | undefined | string)[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: (DNode | null | undefined | string)[] = []): HNode {
-		let properties: VirtualDomProperties = propertiesOrChildren;
+export function v(tag: string, propertiesOrChildren: VirtualDomProperties | (DNode | null | undefined | string)[] = {}, children: undefined | (DNode | null | undefined | string)[] = undefined): HNode {
+		let properties: VirtualDomProperties | undefined = propertiesOrChildren;
 
 		if (Array.isArray(propertiesOrChildren)) {
 			children = propertiesOrChildren;
 			properties = {};
 		}
 
-		let { classes } = properties;
-		if (typeof classes === 'function') {
-			classes = classes();
-			properties = assign(properties, { classes });
+		if (properties) {
+			let { classes } = properties;
+			if (typeof classes === 'function') {
+				classes = classes();
+				properties = assign(properties, { classes });
+			}
 		}
 
-		children = children
-			.filter((child) => child !== null && child !== undefined)
-			.map((child) => typeof child === 'string' ? toTextHNode(child) : child);
+		let filteredChildren: DNode[] | undefined = undefined;
+		if (children) {
+			filteredChildren = [];
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				if (child === null || child === undefined) {
+					continue;
+				}
+				if (typeof child === 'string') {
+					filteredChildren.push(toTextHNode(child));
+					continue;
+				}
+				filteredChildren.push(child);
+			}
+		}
 
 		return {
 			tag,
-			children: children as DNode[],
+			children: filteredChildren,
 			properties,
 			type: HNODE
 		};
