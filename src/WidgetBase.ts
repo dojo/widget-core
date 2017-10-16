@@ -1,9 +1,6 @@
 import { Evented } from '@dojo/core/Evented';
-import { ProjectionOptions } from './interfaces';
 import Map from '@dojo/shim/Map';
-import '@dojo/shim/Promise'; // Imported for side-effects
 import WeakMap from '@dojo/shim/WeakMap';
-import { Handle } from '@dojo/interfaces/core';
 import { isWNode, v, isHNode } from './d';
 import { auto } from './diff';
 import {
@@ -13,6 +10,7 @@ import {
 	CoreProperties,
 	DiffPropertyReaction,
 	DNode,
+	ProjectionOptions,
 	Render,
 	WidgetMetaBase,
 	WidgetMetaConstructor,
@@ -111,8 +109,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _nodeHandler: NodeHandler;
 
-	private _projectorAttachEvent: Handle;
-
 	private _currentRootNode = 0;
 
 	private _numRootNodes = 0;
@@ -188,13 +184,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		if (isRootNode) {
 			this._currentRootNode++;
 			isLastRootNode = (this._currentRootNode === this._numRootNodes);
-
-			if (this._projectorAttachEvent === undefined) {
-				this._projectorAttachEvent = projectionOptions.nodeEvent.on('rendered', () => {
-					this._nodeHandler.addProjector();
-				});
-				this.own(this._projectorAttachEvent);
-			}
 		}
 
 		if (isLastRootNode) {

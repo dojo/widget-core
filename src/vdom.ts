@@ -1,29 +1,16 @@
-import { Evented } from '@dojo/core/Evented';
-import { DNode, HNode, VirtualDomProperties, WidgetProperties } from './interfaces';
+import {
+	DNode,
+	HNode,
+	ProjectionOptions,
+	ProjectorOptions,
+	Projection,
+	TransitionStrategy,
+	VirtualDomProperties,
+	WidgetProperties
+} from './interfaces';
 import { isWNode, isHNode } from './d';
 import { WidgetBase } from './WidgetBase';
 import { isWidgetBaseConstructor } from './Registry';
-
-export interface TransitionStrategy {
-	enter(element: Element, properties: VirtualDomProperties, enterAnimation: string): void;
-	exit(element: Element, properties: VirtualDomProperties, exitAnimation: string, removeElement: () => void): void;
-}
-
-export interface ProjectorOptions {
-	readonly transitions?: TransitionStrategy;
-	styleApplyer?(domNode: HTMLElement, styleName: string, value: string): void;
-	nodeEvent?: Evented;
-}
-
-export interface ProjectionOptions extends ProjectorOptions {
-	readonly namespace?: string;
-	eventHandlerInterceptor?: (propertyName: string, eventHandler: Function, domNode: Node, properties: VirtualDomProperties) => Function | undefined;
-}
-
-export interface Projection {
-	readonly domNode: Element;
-	update(updatedDNode: DNode): void;
-}
 
 const NAMESPACE_W3 = 'http://www.w3.org/';
 const NAMESPACE_SVG = NAMESPACE_W3 + '2000/svg';

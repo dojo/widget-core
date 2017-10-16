@@ -5,13 +5,6 @@ import { VNode, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/int
 import Map from '@dojo/shim/Map';
 
 /**
- * Extended Dojo 2 projection options
- */
-export interface ProjectionOptions extends MaquetteProjectionOptions {
-	nodeEvent: Evented;
-}
-
-/**
  * Generic constructor type
  */
 export type Constructor<T> = new (...args: any[]) => T;
@@ -67,6 +60,26 @@ export type SubmitEventHandler = EventHandler;
 export type ClassesFunction = () => {
 	[index: string]: boolean | null | undefined;
 };
+
+export interface TransitionStrategy {
+	enter(element: Element, properties: VirtualDomProperties, enterAnimation: string): void;
+	exit(element: Element, properties: VirtualDomProperties, exitAnimation: string, removeElement: () => void): void;
+}
+
+export interface ProjectorOptions {
+	readonly transitions?: TransitionStrategy;
+	styleApplyer?(domNode: HTMLElement, styleName: string, value: string): void;
+}
+
+export interface ProjectionOptions extends ProjectorOptions {
+	readonly namespace?: string;
+	eventHandlerInterceptor?: (propertyName: string, eventHandler: Function, domNode: Node, properties: VirtualDomProperties) => Function | undefined;
+}
+
+export interface Projection {
+	readonly domNode: Element;
+	update(updatedDNode: DNode): void;
+}
 
 export interface VirtualDomProperties {
 	/**
