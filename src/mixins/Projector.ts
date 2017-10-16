@@ -384,16 +384,16 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			switch (type) {
 				case AttachType.Append:
-					this._projection = dom.append(this.root, this._boundRender(), this, this._projectionOptions);
+					this._projection = dom.append(this.root, this._boundRender(), this as WidgetBase, this._projectionOptions);
 				break;
 				case AttachType.Merge:
 					this._rootTagName = this._root.tagName.toLowerCase();
 					const hNode: HNode = this._boundRender();
 					// setDomNodes(hNode, this.root);
-					this._projection = dom.merge(this.root, hNode, this, this._projectionOptions);
+					this._projection = dom.merge(this.root, hNode, this as WidgetBase, this._projectionOptions);
 				break;
 				case AttachType.Replace:
-					this._projection = dom.replace(this.root, this._boundRender(), this, this._projectionOptions);
+					this._projection = dom.replace(this.root, this._boundRender(), this as WidgetBase, this._projectionOptions);
 				break;
 			}
 
