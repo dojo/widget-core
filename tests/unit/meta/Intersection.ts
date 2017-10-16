@@ -97,7 +97,7 @@ registerSuite({
 
 			intersection.get(1234);
 			assert.isTrue(onSpy.calledOnce);
-			assert.isTrue(onSpy.firstCall.calledWith(1234));
+			assert.isTrue(onSpy.firstCall.calledWith('1234'));
 		},
 		'intersection calls invalidate when node available'() {
 			const nodeHandler = new NodeHandler();
