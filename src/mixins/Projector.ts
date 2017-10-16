@@ -5,13 +5,13 @@ import { Handle } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
-import { Constructor, DNode, HNode } from './../interfaces';
+import { Constructor, DNode, HNode, Projection, ProjectionOptions } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
 import { afterRender } from './../decorators/afterRender';
 import { isHNode, v } from './../d';
 import { Registry } from './../Registry';
 import eventHandlerInterceptor from '../util/eventHandlerInterceptor';
-import { dom, Projection, ProjectionOptions } from './../vdom';
+import { dom } from './../vdom';
 
 /**
  * Represents the attach state of the projector
@@ -182,8 +182,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this._projectionOptions = {
 				transitions: cssTransitions,
-				eventHandlerInterceptor: eventHandlerInterceptor.bind(this),
-				nodeEvent
+				eventHandlerInterceptor: eventHandlerInterceptor.bind(this)
 			};
 
 			this._boundDoRender = this._doRender.bind(this);
@@ -355,7 +354,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			if (this._projection) {
 				this._projection.update(this._boundRender());
-				this._projectionOptions.nodeEvent && this._projectionOptions.nodeEvent.emit({ type: 'rendered' });
 			}
 		}
 
@@ -396,8 +394,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 					this._projection = dom.replace(this.root, this._boundRender(), this as WidgetBase, this._projectionOptions);
 				break;
 			}
-
-			this._projectionOptions.nodeEvent && this._projectionOptions.nodeEvent.emit({ type: 'rendered' });
 
 			return this._attachHandle;
 		}
