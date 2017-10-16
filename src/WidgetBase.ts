@@ -371,12 +371,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 						};
 					}
 				}
-				nodes = [ ...nodes, ...node.children ];
+				if (node.children && node.children.length > 0) {
+					nodes = [ ...nodes, ...node.children ];
+				}
 			}
 		}
 	}
 
-	protected invalidate(): void {
+	public invalidate(): void {
 		if (this._renderState === WidgetRenderState.IDLE) {
 			this._dirty = true;
 			this.emit({
