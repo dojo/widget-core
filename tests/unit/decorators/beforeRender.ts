@@ -28,7 +28,7 @@ registerSuite('decorators/beforeRender', {
 					return () => {
 						const rendered = renderFunction();
 						const clonedProperties = { ...properties };
-						return v('bar', clonedProperties, [ rendered, ...children ]);
+						return v('bar', clonedProperties, [rendered, ...children]);
 					};
 				}
 
@@ -38,7 +38,7 @@ registerSuite('decorators/beforeRender', {
 					return () => {
 						const rendered = renderFunction();
 						properties.bar = 'foo';
-						return v('qux', properties, [ rendered ]);
+						return v('qux', properties, [rendered]);
 					};
 				}
 			}
@@ -56,7 +56,7 @@ registerSuite('decorators/beforeRender', {
 			}
 
 			const widget = new ExtendedTestWidget();
-			widget.__setChildren__([ v('baz', { baz: 'qux' }) ]);
+			widget.__setChildren__([v('baz', { baz: 'qux' })]);
 			widget.__setProperties__({ foo: 'bar' });
 			const qux: any = widget.__render__();
 			assert.equal(qux.vnodeSelector, 'qux');
@@ -64,21 +64,21 @@ registerSuite('decorators/beforeRender', {
 			assert.equal(qux.properties.bar, 'foo');
 			assert.equal(qux.properties.foo, 'bar');
 			assert.lengthOf(qux.children, 1);
-			const bar = qux.children[ 0 ];
+			const bar = qux.children[0];
 			assert.equal(bar.vnodeSelector, 'bar');
 			assert.deepEqual(bar.properties.bind, widget);
 			assert.deepEqual(bar.properties.foo, 'bar');
 			assert.lengthOf(bar.children, 2);
-			const foo = bar.children[ 0 ];
+			const foo = bar.children[0];
 			assert.equal(foo.vnodeSelector, 'foo');
 			assert.deepEqual(foo.properties.bind, widget);
 			assert.lengthOf(foo.children, 1);
-			const baz1 = foo.children[ 0 ];
+			const baz1 = foo.children[0];
 			assert.equal(baz1.vnodeSelector, 'baz');
 			assert.deepEqual(baz1.properties.bind, widget);
 			assert.deepEqual(baz1.properties.baz, 'qux');
 			assert.lengthOf(baz1.children, 0);
-			const baz2 = bar.children[ 1 ];
+			const baz2 = bar.children[1];
 			assert.equal(baz2.vnodeSelector, 'baz');
 			assert.deepEqual(baz2.properties.bind, widget);
 			assert.deepEqual(baz2.properties.baz, 'qux');

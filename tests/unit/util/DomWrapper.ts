@@ -13,7 +13,7 @@ let projector: any;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(0).args[ 0 ]();
+		rAF.getCall(0).args[0]();
 	}
 	rAF.reset();
 }

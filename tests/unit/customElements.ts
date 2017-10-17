@@ -24,7 +24,7 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 		getDescriptor: () => descriptor,
 		children: [],
 		getAttribute(name: string) {
-			return attributes[ name ] || null;
+			return attributes[name] || null;
 		},
 		dispatchEvent(event: Event) {
 			events.push(event);
@@ -278,8 +278,8 @@ registerSuite('customElements', {
 				element.getWidgetInstance().properties.onTest('detail here');
 
 				assert.lengthOf(element.getEvents(), 1);
-				assert.strictEqual(element.getEvents()[ 0 ].type, 'test');
-				assert.strictEqual(element.getEvents()[ 0 ].detail, 'detail here');
+				assert.strictEqual(element.getEvents()[0].type, 'test');
+				assert.strictEqual(element.getEvents()[0].detail, 'detail here');
 			}
 		}
 	},
@@ -290,10 +290,10 @@ registerSuite('customElements', {
 				tagName: 'test',
 				widgetConstructor: WidgetBase
 			});
-			element.children = [ {
+			element.children = [{
 				key: 'test',
 				parentNode: element
-			} ];
+			}];
 
 			// so.. this is going to fail in maquette, since we don't have a DOM, but,
 			// it's ok because all of our code has already run by now
@@ -340,6 +340,7 @@ registerSuite('customElements', {
 				const appendStub = sandbox.stub();
 
 				const OrigProjectorMixin = projector.ProjectorMixin;
+
 				function TestProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
 					const Mixed = OrigProjectorMixin(Base);
 					Mixed.prototype.append = appendStub;

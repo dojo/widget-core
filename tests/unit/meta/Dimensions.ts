@@ -34,7 +34,7 @@ const defaultDimensions = {
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(i).args[ 0 ]();
+		rAF.getCall(i).args[0]();
 	}
 	rAF.reset();
 }

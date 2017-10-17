@@ -119,7 +119,7 @@ registerSuite('mixins/I18nMixin', {
 
 			const result = <VNode> localized.__render__();
 			assert.isOk(result);
-			assert.isNull(result.properties![ 'lang' ]);
+			assert.isNull(result.properties!['lang']);
 		},
 		'`properties.locale` updates the widget node\'s `lang` property': {
 			'when non-empty'() {
@@ -128,7 +128,7 @@ registerSuite('mixins/I18nMixin', {
 
 				const result = <VNode> localized.__render__();
 				assert.isOk(result);
-				assert.strictEqual(result.properties![ 'lang' ], 'ar-JO');
+				assert.strictEqual(result.properties!['lang'], 'ar-JO');
 			},
 
 			'when empty'() {
@@ -136,7 +136,7 @@ registerSuite('mixins/I18nMixin', {
 
 				const result = localized.__render__();
 				assert.isOk(result);
-				assert.isNull(result.properties![ 'lang' ]);
+				assert.isNull(result.properties!['lang']);
 			}
 		},
 
@@ -147,7 +147,7 @@ registerSuite('mixins/I18nMixin', {
 
 				const result = localized.__render__();
 				assert.isOk(result);
-				assert.strictEqual(result.properties![ 'dir' ], 'rtl');
+				assert.strictEqual(result.properties!['dir'], 'rtl');
 			},
 
 			'The `dir` attribute is "ltr" when false'() {
@@ -156,7 +156,7 @@ registerSuite('mixins/I18nMixin', {
 
 				const result = localized.__render__();
 				assert.isOk(result);
-				assert.strictEqual(result.properties![ 'dir' ], 'ltr');
+				assert.strictEqual(result.properties!['dir'], 'ltr');
 			},
 
 			'The `dir` attribute is not set when not a boolean.'() {
@@ -164,7 +164,7 @@ registerSuite('mixins/I18nMixin', {
 
 				const result = localized.__render__();
 				assert.isOk(result);
-				assert.isNull(result.properties![ 'dir' ]);
+				assert.isNull(result.properties!['dir']);
 			}
 		}
 	}

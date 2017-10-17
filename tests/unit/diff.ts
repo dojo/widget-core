@@ -56,13 +56,13 @@ registerSuite('diff', {
 			assert.isTrue(result.changed);
 		},
 		'array'() {
-			const foo = [ 1, 2, 3 ];
-			const bar = [ 1, 2, 3 ];
+			const foo = [1, 2, 3];
+			const bar = [1, 2, 3];
 			let result = diff.shallow(foo, bar);
 			assert.equal(result.value, bar);
 			assert.isFalse(result.changed);
 
-			const qux = [ 1, 3, 2];
+			const qux = [1, 3, 2];
 			result = diff.shallow(foo, qux);
 			assert.equal(result.value, qux);
 			assert.isTrue(result.changed);

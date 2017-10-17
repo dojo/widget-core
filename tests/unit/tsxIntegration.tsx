@@ -17,8 +17,8 @@ registerSuite('tsx integration', {
 			render() {
 				const { hello } = this.properties;
 				return (
-					<header classes={{ background: true }} >
-						<div>{ hello }</div>
+					<header classes={{ background: true }}>
+						<div>{hello}</div>
 					</header>
 				);
 			}

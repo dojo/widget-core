@@ -70,7 +70,7 @@ registerSuite('mixins/projectorMixin', {
 					const childNodeLength = document.body.childNodes.length;
 					projector = new BaseTestWidget();
 
-					projector.setChildren([ v('h2', [ 'foo' ]) ]);
+					projector.setChildren([v('h2', ['foo'])]);
 
 					projector.append();
 
@@ -90,17 +90,17 @@ registerSuite('mixins/projectorMixin', {
 					assert.equal(vnode.text, result);
 					assert.isUndefined(vnode.children);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 				},
 				'string root node after an initial render'() {
-					result = v('div', [ 'my string' ]);
+					result = v('div', ['my string']);
 					projector = new MyWidget();
 
 					projector.append();
@@ -126,18 +126,18 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 
 				},
 				'null root node after an initial render'() {
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.append();
@@ -163,18 +163,18 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 
 				},
 				'undefined root node after an initial render'() {
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.append();
@@ -191,22 +191,22 @@ registerSuite('mixins/projectorMixin', {
 					assert.lengthOf(vnode.children, 0);
 				},
 				'array root node'() {
-					result = [ v('h2', [ 'my string' ]) ];
+					result = [v('h2', ['my string'])];
 					projector = new MyWidget();
 
 					projector.append();
 					let vnode: any = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.lengthOf(vnode.children, 1);
-					assert.strictEqual(vnode.children[ 0 ].vnodeSelector, 'h2');
-					assert.strictEqual(vnode.children[ 0 ].text, 'my string');
+					assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+					assert.strictEqual(vnode.children[0].text, 'my string');
 				}
 			},
 			'sandbox': {
 				'attaching'() {
 					const childNodeLength = document.body.childNodes.length;
 					projector = new BaseTestWidget();
-					projector.setChildren([ v('h2', [ 'foo' ]) ]);
+					projector.setChildren([v('h2', ['foo'])]);
 
 					projector.sandbox();
 
@@ -225,7 +225,7 @@ registerSuite('mixins/projectorMixin', {
 					const projector = new class extends BaseTestWidget {
 						render() {
 							count++;
-							return v('div', [ String(count) ]);
+							return v('div', [String(count)]);
 						}
 					}();
 
@@ -255,7 +255,7 @@ registerSuite('mixins/projectorMixin', {
 						}
 					}();
 
-					projector.setChildren([ v('h2', [ 'foo' ]) ]);
+					projector.setChildren([v('h2', ['foo'])]);
 
 					projector.replace();
 
@@ -276,19 +276,19 @@ registerSuite('mixins/projectorMixin', {
 					assert.equal(vnode.text, result);
 					assert.isUndefined(vnode.children);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 				},
 				'string root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('div', [ 'my string' ]);
+					result = v('div', ['my string']);
 					projector = new MyWidget();
 
 					projector.replace(root);
@@ -316,20 +316,20 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 
 				},
 				'null root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.replace(root);
@@ -357,20 +357,20 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 1);
-					assert.equal(vnode.children![ 0 ].vnodeSelector, 'div');
-					assert.equal(vnode.children![ 0 ].text, 'other text');
+					assert.equal(vnode.children![0].vnodeSelector, 'div');
+					assert.equal(vnode.children![0].text, 'other text');
 
 				},
 				'undefined root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.replace(root);
@@ -389,15 +389,15 @@ registerSuite('mixins/projectorMixin', {
 				'array root node'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = [ v('h2', [ 'my string' ]) ];
+					result = [v('h2', ['my string'])];
 					projector = new MyWidget();
 
 					projector.replace(root);
 					let vnode: any = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'span');
 					assert.lengthOf(vnode.children, 1);
-					assert.strictEqual(vnode.children[ 0 ].vnodeSelector, 'h2');
-					assert.strictEqual(vnode.children[ 0 ].text, 'my string');
+					assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+					assert.strictEqual(vnode.children[0].text, 'my string');
 				}
 			},
 			'merge': {
@@ -406,7 +406,7 @@ registerSuite('mixins/projectorMixin', {
 					document.body.appendChild(div);
 					const projector = new BaseTestWidget();
 
-					projector.setChildren([ v('h2', [ 'foo' ]) ]);
+					projector.setChildren([v('h2', ['foo'])]);
 
 					projector.merge(div);
 
@@ -428,7 +428,7 @@ registerSuite('mixins/projectorMixin', {
 					assert.equal(vnode.text, result);
 					assert.isUndefined(vnode.children);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'my-app');
@@ -437,7 +437,7 @@ registerSuite('mixins/projectorMixin', {
 				'string root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('div', [ 'my string' ]);
+					result = v('div', ['my string']);
 					projector = new MyWidget();
 
 					projector.merge(root);
@@ -465,7 +465,7 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'my-app');
@@ -475,7 +475,7 @@ registerSuite('mixins/projectorMixin', {
 				'null root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.merge(root);
@@ -503,7 +503,7 @@ registerSuite('mixins/projectorMixin', {
 					assert.isUndefined(vnode.text);
 					assert.lengthOf(vnode.children, 0);
 
-					result = v('div', [ 'other text' ]);
+					result = v('div', ['other text']);
 					projector.invalidate();
 					vnode = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'my-app');
@@ -513,7 +513,7 @@ registerSuite('mixins/projectorMixin', {
 				'undefined root node after an initial render'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = v('h2', [ 'my string' ]);
+					result = v('h2', ['my string']);
 					projector = new MyWidget();
 
 					projector.merge(root);
@@ -532,15 +532,15 @@ registerSuite('mixins/projectorMixin', {
 				'array root node'() {
 					const root = document.createElement('my-app');
 					document.body.appendChild(root);
-					result = [ v('h2', [ 'my string' ]) ];
+					result = [v('h2', ['my string'])];
 					projector = new MyWidget();
 
 					projector.merge(root);
 					let vnode: any = projector.__render__() as VNode;
 					assert.equal(vnode.vnodeSelector, 'my-app');
 					assert.lengthOf(vnode.children, 1);
-					assert.strictEqual(vnode.children[ 0 ].vnodeSelector, 'h2');
-					assert.strictEqual(vnode.children[ 0 ].text, 'my string');
+					assert.strictEqual(vnode.children[0].vnodeSelector, 'h2');
+					assert.strictEqual(vnode.children[0].text, 'my string');
 				},
 				'pre rendered DOM used'() {
 					const iframe = document.createElement('iframe');
@@ -558,9 +558,9 @@ registerSuite('mixins/projectorMixin', {
 					iframe.contentDocument.close();
 					const root = iframe.contentDocument.body.firstChild as HTMLElement;
 					const childElementCount = root.childElementCount;
-					const select = root.childNodes[ 3 ] as HTMLSelectElement;
-					const button = root.childNodes[ 5 ] as HTMLButtonElement;
-					assert.strictEqual((root.childNodes[ 3 ] as HTMLSelectElement).value, 'bar', 'bar should be selected');
+					const select = root.childNodes[3] as HTMLSelectElement;
+					const button = root.childNodes[5] as HTMLButtonElement;
+					assert.strictEqual((root.childNodes[3] as HTMLSelectElement).value, 'bar', 'bar should be selected');
 					const onchangeListener = spy();
 					const onclickListener = spy();
 					const projector = new class extends BaseTestWidget {
@@ -570,7 +570,7 @@ registerSuite('mixins/projectorMixin', {
 							}, [
 								v('label', {
 									for: 'baz'
-								}, [ 'Select Me:' ]),
+								}, ['Select Me:']),
 								v('select', {
 									type: 'text',
 									name: 'baz',
@@ -578,23 +578,23 @@ registerSuite('mixins/projectorMixin', {
 									disabled: false,
 									onchange: onchangeListener
 								}, [
-									v('option', { value: 'foo', selected: true }, [ 'label foo' ]),
-									v('option', { value: 'bar', selected: false }, [ 'label bar' ]),
-									v('option', { value: 'baz', selected: false }, [ 'label baz' ])
+									v('option', { value: 'foo', selected: true }, ['label foo']),
+									v('option', { value: 'bar', selected: false }, ['label bar']),
+									v('option', { value: 'baz', selected: false }, ['label baz'])
 								]),
 								v('button', {
 									type: 'button',
 									disabled: false,
 									onclick: onclickListener
-								}, [ 'Click Me!' ])
+								}, ['Click Me!'])
 							]);
 						}
 					}();
 					projector.merge(root);
 					assert.strictEqual(root.className, 'foo bar', 'should have added bar class');
 					assert.strictEqual(root.childElementCount, childElementCount, 'should have the same number of children');
-					assert.strictEqual(select, root.childNodes[ 3 ], 'should have been reused');
-					assert.strictEqual(button, root.childNodes[ 5 ], 'should have been reused');
+					assert.strictEqual(select, root.childNodes[3], 'should have been reused');
+					assert.strictEqual(button, root.childNodes[5], 'should have been reused');
 					assert.isFalse(select.disabled, 'select should be enabled');
 					assert.isFalse(button.disabled, 'button shound be enabled');
 
@@ -680,7 +680,7 @@ registerSuite('mixins/projectorMixin', {
 		'toHtml()': {
 			'appended'() {
 				const projector = new BaseTestWidget();
-				projector.setChildren([ v('h2', [ 'foo' ]) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.append();
 				assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
@@ -692,7 +692,7 @@ registerSuite('mixins/projectorMixin', {
 				document.body.appendChild(div);
 
 				const projector = new BaseTestWidget();
-				projector.setChildren([ v('h2', [ 'foo' ]) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.replace(div);
 				assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
@@ -704,7 +704,7 @@ registerSuite('mixins/projectorMixin', {
 				document.body.appendChild(div);
 
 				const projector = new BaseTestWidget();
-				projector.setChildren([ v('h2', [ 'foo' ]) ]);
+				projector.setChildren([v('h2', ['foo'])]);
 
 				projector.merge(div);
 				assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
@@ -780,7 +780,7 @@ registerSuite('mixins/projectorMixin', {
 			const testProperties = {
 				key: 'bar'
 			};
-			const testChildren = [ v('div') ];
+			const testChildren = [v('div')];
 
 			class TestWidget extends BaseTestWidget {
 
@@ -807,7 +807,7 @@ registerSuite('mixins/projectorMixin', {
 			projector.append();
 			projector.setChildren([]);
 			assert.isTrue(scheduleRender.notCalled);
-			projector.setChildren([ v('div') ]);
+			projector.setChildren([v('div')]);
 			assert.isTrue(scheduleRender.calledOnce);
 			projector.setChildren([]);
 			assert.isTrue(scheduleRender.calledTwice);

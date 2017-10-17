@@ -18,7 +18,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		result('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, bind, 'should have been called with proper bind');
 	},
 
@@ -29,13 +29,13 @@ registerSuite('util/eventHandlerInterceptor', {
 		} as any;
 		const listener = stub();
 		const context = {};
-		const result = eventHandlerInterceptor.call(undefined, 'onscroll', listener, mockDomNode, { });
+		const result = eventHandlerInterceptor.call(undefined, 'onscroll', listener, mockDomNode, {});
 		assert.isFunction(result);
 		assert.isTrue(addEventListener.notCalled, 'addEventListener should not have been called');
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		result.call(context, 'foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, context, 'should have been called with proper context');
 	},
 
@@ -56,7 +56,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		const handler: (...args: any[]) => void = addEventListener.lastCall.args[1];
 		handler('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, bind, 'should have been called with proper context');
 	},
 
@@ -67,7 +67,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		} as any;
 		const listener = stub();
 		const context = {};
-		const result = eventHandlerInterceptor.call(context, 'ontouchstart', listener, mockDomNode, { });
+		const result = eventHandlerInterceptor.call(context, 'ontouchstart', listener, mockDomNode, {});
 		assert.isUndefined(result);
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		assert.isTrue(addEventListener.calledOnce, 'addEventListener should not have been called once');
@@ -76,7 +76,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		const handler: (...args: any[]) => void = addEventListener.lastCall.args[1];
 		handler('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, context, 'should have been called with proper context');
 	},
 
@@ -104,10 +104,10 @@ registerSuite('util/eventHandlerInterceptor', {
 			'onsubmit'
 		];
 		eventHandlers.forEach((eventType) => {
-			const mockDomNode: Element = { } as any;
+			const mockDomNode: Element = {} as any;
 			const listener = () => { };
 			const context = {};
-			assert.isFunction(eventHandlerInterceptor.call(context, 'onscroll', listener, mockDomNode, { }), 'should pass through handler');
+			assert.isFunction(eventHandlerInterceptor.call(context, 'onscroll', listener, mockDomNode, {}), 'should pass through handler');
 		});
 	}
 });

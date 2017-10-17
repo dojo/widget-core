@@ -25,9 +25,9 @@ import testTheme2 from '../../support/styles/theme2.css';
 import testTheme3 from '../../support/styles/theme3.css';
 import createTestWidget from '../../support/createTestWidget';
 
-(<any> baseThemeClasses1)[ ' _key' ] = 'testPath1';
-(<any> baseThemeClasses2)[ ' _key' ] = 'testPath2';
-(<any> baseThemeClasses3)[ ' _key' ] = 'testPath3';
+(<any> baseThemeClasses1)[' _key'] = 'testPath1';
+(<any> baseThemeClasses2)[' _key'] = 'testPath2';
+(<any> baseThemeClasses3)[' _key'] = 'testPath3';
 
 let testRegistry: Registry;
 
@@ -101,7 +101,7 @@ registerSuite('themeManager', {
 				});
 
 				assert.isTrue(consoleStub.calledOnce);
-				assert.strictEqual(consoleStub.firstCall.args[ 0 ], `Class name: ${newClassName} not found, use chained 'fixed' method instead`);
+				assert.strictEqual(consoleStub.firstCall.args[0], `Class name: ${newClassName} not found, use chained 'fixed' method instead`);
 			},
 			'should split adjoined classes into multiple classes'() {
 				const themeableInstance = new TestWidget();
@@ -340,7 +340,7 @@ registerSuite('themeManager', {
 						[ class2 ]: true
 					});
 					assert.isTrue(consoleStub.called);
-					assert.strictEqual(consoleStub.firstCall.args[ 0 ], `Duplicate base theme class key 'class1' detected, this could cause unexpected results`);
+					assert.strictEqual(consoleStub.firstCall.args[0], `Duplicate base theme class key 'class1' detected, this could cause unexpected results`);
 				}
 			},
 			'non decorator': {
@@ -378,7 +378,7 @@ registerSuite('themeManager', {
 						[ class2 ]: true
 					});
 					assert.isTrue(consoleStub.called);
-					assert.strictEqual(consoleStub.firstCall.args[ 0 ], `Duplicate base theme class key 'class1' detected, this could cause unexpected results`);
+					assert.strictEqual(consoleStub.firstCall.args[0], `Duplicate base theme class key 'class1' detected, this could cause unexpected results`);
 				}
 			}
 		},
@@ -448,18 +448,18 @@ registerSuite('themeManager', {
 				testWidget.__setCoreProperties__({ bind: testWidget, baseRegistry: testRegistry });
 				let vNode: any = testWidget.__render__();
 				assert.lengthOf(vNode.children, 2);
-				assert.deepEqual(vNode.children[ 0 ].properties.classes, { theme1Class1: true });
-				assert.deepEqual(vNode.children[ 1 ].properties.classes, { theme1Class1: true });
+				assert.deepEqual(vNode.children[0].properties.classes, { theme1Class1: true });
+				assert.deepEqual(vNode.children[1].properties.classes, { theme1Class1: true });
 				themeInjectorContext.set(testTheme2);
 				vNode = testWidget.__render__();
 				assert.lengthOf(vNode.children, 2);
-				assert.deepEqual(vNode.children[ 0 ].properties.classes, { theme1Class1: false, theme2Class1: true });
-				assert.deepEqual(vNode.children[ 1 ].properties.classes, { theme1Class1: false, theme2Class1: true });
+				assert.deepEqual(vNode.children[0].properties.classes, { theme1Class1: false, theme2Class1: true });
+				assert.deepEqual(vNode.children[1].properties.classes, { theme1Class1: false, theme2Class1: true });
 				themeInjectorContext.set(testTheme1);
 				vNode = testWidget.__render__();
 				assert.lengthOf(vNode.children, 2);
-				assert.deepEqual(vNode.children[ 0 ].properties.classes, { theme2Class1: false, theme1Class1: true });
-				assert.deepEqual(vNode.children[ 1 ].properties.classes, { theme2Class1: false, theme1Class1: true });
+				assert.deepEqual(vNode.children[0].properties.classes, { theme2Class1: false, theme1Class1: true });
+				assert.deepEqual(vNode.children[1].properties.classes, { theme2Class1: false, theme1Class1: true });
 			}
 		},
 		'integration': {
@@ -483,7 +483,7 @@ registerSuite('themeManager', {
 				themeableWidget.__setProperties__({ theme: testTheme1 });
 
 				const result = <VNode> themeableWidget.__render__();
-				assert.deepEqual(result.children![ 0 ].properties!.classes, {
+				assert.deepEqual(result.children![0].properties!.classes, {
 					[ testTheme1.testPath1.class1 ]: true,
 					[ fixedClassName ]: true
 				});
@@ -491,7 +491,7 @@ registerSuite('themeManager', {
 				themeableWidget.__setProperties__({ theme: testTheme2 });
 
 				const result2 = <VNode> themeableWidget.__render__();
-				assert.deepEqual(result2.children![ 0 ].properties!.classes, {
+				assert.deepEqual(result2.children![0].properties!.classes, {
 					[ testTheme1.testPath1.class1 ]: false,
 					[ testTheme2.testPath1.class1 ]: true,
 					[ fixedClassName ]: true

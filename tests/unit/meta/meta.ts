@@ -13,7 +13,7 @@ let rAFStub: SinonStub;
 
 function resolveRAF() {
 	for (let i = 0; i < rAFStub.callCount; i++) {
-		rAFStub.getCall(i).args[ 0 ]();
+		rAFStub.getCall(i).args[0]();
 	}
 	rAFStub.reset();
 }
@@ -168,7 +168,7 @@ registerSuite('meta base', {
 			class TestWidget extends ProjectorMixin(WidgetBase) {
 				render() {
 					return v('div', { key: 'foo' }, [
-						v('div', { key: 'bar' }, [ 'hello world' ])
+						v('div', { key: 'bar' }, ['hello world'])
 					]);
 				}
 

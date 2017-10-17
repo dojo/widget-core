@@ -1,6 +1,6 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-import { v , w } from '../../src/d';
+import { v, w } from '../../src/d';
 import { WidgetBase } from '../../src/WidgetBase';
 import { diffProperty } from '../../src/decorators/diffProperty';
 import { always } from '../../src/diff';
@@ -68,13 +68,13 @@ registerSuite('mixins/Container', {
 				assert.deepEqual(children, []);
 				assert.deepEqual(properties.properties, { foo: 'bar', registry });
 				assert.lengthOf(properties.children, 1);
-				assert.deepEqual(properties.children[ 0 ], child);
+				assert.deepEqual(properties.children[0], child);
 			};
 			const TestWidgetContainer = Container(TestWidget, 'test-state-1', { getProperties });
 			const widget = new TestWidgetContainer();
 			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
 			widget.__setProperties__({ foo: 'bar' });
-			widget.__setChildren__([ child ]);
+			widget.__setChildren__([child]);
 			widget.__render__();
 		},
 		'container for registry item'() {
