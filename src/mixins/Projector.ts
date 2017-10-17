@@ -322,8 +322,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 					this._rootTagName = 'span';
 				}
 
-				node = v(this._rootTagName);
-				node.children = Array.isArray(result) ? result : [ result ];
+				node = v(this._rootTagName, {}, Array.isArray(result) ? result : [ result ]);
 			}
 			else if (isHNode(node) && !this._rootTagName) {
 				this._rootTagName = node.tag;
@@ -335,8 +334,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 						node.tag = this._rootTagName;
 					}
 					else {
-						node = v(this._rootTagName);
-						node.children = Array.isArray(result) ? result : [ result ];
+						node = v(this._rootTagName, {}, Array.isArray(result) ? result : [ result ]);
 					}
 				}
 			}

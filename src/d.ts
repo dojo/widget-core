@@ -67,34 +67,21 @@ export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => vo
  */
 export function w<W extends WidgetBaseInterface>(widgetConstructor: Constructor<W> | RegistryLabel, properties: W['properties'], children: W['children'] = []): WNode<W> {
 
-	children = children.filter((child) => child !== null && child !== undefined);
-
 	return {
-		children: children as DNode[],
+		children,
 		widgetConstructor,
 		properties,
 		type: WNODE
 	};
 }
 
-let toTextHNode = (data: any): HNode => {
-	return {
-		tag: '',
-		properties: {},
-		children: undefined,
-		text: `${data}`,
-		domNode: undefined,
-		type: HNODE
-	};
-};
-
 /**
  * Wrapper function for calls to create hyperscript, lazily executes the hyperscript creation
  */
-export function v(tag: string, properties: VirtualDomProperties, children?: (DNode | null | undefined | string)[]): HNode;
-export function v(tag: string, children: (DNode | null | undefined | string)[]): HNode;
+export function v(tag: string, properties: VirtualDomProperties, children?: DNode[]): HNode;
+export function v(tag: string, children: undefined | DNode[]): HNode;
 export function v(tag: string): HNode;
-export function v(tag: string, propertiesOrChildren: VirtualDomProperties | (DNode | null | undefined | string)[] = {}, children: undefined | (DNode | null | undefined | string)[] = undefined): HNode {
+export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: undefined | DNode[] = undefined): HNode {
 		let properties: VirtualDomProperties | undefined = propertiesOrChildren;
 
 		if (Array.isArray(propertiesOrChildren)) {
@@ -110,25 +97,9 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties | (DNo
 			}
 		}
 
-		let filteredChildren: DNode[] | undefined = undefined;
-		if (children) {
-			filteredChildren = [];
-			for (let i = 0; i < children.length; i++) {
-				const child = children[i];
-				if (child === null || child === undefined) {
-					continue;
-				}
-				if (typeof child === 'string') {
-					filteredChildren.push(toTextHNode(child));
-					continue;
-				}
-				filteredChildren.push(child);
-			}
-		}
-
 		return {
 			tag,
-			children: filteredChildren,
+			children,
 			properties,
 			type: HNODE
 		};

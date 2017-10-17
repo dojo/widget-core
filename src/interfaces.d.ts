@@ -334,13 +334,13 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 
 	instance?: W;
 
-	rendered?: DNode[];
+	rendered?: (WNode | HNode)[];
 }
 
 /**
  * union type for all possible return types from render
  */
-export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W>;
+export type DNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface> = HNode | WNode<W> | undefined | null | string;
 
 /**
  * Property Change record for specific property diff functions
@@ -365,14 +365,14 @@ export type WidgetBaseConstructor<
 	P extends WidgetProperties = WidgetProperties,
 	C extends DNode = DNode> = Constructor<WidgetBaseInterface<P, C>>;
 
-export interface DefaultWidgetBaseInterface extends WidgetBaseInterface<WidgetProperties, DNode<DefaultWidgetBaseInterface>> {}
+export interface DefaultWidgetBaseInterface extends WidgetBaseInterface<WidgetProperties, DNode> {}
 
 /**
  * The interface for WidgetBase
  */
 export interface WidgetBaseInterface<
 	P = WidgetProperties,
-	C extends DNode = DNode<DefaultWidgetBaseInterface>> extends Evented {
+	C extends DNode = DNode> extends Evented {
 
 	/**
 	 * Widget properties
@@ -429,8 +429,8 @@ export interface WidgetMetaConstructor<T extends WidgetMetaBase> {
 export interface NodeHandlerInterface extends Evented {
 	get(key: string | number): HTMLElement | undefined;
 	has(key: string | number): boolean;
-	add(element: HTMLElement, properties: VirtualDomProperties): void;
-	addRoot(element: HTMLElement, properties: VirtualDomProperties): void;
+	add(element: HTMLElement, key: string): void;
+	addRoot(element: HTMLElement, key: string): void;
 	addProjector(element: HTMLElement, properties: VirtualDomProperties): void;
 	clear(): void;
 }

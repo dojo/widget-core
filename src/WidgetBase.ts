@@ -1,7 +1,7 @@
 import { Evented } from '@dojo/core/Evented';
 import Map from '@dojo/shim/Map';
 import WeakMap from '@dojo/shim/WeakMap';
-import { isWNode, v, isHNode } from './d';
+import { v } from './d';
 import { auto } from './diff';
 import {
 	AfterRender,
@@ -10,13 +10,11 @@ import {
 	CoreProperties,
 	DiffPropertyReaction,
 	DNode,
-	ProjectionOptions,
 	Render,
 	WidgetMetaBase,
 	WidgetMetaConstructor,
 	WidgetBaseInterface,
-	WidgetProperties,
-	VirtualDomProperties
+	WidgetProperties
 } from './interfaces';
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
@@ -44,6 +42,7 @@ export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
 const boundAuto = auto.bind(null);
+let id = 0;
 
 /**
  * Main widget base for all widgets to extend
@@ -58,7 +57,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	/**
 	 * children array
 	 */
-	private _children: C[];
+	private _children: (null | C)[];
 
 	/**
 	 * marker indicating if the widget requires a render
@@ -109,11 +108,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _nodeHandler: NodeHandler;
 
-	private _currentRootNode = 0;
-
-	private _numRootNodes = 0;
-
-	private _rootNodeKeys: object[];
+	private _baseId = id++;
 
 	/**
 	 * @constructor
@@ -132,8 +127,28 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
+		this.own(this.on('element-created', ({ key, element }: any) => {
+			this._nodeHandler.add(element, key);
+			this.onElementCreated(element, key);
+		}));
+		this.own(this.on('element-updated', ({ key, element }: any) => {
+			this._nodeHandler.add(element, key);
+			this.onElementUpdated(element, key);
+		}));
+		this.own(this.on('widget-created', ({ key, element }: any) => {
+			this._nodeHandler.addRoot(element, undefined);
+		}));
+		this.own(this.on('widget-updated', ({ key, element }: any) => {
+			this._nodeHandler.addRoot(element, undefined);
+		}));
 
 		this.own(this._registry.on('invalidate', this._boundInvalidate));
+		console.log(`created ${(this as any).constructor.name} - ${this._baseId}`);
+	}
+
+	destroy() {
+		console.log(`destorying ${(this as any).constructor.name} - ${this._baseId}`);
+		return super.destroy();
 	}
 
 	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
@@ -148,50 +163,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 
 		return cached as T;
-	}
-
-	/**
-	 * vnode afterCreate callback that calls the onElementCreated lifecycle method.
-	 */
-	private _afterCreateCallback(
-		element: HTMLElement,
-		projectionOptions: ProjectionOptions,
-		vnodeSelector: string,
-		properties: VirtualDomProperties
-	): void {
-		this._addElementToNodeHandler(element, projectionOptions, properties);
-		this.onElementCreated(element, String(properties.key));
-	}
-
-	/**
-	 * vnode afterUpdate callback that calls the onElementUpdated lifecycle method.
-	 */
-	private _afterUpdateCallback(
-		element: HTMLElement,
-		projectionOptions: ProjectionOptions,
-		vnodeSelector: string,
-		properties: VirtualDomProperties
-	): void {
-		this._addElementToNodeHandler(element, projectionOptions, properties);
-		this.onElementUpdated(element, String(properties.key));
-	}
-
-	private _addElementToNodeHandler(element: HTMLElement, projectionOptions: ProjectionOptions, properties: VirtualDomProperties) {
-		const isRootNode = !properties.key || this._rootNodeKeys.indexOf(properties.key) > -1;
-		const hasKey = !!properties.key;
-		let isLastRootNode = false;
-
-		if (isRootNode) {
-			this._currentRootNode++;
-			isLastRootNode = (this._currentRootNode === this._numRootNodes);
-		}
-
-		if (isLastRootNode) {
-			this._nodeHandler.addRoot(element, properties);
-		}
-		else if (hasKey) {
-			this._nodeHandler.add(element, properties);
-		}
 	}
 
 	/**
@@ -294,11 +265,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}
 	}
 
-	public get children(): C[] {
+	public get children(): (null | C)[] {
 		return this._children;
 	}
 
-	public __setChildren__(children: C[]): void {
+	public __setChildren__(children: (null | C)[]): void {
 		this._renderState = WidgetRenderState.CHILDREN;
 		if (this._children.length > 0 || children.length > 0) {
 			this._children = children;
@@ -307,64 +278,18 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 	}
 
 	public __render__(): DNode | DNode[] {
+		this._renderState = WidgetRenderState.RENDER;
 		if (this._dirty || !this._cachedDNode) {
-			this._renderState = WidgetRenderState.RENDER;
 			this._dirty = false;
 			const render = this._runBeforeRenders();
 			let dNode = render();
 			dNode = this.runAfterRenders(dNode);
-			this._decorateNodes(dNode);
 			this._nodeHandler.clear();
 			this._renderState = WidgetRenderState.IDLE;
 			this._cachedDNode = dNode;
 		}
+		this._renderState = WidgetRenderState.IDLE;
 		return this._cachedDNode;
-	}
-
-	private _decorateNodes(node: DNode | DNode[]) {
-		let nodes = Array.isArray(node) ? [ ...node ] : [ node ];
-
-		this._numRootNodes = nodes.length;
-		this._currentRootNode =  0;
-		const rootNodes: DNode[] = [];
-		this._rootNodeKeys = [];
-
-		nodes.forEach(node => {
-			if (isHNode(node)) {
-				rootNodes.push(node);
-				node.properties = node.properties || {};
-				if (node.properties.key) {
-					this._rootNodeKeys.push(node.properties.key);
-				}
-			}
-		});
-
-		while (nodes.length) {
-			const node = nodes.pop();
-			if (isHNode(node) || isWNode(node)) {
-				node.properties = node.properties || {};
-				if (isHNode(node)) {
-					if (rootNodes.indexOf(node) !== -1 || node.properties.key) {
-						node.properties.afterCreate = this._afterCreateCallback;
-						node.properties.afterUpdate = this._afterUpdateCallback;
-					}
-					if (node.properties.bind === undefined) {
-						(<any> node.properties).bind = this;
-					}
-				}
-				else {
-					if (!node.coreProperties) {
-						node.coreProperties = {
-							bind: this,
-							baseRegistry: this._coreProperties.baseRegistry
-						};
-					}
-				}
-				if (node.children && node.children.length > 0) {
-					nodes = [ ...nodes, ...node.children ];
-				}
-			}
-		}
 	}
 
 	public invalidate(): void {
