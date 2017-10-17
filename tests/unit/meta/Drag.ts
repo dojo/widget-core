@@ -1,4 +1,5 @@
 import global from '@dojo/shim/global';
+
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
 import { stub, SinonStub } from 'sinon';
@@ -55,7 +56,35 @@ registerSuite('support/meta/Drag', {
 
 			resolveRAF();
 
-			assert.deepEqual(dragResults, [ emptyResults, emptyResults ], 'should have been called twice, both empty results');
+			assert.deepEqual(dragResults, [emptyResults, emptyResults], 'should have been called twice, both empty results');
+
+			widget.destroy();
+			document.body.removeChild(div);
+		},
+
+		'standard rendering with a number key'() {
+			const dragResults: DragResults[] = [];
+
+			class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
+				render() {
+					dragResults.push(this.meta(Drag).get(1234));
+					return v('div', {
+						innerHTML: 'hello world',
+						key: 1234
+					});
+				}
+			}
+
+			const div = document.createElement('div');
+
+			document.body.appendChild(div);
+
+			const widget = new TestWidget();
+			widget.append(div);
+
+			resolveRAF();
+
+			assert.deepEqual(dragResults, [emptyResults, emptyResults], 'should have been called twice, both empty results');
 
 			widget.destroy();
 			document.body.removeChild(div);

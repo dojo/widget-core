@@ -7,7 +7,7 @@ import Intersection from '../../../src/meta/Intersection';
 import { NodeHandler } from '../../../src/NodeHandler';
 
 let intersectionObserver: any;
-const observers: ([ object, Function ])[] = [];
+const observers: ([object, Function])[] = [];
 
 registerSuite('meta - Intersection', {
 	beforeEach() {
@@ -16,7 +16,7 @@ registerSuite('meta - Intersection', {
 				observe: stub(),
 				takeRecords: stub().returns([])
 			};
-			observers.push([ observer, callback ]);
+			observers.push([observer, callback]);
 			return observer;
 		});
 	},
@@ -32,8 +32,7 @@ registerSuite('meta - Intersection', {
 				const nodeHandler = new NodeHandler();
 
 				const intersection = new Intersection({
-					invalidate: () => {
-					},
+					invalidate: () => {},
 					nodeHandler
 				});
 
@@ -44,8 +43,7 @@ registerSuite('meta - Intersection', {
 				const nodeHandler = new NodeHandler();
 
 				const intersection = new Intersection({
-					invalidate: () => {
-					},
+					invalidate: () => {},
 					nodeHandler
 				});
 
@@ -56,21 +54,20 @@ registerSuite('meta - Intersection', {
 				const nodeHandler = new NodeHandler();
 
 				const intersection = new Intersection({
-					invalidate: () => {
-					},
+					invalidate: () => {},
 					nodeHandler
 				});
 				const element = document.createElement('div');
 				nodeHandler.add(element, { key: 'root' });
 
 				intersection.get('root');
-				const [ observer, callback ] = observers[ 0 ];
+				const [observer, callback] = observers[0];
 
-				callback([ {
+				callback([{
 					target: element,
 					intersectionRatio: 0.1,
 					isIntersecting: true
-				} ], observer);
+				}], observer);
 
 				const hasIntersectionInfo = intersection.has('root');
 				assert.isTrue(hasIntersectionInfo);
@@ -82,14 +79,26 @@ registerSuite('meta - Intersection', {
 				const onSpy = spy(nodeHandler, 'on');
 
 				const intersection = new Intersection({
-					invalidate: () => {
-					},
+					invalidate: () => {},
 					nodeHandler
 				});
 
 				intersection.get('root');
 				assert.isTrue(onSpy.calledOnce);
 				assert.isTrue(onSpy.firstCall.calledWith('root'));
+			},
+			'intersections with number key'() {
+				const nodeHandler = new NodeHandler();
+				const onSpy = spy(nodeHandler, 'on');
+
+				const intersection = new Intersection({
+					invalidate: () => {},
+					nodeHandler
+				});
+
+				intersection.get(1234);
+				assert.isTrue(onSpy.calledOnce);
+				assert.isTrue(onSpy.firstCall.calledWith('1234'));
 			},
 			'intersection calls invalidate when node available'() {
 				const nodeHandler = new NodeHandler();
@@ -136,23 +145,23 @@ registerSuite('meta - Intersection', {
 
 				assert.isFalse(onSpy.called);
 
-				const [ observer, callback ] = observers[ 0 ];
+				const [observer, callback] = observers[0];
 
-				callback([ {
+				callback([{
 					target: element,
 					intersectionRatio: 0.1,
 					isIntersecting: true
-				} ], observer);
+				}], observer);
 
 				assert.isTrue(invalidateStub.calledTwice);
 				const result = intersection.get('root');
 				assert.deepEqual(result, { intersectionRatio: 0.1, isIntersecting: true });
 
-				callback([ {
+				callback([{
 					target: element,
 					intersectionRatio: 0.1,
 					isIntersecting: false
-				} ], observer);
+				}], observer);
 
 				assert.isTrue(invalidateStub.calledThrice);
 				const resultTwo = intersection.get('root');
@@ -185,16 +194,16 @@ registerSuite('meta - Intersection', {
 				intersection.get('foo', { root: 'root' });
 
 				assert.isTrue(intersectionObserver.calledOnce);
-				assert.strictEqual(intersectionObserver.firstCall.args[ 1 ].root, root);
+				assert.strictEqual(intersectionObserver.firstCall.args[1].root, root);
 				assert.lengthOf(observers, 1);
 
-				const [ observer, callback ] = observers[ 0 ];
+				const [observer, callback] = observers[0];
 
-				callback([ {
+				callback([{
 					target: element,
 					intersectionRatio: 0.1,
 					isIntersecting: true
-				} ], observer);
+				}], observer);
 
 				assert.isTrue(invalidateStub.calledTwice);
 				const result = intersection.get('foo', { root: 'root' });
@@ -203,8 +212,7 @@ registerSuite('meta - Intersection', {
 			'observers are cached for details'() {
 				const nodeHandler = new NodeHandler();
 				const intersection = new Intersection({
-					invalidate: () => {
-					},
+					invalidate: () => {},
 					nodeHandler
 				});
 

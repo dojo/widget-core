@@ -15,7 +15,7 @@ let rAF: SinonStub;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(i).args[ 0 ]();
+		rAF.getCall(i).args[0]();
 	}
 	rAF.reset();
 }
@@ -59,7 +59,41 @@ registerSuite('support/meta/Matches', {
 
 			sendEvent(div.firstChild as Element, 'click');
 
-			assert.deepEqual(results, [ true ], 'should have been called and the target matched');
+			assert.deepEqual(results, [true], 'should have been called and the target matched');
+
+			widget.destroy();
+			document.body.removeChild(div);
+		},
+
+		'node matches with number key'() {
+			const results: boolean[] = [];
+
+			class TestWidget extends ProjectorMixin(ThemeableMixin(WidgetBase)) {
+				private _onclick(evt: MouseEvent) {
+					results.push(this.meta(Matches).get(1234, evt));
+				}
+
+				render() {
+					return v('div', {
+						innerHTML: 'hello world',
+						key: 1234,
+						onclick: this._onclick
+					});
+				}
+			}
+
+			const div = document.createElement('div');
+
+			document.body.appendChild(div);
+
+			const widget = new TestWidget();
+			widget.append(div);
+
+			resolveRAF();
+
+			sendEvent(div.firstChild as Element, 'click');
+
+			assert.deepEqual(results, [true], 'should have been called and the target matched');
 
 			widget.destroy();
 			document.body.removeChild(div);
@@ -101,7 +135,7 @@ registerSuite('support/meta/Matches', {
 				}
 			});
 
-			assert.deepEqual(results, [ false ], 'should have been called and the target not matching');
+			assert.deepEqual(results, [false], 'should have been called and the target not matching');
 
 			widget.destroy();
 			document.body.removeChild(div);
@@ -156,7 +190,7 @@ registerSuite('support/meta/Matches', {
 				}
 			});
 
-			assert.deepEqual(results, [ true, false, false, true ], 'should have been called twice and keys changed');
+			assert.deepEqual(results, [true, false, false, true], 'should have been called twice and keys changed');
 
 			widget.destroy();
 			document.body.removeChild(div);
