@@ -18,7 +18,7 @@ function resolveRAF() {
 	rAF.reset();
 }
 
-registerSuite('DomWrapper', {
+registerSuite('util/DomWrapper', {
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
 	},

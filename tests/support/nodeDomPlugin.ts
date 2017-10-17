@@ -1,9 +1,8 @@
-debugger;
-intern.registerPlugin("nodeDomPlugin", () => {
+intern.registerPlugin('nodeDomPlugin', () => {
 	return Promise.all([
-		import("jsdom"),
-		import("@dojo/shim/global")
-	]).then(function ([jsdom, {default: global}]) {
+		import('jsdom'),
+		import('@dojo/shim/global')
+	]).then(function ([ jsdom, { default: global } ]) {
 		/* In order to have the tests work under Node.js, we need to load JSDom and polyfill
 		requestAnimationFrame */
 
@@ -23,7 +22,8 @@ intern.registerPlugin("nodeDomPlugin", () => {
 		global.window = doc.defaultView;
 
 		/* Needed for Pointer Event Polyfill's incorrect Element detection */
-		global.Element = function() {};
+		global.Element = function () {
+		};
 
 		/* Polyfill requestAnimationFrame - this can never be called an *actual* polyfill */
 		global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
@@ -32,9 +32,9 @@ intern.registerPlugin("nodeDomPlugin", () => {
 			return true;
 		};
 
-		global.cancelAnimationFrame = () => {};
-		global.IntersectionObserver = () => {};
-
-		console.log('Loaded JSDOM...');
+		global.cancelAnimationFrame = () => {
+		};
+		global.IntersectionObserver = () => {
+		};
 	});
 });

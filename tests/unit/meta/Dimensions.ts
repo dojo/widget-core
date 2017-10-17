@@ -39,6 +39,8 @@ function resolveRAF() {
 	rAF.reset();
 }
 
+let sandbox: HTMLElement | null;
+
 registerSuite('meta - Dimensions', {
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
@@ -46,6 +48,8 @@ registerSuite('meta - Dimensions', {
 
 	afterEach() {
 		rAF.restore();
+		sandbox && sandbox.parentNode && sandbox.parentNode.removeChild(sandbox);
+		sandbox = null;
 	},
 
 	tests: {
@@ -88,7 +92,9 @@ registerSuite('meta - Dimensions', {
 			assert.isTrue(onSpy.calledOnce);
 			assert.isTrue(onSpy.firstCall.calledWith('foo'));
 
+			sandbox = document.createElement('div');
 			const element = document.createElement('div');
+			sandbox.appendChild(element);
 			const getRectSpy = spy(element, 'getBoundingClientRect');
 
 			nodeHandler.add(element, { key: 'foo' });

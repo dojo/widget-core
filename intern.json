@@ -2,6 +2,9 @@
 	"environments": [
 		{ "browserName": "node" }
 	],
+	"suites": [
+		"./_build/tests/unit/**/*.js"
+	],
 	"functionalSuites": [
 		"./_build/tests/functional/**/*.js",
 		"!./_build/tests/functional/support/**"
@@ -34,18 +37,12 @@
 			}
 		}
 	},
-	"browser": {
-		"suites": [
-			"./_build/tests/unit/**/*.js"
-		]
-	},
 	"node" : {
-		"suites": [
-//  trying plugin			"./_build/tests/support/loadJsdom.js",
-			"./_build/tests/unit/**/*.js"
-		],
 		"plugins": [
-			"./_build/tests/support/nodeDomPlugin.js"
+			{
+				"script": "./_build/tests/support/nodeDomPlugin.js",
+				"useLoader": true
+			}
 		]
 	},
 	"configs": {
@@ -76,10 +73,10 @@
 				{ "browserName": "internet explorer", "version": "11" },
 				{ "browserName": "edge" },
 				{ "browserName": "firefox", "platform": "WINDOWS" },
-				{ "browserName": "chrome", "platform": "WINDOWS" },
-				{ "browserName": "safari", "version": "9.1", "platform": "MAC" }
-				// BrowserStack uses iOS 9.1 and some of the tests fail.  I looks like a missing locale problem
-				// { "browserName": "iPhone" }
+				{ "browserName": "chrome", "platform": "WINDOWS" }
+				// Disable Safari 9 because of timing issues when running the tests.
+				// See <https://github.com/dojo/widgets/issues/5>.
+				//{ "browserName": "safari", "version": "9.1", "platform": "MAC" }
 			]
 		},
 		"saucelabs": {
