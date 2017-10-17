@@ -52,7 +52,6 @@ registerSuite({
 		assert.equal(domNode.getAttribute('original'), 'woop');
 		assert.equal(domNode.getAttribute('id'), 'foo');
 		assert.deepEqual(domNode.extra, { foo: 'bar' });
-
 	},
 	'supports events'() {
 		const domNode: any = document.createElement('custom-element');

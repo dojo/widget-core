@@ -49,11 +49,10 @@ registerSuite({
 			assert.isTrue(widgetStub.notCalled);
 			assert.isTrue(projectorStub.notCalled);
 		},
-		'add root emits Widget and element event'() {
+		'add root emits Widget'() {
 			nodeHandler.addRoot(element, 'foo');
 
 			assert.isTrue(widgetStub.calledOnce);
-			assert.isTrue(elementStub.calledOnce);
 			assert.isTrue(projectorStub.notCalled);
 		},
 		'add root without a key emits Widget event only'() {

@@ -28,7 +28,7 @@ registerSuite({
 	'has checks nodehandler for nodes'() {
 		const nodeHandler = new NodeHandler();
 		const element = document.createElement('div');
-		nodeHandler.add(element, { key: 'foo' });
+		nodeHandler.add(element, 'foo');
 		const meta = new MetaBase({
 			invalidate: () => {},
 			nodeHandler
@@ -41,7 +41,7 @@ registerSuite({
 		const nodeHandler = new NodeHandler();
 		const invalidate = stub();
 		const element = document.createElement('div');
-		nodeHandler.add(element, { key: 'foo' });
+		nodeHandler.add(element, 'foo');
 
 		class MyMeta extends MetaBase {
 			callGetNode(key: string) {
@@ -99,7 +99,7 @@ registerSuite({
 
 		const element = document.createElement('div');
 
-		nodeHandler.add(element, { key: 'foo' });
+		nodeHandler.add(element, 'foo');
 
 		resolveRAF();
 		assert.isTrue(invalidate.calledOnce);
@@ -181,12 +181,10 @@ registerSuite({
 		const onFoo = stub();
 		const onBar = stub();
 		const onWidget = stub();
-		const onProjector = stub();
 
 		nodeHandler.on('foo', onFoo);
 		nodeHandler.on('bar', onBar);
 		nodeHandler.on(NodeEventType.Widget, onWidget);
-		nodeHandler.on(NodeEventType.Projector, onProjector);
 
 		const div = document.createElement('div');
 		widget.append(div);
@@ -196,9 +194,7 @@ registerSuite({
 		assert.isTrue(onFoo.calledOnce, '3');
 		assert.isTrue(onBar.calledOnce, '4');
 		assert.isTrue(onWidget.calledOnce, '5');
-		assert.isTrue(onProjector.calledOnce, '6');
-		assert.isTrue(onFoo.calledBefore(onWidget), '7');
-		assert.isTrue(onFoo.calledBefore(onProjector), '8');
+		assert.isTrue(onFoo.calledBefore(onWidget), '6');
 	},
 	'integration with multiple root node'() {
 		class MyMeta extends MetaBase {
@@ -245,8 +241,6 @@ registerSuite({
 		assert.isTrue(onFoo.calledOnce);
 		assert.isTrue(onBar.calledOnce);
 		assert.isTrue(onWidget.calledOnce);
-		assert.isTrue(onProjector.calledOnce);
 		assert.isTrue(onFoo.calledBefore(onWidget));
-		assert.isTrue(onFoo.calledBefore(onProjector));
 	}
 });

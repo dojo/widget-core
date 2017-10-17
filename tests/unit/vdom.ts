@@ -707,7 +707,7 @@ describe('vdom', () => {
 
 		it('element-created not emitted for new nodes without a key', () => {
 			dom.create(v('div'), projectorStub);
-			assert.isTrue(projectorStub.emit.notCalled);
+			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-created' }));
 		});
 
 		it('element-created emitted for new nodes with a key', () => {
@@ -718,7 +718,7 @@ describe('vdom', () => {
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
 			projection.update(v('div'));
-			assert.isTrue(projectorStub.emit.notCalled);
+			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-updated' }));
 		});
 
 		it('element-updated not emitted for updated nodes without a key', () => {
