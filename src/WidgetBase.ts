@@ -42,7 +42,6 @@ export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
 const boundAuto = auto.bind(null);
-let id = 0;
 
 /**
  * Main widget base for all widgets to extend
@@ -108,8 +107,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _nodeHandler: NodeHandler;
 
-	private _baseId = id++;
-
 	/**
 	 * @constructor
 	 */
@@ -143,12 +140,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		}));
 
 		this.own(this._registry.on('invalidate', this._boundInvalidate));
-		console.log(`created ${(this as any).constructor.name} - ${this._baseId}`);
-	}
-
-	destroy() {
-		console.log(`destorying ${(this as any).constructor.name} - ${this._baseId}`);
-		return super.destroy();
 	}
 
 	protected meta<T extends WidgetMetaBase>(MetaType: WidgetMetaConstructor<T>): T {
