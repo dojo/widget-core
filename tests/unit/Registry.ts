@@ -81,7 +81,9 @@ registerSuite('Registry', {
 				assert.strictEqual(factory, WidgetBase);
 			},
 			'get allows a generic to passed that defines the type of registry item'() {
-				class TestWidget extends WidgetBase<{foo: string}> {}
+				class TestWidget extends WidgetBase<{ foo: string }> {
+				}
+
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('test-widget', TestWidget);
 				const RegistryTestWidget = factoryRegistry.get<TestWidget>('test-widget');
@@ -97,9 +99,7 @@ registerSuite('Registry', {
 			},
 			'replaces promise with result on resolution'() {
 				const promise: any = new Promise((resolve) => {
-					setTimeout(() => {
-						resolve(WidgetBase);
-					}, 250);
+					resolve(WidgetBase);
 				});
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('my-widget', promise);
@@ -111,9 +111,7 @@ registerSuite('Registry', {
 			},
 			'replaces promise created by function with result on resolution'() {
 				let promise: Promise<any> = new Promise((resolve, reject) => {
-					setTimeout(() => {
-						resolve(WidgetBase);
-					}, 250);
+					resolve(WidgetBase);
 				});
 				let lazyFactory = () => promise;
 
@@ -127,9 +125,7 @@ registerSuite('Registry', {
 			},
 			'throws error from rejected promise'() {
 				let promise: Promise<any> = new Promise((resolve, reject) => {
-					setTimeout(() => {
-						reject(new Error('reject error'));
-					}, 250);
+					reject(new Error('reject error'));
 				}).then(() => {
 						assert.fail();
 					},
