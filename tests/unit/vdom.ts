@@ -1,8 +1,8 @@
-import { describe, it } from 'intern!bdd';
+import { beforeEach, describe, it } from 'intern!bdd';
 import * as assert from 'intern/chai!assert';
 import { match, spy, stub } from 'sinon';
 
-import { dom } from '../../src/vdom';
+import { dom, InternalHNode } from '../../src/vdom';
 import { v } from '../../src/d';
 
 const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgument: Function) => {
@@ -11,12 +11,21 @@ const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgum
 	};
 };
 
+const projectorStub: any = {
+	on: stub(),
+	emit: stub()
+};
+
 describe('vdom', () => {
+	beforeEach(() => {
+		projectorStub.on.reset();
+		projectorStub.emit.reset();
+	});
 
 	describe('create', () => {
 
 		it('should create and update single text nodes', () => {
-			const projection = dom.create(v('div', [ 'text' ]), null);
+			const projection = dom.create(v('div', [ 'text' ]), projectorStub);
 			assert.strictEqual(projection.domNode.outerHTML, '<div>text</div>');
 
 			projection.update(v('div', [ 'text2' ]));
@@ -33,7 +42,7 @@ describe('vdom', () => {
 		});
 
 		it('should work correctly with adjacent text nodes', () => {
-			const projection = dom.create(v('div', [ '', '1', '' ]), null);
+			const projection = dom.create(v('div', [ '', '1', '' ]), projectorStub);
 			assert.strictEqual(projection.domNode.outerHTML, '<div>1</div>');
 
 			projection.update(v('div', [ ' ', '' ]));
@@ -43,8 +52,17 @@ describe('vdom', () => {
 			assert.strictEqual(projection.domNode.outerHTML, '<div>1</div>');
 		});
 
+		it('should break update when vdom object references are equal', () => {
+			const vnode = v('div', [ 'text' ]);
+			const projection = dom.create(vnode, projectorStub);
+			assert.strictEqual(projection.domNode.outerHTML, '<div>text</div>');
+			vnode.text = 'new';
+			projection.update(vnode);
+			assert.strictEqual(projection.domNode.outerHTML, '<div>text</div>');
+		});
+
 		it('should give a meaningful error when the root selector is changed', () => {
-			const projection = dom.create(v('div'), null);
+			const projection = dom.create(v('div'), projectorStub);
 			assert.throws(() => {
 				projection.update(v('span'));
 			}, Error, 'may not be changed');
@@ -58,12 +76,12 @@ describe('vdom', () => {
 			node.appendChild(childNode);
 			const appendChildSpy = spy(node, 'appendChild');
 
-			const childVNode = v('span', { id: 'b' });
+			const childVNode = v('span', { id: 'b' }) as InternalHNode;
 			childVNode.domNode = childNode;
-			const vnode = v('div', { id: 'a' }, [ childVNode ]);
+			const vnode = v('div', { id: 'a' }, [ childVNode ]) as InternalHNode;
 			vnode.domNode = node;
 
-			const projection = dom.create(vnode, null);
+			const projection = dom.create(vnode, projectorStub);
 			const root = projection.domNode as any;
 			assert.strictEqual(root.outerHTML, '<div id="a"><span id="b"></span></div>');
 			assert.strictEqual(root.foo, 'foo');
@@ -75,7 +93,7 @@ describe('vdom', () => {
 	describe('properties', () => {
 
 		it('updates attributes', () => {
-			const projection = dom.create(v('a', { href: '#1' }), null);
+			const projection = dom.create(v('a', { href: '#1' }), projectorStub);
 			const link = projection.domNode as HTMLLinkElement;
 			assert.strictEqual(link.getAttribute('href'), '#1');
 
@@ -87,7 +105,7 @@ describe('vdom', () => {
 		});
 
 		it('can add an attribute that was initially undefined', () => {
-			const projection = dom.create(v('a', { href: undefined }), null);
+			const projection = dom.create(v('a', { href: undefined }), projectorStub);
 			const link = projection.domNode as HTMLLinkElement;
 			assert.isNull(link.getAttribute('href'));
 
@@ -96,7 +114,7 @@ describe('vdom', () => {
 		});
 
 		it('can remove disabled property when set to null or undefined', () => {
-			const projection = dom.create(v('a', { disabled: true }), null);
+			const projection = dom.create(v('a', { disabled: true }), projectorStub);
 			const link = projection.domNode as HTMLLinkElement;
 
 			assert.isTrue(link.disabled);
@@ -114,7 +132,7 @@ describe('vdom', () => {
 		});
 
 		it('updates properties', () => {
-			const projection = dom.create(v('a', { href: '#1', tabIndex: 1 }), null);
+			const projection = dom.create(v('a', { href: '#1', tabIndex: 1 }), projectorStub);
 			const link = projection.domNode as HTMLLinkElement;
 			assert.strictEqual(link.tabIndex, 1);
 
@@ -126,7 +144,7 @@ describe('vdom', () => {
 		});
 
 		it('updates innerHTML', () => {
-			const projection = dom.create(v('p', { innerHTML: '<span>INNER</span>' }), null);
+			const projection = dom.create(v('p', { innerHTML: '<span>INNER</span>' }), projectorStub);
 			const paragraph = projection.domNode;
 			assert.lengthOf(paragraph.childNodes, 1);
 			assert.strictEqual(paragraph.childNodes[0].textContent, 'INNER');
@@ -136,7 +154,7 @@ describe('vdom', () => {
 		});
 
 		it('does not mess up scrolling in Edge', () => {
-			const projection = dom.create(v('div', { scrollTop: 0 }), null);
+			const projection = dom.create(v('div', { scrollTop: 0 }), projectorStub);
 			const div = projection.domNode as HTMLDivElement;
 			Object.defineProperty(div, 'scrollTop', {
 				get: () => 1,
@@ -148,7 +166,7 @@ describe('vdom', () => {
 		describe('classes', () => {
 
 			it('adds and removes classes', () => {
-				const projection = dom.create(v('div', { classes: { a: true, b: false } }), null);
+				const projection = dom.create(v('div', { classes: { a: true, b: false } }), projectorStub);
 				const div = projection.domNode as HTMLDivElement;
 				assert.strictEqual(div.className, 'a');
 
@@ -160,7 +178,7 @@ describe('vdom', () => {
 			});
 
 			it('allows a constant class to be applied to make JSX workable', () => {
-				const projection = dom.create(v('div', { class: 'extra special' }), null);
+				const projection = dom.create(v('div', { class: 'extra special' }), projectorStub);
 				assert.strictEqual(projection.domNode.outerHTML, '<div class="extra special"></div>');
 				projection.update(v('div', { class: 'extra special' }));
 				assert.throws(() => {
@@ -172,7 +190,7 @@ describe('vdom', () => {
 				const projection = dom.create(v('div', {
 					classes: { extra: true },
 					class: 'special' }
-				), null);
+				), projectorStub);
 				assert.strictEqual(projection.domNode.outerHTML, '<div class="extra special"></div>');
 				projection.update(v('div', { classes: { extra: false }, class: 'special' }));
 				assert.strictEqual(projection.domNode.outerHTML, '<div class="special"></div>');
@@ -180,7 +198,7 @@ describe('vdom', () => {
 
 			it('helps to prevent mistakes when using className', () => {
 				assert.throws(() => {
-					dom.create(v('div', { className: 'special' }), null);
+					dom.create(v('div', { className: 'special' }), projectorStub);
 				}, Error);
 			});
 
@@ -190,7 +208,7 @@ describe('vdom', () => {
 
 			it('should not allow non-string values', () => {
 				try {
-					dom.create(v('div', { styles: { height: 20 as any } }), null);
+					dom.create(v('div', { styles: { height: 20 as any } }), projectorStub);
 					assert.fail();
 				} catch (e) {
 					assert.isTrue(e.message.indexOf('strings') >= 0);
@@ -198,35 +216,35 @@ describe('vdom', () => {
 			});
 
 			it('should add styles to the real DOM', () => {
-				const projection = dom.create(v('div', { styles: { height: '20px' } }), null);
+				const projection = dom.create(v('div', { styles: { height: '20px' } }), projectorStub);
 				assert.strictEqual(projection.domNode.outerHTML, '<div style="height: 20px;"></div>');
 			});
 
 			it('should update styles', () => {
-				const projection = dom.create(v('div', { styles: { height: '20px' } }), null);
+				const projection = dom.create(v('div', { styles: { height: '20px' } }), projectorStub);
 				projection.update(v('div', { styles: { height: '30px' } }));
 				assert.strictEqual(projection.domNode.outerHTML, '<div style="height: 30px;"></div>');
 			});
 
 			it('should remove styles', () => {
-				const projection = dom.create(v('div', { styles: { height: '20px' } }), null);
+				const projection = dom.create(v('div', { styles: { height: '20px' } }), projectorStub);
 				projection.update(v('div', { styles: { height: null } }));
 				assert.strictEqual(projection.domNode.outerHTML, '<div style=""></div>');
 			});
 
 			it('should add styles', () => {
-				const projection = dom.create(v('div', { styles: { height: undefined } }), null);
+				const projection = dom.create(v('div', { styles: { height: undefined } }), projectorStub);
 				projection.update(v('div', { styles: { height: '20px' } }));
 				assert.strictEqual(projection.domNode.outerHTML, '<div style="height: 20px;"></div>');
 				projection.update(v('div', { styles: { height: '20px' } }));
 			});
 
 			it('should use the provided styleApplyer', () => {
-				let styleApplyer = (domNode: any, styleName: string, value: string) => {
+				const styleApplyer = (domNode: any, styleName: string, value: string) => {
 					// Useless styleApplyer which transforms height to minHeight
 					domNode.style['min' + styleName.substr(0, 1).toUpperCase() + styleName.substr(1)] = value;
 				};
-				let projection = dom.create(v('div', { styles: { height: '20px' } }), null, { styleApplyer: styleApplyer });
+				const projection = dom.create(v('div', { styles: { height: '20px' } }), projectorStub, { styleApplyer: styleApplyer });
 				assert.strictEqual(projection.domNode.outerHTML, '<div style="min-height: 20px;"></div>');
 				projection.update(v('div', { styles: { height: '30px' } }));
 				assert.strictEqual(projection.domNode.outerHTML, '<div style="min-height: 30px;"></div>');
@@ -242,7 +260,7 @@ describe('vdom', () => {
 					typedKeys = evt.target.value.substr(0, 2);
 				};
 				const renderFunction = () => v('input', { value: typedKeys, oninput: handleInput });
-				const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+				const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 				const inputElement = projection.domNode as HTMLInputElement;
 				assert.strictEqual(inputElement.value, typedKeys);
 
@@ -268,7 +286,7 @@ describe('vdom', () => {
 
 				const renderFunction = () => v('input', { value: typedKeys, oninput: handleInput });
 
-				const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+				const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 				const inputElement = (projection.domNode as HTMLInputElement);
 				assert.strictEqual(inputElement.value, typedKeys);
 
@@ -291,7 +309,7 @@ describe('vdom', () => {
 			it('does not allow event handlers to be updated, for performance reasons', () => {
 				const handler1 = () => undefined as void;
 				const handler2 = () => undefined as void;
-				const projection = dom.create(v('button', { onclick: handler1 }), null);
+				const projection = dom.create(v('button', { onclick: handler1 }), projectorStub);
 				assert.throws(() => {
 					projection.update(v('button', { onclick: handler2 }));
 				});
@@ -306,7 +324,7 @@ describe('vdom', () => {
 			};
 
 			const renderFunction = () => v('input', { value: typedKeys, oninput: handleInput });
-			const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 			const inputElement = (projection.domNode as HTMLInputElement);
 			assert.strictEqual(inputElement.value, typedKeys);
 			typedKeys = 'value1';
@@ -322,7 +340,7 @@ describe('vdom', () => {
 
 			const renderFunction = () => v('input', { value: typedKeys, oninput: handleInput });
 
-			const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 			const inputElement = (projection.domNode as HTMLInputElement);
 			assert.strictEqual(inputElement.value, typedKeys);
 
@@ -344,7 +362,7 @@ describe('vdom', () => {
 			};
 
 			const renderFunction = () => v('input', { value: model, oninput: handleInput });
-			const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 
 			const inputElement = (projection.domNode as HTMLInputElement);
 			assert.strictEqual(inputElement.value, model);
@@ -369,7 +387,7 @@ describe('vdom', () => {
 			let role: string | undefined = 'button';
 			const renderFunction = () => v('div', { role: role });
 
-			const projection = dom.create(renderFunction(), { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
 			const element = projection.domNode;
 
 			assert.property(element.attributes, 'role');
@@ -389,7 +407,7 @@ describe('vdom', () => {
 				v('span', { key: 1 }),
 				v('span', { key: 2 }),
 				v('span', { key: 3 })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 3);
@@ -420,7 +438,7 @@ describe('vdom', () => {
 			const projection = dom.create(v('div', [
 				v('span', { key: 2 }),
 				v('span', { key: 4 })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 2);
@@ -444,7 +462,7 @@ describe('vdom', () => {
 			const projection = dom.create(v('div', [
 				v('span', { key: 'one' }),
 				v('span', { key: 'three' })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 2);
@@ -468,7 +486,7 @@ describe('vdom', () => {
 				v('span', { key: null as any }),
 				v('span', { key: '' }),
 				v('span', {})
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 4);
@@ -496,7 +514,7 @@ describe('vdom', () => {
 				v('span', { key: 'one' }),
 				v('span', { key: 'two' }),
 				v('span', { key: 'three' })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 3);
@@ -518,7 +536,7 @@ describe('vdom', () => {
 				v('span', { key: 0 }),
 				v('span', { key: false }),
 				v('span', { key: null as any })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 3);
@@ -539,7 +557,7 @@ describe('vdom', () => {
 			const projection = dom.create(v('div', [
 				v('span', { key: 'a' }),
 				v('span', { key: 'b' })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 2);
@@ -560,7 +578,7 @@ describe('vdom', () => {
 			const projection = dom.create(v('div', [
 				v('span', { key: 2 }),
 				v('span', { key: 4 })
-			]), null);
+			]), projectorStub);
 
 			const div = projection.domNode;
 			assert.lengthOf(div.childNodes, 2);
@@ -580,7 +598,7 @@ describe('vdom', () => {
 		});
 
 		it('can update single text nodes', () => {
-			const projection = dom.create(v('span', [ '' ]), null);
+			const projection = dom.create(v('span', [ '' ]), projectorStub);
 			const span = projection.domNode;
 			assert.lengthOf(span.childNodes, 1);
 
@@ -604,7 +622,7 @@ describe('vdom', () => {
 			const projection = dom.create(v('div', [
 				v('span', [ 'a' ]),
 				v('span', [ 'c' ])
-			]), null);
+			]), projectorStub);
 			assert.throws(() => {
 				projection.update(v('div', [
 					v('span', [ 'a' ]),
@@ -619,7 +637,7 @@ describe('vdom', () => {
 				v('span', [ 'a' ]),
 				v('span', [ 'b' ]),
 				v('span', [ 'c' ])
-			]), null);
+			]), projectorStub);
 			assert.throws(() => {
 				projection.update(v('div', [
 					v('span', [ 'a' ]),
@@ -638,7 +656,7 @@ describe('vdom', () => {
 				oninput: handleInput,
 				innerHTML: text
 			});
-			const projection = dom.create(renderMaquette(), null);
+			const projection = dom.create(renderMaquette(), projectorStub);
 
 			projection.domNode.removeChild(projection.domNode.childNodes[0]);
 			handleInput({ currentTarget: projection.domNode });
@@ -660,7 +678,7 @@ describe('vdom', () => {
 						v('image', { href: '/image.jpeg' })
 					]),
 					v('span')
-				]), null);
+				]), projectorStub);
 				const svg = projection.domNode.childNodes[0];
 				assert.strictEqual(svg.namespaceURI, 'http://www.w3.org/2000/svg');
 				const circle = svg.childNodes[0];
@@ -685,40 +703,29 @@ describe('vdom', () => {
 
 	});
 
-	describe('afterCreate', () => {
+	describe('node callbacks', () => {
 
-		it('is always invoked when a new node is rendered', () => {
-			let afterCreate = stub();
-			let projection = dom.create(v('div', { afterCreate }), null);
-			assert.isTrue(afterCreate.calledWith(projection.domNode));
+		it('element-created not emitted for new nodes without a key', () => {
+			dom.create(v('div'), projectorStub);
+			assert.isTrue(projectorStub.emit.notCalled);
 		});
 
-		it('invokes afterCreate with "this" set to the value of the bind property', () => {
-			let afterCreate = stub();
-			let thisObject = stub();
-			dom.create(v('div', { afterCreate, bind: thisObject as any }), null);
-			assert.isTrue(afterCreate.calledOn(thisObject));
+		it('element-created emitted for new nodes with a key', () => {
+			const projection = dom.create(v('div', { key: '1' }), projectorStub);
+			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-created', element: projection.domNode, key: '1' }));
 		});
 
-	});
-
-	describe('afterUpdate', () => {
-
-		it('is always invoked when the dom is being rendered, regardless of updates to the node itself', () => {
-			let afterUpdate = stub();
-			let projection = dom.create(v('div', { afterUpdate }), null);
-			projection.update(v('div', { afterUpdate }));
-			assert.isTrue(afterUpdate.calledWith(projection.domNode));
+		it('element-updated not emitted for updated nodes without a key', () => {
+			const projection = dom.create(v('div'), projectorStub);
+			projection.update(v('div'));
+			assert.isTrue(projectorStub.emit.notCalled);
 		});
 
-		it('invokes afterUpdate with "this" set to the value of the bind property', () => {
-			let afterUpdate = stub();
-			let thisObject = stub();
-			let projection = dom.create(v('div', { afterUpdate, bind: thisObject as any }), null);
-			projection.update(v('div', { afterUpdate: afterUpdate, bind: thisObject as any }));
-			assert.isTrue(afterUpdate.calledOn(thisObject));
+		it('element-updated not emitted for updated nodes without a key', () => {
+			const projection = dom.create(v('div'), projectorStub);
+			projection.update(v('div', { key: '1' }));
+			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-updated', element: projection.domNode, key: '1' }));
 		});
-
 	});
 
 	describe('animations', () => {
@@ -727,7 +734,7 @@ describe('vdom', () => {
 
 			it('is invoked when a node contains only text and that text changes', () => {
 				const updateAnimation = stub();
-				const projection = dom.create(v('div', { updateAnimation }, [ 'text' ]), null);
+				const projection = dom.create(v('div', { updateAnimation }, [ 'text' ]), projectorStub);
 				projection.update(v('div', { updateAnimation }, [ 'text2' ]));
 				assert.isTrue(updateAnimation.calledOnce);
 				assert.strictEqual(projection.domNode.outerHTML, '<div>text2</div>');
@@ -739,7 +746,7 @@ describe('vdom', () => {
 					'textBefore',
 					v('span'),
 					'textAfter'
-				]), null);
+				]), projectorStub);
 				projection.update(v('div', { updateAnimation }, [
 					'textBefore',
 					v('span'),
@@ -758,7 +765,7 @@ describe('vdom', () => {
 
 			it('is invoked when a property changes', () => {
 				const updateAnimation = stub();
-				const projection = dom.create(v('a', { updateAnimation, href: '#1' }), null);
+				const projection = dom.create(v('a', { updateAnimation, href: '#1' }), projectorStub);
 				projection.update(v('a', { updateAnimation, href: '#2' }));
 				assert.isTrue(updateAnimation.calledWith(
 					projection.domNode,
@@ -772,7 +779,7 @@ describe('vdom', () => {
 
 			it('is invoked when a new node is added to an existing parent node', () => {
 				const enterAnimation = stub();
-				const projection = dom.create(v('div', []), null);
+				const projection = dom.create(v('div', []), projectorStub);
 
 				projection.update(v('div', [
 					v('span', { enterAnimation })
@@ -788,7 +795,7 @@ describe('vdom', () => {
 				const exitAnimation = stub();
 				const projection = dom.create(v('div', [
 					v('span', { exitAnimation })
-				]), null);
+				]), projectorStub);
 
 				projection.update(v('div', []));
 
@@ -805,7 +812,7 @@ describe('vdom', () => {
 
 			it('will be invoked when enterAnimation is provided as a string', () => {
 				const transitionStrategy = { enter: stub(), exit: stub() };
-				const projection = dom.create(v('div'), null, { transitions: transitionStrategy });
+				const projection = dom.create(v('div'), projectorStub, { transitions: transitionStrategy });
 
 				projection.update(v('div', [
 					v('span', { enterAnimation: 'fadeIn' })
@@ -824,7 +831,7 @@ describe('vdom', () => {
 					v('div', [
 						v('span', { exitAnimation: 'fadeOut' })
 					]),
-					null,
+					projectorStub,
 					{ transitions: transitionStrategy }
 				);
 
@@ -842,7 +849,7 @@ describe('vdom', () => {
 			});
 
 			it('will complain about a missing transitionStrategy', () => {
-				const projection = dom.create(v('div'), null, {});
+				const projection = dom.create(v('div'), projectorStub, {});
 
 				assert.throws(() => {
 					projection.update(v('div', [
