@@ -387,8 +387,8 @@ registerSuite({
 			const themeableInstance = new InjectedTheme();
 			themeableInstance.__setCoreProperties__({ bind: themeableInstance, baseRegistry: testRegistry });
 			themeableInstance.__setProperties__({});
-			const vNode: any = themeableInstance.__render__();
-			assert.deepEqual(vNode.properties.classes, { theme1Class1: true });
+			const renderResult: any = themeableInstance.__render__();
+			assert.deepEqual(renderResult.properties.classes, { theme1Class1: true });
 		},
 		'theme will not be injected if a theme has been passed via a property'() {
 			const injector = new Injector(testTheme1);
@@ -401,8 +401,8 @@ registerSuite({
 			const themeableInstance = new InjectedTheme();
 			themeableInstance.__setCoreProperties__({ bind: themeableInstance, baseRegistry: testRegistry });
 			themeableInstance.__setProperties__({ theme: testTheme2 });
-			const vNode: any = themeableInstance.__render__();
-			assert.deepEqual(vNode.properties.classes, { theme2Class1: true });
+			const renderResult: any = themeableInstance.__render__();
+			assert.deepEqual(renderResult.properties.classes, { theme2Class1: true });
 		},
 		'does not attempt to inject if the ThemeInjector has not been defined in the registry'() {
 			class InjectedTheme extends TestWidget {
@@ -412,8 +412,8 @@ registerSuite({
 
 			}
 			const themeableInstance = new InjectedTheme();
-			const vNode: any = themeableInstance.__render__();
-			assert.deepEqual(vNode.properties.classes, { baseClass1: true });
+			const renderResult: any = themeableInstance.__render__();
+			assert.deepEqual(renderResult.properties.classes, { baseClass1: true });
 		},
 		'setting the theme invalidates and the new theme is used'() {
 			const themeInjectorContext = registerThemeInjector(testTheme1, testRegistry);
@@ -425,16 +425,16 @@ registerSuite({
 
 			const testWidget = new InjectedTheme();
 			testWidget.__setCoreProperties__({ bind: testWidget, baseRegistry: testRegistry });
-			let vNode: any = testWidget.__render__();
-			assert.deepEqual(vNode.properties.classes, { baseClass1: true });
+			let renderResult: any = testWidget.__render__();
+			assert.deepEqual(renderResult.properties.classes, { baseClass1: true });
 			themeInjectorContext.set(testTheme2);
 			testWidget.__setProperties__({});
-			vNode = testWidget.__render__();
-			assert.deepEqual(vNode.properties.classes, { baseClass1: false, theme2Class1: true });
+			renderResult = testWidget.__render__();
+			assert.deepEqual(renderResult.properties.classes, { baseClass1: false, theme2Class1: true });
 			themeInjectorContext.set(testTheme1);
 			testWidget.__setProperties__({});
-			vNode = testWidget.__render__();
-			assert.deepEqual(vNode.properties.classes, { baseClass1: false, theme2Class1: false, theme1Class1: true });
+			renderResult = testWidget.__render__();
+			assert.deepEqual(renderResult.properties.classes, { baseClass1: false, theme2Class1: false, theme1Class1: true });
 		}
 	},
 	'integration': {

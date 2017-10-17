@@ -15,9 +15,9 @@ export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): D
 	return class extends WidgetBase<DomWrapperProperties> {
 
 		public __render__(): HNode {
-			const vNode = super.__render__() as InternalHNode;
-			vNode.domNode = domNode;
-			return vNode;
+			const hNode = super.__render__() as InternalHNode;
+			hNode.domNode = domNode;
+			return hNode;
 		}
 
 		protected onElementCreated(element: Element, key: string) {

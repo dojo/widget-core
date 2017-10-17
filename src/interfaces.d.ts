@@ -1,7 +1,6 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import { Evented } from '@dojo/core/Evented';
 import { EventTargettedObject } from '@dojo/interfaces/core';
-import { VNode, ProjectionOptions as MaquetteProjectionOptions } from '@dojo/interfaces/vdom';
 import Map from '@dojo/shim/Map';
 
 /**
@@ -86,7 +85,6 @@ export interface VirtualDomProperties {
 	 * The animation to perform when this node is added to an already existing parent.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the
 	 * projector using [[createProjector]].
-	 * {@link http://maquettejs.org/docs/animations.html|More about animations}.
 	 * @param element - Element that was just added to the DOM.
 	 * @param properties - The properties object that was supplied to the [[h]] method
 	 */
@@ -94,45 +92,21 @@ export interface VirtualDomProperties {
 	/**
 	 * The animation to perform when this node is removed while its parent remains.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the projector using [[createProjector]].
-	 * {@link http://maquettejs.org/docs/animations.html|More about animations}.
 	 * @param element - Element that ought to be removed from the DOM.
 	 * @param removeElement - Function that removes the element from the DOM.
 	 * This argument is provided purely for convenience.
 	 * You may use this function to remove the element when the animation is done.
-	 * @param properties - The properties object that was supplied to the [[h]] method that rendered this [[VNode]] the previous time.
+	 * @param properties - The properties object that was supplied to the [[v]] method that rendered this [[HNode]] the previous time.
 	 */
 	exitAnimation?: ((element: Element, removeElement: () => void, properties?: VirtualDomProperties) => void) | string;
 	/**
 	 * The animation to perform when the properties of this node change.
 	 * This also includes attributes, styles, css classes. This callback is also invoked when node contains only text and that text changes.
-	 * {@link http://maquettejs.org/docs/animations.html|More about animations}.
 	 * @param element - Element that was modified in the DOM.
 	 * @param properties - The last properties object that was supplied to the [[h]] method
 	 * @param previousProperties - The previous properties object that was supplied to the [[h]] method
 	 */
 	updateAnimation?: (element: Element, properties?: VirtualDomProperties, previousProperties?: VirtualDomProperties) => void;
-	/**
-	 * Callback that is executed after this node is added to the DOM. Child nodes and properties have
-	 * already been applied.
-	 * @param element - The element that was added to the DOM.
-	 * @param projectionOptions - The projection options that were used, see [[createProjector]].
-	 * @param vnodeSelector - The selector passed to the [[h]] function.
-	 * @param properties - The properties passed to the [[h]] function.
-	 * @param children - The children that were created.
-	 */
-	afterCreate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VirtualDomProperties,
-	children: VNode[]): void;
-	/**
-	 * Callback that is executed every time this node may have been updated. Child nodes and properties
-	 * have already been updated.
-	 * @param element - The element that may have been updated in the DOM.
-	 * @param projectionOptions - The projection options that were used, see [[createProjector]].
-	 * @param vnodeSelector - The selector passed to the [[h]] function.
-	 * @param properties - The properties passed to the [[h]] function.
-	 * @param children - The children for this node.
-	 */
-	afterUpdate?(element: Element, projectionOptions: ProjectionOptions, vnodeSelector: string, properties: VirtualDomProperties,
-	children: VNode[]): void;
 	/**
 	 * Bind should not be defined.
 	 */
@@ -284,12 +258,12 @@ export interface HNode {
 	children?: DNode[];
 
 	/**
-	 * The properties used to create the VNode
+	 * HNode properties
 	 */
 	properties: VirtualDomProperties;
 
 	/**
-	 * The tagname used to create the VNode
+	 * The tag of the HNode
 	 */
 	tag: string;
 

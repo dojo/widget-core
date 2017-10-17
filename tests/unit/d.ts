@@ -66,7 +66,7 @@ registerSuite({
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
 		},
-		'create WNode wrapper using constructor with VNode children'() {
+		'create WNode wrapper using constructor with HNode children'() {
 			const dNode = w(TestChildWidget, { myChildProperty: '' }, [ v('div') ]);
 
 			assert.equal(dNode.type, WNODE);

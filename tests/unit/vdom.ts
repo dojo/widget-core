@@ -53,11 +53,11 @@ describe('vdom', () => {
 		});
 
 		it('should break update when vdom object references are equal', () => {
-			const vnode = v('div', [ 'text' ]);
-			const projection = dom.create(vnode, projectorStub);
+			const hNode = v('div', [ 'text' ]);
+			const projection = dom.create(hNode, projectorStub);
 			assert.strictEqual(projection.domNode.outerHTML, '<div>text</div>');
-			vnode.text = 'new';
-			projection.update(vnode);
+			hNode.text = 'new';
+			projection.update(hNode);
 			assert.strictEqual(projection.domNode.outerHTML, '<div>text</div>');
 		});
 
@@ -76,12 +76,12 @@ describe('vdom', () => {
 			node.appendChild(childNode);
 			const appendChildSpy = spy(node, 'appendChild');
 
-			const childVNode = v('span', { id: 'b' }) as InternalHNode;
-			childVNode.domNode = childNode;
-			const vnode = v('div', { id: 'a' }, [ childVNode ]) as InternalHNode;
-			vnode.domNode = node;
+			const childHNode = v('span', { id: 'b' }) as InternalHNode;
+			childHNode.domNode = childNode;
+			const hNode = v('div', { id: 'a' }, [ childHNode ]) as InternalHNode;
+			hNode.domNode = node;
 
-			const projection = dom.create(vnode, projectorStub);
+			const projection = dom.create(hNode, projectorStub);
 			const root = projection.domNode as any;
 			assert.strictEqual(root.outerHTML, '<div id="a"><span id="b"></span></div>');
 			assert.strictEqual(root.foo, 'foo');

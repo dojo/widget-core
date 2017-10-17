@@ -644,14 +644,14 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 
 function createProjection(dnode: InternalHNode, parentInstance: WidgetBase, projectionOptions: ProjectionOptions): Projection {
 	return {
-		update: function(updatedVnode: HNode) {
-			if (dnode.tag !== updatedVnode.tag) {
-				throw new Error('The tag for the root VNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
+		update: function(updatedHNode: HNode) {
+			if (dnode.tag !== updatedHNode.tag) {
+				throw new Error('The tag for the root HNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
 			}
-			updatedVnode.children = filterAndDecorateChildren(updatedVnode.children, parentInstance);
-			updateDom(dnode, updatedVnode as InternalHNode, projectionOptions, dnode.domNode as Element, parentInstance);
+			updatedHNode.children = filterAndDecorateChildren(updatedHNode.children, parentInstance);
+			updateDom(dnode, updatedHNode as InternalHNode, projectionOptions, dnode.domNode as Element, parentInstance);
 			parentInstance.emit({ type: 'widget-updated' });
-			dnode = updatedVnode as InternalHNode;
+			dnode = updatedHNode as InternalHNode;
 		},
 		domNode: dnode.domNode as Element
 	};
