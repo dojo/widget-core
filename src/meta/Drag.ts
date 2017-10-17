@@ -240,14 +240,10 @@ class DragController {
 		// we are offering up an accurate delta, so we need to take the last event position and move it to the start so
 		// that our deltas are calculated from the last time they are read
 		state.start = state.last;
+		// reset the delta after we have read, as any future reads should have an empty delta
+		state.dragResults.delta = createPosition();
 		// clear the start state
 		delete state.dragResults.start;
-
-		// reset the delta after we have read, as any future reads should have an empty delta
-		if (dragResults.delta.x !== 0 && dragResults.delta.y !== 0) {
-			// future reads of the delta will be blank
-			state.dragResults.delta = createPosition();
-		}
 
 		return dragResults;
 	}
