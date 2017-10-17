@@ -5,7 +5,7 @@ import { Handle } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
 import 'pepjs';
 import cssTransitions from '../animations/cssTransitions';
-import { Constructor, DNode, HNode, Projection, ProjectionOptions } from './../interfaces';
+import { Constructor, DNode, Projection, ProjectionOptions } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
 import { afterRender } from './../decorators/afterRender';
 import { isHNode, v } from './../d';
@@ -136,22 +136,6 @@ export interface ProjectorMixin<P> {
 	invalidate(): void;
 }
 
-/**
- * Internal function that maps existing DOM Elements to virtual DOM nodes.
- *
- * The function does not presume DOM will be there.  It does assume that if a DOM `Element` exists that the `VNode`s are in
- * the same DOM order as the `Element`s.  If a DOM Element does not exist, it will set the `vnode.domNode` to `null` and
- * not descend further into the `VNode` children which will cause the maquette projection to create the Element anew.
- * @param vnode The virtual DOM node
- * @param domNode The Element, if any, to set on the virtual DOM node
- */
-// function setDomNodes(hNode: HNode, domNode: Element | null = null) {
-// 	hNode.domNode = domNode;
-// 	if (hNode.children && domNode) {
-// 		hNode.children.forEach((child, i) => setDomNodes(child, domNode.children[i]));
-// 	}
-// }
-
 export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
 	class Projector extends Base {
 
@@ -168,9 +152,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _boundDoRender: () => void;
 		private _boundRender: Function;
 		private _projectorChildren: DNode[] = [];
-		private _resetChildren = true;
 		private _projectorProperties: this['properties'] = {} as this['properties'];
-		private _resetProperties = true;
 		private _rootTagName: string;
 		private _attachType: AttachType;
 
@@ -237,6 +219,8 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 		public scheduleRender() {
 			if (this.projectorState === ProjectorAttachState.Attached && !this._scheduled && !this._paused) {
+				this.__setProperties__(this._projectorProperties);
+				this.__setChildren__(this._projectorChildren);
 				if (this._async) {
 					this._scheduled = global.requestAnimationFrame(this._boundDoRender);
 				}
@@ -287,13 +271,21 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public setChildren(children: DNode[]): void {
-			this._resetChildren = false;
+			this.__setChildren__(children);
+			this.scheduleRender();
+		}
+
+		public __setChildren__(children: DNode[]) {
 			this._projectorChildren = [ ...children ];
-			super.__setChildren__([ ...children ]);
+			super.__setChildren__(children);
 		}
 
 		public setProperties(properties: this['properties']): void {
-			this._resetProperties = false;
+			this.__setProperties__(properties);
+			this.scheduleRender();
+		}
+
+		public __setProperties__(properties: this['properties']): void {
 			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
 				if (this._projectorProperties.registry) {
 					this._projectorProperties.registry.destroy();
@@ -384,9 +376,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 				break;
 				case AttachType.Merge:
 					this._rootTagName = this._root.tagName.toLowerCase();
-					const hNode: HNode = this._boundRender();
-					// setDomNodes(hNode, this.root);
-					this._projection = dom.merge(this.root, hNode, this as WidgetBase, this._projectionOptions);
+					this._projection = dom.merge(this.root, this._boundRender(), this as WidgetBase, this._projectionOptions);
 				break;
 				case AttachType.Replace:
 					this._projection = dom.replace(this.root, this._boundRender(), this as WidgetBase, this._projectionOptions);
