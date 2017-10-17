@@ -186,6 +186,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		return [ ...this._changedPropertyKeys ];
 	}
 
+	public get coreProperties(): CoreProperties {
+		return this._coreProperties;
+	}
+
 	public __setCoreProperties__(coreProperties: CoreProperties): void {
 		this._renderState = WidgetRenderState.PROPERTIES;
 		const { baseRegistry } = coreProperties;

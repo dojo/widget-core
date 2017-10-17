@@ -4,7 +4,6 @@ import {
 	HNode,
 	WNode,
 	ProjectionOptions,
-	ProjectorOptions,
 	Projection,
 	TransitionStrategy,
 	VirtualDomProperties
@@ -57,7 +56,7 @@ export interface InternalHNode extends HNode {
 
 export type InternalDNode = InternalHNode | InternalWNode;
 
-function extend<T>(base: T, overrides: any): T {
+function extend<T>(base: T, overrides: Partial<T> | undefined): T {
 	const result = {} as any;
 	Object.keys(base).forEach(function(key) {
 		result[key] = (base as any)[key];
@@ -333,7 +332,7 @@ export function filterAndDecorateChildren(children: undefined | DNode | DNode[],
 		}
 		else {
 			if (isHNode(child)) {
-				if ((child.properties as any).bind === undefined) {
+				if (child.properties.bind === undefined) {
 					(child.properties as any).bind = instance;
 					if (child.children && child.children.length > 0) {
 						filterAndDecorateChildren(child.children, instance);
@@ -343,7 +342,7 @@ export function filterAndDecorateChildren(children: undefined | DNode | DNode[],
 				if (!child.coreProperties) {
 					child.coreProperties = {
 						bind: instance,
-						baseRegistry: (instance as any)._coreProperties.baseRegistry
+						baseRegistry: instance.coreProperties.baseRegistry
 					};
 				}
 				if (child.children && child.children.length > 0) {
@@ -612,7 +611,7 @@ function createDom(dnode: InternalDNode, parentNode: Node, insertBefore: Node | 
 	}
 }
 
-function updateDom(previous: any, dnode: InternalDNode, projectionOptions: ProjectorOptions, parentNode: Node, parentInstance: WidgetBase) {
+function updateDom(previous: any, dnode: InternalDNode, projectionOptions: ProjectionOptions, parentNode: Node, parentInstance: WidgetBase) {
 	if (previous === dnode) {
 		return false;
 	}
@@ -686,21 +685,21 @@ export const dom = {
 		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
 		createDom(decoratedNode, document.createElement('div'), undefined, projectionOptions, instance);
 		instance.emit({ type: 'widget-created' });
-		return createProjection(hNode as InternalHNode, instance, projectionOptions);
+		return createProjection(decoratedNode, instance, projectionOptions);
 	},
 	append: function(parentNode: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
 		createDom(decoratedNode, parentNode, undefined, projectionOptions, instance);
 		instance.emit({ type: 'widget-created' });
-		return createProjection(hNode as InternalHNode, instance, projectionOptions);
+		return createProjection(decoratedNode, instance, projectionOptions);
 	},
 	insertBefore: function(beforeNode: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
 		createDom(decoratedNode, beforeNode.parentNode!, beforeNode, projectionOptions, instance);
 		instance.emit({ type: 'widget-created' });
-		return createProjection(hNode as InternalHNode, instance, projectionOptions);
+		return createProjection(decoratedNode, instance, projectionOptions);
 	},
 	merge: function(element: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
@@ -708,7 +707,7 @@ export const dom = {
 		decoratedNode.domNode = element;
 		initPropertiesAndChildren(element, decoratedNode, instance, projectionOptions);
 		instance.emit({ type: 'widget-created' });
-		return createProjection(hNode as InternalHNode, instance, projectionOptions);
+		return createProjection(decoratedNode, instance, projectionOptions);
 	},
 	replace: function(element: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
@@ -716,6 +715,6 @@ export const dom = {
 		createDom(decoratedNode, element.parentNode!, element, projectionOptions, instance);
 		instance.emit({ type: 'widget-created' });
 		element.parentNode!.removeChild(element);
-		return createProjection(hNode as InternalHNode, instance, projectionOptions);
+		return createProjection(decoratedNode, instance, projectionOptions);
 	}
 };
