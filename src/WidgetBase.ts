@@ -270,14 +270,12 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	public __render__(): DNode | DNode[] {
 		this._renderState = WidgetRenderState.RENDER;
-		if (this._dirty || !this._cachedDNode) {
+		if (this._dirty || this._cachedDNode === undefined) {
 			this._dirty = false;
 			const render = this._runBeforeRenders();
 			let dNode = render();
-			dNode = this.runAfterRenders(dNode);
+			this._cachedDNode = this.runAfterRenders(dNode);
 			this._nodeHandler.clear();
-			this._renderState = WidgetRenderState.IDLE;
-			this._cachedDNode = dNode;
 		}
 		this._renderState = WidgetRenderState.IDLE;
 		return this._cachedDNode;
