@@ -298,9 +298,10 @@ export interface HNode {
 	 */
 	type: symbol;
 
+	/**
+	 * Text node string
+	 */
 	text?: string;
-
-	domNode?: Element | Text;
 }
 
 /**
@@ -318,11 +319,6 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	properties: W['properties'];
 
 	/**
-	 * Core properties that are used by the widget core system
-	 */
-	coreProperties?: CoreProperties;
-
-	/**
 	 * DNode children
 	 */
 	children: DNode[];
@@ -331,10 +327,6 @@ export interface WNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterfac
 	 * The type of node
 	 */
 	type: symbol;
-
-	instance?: W;
-
-	rendered?: (WNode | HNode)[];
 }
 
 /**

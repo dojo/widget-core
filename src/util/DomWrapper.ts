@@ -1,6 +1,7 @@
 import { WidgetBase } from './../WidgetBase';
 import { Constructor, DNode, HNode, VirtualDomProperties, WidgetProperties } from './../interfaces';
 import { v } from './../d';
+import { InternalHNode } from './../vdom';
 
 export interface DomWrapperOptions {
 	onAttached?(): void;
@@ -14,7 +15,7 @@ export function DomWrapper(domNode: Element, options: DomWrapperOptions = {}): D
 	return class extends WidgetBase<DomWrapperProperties> {
 
 		public __render__(): HNode {
-			const vNode = super.__render__() as HNode;
+			const vNode = super.__render__() as InternalHNode;
 			vNode.domNode = domNode;
 			return vNode;
 		}
