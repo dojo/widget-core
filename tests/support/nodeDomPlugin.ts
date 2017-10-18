@@ -1,40 +1,33 @@
-intern.registerPlugin('nodeDomPlugin', () => {
-	return Promise.all([
-		import('jsdom'),
-		import('@dojo/shim/global')
-	]).then(function ([ jsdom, { default: global } ]) {
-		/* In order to have the tests work under Node.js, we need to load JSDom and polyfill
-		requestAnimationFrame */
+import * as jsdom from 'jsdom';
+import global from '@dojo/shim/global';
 
-		/* Create a basic document */
-		const doc = jsdom.jsdom(`
-			<!DOCTYPE html>
-			<html>
-			<head></head>
-			<body></body>
-			<html>
-		`);
+/* In order to have the tests work under Node.js, we need to load JSDom and polyfill
+requestAnimationFrame */
 
-		/* Assign it to the global namespace */
-		global.document = doc;
+/* Create a basic document */
+const doc = jsdom.jsdom(`
+		<!DOCTYPE html>
+		<html>
+		<head></head>
+		<body></body>
+		<html>
+	`);
 
-		/* Assign a global window as well */
-		global.window = doc.defaultView;
+/* Assign it to the global namespace */
+global.document = doc;
 
-		/* Needed for Pointer Event Polyfill's incorrect Element detection */
-		global.Element = function () {
-		};
+/* Assign a global window as well */
+global.window = doc.defaultView;
 
-		/* Polyfill requestAnimationFrame - this can never be called an *actual* polyfill */
-		global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
-			setImmediate(cb);
-			// return something at least!
-			return true;
-		};
+/* Needed for Pointer Event Polyfill's incorrect Element detection */
+global.Element = function () {};
 
-		global.cancelAnimationFrame = () => {
-		};
-		global.IntersectionObserver = () => {
-		};
-	});
-});
+/* Polyfill requestAnimationFrame - this can never be called an *actual* polyfill */
+global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
+	setImmediate(cb);
+	// return something at least!
+	return true;
+};
+
+global.cancelAnimationFrame = () => {};
+global.IntersectionObserver = () => {};
