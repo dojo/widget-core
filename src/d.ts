@@ -24,15 +24,15 @@ export const HNODE = Symbol('Identifier for a HNode.');
 /**
  * Helper function that returns true if the `DNode` is a `WNode` using the `type` property
  */
-export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: any): child is WNode<W> {
-	return Boolean(child && child.type === WNODE);
+export function isWNode<W extends WidgetBaseInterface = DefaultWidgetBaseInterface>(child: DNode<W>): child is WNode<W> {
+	return Boolean(child && (typeof child !== 'string') && child.type === WNODE);
 }
 
 /**
  * Helper function that returns true if the `DNode` is a `HNode` using the `type` property
  */
-export function isHNode(child: any): child is HNode {
-	return Boolean(child && child.type === HNODE);
+export function isHNode(child: DNode): child is HNode {
+	return Boolean(child && (typeof child !== 'string') && child.type === HNODE);
 }
 
 /**
@@ -82,7 +82,7 @@ export function v(tag: string, properties: VirtualDomProperties, children?: DNod
 export function v(tag: string, children: undefined | DNode[]): HNode;
 export function v(tag: string): HNode;
 export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNode[] = {}, children: undefined | DNode[] = undefined): HNode {
-		let properties: VirtualDomProperties | undefined = propertiesOrChildren;
+		let properties: VirtualDomProperties = propertiesOrChildren;
 
 		if (Array.isArray(propertiesOrChildren)) {
 			children = propertiesOrChildren;

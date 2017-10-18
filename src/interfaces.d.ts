@@ -16,7 +16,7 @@ export interface TypedTargetEvent<T extends EventTarget> extends Event {
 }
 
 /*
- These are the event handlers exposed by Maquette.
+ These are the event handlers.
  */
 export type EventHandlerResult = boolean | void;
 
@@ -193,7 +193,7 @@ export interface VirtualDomProperties {
 	/**
 	 * Puts a non-interactive string of html inside the DOM node.
 	 *
-	 * Note: if you use innerHTML, maquette cannot protect you from XSS vulnerabilities and you must make sure that the innerHTML value is safe.
+	 * Note: if you use innerHTML, cannot protect you from XSS vulnerabilities and you must make sure that the innerHTML value is safe.
 	 */
 	readonly innerHTML?: string;
 
