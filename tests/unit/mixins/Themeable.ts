@@ -52,6 +52,8 @@ class NonDecoratorDuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<T
 	}
 }
 
+class ThemeableWidgetNoCssTheme extends ThemeableMixin(WidgetBase) {}
+
 let consoleStub: SinonStub;
 
 registerSuite({
@@ -376,6 +378,13 @@ registerSuite({
 				assert.strictEqual(consoleStub.firstCall.args[0], `Duplicate base theme class key 'class1' detected, this could cause unexpected results`);
 			}
 		}
+	},
+	'Themeable warns if no css has been configured using `@theme`'() {
+		const widget = new ThemeableWidgetNoCssTheme();
+		widget.classes();
+		assert.isTrue(consoleStub.calledOnce);
+		assert.strictEqual(consoleStub.firstCall.args[0], 'Base CSS has not been registered using `@theme` for themeable widget.');
+
 	},
 	'injecting a theme': {
 		'theme can be injected by defining a ThemeInjector with registry'() {
