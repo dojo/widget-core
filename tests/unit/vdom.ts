@@ -1,11 +1,13 @@
-import { beforeEach, describe, it } from 'intern!bdd';
+import { afterEach, beforeEach, describe, it } from 'intern!bdd';
 import * as assert from 'intern/chai!assert';
-import { match, spy, stub } from 'sinon';
+import { match, spy, stub, SinonStub } from 'sinon';
 
-import { dom, InternalHNode } from '../../src/vdom';
+import { dom, InternalHNode, InternalWNode } from '../../src/vdom';
 import { v, w } from '../../src/d';
 import { HNode } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
+import { Registry } from '../../src/Registry';
+import eventHandlerInterceptor from '../../src/util/eventHandlerInterceptor';
 
 const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgument: Function) => {
 	return function(this: Node) {
@@ -46,11 +48,18 @@ class TestWidget extends WidgetBase<any> {
 	}
 }
 
+let consoleStub: SinonStub;
+
 describe('vdom', () => {
 	beforeEach(() => {
 		projectorStub.on.reset();
 		projectorStub.emit.reset();
+		consoleStub = stub(console, 'warn');
 	});
+
+	afterEach(() => {
+		consoleStub.restore();
+	}),
 
 	describe('widgets', () => {
 
@@ -176,31 +185,352 @@ describe('vdom', () => {
 		});
 
 		it('invalidates up the widget tree', () => {
+			class Foo extends WidgetBase {
+				private _text = 'first';
 
+				private _onClick() {
+					this._text = 'second';
+					this.invalidate();
+				}
+
+				render() {
+					return v('div', { onclick: this._onClick }, [ this._text ]);
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return v('div', [
+						w(Foo, {})
+					]);
+				}
+			}
+
+			class Baz extends WidgetBase {
+				render() {
+					return v('div', [
+						w(Bar, {})
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection = dom.create(
+				widget.__render__() as HNode,
+				widget,
+				{ eventHandlerInterceptor: eventHandlerInterceptor.bind(widget) }
+			);
+
+			const root = projection.domNode as HTMLElement;
+			assert.lengthOf(root.childNodes, 1);
+			const barDiv = root.childNodes[0];
+			assert.lengthOf(barDiv.childNodes, 1);
+			const fooDiv = barDiv.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(fooDiv.childNodes, 1);
+			const fooTextNode = fooDiv.childNodes[0] as Text;
+			assert.strictEqual(fooTextNode.data, 'first');
+			projection.update(widget.__render__() as HNode);
+			assert.lengthOf(root.childNodes, 1);
+			assert.strictEqual(root.childNodes[0], barDiv);
+			assert.lengthOf(barDiv.childNodes, 1);
+			assert.strictEqual(barDiv.childNodes[0], fooDiv);
+			assert.lengthOf(fooDiv.childNodes, 1);
+			assert.strictEqual(fooDiv.childNodes[0], fooTextNode);
+			assert.strictEqual(fooTextNode.data, 'first');
+			fooDiv.onclick({} as any);
+			projection.update(widget.__render__() as HNode);
+			assert.lengthOf(root.childNodes, 1);
+			assert.strictEqual(root.childNodes[0], barDiv);
+			assert.lengthOf(barDiv.childNodes, 1);
+			assert.strictEqual(barDiv.childNodes[0], fooDiv);
+			assert.lengthOf(fooDiv.childNodes, 1);
+			assert.notStrictEqual(fooDiv.childNodes[0], fooTextNode);
+			const updatedFooTextNode = fooDiv.childNodes[0] as Text;
+			assert.strictEqual(updatedFooTextNode.data, 'second');
 		});
 
 		it('DNodes are bound to the parent widget', () => {
+			class Foo extends WidgetBase<any> {
+				render() {
+					return v('div', { onclick: this.properties.onClick }, this.children);
+				}
+			}
 
+			class Bar extends WidgetBase<any> {
+				render() {
+					return v('div', { onclick: this.properties.onClick });
+				}
+			}
+			class App extends WidgetBase {
+
+				public onClickCount = 0;
+
+				_onClick() {
+					this.onClickCount++;
+				}
+
+				render() {
+					return v('div', { onclick: this._onClick }, [
+						w(Foo, { onClick: this._onClick }, [
+							v('div', { onclick: this._onClick }, [
+								w(Bar, {
+									onClick: this._onClick
+								})
+							])
+						])
+					]);
+				}
+			}
+
+			const widget = new App();
+			const projection: any = dom.create(
+				widget.__render__() as HNode,
+				widget,
+				{ eventHandlerInterceptor: eventHandlerInterceptor.bind(widget) }
+			);
+			projection.domNode.onclick();
+			projection.domNode.childNodes[0].onclick();
+			projection.domNode.childNodes[0].childNodes[0].onclick();
+			projection.domNode.childNodes[0].childNodes[0].childNodes[0].onclick();
+			assert.strictEqual(widget.onClickCount, 4);
 		});
 
 		it('supports widget registry items', () => {
+			const baseRegistry = new Registry();
 
-		});
+			class Foo extends WidgetBase<any> {
+				render() {
+					return v('h1', [ this.properties.text ]);
+				}
+			}
+			class Bar extends WidgetBase<any> {
+				render() {
+					return v('h2', [ this.properties.text ]);
+				}
+			}
 
-		it('supports an array of DNodes', () => {
+			baseRegistry.define('foo', Foo);
+			baseRegistry.define('bar', Bar);
+			class Baz extends WidgetBase {
+				render() {
+					return v('div', [
+						w<Foo>('foo', { text: 'foo' }),
+						w<Bar>('bar', { text: 'bar' })
+					]);
+				}
+			}
 
-		});
-
-		it('supports null and undefined return from render', () => {
-
+			const widget = new Baz();
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			const projection: any = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			const headerOne = root.childNodes[0];
+			const headerOneText = headerOne.childNodes[0] as Text;
+			const headerTwo = root.childNodes[1];
+			const headerTwoText = headerTwo.childNodes[0] as Text;
+			assert.strictEqual(headerOneText.data, 'foo');
+			assert.strictEqual(headerTwoText.data, 'bar');
 		});
 
 		it('should invalidate when a registry items is loaded', () => {
+			const baseRegistry = new Registry();
 
+			class Foo extends WidgetBase<any> {
+				render() {
+					return v('h1', [ this.properties.text ]);
+				}
+			}
+			class Bar extends WidgetBase<any> {
+				render() {
+					return v('h2', [ this.properties.text ]);
+				}
+			}
+
+			class Baz extends WidgetBase {
+				render() {
+					return v('div', [
+						w<Foo>('foo', { text: 'foo' }),
+						w<Bar>('bar', { text: 'bar' })
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			const projection: any = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 0);
+			baseRegistry.define('foo', Foo);
+			baseRegistry.define('bar', Bar);
+			projection.update(widget.__render__() as HNode);
+			const headerOne = root.childNodes[0];
+			const headerOneText = headerOne.childNodes[0] as Text;
+			const headerTwo = root.childNodes[1];
+			const headerTwoText = headerTwo.childNodes[0] as Text;
+			assert.strictEqual(headerOneText.data, 'foo');
+			assert.strictEqual(headerTwoText.data, 'bar');
+		});
+
+		it('supports an array of DNodes', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', {}, [ '1' ]),
+						v('div', {}, [ '2' ]),
+						v('div', {}, [ '3' ])
+					];
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return v('div', [
+						w(Foo, {})
+					]);
+				}
+			}
+
+			const widget = new Bar();
+			const renderResult = widget.__render__() as HNode;
+			const projection: any = dom.create(renderResult, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 3);
+			const childOne = root.childNodes[0];
+			assert.lengthOf(childOne.childNodes, 1);
+			const textNodeOne = childOne.childNodes[0] as Text;
+			assert.strictEqual(textNodeOne.data, '1');
+			const childTwo = root.childNodes[1];
+			assert.lengthOf(childTwo.childNodes, 1);
+			const textNodeTwo = childTwo.childNodes[0] as Text;
+			assert.strictEqual(textNodeTwo.data, '2');
+			const childThree = root.childNodes[2];
+			assert.lengthOf(childThree.childNodes, 1);
+			const textNodeThree = childThree.childNodes[0] as Text;
+			assert.strictEqual(textNodeThree.data, '3');
+
+			widget.invalidate();
+			const secondRenderResult = widget.__render__() as HNode;
+			projection.update(secondRenderResult);
+			const firstWNode = secondRenderResult.children![0] as InternalWNode;
+			const secondWNode = secondRenderResult.children![0] as InternalWNode;
+			assert.strictEqual(firstWNode.rendered, secondWNode.rendered);
+		});
+
+		it('supports null and undefined return from render', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return null;
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return undefined;
+				}
+			}
+
+			class Baz extends WidgetBase {
+				render() {
+					return v('div', [
+						w(Foo, {}),
+						w(Bar, {})
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection: any = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 0);
 		});
 
 		it('should destroy widgets when they are no longer required', () => {
+			let fooDestroyedCount = 0;
 
+			class Foo extends WidgetBase {
+				destroy() {
+					fooDestroyedCount++;
+					return super.destroy();
+				}
+				render() {
+					return null;
+				}
+			}
+
+			class Bar extends WidgetBase {
+				private _count = 20;
+
+				set count(value: number) {
+					this._count = value;
+					this.invalidate();
+
+				}
+
+				render() {
+					const children: any[] = [];
+					for (let i = 0; i < this._count; i++) {
+						children.push(w(Foo, { key: i}));
+					}
+
+					return v('div', children);
+				}
+			}
+
+			const widget = new Bar();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			widget.count = 10;
+			projection.update(widget.__render__() as HNode);
+			assert.strictEqual(fooDestroyedCount, 10);
+			fooDestroyedCount = 0;
+			widget.count = 10;
+			projection.update(widget.__render__() as HNode);
+			assert.strictEqual(fooDestroyedCount, 0);
+			widget.count = 20;
+			projection.update(widget.__render__() as HNode);
+			assert.strictEqual(fooDestroyedCount, 0);
+			widget.count = 0;
+			projection.update(widget.__render__() as HNode);
+			assert.strictEqual(fooDestroyedCount, 20);
+		});
+
+		it('should warn in the console for siblings for the same widgets with no key when added or removed', () => {
+			class Foo extends WidgetBase<any> {
+				render() {
+					return v('div', [ this.properties.text ]);
+				}
+			}
+
+			const widgetName = (Foo as any).name;
+			let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times as siblings';
+
+			if (widgetName) {
+				errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times as siblings`;
+			}
+
+			class Baz extends WidgetBase {
+
+				show = false;
+
+				render() {
+					return v('div', [
+						w(Foo, { text: '1' }),
+						this.show ? w(Foo, { text: '2' }) : null,
+						w(Foo, { text: '3' }),
+						v('div', [
+							w(Foo, { text: '4' })
+						])
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			assert.isTrue(consoleStub.notCalled);
+			widget.invalidate();
+			widget.show = true;
+			projection.update(widget.__render__() as HNode);
+			assert.isTrue(consoleStub.calledTwice);
+			assert.isTrue(consoleStub.calledWith(errorMsg));
 		});
 
 	});
