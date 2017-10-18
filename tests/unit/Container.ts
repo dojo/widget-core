@@ -74,7 +74,7 @@ registerSuite('mixins/Container', {
 			const widget = new TestWidgetContainer();
 			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
 			widget.__setProperties__({ foo: 'bar' });
-			widget.__setChildren__([child]);
+			widget.__setChildren__([ child ]);
 			widget.__render__();
 		},
 		'container for registry item'() {

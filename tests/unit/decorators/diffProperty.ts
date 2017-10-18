@@ -218,7 +218,7 @@ registerSuite('decorators/diffProperty', {
 			foo: 'bar'
 		});
 
-		assert.deepEqual(calls, ['diff1', 'diff2']);
+		assert.deepEqual(calls, [ 'diff1', 'diff2' ]);
 		assert.strictEqual(calls[0], 'diff1');
 		assert.strictEqual(calls[1], 'diff2');
 	},

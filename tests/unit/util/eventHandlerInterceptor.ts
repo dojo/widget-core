@@ -18,7 +18,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		result('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, bind, 'should have been called with proper bind');
 	},
 
@@ -35,7 +35,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		result.call(context, 'foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, context, 'should have been called with proper context');
 	},
 
@@ -56,7 +56,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		const handler: (...args: any[]) => void = addEventListener.lastCall.args[1];
 		handler('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, bind, 'should have been called with proper context');
 	},
 
@@ -76,7 +76,7 @@ registerSuite('util/eventHandlerInterceptor', {
 		const handler: (...args: any[]) => void = addEventListener.lastCall.args[1];
 		handler('foo');
 		assert.isTrue(listener.calledOnce);
-		assert.deepEqual(listener.lastCall.args, ['foo'], 'should have been called with proper arguments');
+		assert.deepEqual(listener.lastCall.args, [ 'foo' ], 'should have been called with proper arguments');
 		assert.strictEqual(listener.lastCall.thisValue, context, 'should have been called with proper context');
 	},
 

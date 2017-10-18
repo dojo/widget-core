@@ -15,7 +15,7 @@ class TestButton extends WidgetBase<TestButtonProperties> {
 	}
 
 	render(this: TestButton) {
-		const { onClick : onclick } = this;
+		const { onClick: onclick } = this;
 		const { label = '', suffix = '' } = this.properties;
 
 		return v('button', {

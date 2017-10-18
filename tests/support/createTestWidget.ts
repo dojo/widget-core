@@ -12,11 +12,9 @@ interface TestWidget<W extends WidgetBase> extends WidgetBaseInterface {
 	renderResult: VirtualDomNode | VirtualDomNode[];
 }
 
-function createTestWidget<W extends WidgetBase>(
-	component: Constructor<W>,
+function createTestWidget<W extends WidgetBase>(component: Constructor<W>,
 	properties: W['properties'] & { registry?: Registry },
-	children?: W['children']
-): TestWidget<W> {
+	children?: W['children']): TestWidget<W> {
 	const { registry, ...props } = properties as any;
 	const testWidget = new class extends WidgetBase implements TestWidget<W> {
 		private _testProperties: W['properties'] = props;
@@ -24,7 +22,7 @@ function createTestWidget<W extends WidgetBase>(
 		private _renderResult: VirtualDomNode | VirtualDomNode[];
 
 		getAttribute(key: string): any {
-			return (<any> this)[key];
+			return (<any> this)[ key ];
 		}
 
 		setProperties(properties: W['properties'] & { registry: Registry }): void {

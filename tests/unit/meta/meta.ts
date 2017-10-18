@@ -168,7 +168,7 @@ registerSuite('meta base', {
 			class TestWidget extends ProjectorMixin(WidgetBase) {
 				render() {
 					return v('div', { key: 'foo' }, [
-						v('div', { key: 'bar' }, ['hello world'])
+						v('div', { key: 'bar' }, [ 'hello world' ])
 					]);
 				}
 

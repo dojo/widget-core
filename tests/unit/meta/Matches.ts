@@ -59,7 +59,7 @@ registerSuite('support/meta/Matches', {
 
 			sendEvent(div.firstChild as Element, 'click');
 
-			assert.deepEqual(results, [true], 'should have been called and the target matched');
+			assert.deepEqual(results, [ true ], 'should have been called and the target matched');
 
 			widget.destroy();
 			document.body.removeChild(div);
@@ -93,7 +93,7 @@ registerSuite('support/meta/Matches', {
 
 			sendEvent(div.firstChild as Element, 'click');
 
-			assert.deepEqual(results, [true], 'should have been called and the target matched');
+			assert.deepEqual(results, [ true ], 'should have been called and the target matched');
 
 			widget.destroy();
 			document.body.removeChild(div);
@@ -135,7 +135,7 @@ registerSuite('support/meta/Matches', {
 				}
 			});
 
-			assert.deepEqual(results, [false], 'should have been called and the target not matching');
+			assert.deepEqual(results, [ false ], 'should have been called and the target not matching');
 
 			widget.destroy();
 			document.body.removeChild(div);
@@ -190,7 +190,7 @@ registerSuite('support/meta/Matches', {
 				}
 			});
 
-			assert.deepEqual(results, [true, false, false, true], 'should have been called twice and keys changed');
+			assert.deepEqual(results, [ true, false, false, true ], 'should have been called twice and keys changed');
 
 			widget.destroy();
 			document.body.removeChild(div);

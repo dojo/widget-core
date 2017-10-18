@@ -28,7 +28,7 @@ registerSuite('decorators/beforeRender', {
 					return () => {
 						const rendered = renderFunction();
 						const clonedProperties = { ...properties };
-						return v('bar', clonedProperties, [rendered, ...children]);
+						return v('bar', clonedProperties, [ rendered, ...children ]);
 					};
 				}
 
@@ -38,7 +38,7 @@ registerSuite('decorators/beforeRender', {
 					return () => {
 						const rendered = renderFunction();
 						properties.bar = 'foo';
-						return v('qux', properties, [rendered]);
+						return v('qux', properties, [ rendered ]);
 					};
 				}
 			}
@@ -56,7 +56,7 @@ registerSuite('decorators/beforeRender', {
 			}
 
 			const widget = new ExtendedTestWidget();
-			widget.__setChildren__([v('baz', { baz: 'qux' })]);
+			widget.__setChildren__([ v('baz', { baz: 'qux' }) ]);
 			widget.__setProperties__({ foo: 'bar' });
 			const qux: any = widget.__render__();
 			assert.equal(qux.vnodeSelector, 'qux');

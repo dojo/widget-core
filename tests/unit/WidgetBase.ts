@@ -38,7 +38,7 @@ registerSuite('WidgetBase', {
 			const widget = new WidgetBase();
 
 			assert.lengthOf(widget.children, 0);
-			widget.__setChildren__([expectedChild]);
+			widget.__setChildren__([ expectedChild ]);
 			assert.lengthOf(widget.children, 1);
 			assert.strictEqual(widget.children[0], expectedChild);
 		},
@@ -50,7 +50,7 @@ registerSuite('WidgetBase', {
 				class Foo extends WidgetBase {
 					render() {
 						renderCount++;
-						return v('div', ['hello world ']);
+						return v('div', [ 'hello world ' ]);
 					}
 
 					callInvalidate() {
@@ -80,7 +80,7 @@ registerSuite('WidgetBase', {
 
 					render() {
 						renderCount++;
-						return v('div', ['hello world ']);
+						return v('div', [ 'hello world ' ]);
 					}
 				}
 
@@ -105,7 +105,7 @@ registerSuite('WidgetBase', {
 					render() {
 						this.invalidate();
 						renderCount++;
-						return v('div', ['hello world ']);
+						return v('div', [ 'hello world ' ]);
 					}
 				}
 
@@ -290,12 +290,12 @@ registerSuite('WidgetBase', {
 
 			const widget = new TestWidget();
 			widget.__setProperties__({ foo: true });
-			assert.deepEqual(widget.changedPropertyKeys, ['foo']);
+			assert.deepEqual(widget.changedPropertyKeys, [ 'foo' ]);
 			widget.__setProperties__({ foo: true });
 			assert.deepEqual(widget.changedPropertyKeys, []);
 			widget.__setProperties__({ foo: true });
 			widget.__setProperties__({ foo: true, bar: true });
-			assert.deepEqual(widget.changedPropertyKeys, ['bar']);
+			assert.deepEqual(widget.changedPropertyKeys, [ 'bar' ]);
 			const changedPropertyKeys = widget.changedPropertyKeys;
 			changedPropertyKeys.push('bad key');
 			assert.notDeepEqual(changedPropertyKeys, widget.changedPropertyKeys);
@@ -678,7 +678,7 @@ registerSuite('WidgetBase', {
 			'render with a text node children'() {
 				class TestWidget extends WidgetBase<any> {
 					render() {
-						return v('div', ['I am a text node']);
+						return v('div', [ 'I am a text node' ]);
 					}
 				}
 
@@ -691,7 +691,7 @@ registerSuite('WidgetBase', {
 				class TestChildWidget extends WidgetBase {
 					render() {
 						return [
-							v('div', ['text']),
+							v('div', [ 'text' ]),
 							v('span', { key: 'span' })
 						];
 					}
@@ -699,7 +699,7 @@ registerSuite('WidgetBase', {
 
 				class TestWidget extends WidgetBase {
 					render() {
-						return v('div', [w(TestChildWidget, {})]);
+						return v('div', [ w(TestChildWidget, {}) ]);
 					}
 				}
 
@@ -740,7 +740,7 @@ registerSuite('WidgetBase', {
 			'render with multiple text node children'() {
 				class TestWidget extends WidgetBase<any> {
 					render() {
-						return v('div', ['I am a text node', 'Second text node']);
+						return v('div', [ 'I am a text node', 'Second text node' ]);
 					}
 				}
 
@@ -861,13 +861,13 @@ registerSuite('WidgetBase', {
 
 				const myWidget = new WidgetBase<any>();
 				myWidget.__setProperties__(properties);
-				assert.deepEqual((<any> myWidget.properties).items, ['a', 'b']);
+				assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b' ]);
 				properties.items.push('c');
 				myWidget.__setProperties__(properties);
-				assert.deepEqual((<any> myWidget.properties).items, ['a', 'b', 'c']);
+				assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b', 'c' ]);
 				properties.items.push('d');
 				myWidget.__setProperties__(properties);
-				assert.deepEqual((<any> myWidget.properties).items, ['a', 'b', 'c', 'd']);
+				assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b', 'c', 'd' ]);
 			},
 			'__render__ with internally updated array state'() {
 				const properties = {
@@ -879,10 +879,10 @@ registerSuite('WidgetBase', {
 				const myWidget: any = new WidgetBase();
 				myWidget.__setProperties__(properties);
 				myWidget.__render__();
-				assert.deepEqual((<any> myWidget.properties).items, ['a', 'b']);
-				myWidget.__setProperties__(<any> { items: ['a', 'b', 'c'] });
+				assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b' ]);
+				myWidget.__setProperties__(<any> { items: [ 'a', 'b', 'c' ] });
 				myWidget.__render__();
-				assert.deepEqual((<any> myWidget.properties).items, ['a', 'b', 'c']);
+				assert.deepEqual((<any> myWidget.properties).items, [ 'a', 'b', 'c' ]);
 			},
 			'__render__() and invalidate()'() {
 				const widgetBase: any = new WidgetBase();
