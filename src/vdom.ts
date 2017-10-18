@@ -57,7 +57,7 @@ export interface InternalHNode extends HNode {
 
 export type InternalDNode = InternalHNode | InternalWNode;
 
-function extend<T>(base: T, overrides: Partial<T> | undefined): T {
+function extend<T>(base: T, overrides: any): T {
 	const result = {} as any;
 	Object.keys(base).forEach(function(key) {
 		result[key] = (base as any)[key];
@@ -637,15 +637,15 @@ function createDom(
 				else {
 					domNode = dnode.domNode = (dnode.domNode || doc.createElement(dnode.tag));
 				}
-				if (insertBefore !== undefined) {
-					parentNode.insertBefore(domNode, insertBefore);
-				}
-				else if (domNode!.parentNode !== parentNode) {
-					parentNode.appendChild(domNode);
-				}
 			}
 			else {
 				domNode = dnode.domNode;
+			}
+			if (insertBefore !== undefined) {
+				parentNode.insertBefore(domNode, insertBefore);
+			}
+			else if (domNode!.parentNode !== parentNode) {
+				parentNode.appendChild(domNode);
 			}
 			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions, merge);
 		}

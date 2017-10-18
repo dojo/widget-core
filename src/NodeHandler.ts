@@ -5,7 +5,7 @@ import { NodeHandlerInterface } from './interfaces';
 /**
  * Enum to identify the type of event.
  * Listening to 'Projector' will notify when projector is created or updated
- * Listening to 'Widget' will notifiy when widget root is created or updated
+ * Listening to 'Widget' will notify when widget root is created or updated
  */
 export enum NodeEventType {
 	Projector = 'Projector',

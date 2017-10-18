@@ -5,10 +5,12 @@ import { spy } from 'sinon';
 import { WidgetBase } from './../../src/WidgetBase';
 import { v } from './../../src/d';
 import { WIDGET_BASE_TYPE } from './../../src/Registry';
-import { HNode, WidgetMetaConstructor } from './../../src/interfaces';
+import { HNode, WidgetMetaConstructor, WidgetMetaBase } from './../../src/interfaces';
 import { handleDecorator } from './../../src/decorators/handleDecorator';
 import { diffProperty } from './../../src/decorators/diffProperty';
 import { Registry } from './../../src/Registry';
+import { Base } from './../../src/meta/Base';
+import { NodeEventType } from './../../src/NodeHandler';
 
 interface TestProperties {
 	foo?: string;
@@ -19,9 +21,24 @@ interface TestProperties {
 	foobar?: number;
 }
 
+class TestMeta extends Base {
+	public widgetEvent = false;
+
+	constructor(options: any) {
+		super(options);
+		this.nodeHandler.on(NodeEventType.Widget, () => {
+			this.widgetEvent = true;
+		});
+	}
+
+	get(key: string | number) {
+		return this.getNode(key);
+	}
+}
+
 class BaseTestWidget extends WidgetBase<TestProperties> {
-	public meta(metaType: WidgetMetaConstructor<any>) {
-		return super.meta(metaType);
+	public meta<T extends WidgetMetaBase>(metaType: WidgetMetaConstructor<T>) {
+		return super.meta(metaType) as T;
 	}
 
 	public render() {
@@ -254,23 +271,45 @@ describe('WidgetBase', () => {
 
 	describe('meta', () => {
 		it('meta providers are cached', () => {
-
+			const widget = new BaseTestWidget();
+			const meta = widget.meta(Base);
+			assert.strictEqual(meta, widget.meta(Base));
 		});
 
 		it('elements are added to node handler on create', () => {
-
+			const element = {};
+			const key = '1';
+			const widget = new BaseTestWidget();
+			const meta = widget.meta(TestMeta);
+			widget.emit({ type: 'element-created', element, key });
+			assert.isTrue(meta.has(key));
+			assert.strictEqual(meta.get(key), element);
 		});
 
 		it('elements are added to node handler on update', () => {
-
+			const element = {};
+			const key = '1';
+			const widget = new BaseTestWidget();
+			const meta = widget.meta(TestMeta);
+			widget.emit({ type: 'element-updated', element, key });
+			assert.isTrue(meta.has(key));
+			assert.strictEqual(meta.get(key), element);
 		});
 
 		it('root added to node handler on widget create', () => {
+			const widget = new BaseTestWidget();
+			const meta = widget.meta(TestMeta);
 
+			widget.emit({ type: 'widget-created' });
+			assert.isTrue(meta.widgetEvent);
 		});
 
 		it('root added to node handler on widget update', () => {
+			const widget = new BaseTestWidget();
+			const meta = widget.meta(TestMeta);
 
+			widget.emit({ type: 'widget-updated' });
+			assert.isTrue(meta.widgetEvent);
 		});
 	});
 

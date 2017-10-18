@@ -125,11 +125,11 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
 		this.own(this.on('element-created', ({ key, element }: any) => {
-			this._nodeHandler.add(element, key);
+			this._nodeHandler.add(element, `${key}`);
 			this.onElementCreated(element, key);
 		}));
 		this.own(this.on('element-updated', ({ key, element }: any) => {
-			this._nodeHandler.add(element, key);
+			this._nodeHandler.add(element, `${key}`);
 			this.onElementUpdated(element, key);
 		}));
 		this.own(this.on('widget-created', ({ key, element }: any) => {
