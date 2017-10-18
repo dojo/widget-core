@@ -1226,7 +1226,7 @@ describe('vdom', () => {
 			assert.lengthOf(span.childNodes, 1);
 		});
 
-		it('will throw an error when maquette is not sure which node is added', () => {
+		it('will throw an error when vdom is not sure which node is added', () => {
 			const projection = dom.create(v('div', [
 				v('span', [ 'a' ]),
 				v('span', [ 'c' ])
@@ -1240,7 +1240,7 @@ describe('vdom', () => {
 			});
 		});
 
-		it('will throw an error when maquette is not sure which node is removed', () => {
+		it('will throw an error when vdom is not sure which node is removed', () => {
 			const projection = dom.create(v('div', [
 				v('span', [ 'a' ]),
 				v('span', [ 'b' ]),
@@ -1259,20 +1259,20 @@ describe('vdom', () => {
 			const handleInput = (evt: any) => {
 				text = evt.currentTarget.innerHTML;
 			};
-			const renderMaquette = () => v('div', {
+			const renderDNodes = () => v('div', {
 				contentEditable: true,
 				oninput: handleInput,
 				innerHTML: text
 			});
-			const projection = dom.create(renderMaquette(), projectorStub);
+			const projection = dom.create(renderDNodes(), projectorStub);
 
 			projection.domNode.removeChild(projection.domNode.childNodes[0]);
 			handleInput({ currentTarget: projection.domNode });
-			projection.update(renderMaquette());
+			projection.update(renderDNodes());
 
 			projection.domNode.innerHTML = 'changed <i>value</i>';
 			handleInput({ currentTarget: projection.domNode });
-			projection.update(renderMaquette());
+			projection.update(renderDNodes());
 
 			assert.strictEqual(projection.domNode.innerHTML, 'changed <i>value</i>');
 		});
