@@ -579,7 +579,7 @@ function createDom(dnode: InternalDNode, parentNode: Node, insertBefore: Node | 
 			parentInstance.emit({ type: 'widget-created' });
 		}
 	}
-	else if (isHNode(dnode)) {
+	else {
 		const doc = parentNode.ownerDocument;
 		if (dnode.tag === '') {
 			domNode = dnode.domNode = doc.createTextNode(dnode.text!);

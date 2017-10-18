@@ -8,6 +8,7 @@ import { WIDGET_BASE_TYPE } from './../../src/Registry';
 import { HNode, WidgetMetaConstructor } from './../../src/interfaces';
 import { handleDecorator } from './../../src/decorators/handleDecorator';
 import { diffProperty } from './../../src/decorators/diffProperty';
+import { Registry } from './../../src/Registry';
 
 interface TestProperties {
 	foo?: string;
@@ -203,21 +204,51 @@ describe('WidgetBase', () => {
 		});
 	});
 
-	describe('__setChildren__', () => {
-
+	it('__setChildren__', () => {
+		const widget = new BaseTestWidget();
+		const invalidateSpy = spy(widget, 'invalidate');
+		widget.__setChildren__([]);
+		assert.isTrue(invalidateSpy.notCalled);
+		widget.__setChildren__([ 'child' ]);
+		assert.isTrue(invalidateSpy.calledOnce);
+		widget.__setChildren__([ 'child' ]);
+		assert.isTrue(invalidateSpy.calledTwice);
+		widget.__setChildren__([]);
+		assert.isTrue(invalidateSpy.calledThrice);
+		widget.__setChildren__([]);
+		assert.isTrue(invalidateSpy.calledThrice);
 	});
 
 	describe('__setCoreProperties__', () => {
-		it('a new registry causes an invalidation', () => {
-
+		it('new baseRegistry is added to RegistryHandler and triggers an invalidation', () => {
+			const baseRegistry = new Registry();
+			baseRegistry.defineInjector('label', 'item' as any);
+			const widget = new BaseTestWidget();
+			const invalidateSpy = spy(widget, 'invalidate');
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			assert.isTrue(invalidateSpy.calledOnce);
+			assert.strictEqual(widget.registry.getInjector('label'), 'item');
 		});
 
-		it('passing the same registry does not causes an invalidation', () => {
-
+		it('The same baseRegistry does not causes an invalidation', () => {
+			const baseRegistry = new Registry();
+			const widget = new BaseTestWidget();
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			const invalidateSpy = spy(widget, 'invalidate');
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			assert.isTrue(invalidateSpy.notCalled);
 		});
 
-		it('passing a different registry does not causes an invalidation', () => {
-
+		it('different baseRegistry replaces the RegistryHandlers baseRegistry and triggers an invalidation', () => {
+			const baseRegistry = new Registry();
+			baseRegistry.defineInjector('label', 'item' as any);
+			const widget = new BaseTestWidget();
+			widget.__setCoreProperties__({ bind: widget, baseRegistry: new Registry() });
+			assert.isNull(widget.registry.getInjector('label'));
+			const invalidateSpy = spy(widget, 'invalidate');
+			widget.__setCoreProperties__({ bind: widget, baseRegistry });
+			assert.strictEqual(widget.registry.getInjector('label'), 'item');
+			assert.isTrue(invalidateSpy.called);
 		});
 	});
 
@@ -243,12 +274,26 @@ describe('WidgetBase', () => {
 		});
 	});
 
-	describe('onElementCreated', () => {
-
+	describe('onElementCreated called on `element-created` event', () => {
+		class TestWidget extends BaseTestWidget {
+			onElementCreated(element: any, key: any) {
+				assert.strictEqual(element, 'element');
+				assert.strictEqual(key, 'key');
+			}
+		}
+		const widget = new TestWidget();
+		widget.emit({ type: 'element-created', key: 'key', element: 'element' });
 	});
 
-	describe('onElementUpdated', () => {
-
+	describe('onElementUpdated called on `element-updated` event', () => {
+		class TestWidget extends BaseTestWidget {
+			onElementUpdated(element: any, key: any) {
+				assert.strictEqual(element, 'element');
+				assert.strictEqual(key, 'key');
+			}
+		}
+		const widget = new TestWidget();
+		widget.emit({ type: 'element-updated', key: 'key', element: 'element' });
 	});
 
 	describe('decorators', () => {

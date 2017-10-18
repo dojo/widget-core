@@ -3,7 +3,9 @@ import * as assert from 'intern/chai!assert';
 import { match, spy, stub } from 'sinon';
 
 import { dom, InternalHNode } from '../../src/vdom';
-import { v } from '../../src/d';
+import { v, w } from '../../src/d';
+import { HNode } from '../../src/interfaces';
+import { WidgetBase } from '../../src/WidgetBase';
 
 const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgument: Function) => {
 	return function(this: Node) {
@@ -16,10 +18,191 @@ const projectorStub: any = {
 	emit: stub()
 };
 
+class Bar extends WidgetBase<any> {
+	render() {
+		return v('span', { innerHTML: 'Bar' });
+	}
+}
+
+class Foo extends WidgetBase<any> {
+	render() {
+		const { show } = this.properties;
+		return v('div', { foo: 'bar' }, [
+			v('h1', { key: 'one' }, [ 'Hello Widget' ]),
+			show ? w(Bar, { key: 'first' }) : null,
+			show ? w(Bar, { key: 'second' }) : null,
+			show ? null : v('div', { key: 'three' }, ['me']),
+			`text node`,
+			v('h1', { key: 'two', innerHTML: 'span' })
+		]);
+	}
+}
+
+class TestWidget extends WidgetBase<any> {
+	render() {
+		return v('span', [
+			w(Foo, { show: this.properties.show })
+		]);
+	}
+}
+
 describe('vdom', () => {
 	beforeEach(() => {
 		projectorStub.on.reset();
 		projectorStub.emit.reset();
+	});
+
+	describe('widgets', () => {
+
+		it('should create elements for widgets', () => {
+			const widget = new TestWidget();
+			widget.__setCoreProperties__({ bind: widget } as any);
+			widget.__setProperties__({ show: true });
+
+			const renderResult = widget.__render__() as HNode;
+			const projection = dom.create(renderResult, widget);
+			const span = projection.domNode as HTMLSpanElement;
+			assert.lengthOf(span.childNodes, 1);
+			const div = span.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(div.childNodes, 5);
+			assert.strictEqual(div.getAttribute('foo'), 'bar');
+
+			const headerOne = div.childNodes[0] as HTMLHeadElement;
+			const spanOne = div.childNodes[1] as HTMLSpanElement;
+			const spanTwo = div.childNodes[2] as HTMLSpanElement;
+			const text = div.childNodes[3] as Text;
+			const headerTwo = div.childNodes[4] as HTMLHeadElement;
+
+			assert.lengthOf(headerOne.childNodes, 1);
+			assert.strictEqual((headerOne.childNodes[0] as Text).data, 'Hello Widget');
+
+			assert.lengthOf(spanOne.childNodes, 1);
+			assert.strictEqual(spanOne.innerHTML, 'Bar');
+
+			assert.lengthOf(spanTwo.childNodes, 1);
+			assert.strictEqual(spanTwo.innerHTML, 'Bar');
+
+			assert.strictEqual(text.data, 'text node');
+
+			assert.lengthOf(headerTwo.childNodes, 1);
+			assert.strictEqual(headerTwo.innerHTML, 'span');
+		});
+
+		it('should update elements for widget changes', () => {
+			const widget = new TestWidget();
+			widget.__setCoreProperties__({ bind: widget } as any);
+			widget.__setProperties__({ show: true });
+
+			const renderResult = widget.__render__() as HNode;
+			const projection = dom.create(renderResult, widget);
+			const root = projection.domNode as HTMLSpanElement;
+
+			assert.lengthOf(root.childNodes, 1);
+			let rootChild = root.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(rootChild.childNodes, 5);
+			assert.strictEqual(rootChild.getAttribute('foo'), 'bar');
+
+			let headerOne = rootChild.childNodes[0] as HTMLHeadElement;
+			let spanOne = rootChild.childNodes[1] as HTMLSpanElement;
+			let spanTwo = rootChild.childNodes[2] as HTMLSpanElement;
+			let text = rootChild.childNodes[3] as Text;
+			let headerTwo = rootChild.childNodes[4] as HTMLHeadElement;
+
+			assert.lengthOf(headerOne.childNodes, 1);
+			assert.strictEqual((headerOne.childNodes[0] as Text).data, 'Hello Widget');
+
+			assert.lengthOf(spanOne.childNodes, 1);
+			assert.strictEqual(spanOne.innerHTML, 'Bar');
+
+			assert.lengthOf(spanTwo.childNodes, 1);
+			assert.strictEqual(spanTwo.innerHTML, 'Bar');
+
+			assert.strictEqual(text.data, 'text node');
+
+			assert.lengthOf(headerTwo.childNodes, 1);
+			assert.strictEqual(headerTwo.innerHTML, 'span');
+
+			widget.__setProperties__({ show: false });
+			projection.update(widget.__render__() as HNode);
+
+			assert.lengthOf(root.childNodes, 1);
+			rootChild = root.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(rootChild.childNodes, 4);
+			assert.strictEqual(rootChild.getAttribute('foo'), 'bar');
+
+			headerOne = rootChild.childNodes[0] as HTMLHeadElement;
+			let insertedDiv = rootChild.childNodes[1] as HTMLDivElement;
+			text = rootChild.childNodes[2] as Text;
+			headerTwo = rootChild.childNodes[3] as HTMLHeadElement;
+
+			assert.lengthOf(headerOne.childNodes, 1);
+			assert.strictEqual((headerOne.childNodes[0] as Text).data, 'Hello Widget');
+
+			assert.lengthOf(insertedDiv.childNodes, 1);
+			assert.strictEqual((insertedDiv.childNodes[0] as Text).data, 'me');
+
+			assert.strictEqual(text.data, 'text node');
+
+			assert.lengthOf(headerTwo.childNodes, 1);
+			assert.strictEqual(headerTwo.innerHTML, 'span');
+
+			widget.__setProperties__({ show: true });
+			projection.update(widget.__render__() as HNode);
+
+			assert.lengthOf(root.childNodes, 1);
+			rootChild = root.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(rootChild.childNodes, 5);
+			assert.strictEqual(rootChild.getAttribute('foo'), 'bar');
+
+			headerOne = rootChild.childNodes[0] as HTMLHeadElement;
+			spanOne = rootChild.childNodes[1] as HTMLSpanElement;
+			spanTwo = rootChild.childNodes[2] as HTMLSpanElement;
+			text = rootChild.childNodes[3] as Text;
+			headerTwo = rootChild.childNodes[4] as HTMLHeadElement;
+
+			assert.lengthOf(headerOne.childNodes, 1);
+			assert.strictEqual((headerOne.childNodes[0] as Text).data, 'Hello Widget');
+
+			assert.lengthOf(spanOne.childNodes, 1);
+			assert.strictEqual(spanOne.innerHTML, 'Bar');
+
+			assert.lengthOf(spanTwo.childNodes, 1);
+			assert.strictEqual(spanTwo.innerHTML, 'Bar');
+
+			assert.strictEqual(text.data, 'text node');
+
+			assert.lengthOf(headerTwo.childNodes, 1);
+			assert.strictEqual(headerTwo.innerHTML, 'span');
+		});
+
+		it('invalidates up the widget tree', () => {
+
+		});
+
+		it('DNodes are bound to the parent widget', () => {
+
+		});
+
+		it('supports widget registry items', () => {
+
+		});
+
+		it('supports an array of DNodes', () => {
+
+		});
+
+		it('supports null and undefined return from render', () => {
+
+		});
+
+		it('should invalidate when a registry items is loaded', () => {
+
+		});
+
+		it('should destroy widgets when they are no longer required', () => {
+
+		});
+
 	});
 
 	describe('create', () => {
@@ -88,6 +271,7 @@ describe('vdom', () => {
 			assert.strictEqual(root.children[0].bar, 'bar');
 			assert.isFalse(appendChildSpy.called);
 		});
+
 	});
 
 	describe('properties', () => {
