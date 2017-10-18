@@ -695,13 +695,6 @@ export const dom = {
 		instance.emit({ type: 'widget-created' });
 		return createProjection(decoratedNode, instance, projectionOptions);
 	},
-	insertBefore: function(beforeNode: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
-		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
-		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
-		createDom(decoratedNode, beforeNode.parentNode!, beforeNode, projectionOptions, instance);
-		instance.emit({ type: 'widget-created' });
-		return createProjection(decoratedNode, instance, projectionOptions);
-	},
 	merge: function(element: Element, hNode: HNode, instance: WidgetBase, projectionOptions?: ProjectionOptions): Projection {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
