@@ -8,6 +8,7 @@ import {
 	TransitionStrategy,
 	VirtualDomProperties
 } from './interfaces';
+import { from as arrayFrom } from '@dojo/shim/array';
 import { isWNode, isHNode, HNODE } from './d';
 import { WidgetBase } from './WidgetBase';
 import { isWidgetBaseConstructor } from './Registry';
@@ -528,26 +529,58 @@ function addChildren(
 	children: InternalDNode[] | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: WidgetBase,
-	insertBefore?: Node
+	insertBefore: undefined | Node = undefined,
+	merge: boolean = false,
+	childNodes?: Node[]
 ) {
 	if (children === undefined) {
 		return;
 	}
+
+	if (merge && childNodes === undefined) {
+		childNodes = arrayFrom(domNode.childNodes);
+	}
+
 	for (let i = 0; i < children.length; i++) {
 		const child = children[i];
-		createDom(child, domNode, insertBefore, projectionOptions, parentInstance);
+		if (isHNode(child)) {
+			if (merge) {
+				const domElement = childNodes ? childNodes.shift() as HTMLElement : undefined;
+				if (domElement && domElement.tagName === (child.tag.toUpperCase() || undefined)) {
+					child.domNode = domElement;
+				}
+			}
+			createDom(child, domNode, insertBefore, projectionOptions, parentInstance, merge);
+		}
+		else {
+			createDom(child, domNode, insertBefore, projectionOptions, parentInstance, merge, childNodes);
+		}
 	}
 }
 
-function initPropertiesAndChildren(domNode: Node, dnode: InternalHNode, parentInstance: WidgetBase, projectionOptions: ProjectionOptions) {
-	addChildren(domNode, dnode.children, projectionOptions, parentInstance);
+function initPropertiesAndChildren(
+	domNode: Node,
+	dnode: InternalHNode,
+	parentInstance: WidgetBase,
+	projectionOptions: ProjectionOptions,
+	merge: boolean = false
+) {
+	addChildren(domNode, dnode.children, projectionOptions, parentInstance, undefined, merge);
 	setProperties(domNode, dnode.properties, projectionOptions);
 	if (dnode.properties.key) {
 		parentInstance.emit({ type: 'element-created', key: dnode.properties.key, element: domNode });
 	}
 }
 
-function createDom(dnode: InternalDNode, parentNode: Node, insertBefore: Node | undefined, projectionOptions: ProjectionOptions, parentInstance: WidgetBase) {
+function createDom(
+	dnode: InternalDNode,
+	parentNode: Node,
+	insertBefore: Node | undefined,
+	projectionOptions: ProjectionOptions,
+	parentInstance: WidgetBase,
+	merge: boolean = false,
+	childNodes?: Node[]
+) {
 	let domNode: Node | undefined;
 	if (isWNode(dnode)) {
 		let { widgetConstructor } = dnode;
@@ -571,38 +604,50 @@ function createDom(dnode: InternalDNode, parentNode: Node, insertBefore: Node | 
 		if (rendered) {
 			const filteredRendered = filterAndDecorateChildren(rendered, instance as WidgetBase);
 			dnode.rendered = filteredRendered;
-			addChildren(parentNode, filteredRendered, projectionOptions, instance as WidgetBase, insertBefore);
+			addChildren(parentNode, filteredRendered, projectionOptions, instance as WidgetBase, insertBefore, merge, childNodes);
 		}
 		parentInstance.emit({ type: 'widget-created' });
 	}
 	else {
 		const doc = parentNode.ownerDocument;
 		if (dnode.tag === '') {
-			domNode = dnode.domNode = doc.createTextNode(dnode.text!);
-			if (insertBefore !== undefined) {
-				parentNode.insertBefore(domNode, insertBefore);
+			if (dnode.domNode !== undefined) {
+				const newDomNode = dnode.domNode.ownerDocument.createTextNode(dnode.text!);
+				dnode.domNode.parentNode!.replaceChild(newDomNode, dnode.domNode);
+				dnode.domNode = newDomNode;
 			}
 			else {
-				parentNode.appendChild(domNode);
+				domNode = dnode.domNode = doc.createTextNode(dnode.text!);
+				if (insertBefore !== undefined) {
+					parentNode.insertBefore(domNode, insertBefore);
+				}
+				else {
+					parentNode.appendChild(domNode);
+				}
 			}
 		}
 		else {
-			if (dnode.tag === 'svg') {
-				projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
-			}
-			if (projectionOptions.namespace !== undefined) {
-				domNode = dnode.domNode = doc.createElementNS(projectionOptions.namespace, dnode.tag);
+			if (dnode.domNode === undefined) {
+				if (dnode.tag === 'svg') {
+					projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
+				}
+				if (projectionOptions.namespace !== undefined) {
+					domNode = dnode.domNode = doc.createElementNS(projectionOptions.namespace, dnode.tag);
+				}
+				else {
+					domNode = dnode.domNode = (dnode.domNode || doc.createElement(dnode.tag));
+				}
+				if (insertBefore !== undefined) {
+					parentNode.insertBefore(domNode, insertBefore);
+				}
+				else if (domNode!.parentNode !== parentNode) {
+					parentNode.appendChild(domNode);
+				}
 			}
 			else {
-				domNode = dnode.domNode = (dnode.domNode || doc.createElement(dnode.tag));
+				domNode = dnode.domNode;
 			}
-			if (insertBefore !== undefined) {
-				parentNode.insertBefore(domNode, insertBefore);
-			}
-			else if (domNode!.parentNode !== parentNode) {
-				parentNode.appendChild(domNode);
-			}
-			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions);
+			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions, merge);
 		}
 	}
 }
@@ -699,7 +744,7 @@ export const dom = {
 		projectionOptions = applyDefaultProjectionOptions(projectionOptions);
 		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
 		decoratedNode.domNode = element;
-		initPropertiesAndChildren(element, decoratedNode, instance, projectionOptions);
+		initPropertiesAndChildren(element, decoratedNode, instance, projectionOptions, true);
 		instance.emit({ type: 'widget-created' });
 		return createProjection(decoratedNode, instance, projectionOptions);
 	},
