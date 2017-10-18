@@ -493,6 +493,100 @@ describe('vdom', () => {
 			assert.strictEqual(fooDestroyedCount, 20);
 		});
 
+		it('destroys existing widget and uses new widget when widget changes', () => {
+			let fooDestroyed = false;
+			let fooCreated = false;
+			let barCreated = false;
+			class Foo extends WidgetBase {
+
+				constructor() {
+					super();
+					fooCreated = true;
+				}
+
+				destroy() {
+					fooDestroyed = true;
+					return super.destroy();
+
+				}
+				render() {
+					return v('div');
+				}
+			}
+
+			class Bar extends WidgetBase {
+				constructor() {
+					super();
+					barCreated = true;
+				}
+
+				render() {
+					return v('span');
+				}
+			}
+
+			class Baz extends WidgetBase {
+				private _foo = true;
+
+				set foo(value: boolean) {
+					this._foo = value;
+					this.invalidate();
+				}
+
+				render() {
+					return v('div', [
+						this._foo ? w(Foo, {}) : w(Bar, {})
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			assert.isTrue(fooCreated);
+			widget.foo = false;
+			projection.update(widget.__render__() as HNode);
+			assert.isTrue(fooDestroyed);
+			assert.isTrue(barCreated);
+		});
+
+		it('remove elements for embedded WNodes', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return v('div', { id: 'foo' });
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return w(Foo, {});
+				}
+			}
+
+			class Baz extends WidgetBase {
+				private _show = true;
+
+				set show(value: boolean) {
+					this._show = value;
+					this.invalidate();
+				}
+
+				render() {
+					return v('div', [
+						this._show ? w(Bar, {}) : null
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			const fooDiv = root.childNodes[0] as HTMLDivElement;
+			assert.strictEqual(fooDiv.getAttribute('id'), 'foo');
+			widget.show = false;
+			projection.update(widget.__render__() as HNode);
+			assert.isNull(fooDiv.parentNode);
+		});
+
 		it('should warn in the console for siblings for the same widgets with no key when added or removed', () => {
 			class Foo extends WidgetBase<any> {
 				render() {
