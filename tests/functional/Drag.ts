@@ -42,6 +42,9 @@ registerSuite('Drag', {
 		if (browserName === 'MicrosoftEdge') {
 			this.skip('For some reason, findById not working on Edge ATM.');
 		}
+		if (browserName === 'internet explorer') {
+			this.skip('Dragging is not working on Internet Explorer.');
+		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
 			.setFindTimeout(5000)
@@ -51,7 +54,6 @@ registerSuite('Drag', {
 			.sleep(100)
 			.moveMouseTo(100, 100)
 			.sleep(100)
-			.findById('results')
 			.getVisibleText()
 			.then((text: string) => {
 				const result: DragResults = JSON.parse(text);
@@ -60,7 +62,6 @@ registerSuite('Drag', {
 			})
 			.releaseMouseButton()
 			.sleep(50)
-			.findById('results')
 			.getVisibleText()
 			.then((text: string) => {
 				const result: DragResults = JSON.parse(text);
