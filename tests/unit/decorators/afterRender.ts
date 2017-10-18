@@ -75,7 +75,7 @@ registerSuite('decorators/afterRender', {
 	'class level decorator'() {
 		let afterRenderCount = 0;
 
-		@afterRender(function (node: any) {
+		@afterRender(function(node: any) {
 			afterRenderCount++;
 			return node;
 		})

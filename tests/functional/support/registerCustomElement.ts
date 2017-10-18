@@ -26,7 +26,7 @@ class TestButton extends WidgetBase<TestButtonProperties> {
 	}
 }
 
-registerCustomElement(function () {
+registerCustomElement(function() {
 	return {
 		tagName: 'test-button',
 		widgetConstructor: TestButton,
@@ -48,7 +48,7 @@ registerCustomElement(function () {
 	};
 });
 
-registerCustomElement(function () {
+registerCustomElement(function() {
 	return {
 		tagName: 'no-attributes',
 		widgetConstructor: TestButton,

@@ -29,7 +29,7 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 		dispatchEvent(event: Event) {
 			events.push(event);
 		},
-		appendChild: function () {
+		appendChild: function() {
 		},
 		getEvents() {
 			return events;
@@ -249,7 +249,7 @@ registerSuite('customElements', {
 	'events': {
 		beforeEach() {
 			oldCustomEvent = global.CustomEvent;
-			global.CustomEvent = function (this: any, type: string, args: any) {
+			global.CustomEvent = function(this: any, type: string, args: any) {
 				args.type = type;
 				assign(this, args);
 			};

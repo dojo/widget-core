@@ -11,7 +11,7 @@ const observers: ([ object, Function ])[] = [];
 
 registerSuite('meta - Intersection', {
 	beforeEach() {
-		intersectionObserver = stub(global, 'IntersectionObserver', function (callback: any) {
+		intersectionObserver = stub(global, 'IntersectionObserver', function(callback: any) {
 			const observer = {
 				observe: stub(),
 				takeRecords: stub().returns([])

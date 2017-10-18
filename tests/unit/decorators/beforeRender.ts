@@ -87,7 +87,7 @@ registerSuite('decorators/beforeRender', {
 		'class level decorator'() {
 			let beforeRenderCount = 0;
 
-			@beforeRender(function (renderFunc: Render) {
+			@beforeRender(function(renderFunc: Render) {
 				beforeRenderCount++;
 				return renderFunc;
 			})

@@ -76,7 +76,7 @@ registerSuite('registerCustomElement', {
 			.findById('testButton')
 			.end()
 			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
-			.then(pollUntil(function () {
+			.then(pollUntil(function() {
 				return (<any> document).querySelector('test-button > button').innerHTML === 'greetings world';
 			}, undefined, 1000), undefined);
 	},
@@ -90,7 +90,7 @@ registerSuite('registerCustomElement', {
 			.findByCssSelector('no-attributes > button')
 			.end()
 			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
-			.then(pollUntil(function () {
+			.then(pollUntil(function() {
 				return (<any> document).querySelector('no-attributes > button').innerHTML === 'greetings';
 			}, undefined, 1000), undefined);
 	},
@@ -103,7 +103,7 @@ registerSuite('registerCustomElement', {
 			.setFindTimeout(1000)
 			.findByCssSelector('#manualButton > button')
 			.end()
-			.then(pollUntil(function () {
+			.then(pollUntil(function() {
 				return (<any> document).querySelector('#manualButton > button').innerHTML === 'manual';
 			}, undefined, 1000), undefined);
 	},
@@ -116,7 +116,7 @@ registerSuite('registerCustomElement', {
 			.setFindTimeout(1000)
 			.findByCssSelector('#reinitButton > button')
 			.end()
-			.then(pollUntil(function () {
+			.then(pollUntil(function() {
 				return (<any> document).querySelector('#reinitButton > button').innerHTML === 'test';
 			}, undefined, 1000), undefined);
 	}

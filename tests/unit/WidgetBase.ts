@@ -199,7 +199,7 @@ registerSuite('WidgetBase', {
 				assert.strictEqual(testWidget.count, 2);
 			},
 			'widget constructors are not bound'() {
-				const widgetConstructorSpy: any = function (this: any) {
+				const widgetConstructorSpy: any = function(this: any) {
 					this.functionIsBound = true;
 				};
 				widgetConstructorSpy._type = WIDGET_BASE_TYPE;
@@ -266,7 +266,7 @@ registerSuite('WidgetBase', {
 			let called = false;
 
 			function PropertyLogger() {
-				return testDecorator(function (dNode: any) {
+				return testDecorator(function(dNode: any) {
 					called = true;
 					return dNode;
 				});
@@ -1109,9 +1109,9 @@ registerSuite('WidgetBase', {
 				constructor() {
 					super();
 
-					this.addDecorator('beforeRender', function () {
+					this.addDecorator('beforeRender', function() {
 					});
-					this.addDecorator('afterRender', function () {
+					this.addDecorator('afterRender', function() {
 					});
 				}
 
