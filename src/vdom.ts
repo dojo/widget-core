@@ -74,10 +74,8 @@ function same(dnode1: InternalDNode, dnode2: InternalDNode) {
 		if (dnode1.tag !== dnode2.tag) {
 			return false;
 		}
-		if (dnode1.properties && dnode2.properties) {
-			if (dnode1.properties.key !== dnode2.properties.key) {
-				return false;
-			}
+		if (dnode1.properties.key !== dnode2.properties.key) {
+			return false;
 		}
 		return true;
 	}
@@ -396,7 +394,7 @@ function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy) {
 	else {
 		const domNode = dnode.domNode;
 		const properties = dnode.properties;
-		const exitAnimation = properties ? properties.exitAnimation : undefined;
+		const exitAnimation = properties.exitAnimation;
 		if (properties && exitAnimation) {
 			(domNode as HTMLElement).style.pointerEvents = 'none';
 			const removeDomNode = function() {
