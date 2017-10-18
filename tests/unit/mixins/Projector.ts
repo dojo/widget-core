@@ -322,16 +322,16 @@ registerSuite({
 	},
 	'destroy'() {
 		const projector = new BaseTestWidget();
-		const maquetteProjectorStopSpy = spy(projector, 'pause');
+		const projectorStopSpy = spy(projector, 'pause');
 
 		projector.append();
 		projector.destroy();
 
-		assert.isTrue(maquetteProjectorStopSpy.calledOnce);
+		assert.isTrue(projectorStopSpy.calledOnce);
 
 		projector.destroy();
 
-		assert.isTrue(maquetteProjectorStopSpy.calledOnce);
+		assert.isTrue(projectorStopSpy.calledOnce);
 	},
 	'setProperties guards against original property interface'() {
 		interface Props {

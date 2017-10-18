@@ -168,8 +168,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	/**
 	 * Widget lifecycle method that is called whenever a dom node that is associated with a HNode is updated.
-	 * Note: this method is dependant on the Maquette afterUpdate callback which is called if a dom
-	 * node might have been updated.  Maquette does not guarantee the dom node was updated.
 	 * Override this method to access the dom node.
 	 * @param element The dom node represented by the vdom node.
 	 * @param key The vdom node's key.
