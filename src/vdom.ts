@@ -430,10 +430,10 @@ function checkDistinguishable(childNodes: InternalDNode[], indexToCheck: number,
 				if (same(node, childNode)) {
 					if (isWNode(childNode)) {
 						const widgetName = (childNode.widgetConstructor as any).name;
-						let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times';
+						let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times as siblings';
 
 						if (widgetName) {
-							errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times`;
+							errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times as siblings`;
 						}
 						console.warn(errorMsg);
 					}
@@ -553,31 +553,29 @@ function createDom(dnode: InternalDNode, parentNode: Node, insertBefore: Node | 
 	let domNode: Node | undefined;
 	if (isWNode(dnode)) {
 		let { widgetConstructor } = dnode;
-		if (parentInstance) {
-			if (!isWidgetBaseConstructor(widgetConstructor)) {
-				const item = parentInstance.registry.get<WidgetBase>(widgetConstructor);
-				if (item === null) {
-					return;
-				}
-				widgetConstructor = item;
+		if (!isWidgetBaseConstructor(widgetConstructor)) {
+			const item = parentInstance.registry.get<WidgetBase>(widgetConstructor);
+			if (item === null) {
+				return;
 			}
-			const instance = new widgetConstructor();
-			parentInstance.own(instance);
-			instance.own(instance.on('invalidated', () => {
-				parentInstance.invalidate();
-			}));
-			dnode.instance = instance;
-			instance.__setCoreProperties__(dnode.coreProperties);
-			instance.__setChildren__(dnode.children);
-			instance.__setProperties__(dnode.properties);
-			const rendered = instance.__render__();
-			if (rendered) {
-				const filteredRendered = filterAndDecorateChildren(rendered, instance as WidgetBase);
-				dnode.rendered = filteredRendered;
-				addChildren(parentNode, filteredRendered, projectionOptions, instance as WidgetBase, insertBefore);
-			}
-			parentInstance.emit({ type: 'widget-created' });
+			widgetConstructor = item;
 		}
+		const instance = new widgetConstructor();
+		parentInstance.own(instance);
+		instance.own(instance.on('invalidated', () => {
+			parentInstance.invalidate();
+		}));
+		dnode.instance = instance;
+		instance.__setCoreProperties__(dnode.coreProperties);
+		instance.__setChildren__(dnode.children);
+		instance.__setProperties__(dnode.properties);
+		const rendered = instance.__render__();
+		if (rendered) {
+			const filteredRendered = filterAndDecorateChildren(rendered, instance as WidgetBase);
+			dnode.rendered = filteredRendered;
+			addChildren(parentNode, filteredRendered, projectionOptions, instance as WidgetBase, insertBefore);
+		}
+		parentInstance.emit({ type: 'widget-created' });
 	}
 	else {
 		const doc = parentNode.ownerDocument;
@@ -617,15 +615,20 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 	}
 	if (isWNode(dnode)) {
 		const { instance, rendered: previousRendered } = previous;
-		instance.__setCoreProperties__(dnode.coreProperties);
-		instance.__setChildren__(dnode.children);
-		instance.__setProperties__(dnode.properties);
-		dnode.instance = instance;
-		const rendered = instance.__render__();
-		dnode.rendered = filterAndDecorateChildren(rendered, instance);
-		if (hasRenderChanged(previousRendered, rendered)) {
-			updateChildren(dnode, parentNode, previousRendered, dnode.rendered, instance, projectionOptions);
-			parentInstance.emit({ type: 'widget-updated' });
+		if (instance) {
+			instance.__setCoreProperties__(dnode.coreProperties);
+			instance.__setChildren__(dnode.children);
+			instance.__setProperties__(dnode.properties);
+			dnode.instance = instance;
+			const rendered = instance.__render__();
+			dnode.rendered = filterAndDecorateChildren(rendered, instance);
+			if (hasRenderChanged(previousRendered, rendered)) {
+				updateChildren(dnode, parentNode, previousRendered, dnode.rendered, instance, projectionOptions);
+				parentInstance.emit({ type: 'widget-updated' });
+			}
+		}
+		else {
+			createDom(dnode, parentNode, undefined, projectionOptions, parentInstance);
 		}
 	}
 	else {
