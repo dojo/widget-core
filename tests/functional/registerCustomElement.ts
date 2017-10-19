@@ -1,5 +1,3 @@
-import intern from 'intern';
-
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
 import pollUntil from '@theintern/leadfoot/helpers/pollUntil';
