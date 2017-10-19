@@ -86,6 +86,45 @@ export type SupportedClassName = string | null | undefined;
 
 export type DeferredVirtualProperties = (inserted: boolean) => VirtualDomProperties;
 
+/**
+ * Animation controls are used to control the web animation that has been applied
+ * to a vdom node.
+ */
+export interface AnimationControls {
+	play?: boolean;
+	onFinish?: () => void;
+	reverse?: boolean;
+	cancel?: boolean;
+	finish?: boolean;
+	playbackRate?: number;
+	startTime?: number;
+	currentTime?: number;
+}
+
+/**
+ * Animation timing properties passed to a new KeyframeEffect.
+ */
+export interface AnimationTimingProperties {
+	duration?: number;
+	delay?: number;
+	direction?: string;
+	easing?: string;
+	endDelay?: number;
+	fill?: string;
+	iterations?: number;
+	iterationStart?: number;
+}
+
+/**
+ * Animation propertiues that can be passed as vdom property `animate`
+ */
+export interface AnimationProperties {
+	id: string;
+	effects: any[];
+	controls?: AnimationControls;
+	timing?: AnimationTimingProperties;
+}
+
 export interface VirtualDomProperties {
 	/**
 	 * The animation to perform when this node is added to an already existing parent.

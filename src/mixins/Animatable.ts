@@ -1,5 +1,5 @@
 import 'web-animations-js/web-animations-next-lite.min';
-import { Constructor, DNode, HNode } from '../interfaces';
+import { Constructor, DNode, HNode, AnimationControls, AnimationProperties } from '../interfaces';
 import { WidgetBase } from '../WidgetBase';
 import { afterRender } from '../decorators/afterRender';
 import { isHNode, decorate } from '../d';
@@ -8,35 +8,6 @@ import MetaBase from '../meta/Base';
 
 declare const KeyframeEffect: any;
 declare const Animation: any;
-
-export interface AnimationControls {
-	play?: boolean;
-	onFinish?: () => void;
-	reverse?: boolean;
-	cancel?: boolean;
-	finish?: boolean;
-	playbackRate?: number;
-	startTime?: number;
-	currentTime?: number;
-}
-
-export interface AnimationTimingProperties {
-	duration?: number;
-	delay?: number;
-	direction?: string;
-	easing?: string;
-	endDelay?: number;
-	fill?: string;
-	iterations?: number;
-	iterationStart?: number;
-}
-
-export interface AnimationProperties {
-	id: string;
-	effects: any[];
-	controls?: AnimationControls;
-	timing?: AnimationTimingProperties;
-}
 
 export class AnimationPlayer extends MetaBase {
 
@@ -107,7 +78,7 @@ export class AnimationPlayer extends MetaBase {
 		}
 	}
 
-	add(key: string, animateProperties: AnimationProperties[]) {
+	add(key: string, animateProperties: AnimationProperties | AnimationProperties[]) {
 		const node = this.getNode(key);
 
 		if (node) {
@@ -160,7 +131,9 @@ export function AnimatableMixin<T extends Constructor<WidgetBase>>(Base: T): T {
 			decorate(result,
 				(node: HNode) => {
 					const { animate, key } = node.properties;
-					this.meta(AnimationPlayer).add(key as string, animate);
+					if (animate && key) {
+						this.meta(AnimationPlayer).add(key as string, animate);
+					}
 				},
 				(node: DNode) => {
 					return !!(isHNode(node) && node.properties.animate && node.properties.key);
