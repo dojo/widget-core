@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { initializeElement, handleAttributeChanged, CustomElementDescriptor } from '../../src/customElements';
 import { WidgetBase } from '../../src/WidgetBase';
 import global from '@dojo/shim/global';
@@ -7,6 +7,8 @@ import { assign } from '@dojo/core/lang';
 import * as projector from '../../src/mixins/Projector';
 import * as sinon from 'sinon';
 import { v } from '../../src/d';
+import { Constructor } from '../../src/interfaces';
+import ProjectorMixin from '../../src/mixins/Projector';
 
 function createFakeElement(attributes: any, descriptor: CustomElementDescriptor): any {
 	let widgetInstance: WidgetBase<any> | null;
@@ -22,12 +24,12 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 		getDescriptor: () => descriptor,
 		children: [],
 		getAttribute(name: string) {
-			return attributes[ name ] || null;
+			return attributes[name] || null;
 		},
 		dispatchEvent(event: Event) {
 			events.push(event);
 		},
-		appendChild: function () {
+		appendChild: function() {
 		},
 		getEvents() {
 			return events;
@@ -43,10 +45,9 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 }
 
 let oldCustomEvent: any;
+let sandbox: any;
 
-registerSuite({
-	name: 'customElements',
-
+registerSuite('customElements', {
 	'attributes': {
 		'attributes are set as properties'() {
 			let element = createFakeElement({
@@ -248,7 +249,7 @@ registerSuite({
 	'events': {
 		beforeEach() {
 			oldCustomEvent = global.CustomEvent;
-			global.CustomEvent = function (this: any, type: string, args: any) {
+			global.CustomEvent = function(this: any, type: string, args: any) {
 				args.type = type;
 				assign(this, args);
 			};
@@ -258,26 +259,28 @@ registerSuite({
 			global.CustomEvent = oldCustomEvent;
 		},
 
-		'events are created'() {
-			let element = createFakeElement({}, {
-				tagName: 'test',
-				widgetConstructor: WidgetBase,
-				events: [
-					{
-						propertyName: 'onTest',
-						eventName: 'test'
-					}
-				]
-			});
+		tests: {
+			'events are created'() {
+				let element = createFakeElement({}, {
+					tagName: 'test',
+					widgetConstructor: WidgetBase,
+					events: [
+						{
+							propertyName: 'onTest',
+							eventName: 'test'
+						}
+					]
+				});
 
-			initializeElement(element);
+				initializeElement(element);
 
-			assert.isFunction(element.getWidgetInstance().properties.onTest);
-			element.getWidgetInstance().properties.onTest('detail here');
+				assert.isFunction(element.getWidgetInstance().properties.onTest);
+				element.getWidgetInstance().properties.onTest('detail here');
 
-			assert.lengthOf(element.getEvents(), 1);
-			assert.strictEqual(element.getEvents()[ 0 ].type, 'test');
-			assert.strictEqual(element.getEvents()[ 0 ].detail, 'detail here');
+				assert.lengthOf(element.getEvents(), 1);
+				assert.strictEqual(element.getEvents()[0].type, 'test');
+				assert.strictEqual(element.getEvents()[0].detail, 'detail here');
+			}
 		}
 	},
 
@@ -321,28 +324,30 @@ registerSuite({
 		}
 	},
 
-	'appender': function () {
-		let sandbox: any;
+	'appender': {
+		beforeEach() {
+			sandbox = sinon.sandbox.create();
+		},
 
-		return {
-			'beforeEach'() {
-				sandbox = sinon.sandbox.create();
-			},
+		afterEach() {
+			sandbox.restore();
+		},
 
-			afterEach() {
-				sandbox.restore();
-			},
-
+		tests: {
 			'appender is returned as a function'(this: any) {
 				let rendered = false;
 
 				const appendStub = sandbox.stub();
 
-				sandbox.stub(projector, 'ProjectorMixin', function () {
-					return {
-						append: appendStub
-					};
-				});
+				const OrigProjectorMixin = projector.ProjectorMixin;
+
+				function TestProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
+					const Mixed = OrigProjectorMixin(Base);
+					Mixed.prototype.append = appendStub;
+					return Mixed;
+				}
+
+				sandbox.stub(projector, 'ProjectorMixin', TestProjectorMixin);
 
 				let element = createFakeElement({}, {
 					tagName: 'test',
@@ -363,6 +368,6 @@ registerSuite({
 
 				assert.isTrue(appendStub.called);
 			}
-		};
+		}
 	}
 });

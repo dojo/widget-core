@@ -1,11 +1,9 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 // import pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
 import { DragResults } from '../../src/meta/Drag';
 
-registerSuite({
-	name: 'Drag',
-
+registerSuite('Drag', {
 	'touch drag'(this: any) {
 		if (!this.remote.session.capabilities.touchEnabled) {
 			this.skip('Not touch enabled device');
@@ -44,6 +42,9 @@ registerSuite({
 		if (browserName === 'MicrosoftEdge') {
 			this.skip('For some reason, findById not working on Edge ATM.');
 		}
+		if (browserName === 'internet explorer') {
+			this.skip('Dragging is not working on Internet Explorer.');
+		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
 			.setFindTimeout(5000)
@@ -53,7 +54,6 @@ registerSuite({
 			.sleep(100)
 			.moveMouseTo(100, 100)
 			.sleep(100)
-			.findById('results')
 			.getVisibleText()
 			.then((text: string) => {
 				const result: DragResults = JSON.parse(text);
@@ -62,7 +62,6 @@ registerSuite({
 			})
 			.releaseMouseButton()
 			.sleep(50)
-			.findById('results')
 			.getVisibleText()
 			.then((text: string) => {
 				const result: DragResults = JSON.parse(text);

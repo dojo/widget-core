@@ -1,11 +1,9 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { stub } from 'sinon';
 import eventHandlerInterceptor from '../../../src/util/eventHandlerInterceptor';
 
-registerSuite({
-	name: 'util/eventHandlerInterceptor',
-
+registerSuite('util/eventHandlerInterceptor', {
 	'event is passed through with bind'() {
 		const addEventListener = stub();
 		const mockDomNode: Element = {
@@ -31,7 +29,7 @@ registerSuite({
 		} as any;
 		const listener = stub();
 		const context = {};
-		const result = eventHandlerInterceptor.call(undefined, 'onscroll', listener, mockDomNode, { });
+		const result = eventHandlerInterceptor.call(undefined, 'onscroll', listener, mockDomNode, {});
 		assert.isFunction(result);
 		assert.isTrue(addEventListener.notCalled, 'addEventListener should not have been called');
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
@@ -69,7 +67,7 @@ registerSuite({
 		} as any;
 		const listener = stub();
 		const context = {};
-		const result = eventHandlerInterceptor.call(context, 'ontouchstart', listener, mockDomNode, { });
+		const result = eventHandlerInterceptor.call(context, 'ontouchstart', listener, mockDomNode, {});
 		assert.isUndefined(result);
 		assert.isTrue(listener.notCalled, 'listener should not have been called');
 		assert.isTrue(addEventListener.calledOnce, 'addEventListener should not have been called once');
@@ -106,10 +104,10 @@ registerSuite({
 			'onsubmit'
 		];
 		eventHandlers.forEach((eventType) => {
-			const mockDomNode: Element = { } as any;
+			const mockDomNode: Element = {} as any;
 			const listener = () => { };
 			const context = {};
-			assert.isFunction(eventHandlerInterceptor.call(context, 'onscroll', listener, mockDomNode, { }), 'should pass through handler');
+			assert.isFunction(eventHandlerInterceptor.call(context, 'onscroll', listener, mockDomNode, {}), 'should pass through handler');
 		});
 	}
 });

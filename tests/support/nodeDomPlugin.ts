@@ -2,16 +2,16 @@ import * as jsdom from 'jsdom';
 import global from '@dojo/shim/global';
 
 /* In order to have the tests work under Node.js, we need to load JSDom and polyfill
- * requestAnimationFrame */
+requestAnimationFrame */
 
 /* Create a basic document */
 const doc = jsdom.jsdom(`
-	<!DOCTYPE html>
-	<html>
-	<head></head>
-	<body></body>
-	<html>
-`);
+		<!DOCTYPE html>
+		<html>
+		<head></head>
+		<body></body>
+		<html>
+	`);
 
 /* Assign it to the global namespace */
 global.document = doc;
@@ -31,7 +31,3 @@ global.requestAnimationFrame = (cb: (...args: any[]) => {}) => {
 
 global.cancelAnimationFrame = () => {};
 global.IntersectionObserver = () => {};
-
-export default doc;
-
-console.log('Loaded JSDOM...');

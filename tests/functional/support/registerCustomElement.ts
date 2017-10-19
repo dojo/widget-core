@@ -15,7 +15,7 @@ class TestButton extends WidgetBase<TestButtonProperties> {
 	}
 
 	render(this: TestButton) {
-		const { onClick : onclick } = this;
+		const { onClick: onclick } = this;
 		const { label = '', suffix = '' } = this.properties;
 
 		return v('button', {
@@ -26,7 +26,7 @@ class TestButton extends WidgetBase<TestButtonProperties> {
 	}
 }
 
-registerCustomElement(function () {
+registerCustomElement(function() {
 	return {
 		tagName: 'test-button',
 		widgetConstructor: TestButton,
@@ -48,7 +48,7 @@ registerCustomElement(function () {
 	};
 });
 
-registerCustomElement(function () {
+registerCustomElement(function() {
 	return {
 		tagName: 'no-attributes',
 		widgetConstructor: TestButton,

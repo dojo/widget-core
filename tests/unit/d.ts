@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { assign } from '@dojo/core/lang';
 import { DNode, HNode, WNode, WidgetProperties } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
@@ -34,8 +34,7 @@ class TestWidget extends WidgetBase<TestProperties, WNode<TestChildWidget>> {
 	}
 }
 
-registerSuite({
-	name: 'd',
+registerSuite('d', {
 	w: {
 		'create WNode wrapper using constructor with properties'() {
 			const properties: any = { id: 'id', classes: [ 'world' ] };
@@ -43,7 +42,7 @@ registerSuite({
 
 			assert.equal(dNode.type, WNODE);
 			assert.deepEqual(dNode.widgetConstructor, WidgetBase);
-			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
 		},
@@ -53,7 +52,7 @@ registerSuite({
 
 			assert.equal(dNode.type, WNODE);
 			assert.deepEqual(dNode.widgetConstructor, 'my-widget');
-			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
 		},
@@ -81,7 +80,7 @@ registerSuite({
 
 			assert.equal(dNode.type, WNODE);
 			assert.deepEqual(dNode.widgetConstructor, WidgetBase);
-			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.lengthOf(dNode.children, 1);
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
@@ -92,7 +91,7 @@ registerSuite({
 
 			assert.equal(dNode.type, WNODE);
 			assert.deepEqual(dNode.widgetConstructor, 'my-widget');
-			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.lengthOf(dNode.children, 1);
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));
@@ -104,7 +103,7 @@ registerSuite({
 			const dNode = w(symbolLabel, properties, [ w(WidgetBase, properties) ]);
 			assert.equal(dNode.type, WNODE);
 			assert.strictEqual(dNode.widgetConstructor, symbolLabel);
-			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ]});
+			assert.deepEqual(dNode.properties, { id: 'id', classes: [ 'world' ] });
 			assert.lengthOf(dNode.children, 1);
 			assert.isTrue(isWNode(dNode));
 			assert.isFalse(isHNode(dNode));

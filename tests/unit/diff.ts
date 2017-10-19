@@ -1,10 +1,9 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import * as diff from '../../src/diff';
 import WidgetBase from '../../src/WidgetBase';
 
-registerSuite({
-	name: 'diff',
+registerSuite('diff', {
 	'always'() {
 		const foo = {};
 		const result = diff.always(foo, foo);
@@ -63,7 +62,7 @@ registerSuite({
 			assert.equal(result.value, bar);
 			assert.isFalse(result.changed);
 
-			const qux = [ 1, 3, 2];
+			const qux = [ 1, 3, 2 ];
 			result = diff.shallow(foo, qux);
 			assert.equal(result.value, qux);
 			assert.isTrue(result.changed);
@@ -78,8 +77,8 @@ registerSuite({
 			assert.isTrue(result.changed);
 		},
 		'function'() {
-			const foo = () => {};
-			const bar = () => {};
+			const foo = () => { };
+			const bar = () => { };
 			let result = diff.auto(foo, bar);
 			assert.equal(result.value, bar);
 			assert.isFalse(result.changed);

@@ -4,7 +4,7 @@ export default {
 			'_number': '$Revision: 12932 $',
 			'_unicodeVersion': '9.0.0',
 			'_cldrVersion': '30.0.3'
-	},
+		},
 		'likelySubtags': {
 			'aa': 'aa-Latn-ET',
 			'aai': 'aai-Latn-ZZ',

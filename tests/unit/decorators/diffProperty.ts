@@ -1,18 +1,17 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 
-import { PropertyChangeRecord } from './../../../src/interfaces';
-import { always, ignore } from './../../../src/diff';
-import { diffProperty } from './../../../src/decorators/diffProperty';
-import { WidgetBase } from './../../../src/WidgetBase';
+import { PropertyChangeRecord } from '../../../src/interfaces';
+import { always, ignore } from '../../../src/diff';
+import { diffProperty } from '../../../src/decorators/diffProperty';
+import { WidgetBase } from '../../../src/WidgetBase';
 
 interface TestProperties {
 	id?: string;
 	foo: string;
 }
 
-registerSuite({
-	name: 'decorators/diffProperty',
+registerSuite('decorators/diffProperty', {
 	'decorator': {
 		'diff with no reaction'() {
 			let callCount = 0;
@@ -174,10 +173,10 @@ registerSuite({
 	},
 	'multiple default decorators on the same method cause the first matching decorator to win'() {
 		@diffProperty('foo', ignore)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		@diffProperty('foo', always)
-		class SubWidget extends TestWidget { }
+		class SubWidget extends TestWidget {}
 
 		const widget = new SubWidget();
 		const vnode = widget.__render__();
@@ -208,10 +207,10 @@ registerSuite({
 		}
 
 		@diffProperty('foo', diff1)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		@diffProperty('foo', diff2)
-		class SubWidget extends TestWidget { }
+		class SubWidget extends TestWidget {}
 
 		const widget = new SubWidget();
 		widget.__setProperties__({
@@ -219,7 +218,7 @@ registerSuite({
 			foo: 'bar'
 		});
 
-		assert.deepEqual(calls, ['diff1', 'diff2']);
+		assert.deepEqual(calls, [ 'diff1', 'diff2' ]);
 		assert.strictEqual(calls[0], 'diff1');
 		assert.strictEqual(calls[1], 'diff2');
 	},
@@ -233,7 +232,7 @@ registerSuite({
 		}
 		@diffProperty('foo', customDiff)
 		@diffProperty('id', customDiff)
-		class TestWidget extends WidgetBase<TestProperties> { }
+		class TestWidget extends WidgetBase<TestProperties> {}
 
 		const widget = new TestWidget();
 		const vnode = widget.__render__();
