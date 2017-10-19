@@ -218,14 +218,16 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public scheduleRender() {
-			if (this.projectorState === ProjectorAttachState.Attached && !this._scheduled && !this._paused) {
+			if (this.projectorState === ProjectorAttachState.Attached) {
 				this.__setProperties__(this._projectorProperties);
 				this.__setChildren__(this._projectorChildren);
-				if (this._async) {
-					this._scheduled = global.requestAnimationFrame(this._boundDoRender);
-				}
-				else {
-					this._boundDoRender();
+				if (!this._scheduled && !this._paused) {
+					if (this._async) {
+						this._scheduled = global.requestAnimationFrame(this._boundDoRender);
+					}
+					else {
+						this._boundDoRender();
+					}
 				}
 			}
 		}
