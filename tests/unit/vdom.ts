@@ -20,30 +20,30 @@ const projectorStub: any = {
 	emit: stub()
 };
 
-class Bar extends WidgetBase<any> {
+class MainBar extends WidgetBase<any> {
 	render() {
 		return v('span', { innerHTML: 'Bar' });
 	}
 }
 
-class Foo extends WidgetBase<any> {
+class MainFoo extends WidgetBase<any> {
 	render() {
 		const { show } = this.properties;
-		return v('div', { foo: 'bar' }, [
-			v('h1', { key: 'one' }, [ 'Hello Widget' ]),
-			show ? w(Bar, { key: 'first' }) : null,
-			show ? w(Bar, { key: 'second' }) : null,
+		return v('div', { classes: { myClass: true }, foo: 'bar' }, [
+			v('h1', { classes: { myClass: true }, key: 'one' }, [ 'Hello Widget' ]),
+			show ? w(MainBar, { classes: { myClass: true }, key: 'first' }) : null,
+			show ? w(MainBar, { key: 'second' }) : null,
 			show ? null : v('div', { key: 'three' }, ['me']),
 			`text node`,
-			v('h1', { key: 'two', innerHTML: 'span' })
+			v('h1', { key: 'two', classes: { myClass: true }, innerHTML: 'span' })
 		]);
 	}
 }
 
 class TestWidget extends WidgetBase<any> {
 	render() {
-		return v('span', [
-			w(Foo, { show: this.properties.show })
+		return v('span', { classes: { myClass: true } }, [
+			w(MainFoo, { show: this.properties.show })
 		]);
 	}
 }
@@ -373,11 +373,15 @@ describe('vdom', () => {
 
 		it('supports an array of DNodes', () => {
 			class Foo extends WidgetBase {
+				private myClass = false;
+
 				render() {
+					this.myClass = !this.myClass;
+
 					return [
-						v('div', {}, [ '1' ]),
+						v('div', { classes: { myClass: this.myClass } }, [ '1' ]),
 						v('div', {}, [ '2' ]),
-						v('div', {}, [ '3' ])
+						v('div', { classes: { myClass: this.myClass } }, [ '3' ])
 					];
 				}
 			}
@@ -442,6 +446,63 @@ describe('vdom', () => {
 			const projection: any = dom.create(widget.__render__() as HNode, widget);
 			const root = projection.domNode;
 			assert.lengthOf(root.childNodes, 0);
+		});
+
+		it('supports null return from render and subsequent return on re-render', () => {
+			let fooInvalidate: any;
+			class Foo extends WidgetBase<any> {
+
+				private myClass = false;
+
+				constructor() {
+					super();
+					fooInvalidate = this.invalidate.bind(this);
+				}
+
+				render() {
+
+					if (!this.properties.show) {
+						return null;
+					}
+					this.myClass = !this.myClass;
+					return v('div', { key: '1', classes: { myClass: this.myClass }}, [
+						'content'
+					]);
+				}
+			}
+
+			class Baz extends WidgetBase {
+
+				private _show = false;
+
+				set show(value: boolean) {
+					this._show = value;
+					this.invalidate();
+				}
+
+				render() {
+					return v('div', [
+						w(Foo, { show: this._show })
+					]);
+				}
+			}
+
+			const widget = new Baz();
+			const projection: any = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 0);
+			widget.show = true;
+			projection.update(widget.__render__() as HNode);
+			assert.lengthOf(root.childNodes, 1);
+			const fooDiv = root.childNodes[0] as HTMLDivElement;
+			assert.lengthOf(fooDiv.classList, 1);
+			assert.lengthOf(fooDiv.childNodes, 1);
+			const fooDivContent = fooDiv.childNodes[0] as Text;
+			assert.strictEqual(fooDivContent.data, 'content');
+			fooInvalidate();
+			projection.update(widget.__render__() as HNode);
+			assert.lengthOf(fooDiv.classList, 0);
+			assert.lengthOf(fooDiv.childNodes, 1);
 		});
 
 		it('should destroy widgets when they are no longer required', () => {
