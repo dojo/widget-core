@@ -145,7 +145,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _root: Element;
 		private _async = true;
 		private _attachHandle: Handle;
-		private _projectionOptions: ProjectionOptions;
+		private _projectionOptions: Partial<ProjectionOptions>;
 		private _projection: Projection | undefined;
 		private _scheduled: number | undefined;
 		private _paused: boolean;
@@ -334,11 +334,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			}
 
 			return node;
-		}
-
-		public invalidate(): void {
-			super.invalidate();
-			this.scheduleRender();
 		}
 
 		private _doRender() {

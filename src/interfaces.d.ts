@@ -73,8 +73,8 @@ export interface ProjectorOptions {
 export interface ProjectionOptions extends ProjectorOptions {
 	readonly namespace?: string;
 	eventHandlerInterceptor?: (propertyName: string, eventHandler: Function, domNode: Node, properties: VirtualDomProperties) => Function | undefined;
-	afterRenderCallbacks?: Function[];
-	merge?: boolean;
+	afterRenderCallbacks: Function[];
+	merge: boolean;
 }
 
 export interface Projection {

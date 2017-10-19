@@ -10,12 +10,20 @@ import { WidgetBase } from '../../../src/WidgetBase';
 import { ThemeableMixin } from '../../../src/mixins/Themeable';
 
 let rAF: SinonStub;
+let rIC: SinonStub;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
 		rAF.getCall(i).args[0]();
 	}
 	rAF.reset();
+}
+
+function resolveRIC() {
+	for (let i = 0; i < rIC.callCount; i++) {
+		rIC.getCall(i).args[0]();
+	}
+	rIC.reset();
 }
 
 const emptyResults: DragResults = {
@@ -27,11 +35,13 @@ registerSuite({
 	name: 'support/meta/Drag',
 
 	beforeEach() {
-		rAF = stub(global, 'requestAnimationFrame');
+		rAF = stub(global, 'requestAnimationFrame').returns(1);
+		rIC = stub(global, 'requestIdleCallback').returns(1);
 	},
 
 	afterEach() {
 		rAF.restore();
+		rIC.restore();
 	},
 
 	'standard rendering'() {
@@ -54,7 +64,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [ emptyResults, emptyResults ], 'should have been called twice, both empty results');
 
@@ -85,7 +97,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [ emptyResults, emptyResults ], 'should have been called twice, both empty results');
 
@@ -117,7 +131,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -136,6 +152,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -152,6 +169,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -168,6 +186,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -215,7 +234,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -234,6 +255,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -278,6 +300,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -294,6 +317,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -341,7 +365,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -360,6 +386,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -418,6 +445,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -461,7 +489,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -478,6 +508,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -494,6 +525,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -532,7 +564,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -551,6 +585,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -567,6 +602,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -583,6 +619,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -638,7 +675,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -657,6 +696,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -673,6 +713,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -689,6 +730,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -723,7 +765,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -742,6 +786,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -758,6 +803,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -774,6 +820,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -808,7 +855,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -827,6 +876,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -845,6 +895,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -861,6 +912,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -877,6 +929,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,
@@ -919,7 +972,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerdown', {
 			eventInit: {
@@ -938,6 +993,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointermove', {
 			eventInit: {
@@ -954,10 +1010,12 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		widget.invalidate();
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'pointerup', {
 			eventInit: {
@@ -974,6 +1032,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		assert.deepEqual(dragResults, [
 			emptyResults,

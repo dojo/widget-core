@@ -9,8 +9,16 @@ import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
 
 let rAFStub: SinonStub;
+let rICStub: SinonStub;
 
 function resolveRAF() {
+	for (let i = 0; i < rAFStub.callCount; i++) {
+		rAFStub.getCall(i).args[0]();
+	}
+	rAFStub.reset();
+}
+
+function resolveRIC() {
 	for (let i = 0; i < rAFStub.callCount; i++) {
 		rAFStub.getCall(i).args[0]();
 	}
@@ -21,9 +29,11 @@ registerSuite({
 	name: 'meta base',
 	beforeEach() {
 		rAFStub = stub(global, 'requestAnimationFrame').returns(1);
+		rICStub = stub(global, 'requestIdleCallback').returns(1);
 	},
 	afterEach() {
 		rAFStub.restore();
+		rICStub.restore();
 	},
 	'has checks nodehandler for nodes'() {
 		const nodeHandler = new NodeHandler();
@@ -102,6 +112,7 @@ registerSuite({
 		nodeHandler.add(element, 'foo');
 
 		resolveRAF();
+		resolveRIC();
 		assert.isTrue(invalidate.calledOnce);
 
 		onSpy.reset();
@@ -150,6 +161,7 @@ registerSuite({
 
 		meta.callInvalidate();
 		resolveRAF();
+		resolveRIC();
 		assert.isTrue(invalidate.calledOnce);
 	},
 	'integration with single root node'() {
