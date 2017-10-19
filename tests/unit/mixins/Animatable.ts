@@ -2,42 +2,22 @@ import global from '@dojo/shim/global';
 import { VNode } from '@dojo/interfaces/vdom';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { WidgetProperties } from '../../../src/interfaces';
 import { AnimatableMixin, AnimationPlayer, AnimationControls, AnimationTimingProperties } from '../../../src/mixins/Animatable';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { spy, stub } from 'sinon';
 
-interface TestWidgetProperties extends WidgetProperties {
-	controls?: AnimationControls;
-	effects?: any;
-	timing?: AnimationTimingProperties;
-	animate?: boolean;
-}
+let effects: any;
+let controls: AnimationControls;
+let timing: AnimationTimingProperties;
+let animate: any;
 
-class TestWidget extends AnimatableMixin(WidgetBase)<TestWidgetProperties> {
-	protected getAnimation(): {} | undefined | (() => {}) {
-		const { animate = true,
-			controls = {},
-			timing = {},
-			effects = [
-				{ height: '0px' },
-				{ height: '10px' }
-			] } = this.properties;
-
-		return animate ? {
-			id: 'animation',
-			effects,
-			controls,
-			timing
-		} : undefined;
-	}
-
+class TestWidget extends AnimatableMixin(WidgetBase) {
 	render() {
 		return v('div', {}, [
 			v('div', {
 				key: 'animated',
-				animate: this.getAnimation()
+				animate
 			}),
 			v('div', {
 				key: 'nonAnimated'
@@ -45,28 +25,12 @@ class TestWidget extends AnimatableMixin(WidgetBase)<TestWidgetProperties> {
 		]);
 	}
 
+	callInvalidate() {
+		this.invalidate();
+	}
+
 	getMeta() {
 		return this.meta(AnimationPlayer);
-	}
-}
-
-class PropertyFunctionWidget extends TestWidget {
-	getAnimation() {
-		const { controls = {},
-			timing = {},
-			effects = [
-				{ height: '0px' },
-				{ height: '10px' }
-			] } = this.properties;
-
-		return function () {
-			return {
-				id: 'animation',
-				effects,
-				controls,
-				timing
-			};
-		};
 	}
 }
 
@@ -79,10 +43,23 @@ const cancelStub = stub();
 const finishStub = stub();
 const startStub = stub();
 const currentStub = stub();
+const playbackRateStub = stub();
 let metaNode: HTMLElement;
 
 registerSuite({
 	name: 'animatable',
+	'beforeEach'() {
+		effects = [
+			{ height: '0px' },
+			{ height: '10px' }
+		];
+		controls = {};
+		timing = {};
+		animate = {
+			id: 'animation',
+			effects
+		};
+	},
 	'animatable mixin': {
 		'adds an animatable player for each node with animations'() {
 			const widget = new TestWidget();
@@ -152,6 +129,9 @@ registerSuite({
 				set onfinish(onFinish: () => {}) {
 					onFinish();
 				}
+				set playbackRate(rate: number) {
+					playbackRateStub(rate);
+				}
 			}
 			global.KeyframeEffect = KeyframeEffectMock;
 			global.Animation = AnimationMock;
@@ -166,6 +146,7 @@ registerSuite({
 			finishStub.reset();
 			startStub.reset();
 			currentStub.reset();
+			playbackRateStub.reset();
 			metaNode = document.createElement('div');
 		},
 		afterEach() {
@@ -180,13 +161,22 @@ registerSuite({
 			assert.isTrue(keyframeCtorStub.calledOnce);
 			assert.isTrue(animationCtorStub.calledOnce);
 		},
-		'passed timing and node info to keyframe effect'() {
+		'reuses previous KeyframeEffect and Player when animation is still valid'() {
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				timing: {
-					duration: 2
-				}
-			});
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			widget.callInvalidate();
+			widget.__render__();
+			assert.isTrue(keyframeCtorStub.calledOnce);
+			assert.isTrue(animationCtorStub.calledOnce);
+		},
+		'passed timing and node info to keyframe effect'() {
+			animate.timing = {
+				duration: 2
+			};
+			const widget = new TestWidget();
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -213,12 +203,10 @@ registerSuite({
 			assert.isTrue(playStub.notCalled);
 		},
 		'plays when play set to true'() {
+			animate.controls = {
+				play: true
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					play: true
-				}
-			});
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -227,12 +215,10 @@ registerSuite({
 			assert.isTrue(pauseStub.notCalled);
 		},
 		'reverses when reverse set to true'() {
+			animate.controls = {
+				reverse: true
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					reverse: true
-				}
-			});
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -240,12 +226,10 @@ registerSuite({
 			assert.isTrue(reverseStub.calledOnce);
 		},
 		'cancels when cancel set to true'() {
+			animate.controls = {
+				cancel: true
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					cancel: true
-				}
-			});
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -253,25 +237,32 @@ registerSuite({
 			assert.isTrue(cancelStub.calledOnce);
 		},
 		'finishes when finish set to true'() {
+			animate.controls = {
+				finish: true
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					finish: true
-				}
-			});
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
 			widget.__render__();
 			assert.isTrue(finishStub.calledOnce);
 		},
-		'can set start time'() {
+		'sets playback rate when passed'() {
+			animate.controls = {
+				playbackRate: 2
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					startTime: 2
-				}
-			});
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			assert.isTrue(playbackRateStub.calledOnce);
+		},
+		'can set start time'() {
+			animate.controls = {
+				startTime: 2
+			};
+			const widget = new TestWidget();
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -280,12 +271,10 @@ registerSuite({
 			assert.isTrue(startStub.firstCall.calledWith(2));
 		},
 		'can set current time'() {
+			animate.controls = {
+				currentTime: 2
+			};
 			const widget = new TestWidget();
-			widget.__setProperties__({
-				controls: {
-					currentTime: 2
-				}
-			});
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -294,11 +283,9 @@ registerSuite({
 			assert.isTrue(currentStub.firstCall.calledWith(2));
 		},
 		'will execute effects function if one is passed'() {
-			const widget = new TestWidget();
 			const fx = stub().returns([]);
-			widget.__setProperties__({
-				effects: fx
-			});
+			animate.effects = fx;
+			const widget = new TestWidget();
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -312,29 +299,35 @@ registerSuite({
 
 			widget.__render__();
 			assert.isTrue(cancelStub.notCalled);
-			widget.__setProperties__({
-				animate: false
-			});
+
+			widget.callInvalidate();
+			animate = undefined;
+
 			widget.__render__();
 			assert.isTrue(cancelStub.calledOnce);
 		},
 		'will call onfinish function if passed'() {
 			const onFinishStub = stub();
+			animate.controls = {
+				onFinish: onFinishStub
+			};
 			const widget = new TestWidget();
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
-
-			widget.__setProperties__({
-				controls: {
-					onFinish: onFinishStub
-				}
-			});
 
 			widget.__render__();
 			assert.isTrue(onFinishStub.calledOnce);
 		},
 		'can return a function instead of properties object'() {
-			const widget = new PropertyFunctionWidget();
+			const animateReturn = {
+				id: 'animation',
+				effects,
+				controls,
+				timing
+			};
+			animate = () => animateReturn;
+
+			const widget = new TestWidget();
 			const meta = widget.getMeta();
 			stub(meta, 'getNode').returns(metaNode);
 
@@ -348,6 +341,36 @@ registerSuite({
 				],
 				{}
 			));
+		},
+		'does not create animation if function does not return properties'() {
+			animate = () => undefined;
+
+			const widget = new TestWidget();
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			assert.isTrue(keyframeCtorStub.notCalled);
+		},
+		'can have multiple animations on a single node'() {
+			animate = [{
+				id: 'animation1',
+				effects,
+				controls,
+				timing
+			},
+			{
+				id: 'animation2',
+				effects,
+				controls,
+				timing
+			}];
+			const widget = new TestWidget();
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			assert.isTrue(keyframeCtorStub.calledTwice);
 		}
 	}
 });
