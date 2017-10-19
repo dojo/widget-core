@@ -653,7 +653,7 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 	}
 	if (isWNode(dnode)) {
 		const { instance, rendered: previousRendered } = previous;
-		if (instance) {
+		if (instance && previousRendered) {
 			instance.__setCoreProperties__(dnode.coreProperties);
 			instance.__setChildren__(dnode.children);
 			instance.__setProperties__(dnode.properties);
