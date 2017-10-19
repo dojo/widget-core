@@ -9,6 +9,9 @@ import { WidgetBase } from '../../src/WidgetBase';
 import { Registry } from '../../src/Registry';
 import eventHandlerInterceptor from '../../src/util/eventHandlerInterceptor';
 
+let consoleStub: SinonStub;
+let rIC: SinonStub;
+
 const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgument: Function) => {
 	return function(this: Node) {
 		return functionPropertyArgument.apply(this, arguments);
@@ -48,17 +51,24 @@ class TestWidget extends WidgetBase<any> {
 	}
 }
 
-let consoleStub: SinonStub;
+function resolveRIC() {
+	for (let i = 0; i < rIC.callCount; i++) {
+		rIC.getCall(i).args[0]();
+	}
+	rIC.reset();
+}
 
 describe('vdom', () => {
 	beforeEach(() => {
 		projectorStub.on.reset();
 		projectorStub.emit.reset();
 		consoleStub = stub(console, 'warn');
+		rIC = stub(global, 'requestIdleCallback').returns(1);
 	});
 
 	afterEach(() => {
 		consoleStub.restore();
+		rIC.restore();
 	});
 
 	describe('widgets', () => {
@@ -539,18 +549,23 @@ describe('vdom', () => {
 
 			const widget = new Bar();
 			const projection = dom.create(widget.__render__() as HNode, widget);
+			resolveRIC();
 			widget.count = 10;
 			projection.update(widget.__render__() as HNode);
+			resolveRIC();
 			assert.strictEqual(fooDestroyedCount, 10);
 			fooDestroyedCount = 0;
 			widget.count = 10;
 			projection.update(widget.__render__() as HNode);
+			resolveRIC();
 			assert.strictEqual(fooDestroyedCount, 0);
 			widget.count = 20;
 			projection.update(widget.__render__() as HNode);
+			resolveRIC();
 			assert.strictEqual(fooDestroyedCount, 0);
 			widget.count = 0;
 			projection.update(widget.__render__() as HNode);
+			resolveRIC();
 			assert.strictEqual(fooDestroyedCount, 20);
 		});
 
@@ -603,9 +618,11 @@ describe('vdom', () => {
 
 			const widget = new Baz();
 			const projection = dom.create(widget.__render__() as HNode, widget);
+			resolveRIC();
 			assert.isTrue(fooCreated);
 			widget.foo = false;
 			projection.update(widget.__render__() as HNode);
+			resolveRIC();
 			assert.isTrue(fooDestroyed);
 			assert.isTrue(barCreated);
 		});
@@ -1528,23 +1545,29 @@ describe('vdom', () => {
 
 		it('element-created not emitted for new nodes without a key', () => {
 			dom.create(v('div'), projectorStub);
+			resolveRIC();
 			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-created' }));
 		});
 
 		it('element-created emitted for new nodes with a key', () => {
 			const projection = dom.create(v('div', { key: '1' }), projectorStub);
+			resolveRIC();
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-created', element: projection.domNode, key: '1' }));
 		});
 
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
+			resolveRIC();
 			projection.update(v('div'));
+			resolveRIC();
 			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-updated' }));
 		});
 
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
+			resolveRIC();
 			projection.update(v('div', { key: '1' }));
+			resolveRIC();
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-updated', element: projection.domNode, key: '1' }));
 		});
 	});

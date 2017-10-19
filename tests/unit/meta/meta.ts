@@ -19,10 +19,10 @@ function resolveRAF() {
 }
 
 function resolveRIC() {
-	for (let i = 0; i < rAFStub.callCount; i++) {
-		rAFStub.getCall(i).args[0]();
+	for (let i = 0; i < rICStub.callCount; i++) {
+		rICStub.getCall(i).args[0]();
 	}
-	rAFStub.reset();
+	rICStub.reset();
 }
 
 registerSuite({
@@ -200,6 +200,7 @@ registerSuite({
 
 		const div = document.createElement('div');
 		widget.append(div);
+		resolveRIC();
 
 		assert.isTrue(meta.has('foo'), '1');
 		assert.isTrue(meta.has('bar'), '2');
@@ -238,15 +239,14 @@ registerSuite({
 		const onFoo = stub();
 		const onBar = stub();
 		const onWidget = stub();
-		const onProjector = stub();
 
 		nodeHandler.on('foo', onFoo);
 		nodeHandler.on('bar', onBar);
 		nodeHandler.on(NodeEventType.Widget, onWidget);
-		nodeHandler.on(NodeEventType.Projector, onProjector);
 
 		const div = document.createElement('div');
 		widget.append(div);
+		resolveRIC();
 
 		assert.isTrue(meta.has('foo'));
 		assert.isTrue(meta.has('bar'));

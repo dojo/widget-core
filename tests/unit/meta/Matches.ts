@@ -12,6 +12,7 @@ import { ThemeableMixin } from '../../../src/mixins/Themeable';
 import Matches from '../../../src/meta/Matches';
 
 let rAF: SinonStub;
+let rIC: SinonStub;
 
 function resolveRAF() {
 	for (let i = 0; i < rAF.callCount; i++) {
@@ -20,15 +21,24 @@ function resolveRAF() {
 	rAF.reset();
 }
 
+function resolveRIC() {
+	for (let i = 0; i < rIC.callCount; i++) {
+		rIC.getCall(i).args[0]();
+	}
+	rIC.reset();
+}
+
 registerSuite({
 	name: 'support/meta/Matches',
 
 	beforeEach() {
-		rAF = stub(global, 'requestAnimationFrame');
+		rAF = stub(global, 'requestAnimationFrame').returns(1);
+		rIC = stub(global, 'requestIdleCallback').returns(1);
 	},
 
 	afterEach() {
 		rAF.restore();
+		rIC.restore();
 	},
 
 	'node matches'() {
@@ -55,7 +65,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'click');
 
@@ -89,7 +101,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild as Element, 'click');
 
@@ -127,7 +141,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {
@@ -173,7 +189,9 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {
@@ -182,6 +200,7 @@ registerSuite({
 		});
 
 		resolveRAF();
+		resolveRIC();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {

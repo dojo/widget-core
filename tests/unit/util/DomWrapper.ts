@@ -9,6 +9,7 @@ import ProjectorMixin from '../../../src/mixins/Projector';
 import { ThemeableMixin, theme } from '../../../src/mixins/Themeable';
 
 let rAF: any;
+let rIC: any;
 let projector: any;
 
 function resolveRAF() {
@@ -18,15 +19,24 @@ function resolveRAF() {
 	rAF.reset();
 }
 
+function resolveRIC() {
+	for (let i = 0; i < rIC.callCount; i++) {
+		rIC.getCall(0).args[0]();
+	}
+	rIC.reset();
+}
+
 registerSuite({
 	name: 'DomWrapper',
 
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
+		rIC = stub(global, 'requestIdleCallback');
 	},
 
 	afterEach() {
 		rAF.restore();
+		rIC.restore();
 		projector && projector.destroy();
 	},
 
@@ -47,7 +57,9 @@ registerSuite({
 		projector = new Projector();
 		const root = document.createElement('div');
 		projector.append(root);
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 		assert.equal(domNode.foo, 'blah');
 		assert.equal(domNode.getAttribute('original'), 'woop');
 		assert.equal(domNode.getAttribute('id'), 'foo');
@@ -70,7 +82,9 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 		domNode.click();
 		assert.isTrue(clicked);
 	},
@@ -97,7 +111,9 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 		assert.isTrue(domNode.classList.contains('classFoo'));
 		assert.equal(domNode.style.color, 'red');
 	},
@@ -120,7 +136,9 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
+		resolveRIC();
 		resolveRAF();
+		resolveRIC();
 		assert.isTrue(attached);
 	}
 });
