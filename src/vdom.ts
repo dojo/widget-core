@@ -569,7 +569,7 @@ function initPropertiesAndChildren(
 ) {
 	addChildren(domNode, dnode.children, projectionOptions, parentInstance, undefined);
 	setProperties(domNode, dnode.properties, projectionOptions);
-	if (dnode.properties.key) {
+	if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 		projectionOptions.afterRenderCallbacks.push(() => {
 			parentInstance.emit({ type: 'element-created', key: dnode.properties.key, element: domNode });
 		});
@@ -705,7 +705,7 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 			}
 			updated = updateProperties(domNode, previous.properties, dnode.properties, projectionOptions) || updated;
 
-			if (dnode.properties.key) {
+			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 				projectionOptions.afterRenderCallbacks.push(() => {
 					parentInstance.emit({ type: 'element-updated', key: dnode.properties.key, element: domNode });
 				});

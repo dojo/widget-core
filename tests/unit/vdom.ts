@@ -1643,6 +1643,12 @@ describe('vdom', () => {
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-created', element: projection.domNode, key: '1' }));
 		});
 
+		it('element-created emitted for new nodes with a key of 0', () => {
+			const projection = dom.create(v('div', { key: 0 }), projectorStub);
+			resolvers.resolve();
+			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-created', element: projection.domNode, key: 0 }));
+		});
+
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
 			resolvers.resolve();
@@ -1651,13 +1657,22 @@ describe('vdom', () => {
 			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-updated' }));
 		});
 
-		it('element-updated not emitted for updated nodes without a key', () => {
+		it('element-updated emitted for updated nodes with a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
 			resolvers.resolve();
 			projection.update(v('div', { key: '1' }));
 			resolvers.resolve();
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-updated', element: projection.domNode, key: '1' }));
 		});
+
+		it('element-updated emitted for updated nodes with a key of 0', () => {
+			const projection = dom.create(v('div'), projectorStub);
+			resolvers.resolve();
+			projection.update(v('div', { key: 0 }));
+			resolvers.resolve();
+			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-updated', element: projection.domNode, key: 0 }));
+		});
+
 	});
 
 	describe('animations', () => {
