@@ -21,6 +21,7 @@ widget-core is a library to create powerful, composable user interface widgets.
         - [Composing Widgets](#composing-widgets)
         - [Decomposing Widgets](#decomposing-widgets)
     - [Mixins](#mixins)
+    - [Animations](#animations)
     - [Styling & Theming](#styling--theming)
     - [Internationalization](#internationalization)
 - [Key Principles](#key-principles)
