@@ -1,7 +1,7 @@
-import global from '@dojo/shim/global';
 import { afterEach, beforeEach, describe, it } from 'intern!bdd';
 import * as assert from 'intern/chai!assert';
 import { match, spy, stub, SinonStub } from 'sinon';
+import { createResolvers } from './../support/util';
 
 import { dom, InternalHNode, InternalWNode } from '../../src/vdom';
 import { v, w } from '../../src/d';
@@ -11,7 +11,8 @@ import { Registry } from '../../src/Registry';
 import eventHandlerInterceptor from '../../src/util/eventHandlerInterceptor';
 
 let consoleStub: SinonStub;
-let rIC: SinonStub;
+
+const resolvers = createResolvers();
 
 const noopEventHandlerInterceptor = (propertyName: string, functionPropertyArgument: Function) => {
 	return function(this: Node) {
@@ -52,24 +53,17 @@ class TestWidget extends WidgetBase<any> {
 	}
 }
 
-function resolveRIC() {
-	for (let i = 0; i < rIC.callCount; i++) {
-		rIC.getCall(i).args[0]();
-	}
-	rIC.reset();
-}
-
 describe('vdom', () => {
 	beforeEach(() => {
 		projectorStub.on.reset();
 		projectorStub.emit.reset();
 		consoleStub = stub(console, 'warn');
-		rIC = stub(global, 'requestIdleCallback').returns(1);
+		resolvers.stub();
 	});
 
 	afterEach(() => {
 		consoleStub.restore();
-		rIC.restore();
+		resolvers.restore();
 	});
 
 	describe('widgets', () => {
@@ -550,23 +544,23 @@ describe('vdom', () => {
 
 			const widget = new Bar();
 			const projection = dom.create(widget.__render__() as HNode, widget);
-			resolveRIC();
+			resolvers.resolve();
 			widget.count = 10;
 			projection.update(widget.__render__() as HNode);
-			resolveRIC();
+			resolvers.resolve();
 			assert.strictEqual(fooDestroyedCount, 10);
 			fooDestroyedCount = 0;
 			widget.count = 10;
 			projection.update(widget.__render__() as HNode);
-			resolveRIC();
+			resolvers.resolve();
 			assert.strictEqual(fooDestroyedCount, 0);
 			widget.count = 20;
 			projection.update(widget.__render__() as HNode);
-			resolveRIC();
+			resolvers.resolve();
 			assert.strictEqual(fooDestroyedCount, 0);
 			widget.count = 0;
 			projection.update(widget.__render__() as HNode);
-			resolveRIC();
+			resolvers.resolve();
 			assert.strictEqual(fooDestroyedCount, 20);
 		});
 
@@ -619,11 +613,11 @@ describe('vdom', () => {
 
 			const widget = new Baz();
 			const projection = dom.create(widget.__render__() as HNode, widget);
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(fooCreated);
 			widget.foo = false;
 			projection.update(widget.__render__() as HNode);
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(fooDestroyed);
 			assert.isTrue(barCreated);
 		});
@@ -1639,29 +1633,29 @@ describe('vdom', () => {
 
 		it('element-created not emitted for new nodes without a key', () => {
 			dom.create(v('div'), projectorStub);
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-created' }));
 		});
 
 		it('element-created emitted for new nodes with a key', () => {
 			const projection = dom.create(v('div', { key: '1' }), projectorStub);
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-created', element: projection.domNode, key: '1' }));
 		});
 
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
-			resolveRIC();
+			resolvers.resolve();
 			projection.update(v('div'));
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(projectorStub.emit.neverCalledWith({ type: 'element-updated' }));
 		});
 
 		it('element-updated not emitted for updated nodes without a key', () => {
 			const projection = dom.create(v('div'), projectorStub);
-			resolveRIC();
+			resolvers.resolve();
 			projection.update(v('div', { key: '1' }));
-			resolveRIC();
+			resolvers.resolve();
 			assert.isTrue(projectorStub.emit.calledWith({ type: 'element-updated', element: projection.domNode, key: '1' }));
 		});
 	});

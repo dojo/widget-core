@@ -1,9 +1,8 @@
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
-import { stub, SinonStub } from 'sinon';
 
-import global from '@dojo/shim/global';
 import sendEvent from '../../support/sendEvent';
+import { createResolvers } from './../../support/util';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
@@ -11,34 +10,17 @@ import { ThemeableMixin } from '../../../src/mixins/Themeable';
 
 import Matches from '../../../src/meta/Matches';
 
-let rAF: SinonStub;
-let rIC: SinonStub;
-
-function resolveRAF() {
-	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(i).args[0]();
-	}
-	rAF.reset();
-}
-
-function resolveRIC() {
-	for (let i = 0; i < rIC.callCount; i++) {
-		rIC.getCall(i).args[0]();
-	}
-	rIC.reset();
-}
+const resolvers = createResolvers();
 
 registerSuite({
 	name: 'support/meta/Matches',
 
 	beforeEach() {
-		rAF = stub(global, 'requestAnimationFrame').returns(1);
-		rIC = stub(global, 'requestIdleCallback').returns(1);
+		resolvers.stub();
 	},
 
 	afterEach() {
-		rAF.restore();
-		rIC.restore();
+		resolvers.restore();
 	},
 
 	'node matches'() {
@@ -65,9 +47,8 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 
 		sendEvent(div.firstChild as Element, 'click');
 
@@ -101,9 +82,8 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 
 		sendEvent(div.firstChild as Element, 'click');
 
@@ -141,9 +121,8 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {
@@ -189,9 +168,8 @@ registerSuite({
 		const widget = new TestWidget();
 		widget.append(div);
 
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {
@@ -199,8 +177,7 @@ registerSuite({
 			}
 		});
 
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
 
 		sendEvent(div.firstChild!.firstChild as Element, 'click', {
 			eventInit: {

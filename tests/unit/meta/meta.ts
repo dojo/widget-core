@@ -1,39 +1,22 @@
-import global from '@dojo/shim/global';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 import { Base as MetaBase } from '../../../src/meta/Base';
-import { stub, SinonStub, spy } from 'sinon';
+import { stub, spy } from 'sinon';
+import { createResolvers } from './../../support/util';
 import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
 
-let rAFStub: SinonStub;
-let rICStub: SinonStub;
-
-function resolveRAF() {
-	for (let i = 0; i < rAFStub.callCount; i++) {
-		rAFStub.getCall(i).args[0]();
-	}
-	rAFStub.reset();
-}
-
-function resolveRIC() {
-	for (let i = 0; i < rICStub.callCount; i++) {
-		rICStub.getCall(i).args[0]();
-	}
-	rICStub.reset();
-}
+const resolvers = createResolvers();
 
 registerSuite({
 	name: 'meta base',
 	beforeEach() {
-		rAFStub = stub(global, 'requestAnimationFrame').returns(1);
-		rICStub = stub(global, 'requestIdleCallback').returns(1);
+		resolvers.stub();
 	},
 	afterEach() {
-		rAFStub.restore();
-		rICStub.restore();
+		resolvers.restore();
 	},
 	'has checks nodehandler for nodes'() {
 		const nodeHandler = new NodeHandler();
@@ -111,8 +94,7 @@ registerSuite({
 
 		nodeHandler.add(element, 'foo');
 
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
 		assert.isTrue(invalidate.calledOnce);
 
 		onSpy.reset();
@@ -160,8 +142,7 @@ registerSuite({
 		});
 
 		meta.callInvalidate();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
 		assert.isTrue(invalidate.calledOnce);
 	},
 	'integration with single root node'() {
@@ -200,7 +181,7 @@ registerSuite({
 
 		const div = document.createElement('div');
 		widget.append(div);
-		resolveRIC();
+		resolvers.resolve();
 
 		assert.isTrue(meta.has('foo'), '1');
 		assert.isTrue(meta.has('bar'), '2');
@@ -246,7 +227,7 @@ registerSuite({
 
 		const div = document.createElement('div');
 		widget.append(div);
-		resolveRIC();
+		resolvers.resolve();
 
 		assert.isTrue(meta.has('foo'));
 		assert.isTrue(meta.has('bar'));

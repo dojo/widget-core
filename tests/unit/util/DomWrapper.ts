@@ -1,42 +1,25 @@
 import * as registerSuite from 'intern!object';
+import { createResolvers } from './../../support/util';
 import { WidgetBase } from './../../../src/WidgetBase';
 import { v, w } from './../../../src/d';
 import { DomWrapper } from '../../../src/util/DomWrapper';
-import global from '@dojo/shim/global';
-import { stub } from 'sinon';
 import * as assert from 'intern/chai!assert';
 import ProjectorMixin from '../../../src/mixins/Projector';
 import { ThemeableMixin, theme } from '../../../src/mixins/Themeable';
 
-let rAF: any;
-let rIC: any;
 let projector: any;
 
-function resolveRAF() {
-	for (let i = 0; i < rAF.callCount; i++) {
-		rAF.getCall(0).args[0]();
-	}
-	rAF.reset();
-}
-
-function resolveRIC() {
-	for (let i = 0; i < rIC.callCount; i++) {
-		rIC.getCall(0).args[0]();
-	}
-	rIC.reset();
-}
+const resolvers = createResolvers();
 
 registerSuite({
 	name: 'DomWrapper',
 
 	beforeEach() {
-		rAF = stub(global, 'requestAnimationFrame');
-		rIC = stub(global, 'requestIdleCallback');
+		resolvers.stub();
 	},
 
 	afterEach() {
-		rAF.restore();
-		rIC.restore();
+		resolvers.restore();
 		projector && projector.destroy();
 	},
 
@@ -57,9 +40,8 @@ registerSuite({
 		projector = new Projector();
 		const root = document.createElement('div');
 		projector.append(root);
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 		assert.equal(domNode.foo, 'blah');
 		assert.equal(domNode.getAttribute('original'), 'woop');
 		assert.equal(domNode.getAttribute('id'), 'foo');
@@ -82,9 +64,8 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 		domNode.click();
 		assert.isTrue(clicked);
 	},
@@ -111,9 +92,8 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 		assert.isTrue(domNode.classList.contains('classFoo'));
 		assert.equal(domNode.style.color, 'red');
 	},
@@ -136,9 +116,8 @@ registerSuite({
 		const Projector = ProjectorMixin(Foo);
 		projector = new Projector();
 		projector.append(root);
-		resolveRIC();
-		resolveRAF();
-		resolveRIC();
+		resolvers.resolve();
+		resolvers.resolve();
 		assert.isTrue(attached);
 	}
 });
