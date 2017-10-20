@@ -715,6 +715,25 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 	}
 }
 
+function runAfterRenderCallbacks(projectionOptions: ProjectionOptions) {
+	if (global.requestIdleCallback) {
+		global.requestIdleCallback(() => {
+			while (projectionOptions.afterRenderCallbacks.length) {
+				const callback = projectionOptions.afterRenderCallbacks.shift();
+				callback && callback();
+			}
+		});
+	}
+	else {
+		setTimeout(() => {
+			while (projectionOptions.afterRenderCallbacks.length) {
+				const callback = projectionOptions.afterRenderCallbacks.shift();
+				callback && callback();
+			}
+		});
+	}
+}
+
 function createProjection(dnode: InternalHNode, parentInstance: WidgetBase, projectionOptions: ProjectionOptions): Projection {
 	return {
 		update: function(updatedHNode: HNode) {
@@ -726,24 +745,7 @@ function createProjection(dnode: InternalHNode, parentInstance: WidgetBase, proj
 			projectionOptions.afterRenderCallbacks.push(() => {
 				parentInstance.emit({ type: 'widget-created' });
 			});
-
-			if (global.requestIdleCallback) {
-				global.requestIdleCallback(() => {
-					while (projectionOptions.afterRenderCallbacks.length) {
-						const callback = projectionOptions.afterRenderCallbacks.shift();
-						callback && callback();
-					}
-				});
-			}
-			else {
-				setTimeout(() => {
-					while (projectionOptions.afterRenderCallbacks.length) {
-						const callback = projectionOptions.afterRenderCallbacks.shift();
-						callback && callback();
-					}
-				});
-			}
-
+			runAfterRenderCallbacks(projectionOptions);
 			dnode = updatedHNode as InternalHNode;
 		},
 		domNode: dnode.domNode as Element
@@ -758,22 +760,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
-		if (global.requestIdleCallback) {
-			global.requestIdleCallback(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
-		else {
-			setTimeout(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
+		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
 	append: function(parentNode: Element, hNode: HNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
@@ -783,22 +770,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
-		if (global.requestIdleCallback) {
-			global.requestIdleCallback(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
-		else {
-			setTimeout(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
+		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
 	merge: function(element: Element, hNode: HNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
@@ -810,22 +782,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
-		if (global.requestIdleCallback) {
-			global.requestIdleCallback(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
-		else {
-			setTimeout(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
+		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
 	replace: function(element: Element, hNode: HNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
@@ -835,22 +792,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
-		if (global.requestIdleCallback) {
-			global.requestIdleCallback(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
-		else {
-			setTimeout(() => {
-				while (finalProjectorOptions.afterRenderCallbacks.length) {
-					const callback = finalProjectorOptions.afterRenderCallbacks.shift();
-					callback && callback();
-				}
-			});
-		}
+		runAfterRenderCallbacks(finalProjectorOptions);
 		element.parentNode!.removeChild(element);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	}

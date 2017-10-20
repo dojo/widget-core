@@ -1,3 +1,4 @@
+import global from '@dojo/shim/global';
 import { afterEach, beforeEach, describe, it } from 'intern!bdd';
 import * as assert from 'intern/chai!assert';
 import { match, spy, stub, SinonStub } from 'sinon';
