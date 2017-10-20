@@ -908,9 +908,9 @@ describe('vdom', () => {
 			});
 
 			it('should remove styles', () => {
-				const projection = dom.create(v('div', { styles: { height: '20px' } }), projectorStub);
-				projection.update(v('div', { styles: { height: null } }));
-				assert.strictEqual(projection.domNode.outerHTML, '<div style=""></div>');
+				const projection = dom.create(v('div', { styles: { width: '30px', height: '20px' } }), projectorStub);
+				projection.update(v('div', { styles: { height: null, width: '30px' } }));
+				assert.strictEqual(projection.domNode.outerHTML, '<div style="width: 30px;"></div>');
 			});
 
 			it('should add styles', () => {
