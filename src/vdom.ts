@@ -342,7 +342,8 @@ export function filterAndDecorateChildren(children: undefined | DNode | DNode[],
 						filterAndDecorateChildren(child.children, instance);
 					}
 				}
-			} else {
+			}
+			else {
 				if (!child.coreProperties) {
 					child.coreProperties = {
 						bind: instance,
