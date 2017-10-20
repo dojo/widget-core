@@ -542,11 +542,15 @@ function addChildren(
 
 	for (let i = 0; i < children.length; i++) {
 		const child = children[i];
+
 		if (isHNode(child)) {
-			if (projectionOptions.merge) {
-				const domElement = childNodes ? childNodes.shift() as HTMLElement : undefined;
-				if (domElement && domElement.tagName === (child.tag.toUpperCase() || undefined)) {
-					child.domNode = domElement;
+			if (projectionOptions.merge && childNodes) {
+				let domElement: HTMLElement | undefined = undefined;
+				while (child.domNode === undefined && childNodes.length > 0) {
+					domElement = childNodes.shift() as HTMLElement;
+					if (domElement && domElement.tagName === (child.tag.toUpperCase() || undefined)) {
+						child.domNode = domElement;
+					}
 				}
 			}
 			createDom(child, domNode, insertBefore, projectionOptions, parentInstance);
