@@ -308,7 +308,7 @@ Dojo 2 widget-core provides a `Animatable` mixin to decorate a widget with the f
 
 To specify the web animations pass an `animate` property to the node you wish to animate. This can be a single animation or an array or animations.
 
-## Basic Example
+#### Basic Example
 
 ```ts
 export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
@@ -332,7 +332,7 @@ export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
 
 `controls` and `timing` are optional properties and are used to setup and control the animation. The `timing` property can only be set once, but the `controls` can be changed to stop / start / reverse etc... the web animation.
 
-## Changing Animation
+#### Changing Animation
 
 Animations can be changed on each widget render in a reactive pattern, for example changing the animation from `slideUp` to `slideDown` on a title pane depending of if the titlepane is open or not.
 
@@ -367,7 +367,7 @@ export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
 }
 ```
 
-## Passing an effects function
+#### Passing an effects function
 
 an `effects` function can be passed to the animation and evaluated at render time. This allows you to create programatic effects such as those depending on measurements from the `Dimensions` `Meta`.
 
