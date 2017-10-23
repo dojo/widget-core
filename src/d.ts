@@ -89,12 +89,10 @@ export function v(tag: string, propertiesOrChildren: VirtualDomProperties | DNod
 			properties = {};
 		}
 
-		if (properties) {
-			let { classes } = properties;
-			if (typeof classes === 'function') {
-				classes = classes();
-				properties = assign(properties, { classes });
-			}
+		let { classes } = properties;
+		if (typeof classes === 'function') {
+			classes = classes();
+			properties = assign(properties, { classes });
 		}
 
 		return {
