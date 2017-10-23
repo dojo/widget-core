@@ -1,3 +1,4 @@
+import { EventTypedObject } from '@dojo/interfaces/core';
 import { Evented } from '@dojo/core/Evented';
 import Map from '@dojo/shim/Map';
 import WeakMap from '@dojo/shim/WeakMap';
@@ -36,6 +37,12 @@ interface ReactionFunctionArguments {
 interface ReactionFunctionConfig {
 	propertyName: string;
 	reaction: DiffPropertyReaction;
+}
+
+export interface WidgetAndElementEvent extends EventTypedObject<'properties:changed'> {
+	key: string;
+	element: HTMLElement;
+	target: WidgetBase;
 }
 
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
@@ -124,21 +131,22 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 		this.own(this._nodeHandler);
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
-		this.own(this.on('element-created', ({ key, element }: any) => {
-			this._nodeHandler.add(element, `${key}`);
-			this.onElementCreated(element, key);
+		this.own(this.on({
+			'element-created': ({ key, element }: WidgetAndElementEvent) => {
+				this._nodeHandler.add(element, `${key}`);
+				this.onElementCreated(element, key);
+			},
+			'element-updated': ({ key, element }: WidgetAndElementEvent) => {
+				this._nodeHandler.add(element, `${key}`);
+				this.onElementUpdated(element, key);
+			},
+			'widget-created': ({ element }: WidgetAndElementEvent) => {
+				this._nodeHandler.addRoot(element, undefined);
+			},
+			'widget-updated': ({ element }: WidgetAndElementEvent) => {
+				this._nodeHandler.addRoot(element, undefined);
+			}
 		}));
-		this.own(this.on('element-updated', ({ key, element }: any) => {
-			this._nodeHandler.add(element, `${key}`);
-			this.onElementUpdated(element, key);
-		}));
-		this.own(this.on('widget-created', ({ key, element }: any) => {
-			this._nodeHandler.addRoot(element, undefined);
-		}));
-		this.own(this.on('widget-updated', ({ key, element }: any) => {
-			this._nodeHandler.addRoot(element, undefined);
-		}));
-
 		this.own(this._registry.on('invalidate', this._boundInvalidate));
 	}
 
