@@ -37,6 +37,7 @@ export class AnimationPlayer extends MetaBase {
 			cancel,
 			finish,
 			onFinish,
+			onCancel,
 			playbackRate,
 			startTime,
 			currentTime
@@ -76,9 +77,27 @@ export class AnimationPlayer extends MetaBase {
 		if (onFinish) {
 			player.onfinish = onFinish;
 		}
+
+		if (onCancel) {
+			player.oncancel = onCancel;
+		}
 	}
 
-	add(key: string, animateProperties: AnimationProperties | AnimationProperties[]) {
+	private _bindControlCallbacks(controls: AnimationControls, bindScope: any): AnimationControls {
+
+		const {
+			onFinish,
+			onCancel
+		} = controls;
+
+		return {
+			...controls,
+			onFinish: onFinish ? onFinish.bind(bindScope) : null,
+			onCancel: onCancel ? onCancel.bind(bindScope) : null
+		};
+	}
+
+	add(key: string, animateProperties: AnimationProperties | AnimationProperties[], bindScope: any) {
 		const node = this.getNode(key);
 
 		if (node) {
@@ -91,6 +110,7 @@ export class AnimationPlayer extends MetaBase {
 				if (properties) {
 					const { id } = properties;
 					if (!this._animationMap.has(id)) {
+
 						this._animationMap.set(id, {
 							player: this._createPlayer(node, properties),
 							used: true
@@ -100,7 +120,7 @@ export class AnimationPlayer extends MetaBase {
 					const { player } = this._animationMap.get(id);
 					const { controls = {} } = properties;
 
-					this._updatePlayer(player, controls);
+					this._updatePlayer(player, this._bindControlCallbacks(controls, bindScope));
 
 					this._animationMap.set(id, {
 						player,
@@ -132,7 +152,7 @@ export function AnimatableMixin<T extends Constructor<WidgetBase>>(Base: T): T {
 				(node: HNode) => {
 					const { animate, key } = node.properties;
 					if (animate && key) {
-						this.meta(AnimationPlayer).add(key as string, animate);
+						this.meta(AnimationPlayer).add(key as string, animate, this);
 					}
 				},
 				(node: DNode) => {

@@ -132,6 +132,9 @@ describe('animatable', () => {
 				set onfinish(onFinish: () => {}) {
 					onFinish();
 				}
+				set oncancel(onCancel: () => {}) {
+					onCancel();
+				}
 				set playbackRate(rate: number) {
 					playbackRateStub(rate);
 				}
@@ -319,6 +322,18 @@ describe('animatable', () => {
 
 			widget.__render__();
 			assert.isTrue(onFinishStub.calledOnce);
+		});
+		it('will call oncancel function if passed', () => {
+			const onCancelStub = stub();
+			animate.controls = {
+				onCancel: onCancelStub
+			};
+			const widget = new TestWidget();
+			const meta = widget.getMeta();
+			stub(meta, 'getNode').returns(metaNode);
+
+			widget.__render__();
+			assert.isTrue(onCancelStub.calledOnce);
 		});
 		it('can return a function instead of properties object', () => {
 			const animateReturn = {

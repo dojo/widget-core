@@ -93,6 +93,7 @@ export type DeferredVirtualProperties = (inserted: boolean) => VirtualDomPropert
 export interface AnimationControls {
 	play?: boolean;
 	onFinish?: () => void;
+	onCancel?: () => void;
 	reverse?: boolean;
 	cancel?: boolean;
 	finish?: boolean;
