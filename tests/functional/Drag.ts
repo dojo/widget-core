@@ -19,7 +19,7 @@ registerSuite('Drag', {
 			.sleep(100)
 			.findById('results')
 			.getVisibleText()
-			.then((text: string) => {
+			.then((text) => {
 				const result: DragResults = JSON.parse(text);
 				assert.isTrue(result.isDragging, 'should be in a drag state');
 				assert.deepEqual(result.delta, { x: 50, y: 50 }, 'should have dragged expected distance');
@@ -28,7 +28,7 @@ registerSuite('Drag', {
 			.sleep(50)
 			.findById('results')
 			.getVisibleText()
-			.then((text: string) => {
+			.then((text) => {
 				const result: DragResults = JSON.parse(text);
 				assert.isFalse(result.isDragging, 'should be no longer dragging');
 				assert.deepEqual(result.delta, { x: 0, y: 0 }, 'should not have moved further');
@@ -55,16 +55,14 @@ registerSuite('Drag', {
 			.sleep(100)
 			.moveMouseTo(100, 100)
 			.sleep(100)
-			.findById('results')
 			.getVisibleText()
-			.then((text: string) => {
+			.then((text) => {
 				const result: DragResults = JSON.parse(text);
 				assert.isTrue(result.isDragging, 'should be in a drag state');
 				assert.deepEqual(result.delta, { x: 50, y: 50 }, 'should have dragged expected distance');
 			})
 			.releaseMouseButton()
 			.sleep(50)
-			.findById('results')
 			.getVisibleText()
 			.then((text: string) => {
 				const result: DragResults = JSON.parse(text);
