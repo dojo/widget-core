@@ -44,8 +44,8 @@ registerSuite('Drag', {
 			this.skip('For some reason, findById not working on Edge ATM.');
 		}
 		if (browserName === 'internet explorer') {
- 			this.skip('Dragging is not working on Internet Explorer.');
- 		}
+			this.skip('Dragging is not working on Internet Explorer.');
+		}
 		return this.remote
 			.get((<any> require).toUrl('./meta/Drag.html'))
 			.setFindTimeout(5000)

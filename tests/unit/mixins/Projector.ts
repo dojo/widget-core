@@ -189,7 +189,7 @@ registerSuite('mixins/projectorMixin', {
 			projector.sandbox();
 
 			assert.strictEqual(document.body.childNodes.length, childNodeLength, 'No nodes should be added to body');
-			assert.instanceOf(projector.root, global.window.DocumentFragment, 'the root should be a document fragment');
+			assert.isTrue(projector.root instanceof global.window.DocumentFragment, 'the root should be a document fragment');
 			const child = projector.root.firstChild as HTMLElement;
 			assert.strictEqual(child.innerHTML, '<h2>foo</h2>');
 			assert.strictEqual(child.tagName.toLocaleLowerCase(), 'div');
@@ -441,7 +441,7 @@ registerSuite('mixins/projectorMixin', {
 		projector.append();
 		const domNode = document.getElementById('handler-test-root');
 		dispatchEvent(domNode as HTMLElement, 'input');
-		assert.instanceOf(domEvent, Event);
+		assert.isTrue(domEvent instanceof Event);
 	},
 	'can attach an event listener'() {
 		let domEvent: any;
@@ -459,7 +459,7 @@ registerSuite('mixins/projectorMixin', {
 		projector.append();
 		const domNode = document.getElementById('listener-test-root');
 		dispatchEvent(domNode as HTMLElement, 'pointermove');
-		assert.instanceOf(domEvent, Event);
+		assert.isTrue(domEvent instanceof Event);
 	},
 	'-active gets appended to enter/exit animations by default'(this: any) {
 		if (!has('host-browser')) {

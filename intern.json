@@ -18,15 +18,12 @@
 			"packages": [
 				{ "name": "src", "location": "_build/src" },
 				{ "name": "tests", "location": "_build/tests" },
-				{ "name": "node_modules", "location": "_build/node_modules" },
 				{ "name": "@dojo", "location": "node_modules/@dojo" },
 				{ "name": "cldr-data", "location": "node_modules/cldr-data" },
 				{ "name": "cldrjs", "location": "node_modules/cldrjs" },
 				{ "name": "globalize", "location": "node_modules/globalize", "main": "dist/globalize" },
-				{ "name": "maquette", "location": "node_modules/maquette/dist", "main": "maquette" },
 				{ "name": "pepjs", "location": "node_modules/pepjs/dist", "main": "pep" },
 				{ "name": "intersection-observer", "location": "node_modules/intersection-observer", "main": "intersection-observer" },
-				{ "name": "grunt-dojo2", "location": "node_modules/grunt-dojo2"},
 				{ "name": "sinon", "location": "node_modules/sinon/pkg", "main": "sinon" }
 			],
 			"map": {
@@ -63,7 +60,11 @@
 				"browserstack.debug": false
 			},
 			"environments+": [
-				{ "browserName": "internet explorer", "version": "11" }
+				{ "browserName": "edge" },
+				{ "browserName": "chrome", "platform": "WINDOWS" },
+				{ "browserName": "firefox", "platform": "WINDOWS" },
+				{ "browserName": "safari", "version": "9.1", "platform": "MAC" },
+				{ "browserName": "iPhone", "version": "9.1" }
 			]
 		},
 		"saucelabs": {
