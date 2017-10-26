@@ -1,6 +1,6 @@
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import global from '@dojo/shim/global';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
 import { stub, spy } from 'sinon';
 import Dimensions from '../../../src/meta/Dimensions';
 import NodeHandler from '../../../src/NodeHandler';
@@ -38,8 +38,7 @@ function resolveRAF() {
 	rAF.reset();
 }
 
-registerSuite({
-	name: 'meta - Dimensions',
+registerSuite('meta - Dimensions', {
 
 	beforeEach() {
 		rAF = stub(global, 'requestAnimationFrame');
@@ -49,6 +48,7 @@ registerSuite({
 		rAF.restore();
 	},
 
+	tests: {
 	'Will return default dimensions if node not loaded'() {
 		const nodeHandler = new NodeHandler();
 
@@ -140,5 +140,6 @@ registerSuite({
 			position,
 			size
 		});
+	}
 	}
 });

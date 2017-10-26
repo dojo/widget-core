@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { stub, SinonStub } from 'sinon';
 
 import { v } from './../../../src/d';
@@ -9,14 +9,15 @@ import { WidgetBase } from './../../../src/WidgetBase';
 
 let consoleStub: SinonStub;
 
-registerSuite({
-	name: 'decorators/beforeRender',
+registerSuite('decorators/beforeRender', {
 	beforeEach() {
 		consoleStub = stub(console, 'warn');
 	},
 	afterEach() {
 		consoleStub.restore();
 	},
+
+	tests: {
 	decorator() {
 		let beforeRenderCount = 1;
 		type RenderFunction = () => DNode;
@@ -108,5 +109,6 @@ registerSuite({
 		assert.strictEqual(renderResult, 'first render');
 		assert.isTrue(consoleStub.calledOnce);
 		assert.isTrue(consoleStub.calledWith('Render function not returned from beforeRender, using previous render'));
+	}
 	}
 });

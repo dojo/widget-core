@@ -1,6 +1,6 @@
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import global from '@dojo/shim/global';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
 import { stub, spy } from 'sinon';
 import Intersection from '../../../src/meta/Intersection';
 import { NodeHandler } from './../../../src/NodeHandler';
@@ -8,8 +8,7 @@ import { NodeHandler } from './../../../src/NodeHandler';
 let intersectionObserver: any;
 const observers: ([ object, Function ])[] = [];
 
-registerSuite({
-	name: 'meta - Intersection',
+registerSuite('meta - Intersection', {
 
 	beforeEach() {
 		intersectionObserver = stub(global, 'IntersectionObserver', function (callback: any) {
@@ -26,6 +25,8 @@ registerSuite({
 		intersectionObserver.restore();
 		observers.length = 0;
 	},
+
+	tests: {
 	has: {
 		'no intersection'() {
 			const nodeHandler = new NodeHandler();
@@ -227,5 +228,6 @@ registerSuite({
 			intersection.get('foo', { root: 'root'});
 			assert.lengthOf(observers, 2);
 		}
+	}
 	}
 });

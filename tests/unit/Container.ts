@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { v } from '../../src/d';
 import { WidgetBase } from '../../src/WidgetBase';
 import { diffProperty } from './../../src/decorators/diffProperty';
@@ -34,13 +34,14 @@ const injector = new Injector({});
 registry.defineInjector('test-state-1', injector);
 registry.define('test-widget', TestWidget);
 
-registerSuite({
-	name: 'mixins/Container',
+registerSuite('mixins/Container', {
 	beforeEach() {
 		childrenCalled = false;
 		propertiesCalled = false;
 		assertRender = (properties: any) => {};
 	},
+
+	tests: {
 	'container with no default mappers'() {
 		assertRender = (properties: any) => {
 			properties.getChildren();
@@ -113,5 +114,6 @@ registerSuite({
 		assert.strictEqual(invalidatedCount, 4);
 		widget.__setProperties__({ foo: 'bar'});
 		assert.strictEqual(invalidatedCount, 5);
+	}
 	}
 });

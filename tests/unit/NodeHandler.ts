@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { stub, SinonStub } from 'sinon';
 import NodeHandler, { NodeEventType } from '../../src/NodeHandler';
 
@@ -9,12 +9,13 @@ const projectorStub: SinonStub = stub();
 let nodeHandler: NodeHandler;
 let element: HTMLElement;
 
-registerSuite({
-	name: 'NodeHandler',
+registerSuite('NodeHandler', {
 	beforeEach() {
 		nodeHandler = new NodeHandler();
 		element = document.createElement('div');
 	},
+
+	tests: {
 	'add populates nodehandler map'() {
 		nodeHandler.add(element, 'foo');
 		assert.isTrue(nodeHandler.has('foo'));
@@ -42,6 +43,8 @@ registerSuite({
 			nodeHandler.on(NodeEventType.Widget, widgetStub);
 			nodeHandler.on(NodeEventType.Projector, projectorStub);
 		},
+
+		tests: {
 		'add emits event when element added'() {
 			nodeHandler.add(element, 'foo');
 
@@ -69,5 +72,7 @@ registerSuite({
 			assert.isTrue(elementStub.notCalled);
 			assert.isTrue(projectorStub.calledOnce);
 		}
+		}
+	}
 	}
 });

@@ -1,19 +1,20 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
-import pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
+import pollUntil from '@theintern/leadfoot/helpers/pollUntil';
 
 let skip: boolean;
 
-registerSuite({
-	name: 'registerCustomElement',
-	beforeEach(this: any) {
+registerSuite('registerCustomElement', {
+	beforeEach() {
 		const { browserName, browser, version } = this.remote.session.capabilities;
 		skip = false;
 		if ((browser === 'iPhone' && version === '9.1') || (browserName === 'safari' && version === '9.1.3')) {
 			skip = true;
 		}
 	},
-	'custom elements are registered'(this: any) {
+
+	tests: {
+	'custom elements are registered'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -22,7 +23,7 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findById('testButton');
 	},
-	'custom element initial properties are set correctly'(this: any) {
+	'custom element initial properties are set correctly'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -37,7 +38,7 @@ registerSuite({
 				assert.strictEqual(text, 'hello world');
 			});
 	},
-	'custom element event handlers are registered'(this: any) {
+	'custom element event handlers are registered'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -52,7 +53,7 @@ registerSuite({
 				assert.isTrue(buttonClicked);
 			});
 	},
-	'updates the correct instance when multiple or the same custom elements are used'(this: any) {
+	'updates the correct instance when multiple or the same custom elements are used'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -67,7 +68,7 @@ registerSuite({
 				assert.strictEqual(text, 'Worlds hello');
 			});
 	},
-	'setting custom element attribute updates properties'(this: any) {
+	'setting custom element attribute updates properties'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -77,11 +78,11 @@ registerSuite({
 			.findById('testButton')
 			.end()
 			.execute('document.querySelector("test-button").setAttribute("label", "greetings")')
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('test-button > button').innerHTML === 'greetings world';
 			}, undefined, 1000), undefined);
 	},
-	'setting custom element properties updates widget'(this: any) {
+	'setting custom element properties updates widget'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -91,11 +92,11 @@ registerSuite({
 			.findByCssSelector('no-attributes > button')
 			.end()
 			.execute('document.querySelector("no-attributes").buttonLabel = "greetings"')
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('no-attributes > button').innerHTML === 'greetings';
 			}, undefined, 1000), undefined);
 	},
-	'creating elements manually works'(this: any) {
+	'creating elements manually works'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -104,11 +105,11 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findByCssSelector('#manualButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('#manualButton > button').innerHTML === 'manual';
 			}, undefined, 1000), undefined);
 	},
-	'elements readded to the DOM are only initialized once'(this: any) {
+	'elements readded to the DOM are only initialized once'() {
 		if (skip) {
 			this.skip('not compatible with iOS 9.1 or Safari 9.1');
 		}
@@ -117,8 +118,9 @@ registerSuite({
 			.setFindTimeout(1000)
 			.findByCssSelector('#reinitButton > button')
 			.end()
-			.then(pollUntil<any>(function () {
+			.then(pollUntil(function () {
 				return (<any> document).querySelector('#reinitButton > button').innerHTML === 'test';
 			}, undefined, 1000), undefined);
+	}
 	}
 });

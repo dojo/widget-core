@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 
 import { inject } from './../../../src/decorators/inject';
 import { WidgetBase } from './../../../src/WidgetBase';
@@ -11,8 +11,7 @@ let injectorOne = new Injector<any>({ foo: 'bar' });
 let injectorTwo = new Injector<any>({ bar: 'foo' });
 let registry: Registry;
 
-registerSuite({
-	name: 'decorators/inject',
+registerSuite('decorators/inject', {
 	beforeEach() {
 		registry = new Registry();
 		injectorOne = new Injector({ foo: 'bar' });
@@ -20,6 +19,8 @@ registerSuite({
 		registry.defineInjector('inject-one', injectorOne);
 		registry.defineInjector('inject-two', injectorTwo);
 	},
+
+	tests: {
 	beforeProperties() {
 		function getProperties(payload: any, properties: WidgetProperties): WidgetProperties {
 			return payload;
@@ -87,5 +88,6 @@ registerSuite({
 		widget.__setProperties__({});
 		assert.strictEqual(widget.properties.foo, 'bar');
 		assert.strictEqual(widget.properties.bar, 'foo');
+	}
 	}
 });

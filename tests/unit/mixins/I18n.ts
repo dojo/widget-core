@@ -1,6 +1,6 @@
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import i18n, { invalidate, switchLocale, systemLocale } from '@dojo/i18n/i18n';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
 import * as sinon from 'sinon';
 import { I18nMixin, I18nProperties } from '../../../src/mixins/I18n';
 import { WidgetBase } from '../../../src/WidgetBase';
@@ -13,8 +13,11 @@ class Localized extends I18nMixin(ThemeableMixin(WidgetBase))<I18nProperties> { 
 
 let localized: any;
 
-registerSuite({
-	name: 'mixins/I18nMixin',
+registerSuite('mixins/I18nMixin', {
+
+	before() {
+		return <Promise<any>> fetchCldrData();
+	},
 
 	afterEach() {
 		invalidate();
@@ -26,10 +29,7 @@ registerSuite({
 		}
 	},
 
-	setup() {
-		return fetchCldrData();
-	},
-
+	tests: {
 	api() {
 		const localized = new Localized();
 		assert(localized);
@@ -163,5 +163,6 @@ registerSuite({
 			assert.isOk(result);
 			assert.isNull(result.properties!['dir']);
 		}
+	}
 	}
 });

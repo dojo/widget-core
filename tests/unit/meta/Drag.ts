@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import sendEvent from '../../support/sendEvent';
 import { createResolvers } from './../../support/util';
 import { v } from '../../../src/d';
@@ -15,8 +15,7 @@ const emptyResults: DragResults = {
 	isDragging: false
 };
 
-registerSuite({
-	name: 'support/meta/Drag',
+registerSuite('support/meta/Drag', {
 
 	beforeEach() {
 		resolvers.stub();
@@ -26,6 +25,7 @@ registerSuite({
 		resolvers.restore();
 	},
 
+	tests: {
 	'standard rendering'() {
 		const dragResults: DragResults[] = [];
 
@@ -1001,5 +1001,6 @@ registerSuite({
 
 		widget.destroy();
 		document.body.removeChild(div);
+	}
 	}
 });

@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import {
 	ThemeableMixin,
 	theme,
@@ -52,8 +52,7 @@ class NonDecoratorDuplicateThemeClassWidget extends ThemeableMixin(WidgetBase)<T
 
 let consoleStub: SinonStub;
 
-registerSuite({
-	name: 'themeManager',
+registerSuite('themeManager', {
 	beforeEach() {
 		testRegistry = new Registry();
 		consoleStub = stub(console, 'warn');
@@ -61,6 +60,8 @@ registerSuite({
 	afterEach() {
 		consoleStub.restore();
 	},
+
+	tests: {
 	'classes function': {
 		'should return baseThemeClasses1 flagged classes via the classes function'() {
 			const themeableInstance = new TestWidget();
@@ -472,5 +473,6 @@ registerSuite({
 				[ fixedClassName ]: true
 			});
 		}
+	}
 	}
 });

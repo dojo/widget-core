@@ -1,9 +1,9 @@
-import * as registerSuite from 'intern!object';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { createResolvers } from './../../support/util';
 import { WidgetBase } from './../../../src/WidgetBase';
 import { v, w } from './../../../src/d';
 import { DomWrapper } from '../../../src/util/DomWrapper';
-import * as assert from 'intern/chai!assert';
 import ProjectorMixin from '../../../src/mixins/Projector';
 import { ThemeableMixin, theme } from '../../../src/mixins/Themeable';
 
@@ -11,8 +11,7 @@ let projector: any;
 
 const resolvers = createResolvers();
 
-registerSuite({
-	name: 'DomWrapper',
+registerSuite('DomWrapper', {
 
 	beforeEach() {
 		resolvers.stub();
@@ -23,6 +22,7 @@ registerSuite({
 		projector && projector.destroy();
 	},
 
+	tests: {
 	'properties and attributes are maintained from element'() {
 		const domNode: any = document.createElement('custom-element');
 		domNode.foo = 'blah';
@@ -119,5 +119,6 @@ registerSuite({
 		resolvers.resolve();
 		resolvers.resolve();
 		assert.isTrue(attached);
+	}
 	}
 });

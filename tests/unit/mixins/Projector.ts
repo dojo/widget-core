@@ -1,7 +1,8 @@
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
+
 import global from '@dojo/shim/global';
 import has from '@dojo/has/has';
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
 import { spy, stub, SinonStub } from 'sinon';
 import { v } from '../../../src/d';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
@@ -44,8 +45,7 @@ let rafStub: SinonStub;
 let cancelRafStub: SinonStub;
 let projector: BaseTestWidget | MyWidget;
 
-registerSuite({
-	name: 'mixins/projectorMixin',
+registerSuite('mixins/projectorMixin', {
 
 	beforeEach() {
 		result = null;
@@ -62,6 +62,8 @@ registerSuite({
 		rafStub.restore();
 		cancelRafStub.restore();
 	},
+
+	tests: {
 	'render': {
 		'string root node'() {
 			result = 'my string';
@@ -585,5 +587,6 @@ registerSuite({
 		sendAnimationEndEvents(domNode);
 
 		assert.isNull(document.getElementById('test-element'));
+	}
 	}
 });

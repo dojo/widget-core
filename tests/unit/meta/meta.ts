@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 import { Base as MetaBase } from '../../../src/meta/Base';
 import { stub, spy } from 'sinon';
 import { createResolvers } from './../../support/util';
@@ -10,14 +10,15 @@ import { WidgetBase } from '../../../src/WidgetBase';
 
 const resolvers = createResolvers();
 
-registerSuite({
-	name: 'meta base',
+registerSuite('meta base', {
 	beforeEach() {
 		resolvers.stub();
 	},
 	afterEach() {
 		resolvers.restore();
 	},
+
+	tests: {
 	'has checks nodehandler for nodes'() {
 		const nodeHandler = new NodeHandler();
 		const element = document.createElement('div');
@@ -235,5 +236,6 @@ registerSuite({
 		assert.isTrue(onBar.calledOnce);
 		assert.isTrue(onWidget.calledOnce);
 		assert.isTrue(onFoo.calledBefore(onWidget));
+	}
 	}
 });

@@ -1,5 +1,5 @@
-import * as registerSuite from 'intern!object';
-import * as assert from 'intern/chai!assert';
+const { registerSuite } = intern.getInterface('object');
+const { assert } = intern.getPlugin('chai');
 
 import sendEvent from '../../support/sendEvent';
 import { createResolvers } from './../../support/util';
@@ -12,8 +12,7 @@ import Matches from '../../../src/meta/Matches';
 
 const resolvers = createResolvers();
 
-registerSuite({
-	name: 'support/meta/Matches',
+registerSuite('support/meta/Matches', {
 
 	beforeEach() {
 		resolvers.stub();
@@ -23,6 +22,7 @@ registerSuite({
 		resolvers.restore();
 	},
 
+	tests: {
 	'node matches'() {
 		const results: boolean[] = [];
 
@@ -189,5 +189,6 @@ registerSuite({
 
 		widget.destroy();
 		document.body.removeChild(div);
+	}
 	}
 });
