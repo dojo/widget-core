@@ -16,63 +16,63 @@ registerSuite('NodeHandler', {
 	},
 
 	tests: {
-	'add populates nodehandler map'() {
-		nodeHandler.add(element, 'foo');
-		assert.isTrue(nodeHandler.has('foo'));
-	},
-	'has returns undefined when element does not exist'() {
-		assert.isFalse(nodeHandler.has('foo'));
-	},
-	'get returns elements that have been added'() {
-		nodeHandler.add(element, 'foo');
-		assert.equal(nodeHandler.get('foo'), element);
-	},
-	'clear removes nodes from map'() {
-		nodeHandler.add(element, 'foo');
-		assert.isTrue(nodeHandler.has('foo'));
-		nodeHandler.clear();
-		assert.isFalse(nodeHandler.has('foo'));
-	},
-	'events': {
-		beforeEach() {
-			elementStub.reset();
-			widgetStub.reset();
-			projectorStub.reset();
-
-			nodeHandler.on('foo', elementStub);
-			nodeHandler.on(NodeEventType.Widget, widgetStub);
-			nodeHandler.on(NodeEventType.Projector, projectorStub);
-		},
-
-		tests: {
-		'add emits event when element added'() {
+		'add populates nodehandler map'() {
 			nodeHandler.add(element, 'foo');
-
-			assert.isTrue(elementStub.calledOnce);
-			assert.isTrue(widgetStub.notCalled);
-			assert.isTrue(projectorStub.notCalled);
+			assert.isTrue(nodeHandler.has('foo'));
 		},
-		'add root emits Widget'() {
-			nodeHandler.addRoot(element, 'foo');
-
-			assert.isTrue(widgetStub.calledOnce);
-			assert.isTrue(projectorStub.notCalled);
+		'has returns undefined when element does not exist'() {
+			assert.isFalse(nodeHandler.has('foo'));
 		},
-		'add root without a key emits Widget event only'() {
-			nodeHandler.addRoot(element);
-
-			assert.isTrue(widgetStub.calledOnce);
-			assert.isTrue(elementStub.notCalled);
-			assert.isTrue(projectorStub.notCalled);
+		'get returns elements that have been added'() {
+			nodeHandler.add(element, 'foo');
+			assert.equal(nodeHandler.get('foo'), element);
 		},
-		'add projector emits Projector event'() {
-			nodeHandler.addProjector();
+		'clear removes nodes from map'() {
+			nodeHandler.add(element, 'foo');
+			assert.isTrue(nodeHandler.has('foo'));
+			nodeHandler.clear();
+			assert.isFalse(nodeHandler.has('foo'));
+		},
+		'events': {
+			beforeEach() {
+				elementStub.reset();
+				widgetStub.reset();
+				projectorStub.reset();
 
-			assert.isTrue(widgetStub.notCalled);
-			assert.isTrue(elementStub.notCalled);
-			assert.isTrue(projectorStub.calledOnce);
+				nodeHandler.on('foo', elementStub);
+				nodeHandler.on(NodeEventType.Widget, widgetStub);
+				nodeHandler.on(NodeEventType.Projector, projectorStub);
+			},
+
+			tests: {
+				'add emits event when element added'() {
+					nodeHandler.add(element, 'foo');
+
+					assert.isTrue(elementStub.calledOnce);
+					assert.isTrue(widgetStub.notCalled);
+					assert.isTrue(projectorStub.notCalled);
+				},
+				'add root emits Widget'() {
+					nodeHandler.addRoot(element, 'foo');
+
+					assert.isTrue(widgetStub.calledOnce);
+					assert.isTrue(projectorStub.notCalled);
+				},
+				'add root without a key emits Widget event only'() {
+					nodeHandler.addRoot(element);
+
+					assert.isTrue(widgetStub.calledOnce);
+					assert.isTrue(elementStub.notCalled);
+					assert.isTrue(projectorStub.notCalled);
+				},
+				'add projector emits Projector event'() {
+					nodeHandler.addProjector();
+
+					assert.isTrue(widgetStub.notCalled);
+					assert.isTrue(elementStub.notCalled);
+					assert.isTrue(projectorStub.calledOnce);
+				}
+			}
 		}
-		}
-	}
 	}
 });

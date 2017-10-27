@@ -261,27 +261,27 @@ registerSuite('customElements', {
 		},
 
 		tests: {
-		'events are created'() {
-			let element = createFakeElement({}, {
-				tagName: 'test',
-				widgetConstructor: WidgetBase,
-				events: [
-					{
-						propertyName: 'onTest',
-						eventName: 'test'
-					}
-				]
-			});
+			'events are created'() {
+				let element = createFakeElement({}, {
+					tagName: 'test',
+					widgetConstructor: WidgetBase,
+					events: [
+						{
+							propertyName: 'onTest',
+							eventName: 'test'
+						}
+					]
+				});
 
-			initializeElement(element);
+				initializeElement(element);
 
-			assert.isFunction(element.getWidgetInstance().properties.onTest);
-			element.getWidgetInstance().properties.onTest('detail here');
+				assert.isFunction(element.getWidgetInstance().properties.onTest);
+				element.getWidgetInstance().properties.onTest('detail here');
 
-			assert.lengthOf(element.getEvents(), 1);
-			assert.strictEqual(element.getEvents()[ 0 ].type, 'test');
-			assert.strictEqual(element.getEvents()[ 0 ].detail, 'detail here');
-		}
+				assert.lengthOf(element.getEvents(), 1);
+				assert.strictEqual(element.getEvents()[ 0 ].type, 'test');
+				assert.strictEqual(element.getEvents()[ 0 ].detail, 'detail here');
+			}
 		}
 	},
 
@@ -329,40 +329,40 @@ registerSuite('customElements', {
 			},
 
 			tests: {
-			'appender is returned as a function'(this: any) {
-				let rendered = false;
+				'appender is returned as a function'(this: any) {
+					let rendered = false;
 
-				const appendStub = sandbox.stub();
+					const appendStub = sandbox.stub();
 
-				const OrigProjectorMixin = projector.ProjectorMixin;
+					const OrigProjectorMixin = projector.ProjectorMixin;
 
-				function TestProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
-					const Mixed = OrigProjectorMixin(Base);
-					Mixed.prototype.append = appendStub;
-					return Mixed;
-				}
-
-				sandbox.stub(projector, 'ProjectorMixin', TestProjectorMixin);
-
-				let element = createFakeElement({}, {
-					tagName: 'test',
-					widgetConstructor: class extends WidgetBase<any> {
-						render() {
-							rendered = true;
-							return v('div');
-						}
+					function TestProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T): T & Constructor<ProjectorMixin<P>> {
+						const Mixed = OrigProjectorMixin(Base);
+						Mixed.prototype.append = appendStub;
+						return Mixed;
 					}
-				});
 
-				const appender = initializeElement(element);
+					sandbox.stub(projector, 'ProjectorMixin', TestProjectorMixin);
 
-				assert.isFalse(rendered);
-				assert.isFunction(appender);
+					let element = createFakeElement({}, {
+						tagName: 'test',
+						widgetConstructor: class extends WidgetBase<any> {
+							render() {
+								rendered = true;
+								return v('div');
+							}
+						}
+					});
 
-				appender();
+					const appender = initializeElement(element);
 
-				assert.isTrue(appendStub.called);
-			}
+					assert.isFalse(rendered);
+					assert.isFunction(appender);
+
+					appender();
+
+					assert.isTrue(appendStub.called);
+				}
 			}
 	}
 });
