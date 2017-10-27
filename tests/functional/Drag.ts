@@ -1,6 +1,5 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-// import pollUntil = require('intern/dojo/node!leadfoot/helpers/pollUntil');
 import { DragResults } from '../../src/meta/Drag';
 
 registerSuite('Drag', {

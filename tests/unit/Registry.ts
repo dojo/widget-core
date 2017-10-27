@@ -96,13 +96,15 @@ registerSuite('Registry', {
 				assert.isNull(item);
 			},
 			'replaces promise with result on resolution'() {
+				let resolveFunction: (widget: typeof WidgetBase) => void;
 				const promise: Promise<any> = new Promise((resolve) => {
-					resolve(WidgetBase);
+					resolveFunction = resolve;
 				});
 
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('my-widget', promise);
 				factoryRegistry.get('my-widget');
+				resolveFunction!(WidgetBase);
 
 				return promise.then(() => {
 					const factory = factoryRegistry.get('my-widget');
@@ -110,14 +112,16 @@ registerSuite('Registry', {
 				});
 			},
 			'replaces promise created by function with result on resolution'() {
+				let resolveFunction: (widget: typeof WidgetBase) => void;
 				const promise: Promise<any> = new Promise((resolve) => {
-					resolve(WidgetBase);
+					resolveFunction = resolve;
 				});
 				const lazyFactory = () => promise;
 
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('my-widget', lazyFactory);
 				factoryRegistry.get('my-widget');
+				resolveFunction!(WidgetBase);
 
 				return promise.then(() => {
 					const factory = factoryRegistry.get('my-widget');
@@ -125,8 +129,9 @@ registerSuite('Registry', {
 				});
 			},
 			'throws error from rejected promise'() {
-				const promise: Promise<any> = new Promise((resolve, reject) => {
-					reject(new Error('reject error'));
+				let rejectFunction: (error: Error) => void;
+				const promise: Promise<any> = new Promise((_resolve, reject) => {
+					rejectFunction = reject;
 				}).then(() => {
 					assert.fail();
 				}, (error) => {
@@ -138,6 +143,7 @@ registerSuite('Registry', {
 				const factoryRegistry = new Registry();
 				factoryRegistry.define('my-widget', lazyFactory);
 				factoryRegistry.get('my-widget');
+				rejectFunction!(new Error('reject error'));
 
 				return promise;
 			}
