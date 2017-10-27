@@ -62,7 +62,7 @@
 			"environments+": [
 				{ "browserName": "edge" },
 				{ "browserName": "chrome", "platform": "WINDOWS" },
-				{ "browserName": "firefox", "platform": "WINDOWS" },
+				{ "browserName": "firefox", "os": "WINDOWS", "os_version": "10" },
 				{ "browserName": "safari", "version": "9.1", "platform": "MAC" },
 				{ "browserName": "iPhone", "version": "9.1" }
 			]
