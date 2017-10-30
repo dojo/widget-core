@@ -85,7 +85,7 @@ registerSuite('DomWrapper', {
 						styles: {
 							color: 'red'
 						},
-						classes: this.classes(myTheme.class1)
+						classes: this.theme(myTheme.class1)
 					});
 				}
 			}
