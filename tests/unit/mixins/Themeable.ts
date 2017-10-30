@@ -29,7 +29,7 @@ import testTheme3 from './../../support/styles/theme3.css';
 let testRegistry: Registry;
 
 @theme(baseThemeClasses1)
-class TestWidget extends ThemeableMixin(WidgetBase)<ThemeableProperties<typeof baseThemeClasses1>> { }
+class TestWidget extends ThemeableMixin(WidgetBase)<any> { }
 
 @theme(baseThemeClasses2)
 class SubClassTestWidget extends TestWidget { }
@@ -250,6 +250,10 @@ registerSuite('ThemeableMixin', {
 				assert.deepEqual(renderResult.properties.classes, [ 'theme2Class1' ]);
 				themeInjectorContext.set(testTheme1);
 				testWidget.__setProperties__({});
+				renderResult = testWidget.__render__();
+				assert.deepEqual(renderResult.properties.classes, [ 'theme1Class1' ]);
+				themeInjectorContext.set(testTheme1);
+				testWidget.__setProperties__({ foo: 'bar' });
 				renderResult = testWidget.__render__();
 				assert.deepEqual(renderResult.properties.classes, [ 'theme1Class1' ]);
 			}
