@@ -1,8 +1,7 @@
 import global from '@dojo/shim/global';
-import { VNode } from '@dojo/interfaces/vdom';
 import * as assert from 'intern/chai!assert';
 import { AnimatableMixin, AnimationPlayer } from '../../../src/mixins/Animatable';
-import { AnimationControls, AnimationTimingProperties } from '../../../src/interfaces';
+import { HNode, AnimationControls, AnimationTimingProperties } from '../../../src/interfaces';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { spy, stub } from 'sinon';
@@ -90,7 +89,7 @@ describe('animatable', () => {
 
 			const addSpy = spy(meta, 'add');
 
-			const renderedWidget = (widget.__render__() as VNode);
+			const renderedWidget = widget.__render__() as HNode;
 
 			assert.equal(renderedWidget.children!.length, 2);
 			assert.isTrue(addSpy.calledOnce);
