@@ -79,7 +79,7 @@ export interface Projection {
 	update(updatedDNode: DNode): void;
 }
 
-export type DeferredVirtualProperties = (updated: boolean) => VirtualDomProperties;
+export type DeferredVirtualProperties = (inserted: boolean) => VirtualDomProperties;
 
 export interface VirtualDomProperties {
 	/**

@@ -50,6 +50,8 @@ export interface InternalHNode extends HNode {
 	 */
 	children?: InternalDNode[];
 
+	inserted?: boolean;
+
 	/**
 	 * Bag used to still decorate properties on a deferred properties callback
 	 */
@@ -612,6 +614,7 @@ function initPropertiesAndChildren(
 			parentInstance.emit({ type: 'element-created', key: dnode.properties.key, element: domNode });
 		});
 	}
+	dnode.inserted = true;
 }
 
 function createDom(
@@ -723,6 +726,7 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 		const domNode = previous.domNode!;
 		let textUpdated = false;
 		let updated = false;
+		dnode.inserted = previous.inserted;
 		if (dnode.tag === '') {
 			if (dnode.text !== previous.text) {
 				const newDomNode = domNode.ownerDocument.createTextNode(dnode.text!);
@@ -765,11 +769,15 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 function addDeferredProperties(hnode: InternalHNode, projectionOptions: ProjectionOptions) {
 	// transfer any properties that have been passed - as these must be decorated properties
 	hnode.decoratedDeferredProperties = hnode.properties;
-	const properties = hnode.deferredPropertiesCallback!(true);
+	const properties = hnode.deferredPropertiesCallback!(!!hnode.inserted);
 	hnode.properties = { ...properties, ...hnode.decoratedDeferredProperties };
 	projectionOptions.deferredRenderCallbacks.push(() => {
-		const properties = { ...hnode.deferredPropertiesCallback!(true), ...hnode.decoratedDeferredProperties };
+		const properties = {
+			...hnode.deferredPropertiesCallback!(!!hnode.inserted),
+			...hnode.decoratedDeferredProperties
+		};
 		updateProperties(hnode.domNode!, hnode.properties, properties, projectionOptions);
+		hnode.properties = properties;
 	});
 }
 

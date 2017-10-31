@@ -1126,6 +1126,53 @@ describe('vdom', () => {
 
 	});
 
+	describe('deferred properties', () => {
+		it('can call a callback on render and on the next rAF for hnode properties', () => {
+			let deferredCallbackCount = 0;
+			let renderCount = 0;
+
+			const renderFunction = () => {
+				renderCount++;
+				const div = v('div', (inserted) => {
+					return {
+						inserted,
+						deferredCallbackCount: ++deferredCallbackCount,
+						renderCount: 'this should not override'
+					};
+				});
+				div.properties.renderCount = renderCount;
+				return div;
+			};
+
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const element: any = projection.domNode;
+
+			assert.strictEqual(element.deferredCallbackCount, 1);
+			assert.strictEqual(element.renderCount, 1);
+			assert.isFalse(element.inserted);
+
+			// resolve the rAF so deferred properties will run
+			resolvers.resolve();
+
+			assert.strictEqual(element.deferredCallbackCount, 2);
+			assert.strictEqual(element.renderCount, 1);
+			assert.isTrue(element.inserted);
+
+			projection.update(renderFunction());
+
+			assert.strictEqual(element.deferredCallbackCount, 3);
+			assert.strictEqual(element.renderCount, 2);
+			assert.isTrue(element.inserted);
+
+			// resolve the rAF so deferred properties will run
+			resolvers.resolve();
+
+			assert.strictEqual(element.deferredCallbackCount, 4);
+			assert.strictEqual(element.renderCount, 2);
+			assert.isTrue(element.inserted);
+		});
+	});
+
 	describe('children', () => {
 
 		it('can remove child nodes', () => {
