@@ -131,13 +131,14 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 		const propName = propNames[i];
 		let propValue = properties[propName];
 		if (propName === 'classes') {
+			const currentClasses = Array.isArray(propValue) ? propValue : [ propValue ];
 			if (!(domNode as Element).className) {
-				(domNode as Element).className = propValue.join(' ').trim();
+				(domNode as Element).className = currentClasses.join(' ').trim();
 			}
 			else {
-				for (let i = 0; i < propValue.length; i++) {
-					if (propValue[i]) {
-						(domNode as Element).classList.add(propValue[i]);
+				for (let i = 0; i < currentClasses.length; i++) {
+					if (currentClasses[i]) {
+						(domNode as Element).classList.add(...currentClasses[i].split(' '));
 					}
 				}
 			}
@@ -199,11 +200,16 @@ function updateProperties(
 	const propNames = Object.keys(properties);
 	const propCount = propNames.length;
 	if (propNames.indexOf('classes') === -1 && previousProperties.classes) {
-		for (let i = 0; i < previousProperties.classes.length; i++) {
-			const previousClassName = previousProperties.classes[i];
-			if (previousClassName) {
-				(domNode as Element).classList.remove(previousClassName);
+		if (Array.isArray(previousProperties.classes)) {
+			for (let i = 0; i < previousProperties.classes.length; i++) {
+				const previousClassName = previousProperties.classes[i];
+				if (previousClassName) {
+					(domNode as Element).classList.remove(...previousClassName.split(' '));
+				}
 			}
+		}
+		else {
+			(domNode as Element).classList.remove(...previousProperties.classes.split(' '));
 		}
 	}
 	for (let i = 0; i < propCount; i++) {
@@ -211,23 +217,25 @@ function updateProperties(
 		let propValue = properties[propName];
 		const previousValue = previousProperties![propName];
 		if (propName === 'classes') {
-			if (previousProperties.classes && previousProperties.classes.length > 0) {
+			const previousClasses = Array.isArray(previousValue) ? previousValue : [ previousValue ];
+			const currentClasses = Array.isArray(propValue) ? propValue : [ propValue ];
+			if (previousClasses && previousClasses.length > 0) {
 				if (!propValue || propValue.length === 0) {
-					for (let i = 0; i < previousProperties.classes.length; i++) {
-						const previousClassName = previousProperties.classes[i];
+					for (let i = 0; i < previousClasses.length; i++) {
+						const previousClassName = previousClasses[i];
 						if (previousClassName) {
-							(domNode as Element).classList.remove(previousClassName);
+							(domNode as Element).classList.remove(...previousClassName.split(' '));
 						}
 					}
 				}
 				else {
-					const newClasses: (null | undefined | string)[] = [ ...propValue ];
-					for (let i = 0; i < previousProperties.classes.length; i++) {
-						const previousClassName = previousProperties.classes[i];
+					const newClasses: (null | undefined | string)[] = [ ...currentClasses ];
+					for (let i = 0; i < previousClasses.length; i++) {
+						const previousClassName = previousClasses[i];
 						if (previousClassName) {
 							const classIndex = newClasses.indexOf(previousClassName);
 							if (classIndex === -1) {
-								(domNode as Element).classList.remove(previousClassName);
+								(domNode as Element).classList.remove(...previousClassName.split(' '));
 							}
 							else {
 								newClasses.splice(classIndex, 1);
@@ -237,15 +245,15 @@ function updateProperties(
 					for (let i = 0; i < newClasses.length; i++) {
 						const newClassName = newClasses[i];
 						if (newClassName) {
-							(domNode as Element).classList.add(newClassName);
+							(domNode as Element).classList.add(...newClassName.split(' '));
 						}
 					}
 				}
 			}
 			else {
-				for (let i = 0; i < propValue.length; i++) {
-					if (propValue[i]) {
-						(domNode as Element).classList.add(propValue[i]);
+				for (let i = 0; i < currentClasses.length; i++) {
+					if (currentClasses[i]) {
+						(domNode as Element).classList.add(...currentClasses[i].split(' '));
 					}
 				}
 			}

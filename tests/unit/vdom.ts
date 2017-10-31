@@ -892,6 +892,36 @@ describe('vdom', () => {
 				assert.strictEqual(div.className, '');
 			});
 
+			it('classes accepts a string', () => {
+				const div = document.createElement('div');
+				const projection = dom.merge(div, v('div', { classes: 'b' }), projectorStub);
+				assert.strictEqual(div.className, 'b');
+				projection.update(v('div', { classes: 'b' }));
+				assert.strictEqual(div.className, 'b');
+
+				projection.update(v('div', { classes: 'a' }));
+				assert.strictEqual(div.className, 'a');
+				projection.update(v('div'));
+				assert.strictEqual(div.className, '');
+				projection.update(v('div', { classes: null }));
+				assert.strictEqual(div.className, '');
+				projection.update(v('div'));
+				projection.update(v('div', { classes: 'a b' }));
+				assert.strictEqual(div.className, 'a b');
+			});
+
+			it('should split class names by space before applying/removing', () => {
+				const div = document.createElement('div');
+				const projection = dom.merge(div, v('div', { classes: 'a b' }), projectorStub);
+				assert.strictEqual(div.className, 'a b');
+				projection.update(v('div'));
+				assert.strictEqual(div.className, '');
+
+				projection.update(v('div', { classes: [ 'a b' ] }));
+				assert.strictEqual(div.className, 'a b');
+				projection.update(v('div'));
+				assert.strictEqual(div.className, '');
+			});
 		});
 
 		describe('styles', () => {
