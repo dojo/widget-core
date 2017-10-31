@@ -922,6 +922,12 @@ describe('vdom', () => {
 				projection.update(v('div'));
 				assert.strictEqual(div.className, '');
 			});
+
+			it('should accept null as a class', () => {
+				const div = document.createElement('div');
+				dom.merge(div, v('div', { classes: null }), projectorStub);
+				assert.strictEqual(div.className, '');
+			});
 		});
 
 		describe('styles', () => {
