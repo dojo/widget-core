@@ -51,6 +51,11 @@ export interface InternalHNode extends HNode {
 	children?: InternalDNode[];
 
 	/**
+	 * Bag used to still decorate properties on a deferred properties callback
+	 */
+	decoratedDeferredProperties?: VirtualDomProperties;
+
+	/**
 	 * DOM element
 	 */
 	domNode?: Element | Text;
@@ -107,12 +112,14 @@ const DEFAULT_PROJECTION_OPTIONS: ProjectionOptions = {
 		enter: missingTransition,
 		exit: missingTransition
 	},
+	deferredRenderCallbacks: [],
 	afterRenderCallbacks: [],
 	merge: false
 };
 
 function applyDefaultProjectionOptions(projectorOptions?: Partial<ProjectionOptions>): ProjectionOptions {
 	projectorOptions = extend(DEFAULT_PROJECTION_OPTIONS, projectorOptions);
+	projectorOptions.deferredRenderCallbacks = [];
 	projectorOptions.afterRenderCallbacks = [];
 	return projectorOptions as ProjectionOptions;
 }
@@ -596,6 +603,9 @@ function initPropertiesAndChildren(
 	projectionOptions: ProjectionOptions
 ) {
 	addChildren(domNode, dnode.children, projectionOptions, parentInstance, undefined);
+	if (typeof dnode.deferredPropertiesCallback === 'function') {
+		addDeferredProperties(dnode, projectionOptions);
+	}
 	setProperties(domNode, dnode.properties, projectionOptions);
 	if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 		projectionOptions.afterRenderCallbacks.push(() => {
@@ -731,6 +741,11 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 				dnode.children = children;
 				updated = updateChildren(dnode, domNode, previous.children, children, parentInstance, projectionOptions) || updated;
 			}
+
+			if (typeof dnode.deferredPropertiesCallback === 'function') {
+				addDeferredProperties(dnode, projectionOptions);
+			}
+
 			updated = updateProperties(domNode, previous.properties, dnode.properties, projectionOptions) || updated;
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
@@ -744,6 +759,28 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 		}
 		dnode.domNode = previous.domNode;
 		return textUpdated;
+	}
+}
+
+function addDeferredProperties(hnode: InternalHNode, projectionOptions: ProjectionOptions) {
+	// transfer any properties that have been passed - as these must be decorated properties
+	hnode.decoratedDeferredProperties = hnode.properties;
+	const properties = hnode.deferredPropertiesCallback!(true);
+	hnode.properties = { ...properties, ...hnode.decoratedDeferredProperties };
+	projectionOptions.deferredRenderCallbacks.push(() => {
+		const properties = { ...hnode.deferredPropertiesCallback!(true), ...hnode.decoratedDeferredProperties };
+		updateProperties(hnode.domNode!, hnode.properties, properties, projectionOptions);
+	});
+}
+
+function runDeferredRenderCallbacks(projectionOptions: ProjectionOptions) {
+	if (projectionOptions.deferredRenderCallbacks.length) {
+		global.requestAnimationFrame(() => {
+			while (projectionOptions.deferredRenderCallbacks.length) {
+				const callback = projectionOptions.deferredRenderCallbacks.shift();
+				callback && callback();
+			}
+		});
 	}
 }
 
@@ -777,6 +814,7 @@ function createProjection(dnode: InternalHNode, parentInstance: WidgetBase, proj
 			projectionOptions.afterRenderCallbacks.push(() => {
 				parentInstance.emit({ type: 'widget-created' });
 			});
+			runDeferredRenderCallbacks(projectionOptions);
 			runAfterRenderCallbacks(projectionOptions);
 			dnode = updatedHNode as InternalHNode;
 		},
@@ -792,6 +830,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
+		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
@@ -802,6 +841,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
+		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
@@ -814,6 +854,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
+		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
@@ -824,6 +865,7 @@ export const dom = {
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
+		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		element.parentNode!.removeChild(element);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
