@@ -1,4 +1,4 @@
 import './Themed';
-import './Animatable';
+import './Animated';
 import './Projector';
 import './I18n';

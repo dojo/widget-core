@@ -305,14 +305,14 @@ Examples of Dojo 2 mixins can be seen with `ThemedMixin` and `I18nMixin` that ar
 
 ### Animation
 
-Dojo 2 widget-core provides a `Animatable` mixin to decorate a widget with the functionality to apply web animations to the nodes that it creates.
+Dojo 2 widget-core provides a `Animated` mixin to decorate a widget with the functionality to apply web animations to the nodes that it creates.
 
 To specify the web animations pass an `animate` property to the node you wish to animate. This can be a single animation or an array or animations.
 
 #### Basic Example
 
 ```ts
-export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
+export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
     protected render() {
         return v('div', {
             key: 'root',
@@ -338,7 +338,7 @@ export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
 Animations can be changed on each widget render in a reactive pattern, for example changing the animation from `slideUp` to `slideDown` on a title pane depending of if the titlepane is open or not.
 
 ```ts
-export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
+export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
     private _open = false;
 
     protected render() {
@@ -373,7 +373,7 @@ export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
 an `effects` function can be passed to the animation and evaluated at render time. This allows you to create programatic effects such as those depending on measurements from the `Dimensions` `Meta`.
 
 ```ts
-export default class AnimatedWidget extends AnimatableMixin(WidgetBase) {
+export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
     private _getEffect() {
         const { scroll } = this.meta(Dimensions).get('content');
 

@@ -143,7 +143,7 @@ export class AnimationPlayer extends MetaBase {
 
 }
 
-export function AnimatableMixin<T extends Constructor<WidgetBase>>(Base: T): T {
+export function AnimatedMixin<T extends Constructor<WidgetBase>>(Base: T): T {
 	class Animated extends Base {
 
 		@afterRender()
@@ -167,4 +167,4 @@ export function AnimatableMixin<T extends Constructor<WidgetBase>>(Base: T): T {
 	return Animated;
 }
 
-export default AnimatableMixin;
+export default AnimatedMixin;

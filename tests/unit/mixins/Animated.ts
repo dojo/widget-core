@@ -1,20 +1,20 @@
 import global from '@dojo/shim/global';
-import * as assert from 'intern/chai!assert';
-import { AnimatableMixin, AnimationPlayer } from '../../../src/mixins/Animatable';
+const { assert } = intern.getPlugin('chai');
+const { beforeEach, before, describe, it} = intern.getInterface('bdd');
+import { AnimatedMixin, AnimationPlayer } from '../../../src/mixins/Animated';
 import { HNode, AnimationControls, AnimationTimingProperties } from '../../../src/interfaces';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { spy, stub } from 'sinon';
-import { beforeEach, before, describe, it } from 'intern!bdd';
 
-describe('animatable', () => {
+describe('animated', () => {
 
 	let effects: any;
 	let controls: AnimationControls;
 	let timing: AnimationTimingProperties;
 	let animate: any;
 
-	class TestWidget extends AnimatableMixin(WidgetBase) {
+	class TestWidget extends AnimatedMixin(WidgetBase) {
 		render() {
 			return v('div', {}, [
 				v('div', {
@@ -62,7 +62,7 @@ describe('animatable', () => {
 	});
 
 	describe('mixin', () => {
-		it('adds an animatable player for each node with animations', () => {
+		it('adds an animation player for each node with animations', () => {
 			const widget = new TestWidget();
 			const meta = widget.getMeta();
 
