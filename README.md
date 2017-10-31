@@ -339,7 +339,7 @@ export default class MyWidget extends ThemeableMixin(WidgetBase) {
 }
 ```
 
-If an array is passed to `this.theme` then an array will be returned for example, `this.theme([ css.root, css.other ])` will return an array containing the theme's class names `[ 'themedRoot', themedOther' ]`.
+If an array is passed to `this.theme` then an array will be returned for example, `this.theme([ css.root, css.other ])` will return an array containing the theme's class names `[ 'themedRoot', 'themedOther' ]`.
 
 #### Writing a theme
 
