@@ -5,7 +5,7 @@ import { WidgetBase } from './../../../src/WidgetBase';
 import { v, w } from './../../../src/d';
 import { DomWrapper } from '../../../src/util/DomWrapper';
 import ProjectorMixin from '../../../src/mixins/Projector';
-import { ThemeableMixin, theme } from '../../../src/mixins/Themeable';
+import { ThemedMixin, theme } from '../../../src/mixins/Themed';
 
 let projector: any;
 
@@ -79,7 +79,7 @@ registerSuite('DomWrapper', {
 			};
 
 			@theme(myTheme)
-			class Foo extends ThemeableMixin(WidgetBase) {
+			class Foo extends ThemedMixin(WidgetBase) {
 				render() {
 					return w(DomNode, {
 						styles: {

@@ -22,9 +22,9 @@ export interface Theme {
 }
 
 /**
- * Properties required for the themeable mixin
+ * Properties required for the Themed mixin
  */
-export interface ThemeableProperties<T = ClassNames> extends WidgetProperties {
+export interface ThemedProperties<T = ClassNames> extends WidgetProperties {
 	injectedTheme?: any;
 	theme?: Theme;
 	extraClasses?: { [P in keyof T]?: string };
@@ -35,12 +35,12 @@ const THEME_KEY = ' _key';
 export const INJECTED_THEME_KEY = Symbol('theme');
 
 /**
- * Interface for the ThemeableMixin
+ * Interface for the ThemedMixin
  */
-export interface ThemeableMixin<T = ClassNames> {
+export interface ThemedMixin<T = ClassNames> {
 	theme(classes: string): string | null;
 	theme(classes: (string | null)[]): (null | string)[];
-	properties: ThemeableProperties<T>;
+	properties: ThemedProperties<T>;
 }
 
 /**
@@ -84,23 +84,23 @@ export function registerThemeInjector(theme: any, themeRegistry: Registry): Inje
 }
 
 /**
- * Function that returns a class decorated with with Themeable functionality
+ * Function that returns a class decorated with with Themed functionality
  */
-export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProperties<E>>>>(Base: T): Constructor<ThemeableMixin<E>> & T {
+export function ThemedMixin<E, T extends Constructor<WidgetBase<ThemedProperties<E>>>>(Base: T): Constructor<ThemedMixin<E>> & T {
 	@inject({
 		name: INJECTED_THEME_KEY,
-		getProperties: (theme: Theme, properties: ThemeableProperties): ThemeableProperties  => {
+		getProperties: (theme: Theme, properties: ThemedProperties): ThemedProperties  => {
 		if (!properties.theme) {
 			return { theme };
 		}
 		return {};
 	}})
-	class Themeable extends Base {
+	class Themed extends Base {
 
-		public properties: ThemeableProperties<E>;
+		public properties: ThemedProperties<E>;
 
 		/**
-		 * The Themeable baseClasses
+		 * The Themed baseClasses
 		 */
 		private _registeredBaseTheme: ClassNames;
 
@@ -202,7 +202,7 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		}
 	}
 
-	return Themeable;
+	return Themed;
 }
 
-export default ThemeableMixin;
+export default ThemedMixin;
