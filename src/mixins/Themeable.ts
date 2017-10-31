@@ -38,7 +38,8 @@ export const INJECTED_THEME_KEY = Symbol('theme');
  * Interface for the ThemeableMixin
  */
 export interface ThemeableMixin<T = ClassNames> {
-	theme(...classNames: (string | null)[]): string[];
+	theme(classes: string): string | null;
+	theme(classes: (string | null)[]): (null | string)[];
 	properties: ThemeableProperties<T>;
 }
 
@@ -123,11 +124,16 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		 */
 		private _theme: ClassNames = {};
 
-		public theme(...classNames: (string | null)[]): string[] {
+		public theme(classes: string): null | string;
+		public theme(classes: (string | null)[]): (null | string)[];
+		public theme(classes: (string | null)[] | string): null | string | (null | string)[] {
 			if (this._recalculateClasses) {
 				this._recalculateThemeClasses();
 			}
-			return this._getThemeClasses(classNames);
+			if (Array.isArray(classes)) {
+				return this._getThemeClasses(classes);
+			}
+			return this._getThemeClass(classes);
 		}
 
 		/**
@@ -142,31 +148,38 @@ export function ThemeableMixin<E, T extends Constructor<WidgetBase<ThemeableProp
 		/**
 		 * Get theme class object from classNames
 		 */
-		private _getThemeClasses(classNames: (string | null)[]): string[]  {
-			const extraClasses = this.properties.extraClasses || {} as any;
-			let themeClasses: string[] = [];
+		private _getThemeClasses(classNames: (string | null)[]): (string | null)[]  {
+			let themeClasses: (string | null)[] = [];
 			for (let i = 0; i < classNames.length; i++) {
 				const className = classNames[i];
 				if (!className) {
 					continue;
 				}
-				const themeClassName = this._baseThemeClassesReverseLookup[className];
-				if (!themeClassName) {
-					console.warn(`Class name: '${className}' not found`);
-					continue;
-				}
-
-				if (extraClasses[themeClassName]) {
-					themeClasses.push(...extraClasses[themeClassName].split(' '));
-				}
-
-				if (this._theme[themeClassName]) {
-					themeClasses = [ ...themeClasses, ...this._theme[themeClassName].split(' ') ];
-					continue;
-				}
-				themeClasses.push(this._registeredBaseTheme[themeClassName]);
+				themeClasses.push(this._getThemeClass(className));
 			}
 			return themeClasses;
+		}
+
+		private _getThemeClass(className: string): string | null {
+			const extraClasses = this.properties.extraClasses || {} as any;
+			const themeClassName = this._baseThemeClassesReverseLookup[className];
+			let resultClassNames: string[] = [];
+			if (!themeClassName) {
+				console.warn(`Class name: '${className}' not found in theme`);
+				return null;
+			}
+
+			if (extraClasses[themeClassName]) {
+				resultClassNames.push(extraClasses[themeClassName]);
+			}
+
+			if (this._theme[themeClassName]) {
+				resultClassNames.push(this._theme[themeClassName]);
+			}
+			else {
+				resultClassNames.push(this._registeredBaseTheme[themeClassName]);
+			}
+			return resultClassNames.join(' ');
 		}
 
 		private _recalculateThemeClasses() {
