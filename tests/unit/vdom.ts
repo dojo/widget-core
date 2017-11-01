@@ -512,6 +512,34 @@ describe('vdom', () => {
 			assert.lengthOf(fooDiv.childNodes, 1);
 		});
 
+		it('should allow a widget returned from render', () => {
+
+			class Bar extends WidgetBase<any> {
+				render() {
+					return v('div', [ `Hello, ${this.properties.foo}!` ]);
+				}
+			}
+
+			class Baz extends WidgetBase<any> {
+				render() {
+					return w(Bar, { foo: this.properties.foo });
+				}
+			}
+
+			const div = document.createElement('div');
+			const widget = new Baz();
+			widget.__setProperties__({ foo: 'foo' });
+			const projection = dom.append(div, widget.__render__() as HNode, widget);
+			const root = div.childNodes[0];
+			assert.lengthOf(root.childNodes, 1);
+			let textNodeOne = root.childNodes[0] as Text;
+			assert.strictEqual(textNodeOne.data, 'Hello, foo!');
+			widget.__setProperties__({ foo: 'bar' });
+			projection.update(widget.__render__() as HNode);
+			textNodeOne = root.childNodes[0] as Text;
+			assert.strictEqual(textNodeOne, 'Hello, bar!');
+		});
+
 		it('should destroy widgets when they are no longer required', () => {
 			let fooDestroyedCount = 0;
 
