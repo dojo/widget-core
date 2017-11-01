@@ -72,7 +72,7 @@ export interface ProjectionOptions extends ProjectorOptions {
 	deferredRenderCallbacks: Function [];
 	afterRenderCallbacks: Function[];
 	merge: boolean;
-	mergeElement: Element;
+	mergeElement?: Element;
 	rootNode: Element;
 }
 

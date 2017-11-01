@@ -655,6 +655,12 @@ function createDom(
 		});
 	}
 	else {
+		if (projectionOptions.merge && projectionOptions.mergeElement !== undefined) {
+			domNode = dnode.domNode = projectionOptions.mergeElement;
+			projectionOptions.mergeElement = undefined;
+			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions);
+			return;
+		}
 		const doc = parentNode.ownerDocument;
 		if (dnode.tag === '') {
 			if (dnode.domNode !== undefined) {
@@ -816,9 +822,6 @@ function createProjection(dnode: InternalDNode, parentInstance: WidgetBase, proj
 	return {
 		update: function(updatedDNode: DNode) {
 			let domNode = isHNode(dnode) ? dnode.domNode as Element : projectionOptions.rootNode;
-			if (!updatedDNode) {
-				return;
-			}
 			if (isHNode(dnode) && isHNode(updatedDNode)) {
 				if (dnode.tag !== updatedDNode.tag) {
 					throw new Error('The tag for the root HNode may not be changed. (consider using dom.merge and add one extra level to the virtual DOM)');
@@ -838,9 +841,9 @@ function createProjection(dnode: InternalDNode, parentInstance: WidgetBase, proj
 }
 
 export const dom = {
-	create: function(hNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	create: function(dNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
-		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
+		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
 		const rootNode = document.createElement('div');
 		finalProjectorOptions.rootNode = rootNode;
 		createDom(decoratedNode, rootNode, undefined, finalProjectorOptions, instance);
@@ -851,9 +854,9 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	append: function(parentNode: Element, hNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	append: function(parentNode: Element, dNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
-		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
+		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
 		finalProjectorOptions.rootNode = parentNode;
 		createDom(decoratedNode, parentNode, undefined, finalProjectorOptions, instance);
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
@@ -863,13 +866,15 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	merge: function(element: Element, hNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	merge: function(element: Element, dNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
 		finalProjectorOptions.merge = true;
-		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
-		decoratedNode.domNode = element;
+		finalProjectorOptions.mergeElement = element;
 		finalProjectorOptions.rootNode = element.parentNode as Element;
-		initPropertiesAndChildren(element, decoratedNode, instance, finalProjectorOptions);
+		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
+
+		createDom(decoratedNode, finalProjectorOptions.rootNode, undefined, finalProjectorOptions, instance);
+		// initPropertiesAndChildren(element, decoratedNode, instance, finalProjectorOptions);
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
@@ -877,9 +882,9 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	replace: function(element: Element, hNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	replace: function(element: Element, dNode: DNode, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
-		const decoratedNode = filterAndDecorateChildren(hNode, instance)[0] as InternalHNode;
+		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
 		finalProjectorOptions.rootNode = element.parentNode! as Element;
 		createDom(decoratedNode, element.parentNode!, element, finalProjectorOptions, instance);
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
