@@ -1136,8 +1136,7 @@ describe('vdom', () => {
 				const div = v('div', (inserted) => {
 					return {
 						inserted,
-						deferredCallbackCount: ++deferredCallbackCount,
-						renderCount: 'this should not override'
+						deferredCallbackCount: ++deferredCallbackCount
 					};
 				});
 				div.properties.renderCount = renderCount;
@@ -1170,6 +1169,46 @@ describe('vdom', () => {
 			assert.strictEqual(element.deferredCallbackCount, 4);
 			assert.strictEqual(element.renderCount, 2);
 			assert.isTrue(element.inserted);
+		});
+
+		it('should still allow properties to be decorated on a DNode', () => {
+			let foo = 'bar';
+
+			const renderFunction = () => {
+				const div = v('div', (inserted) => {
+					return {
+						foo: 'this should not override the decorated property',
+						another: 'property'
+					};
+				});
+				div.properties.foo = foo;
+				return div;
+			};
+
+			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
+			const element: any = projection.domNode;
+
+			assert.strictEqual(element.getAttribute('foo'), 'bar');
+			assert.strictEqual(element.getAttribute('another'), 'property');
+
+			// resolve the rAF so deferred properties will run
+			resolvers.resolve();
+
+			assert.strictEqual(element.getAttribute('foo'), 'bar');
+			assert.strictEqual(element.getAttribute('another'), 'property');
+
+			foo = 'qux';
+
+			projection.update(renderFunction());
+
+			assert.strictEqual(element.getAttribute('foo'), 'qux');
+			assert.strictEqual(element.getAttribute('another'), 'property');
+
+			// resolve the rAF so deferred properties will run
+			resolvers.resolve();
+
+			assert.strictEqual(element.getAttribute('foo'), 'qux');
+			assert.strictEqual(element.getAttribute('another'), 'property');
 		});
 	});
 
