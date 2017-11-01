@@ -321,7 +321,7 @@ export const classNameTwo: string;
 
 **Important:** at runtime a JavaScript file is required to provide the processed CSS class names.
 
-The `ThemedMixin` provides a method available on the instance `this.theme()` that consumes string class names and returns the theme's equivalent class names.
+The `ThemedMixin` provides a method available on the instance `this.theme()` takes a single argument that is either a `string` class name or an array of `string` class names and returns the theme's equivalent class names as either a single string or array of strings.
 
 However, it is not always desirable to allow consumers to override styling that may be required for a widget to function correctly. These classes can be added directly to the `classes` array in `VirtualDomProperties`.
 
