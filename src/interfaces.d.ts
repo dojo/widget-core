@@ -108,10 +108,10 @@ export interface AnimationControls {
 export interface AnimationTimingProperties {
 	duration?: number;
 	delay?: number;
-	direction?: string;
+	direction?: 'normal' | 'reverse' | 'alternate' | 'alternate-reverse';
 	easing?: string;
 	endDelay?: number;
-	fill?: string;
+	fill?: 'none' | 'forwards' | 'backwards' | 'both' | 'auto';
 	iterations?: number;
 	iterationStart?: number;
 }
@@ -431,6 +431,7 @@ export interface WidgetBaseInterface<
  */
 export interface WidgetMetaBase extends Destroyable {
 	has(key: string | number): boolean;
+	afterRender(): void;
 }
 
 /**

@@ -1,15 +1,9 @@
 import 'web-animations-js/web-animations-next-lite.min';
-import { Constructor, DNode, HNode, AnimationControls, AnimationProperties } from '../interfaces';
-import { WidgetBase } from '../WidgetBase';
-import { afterRender } from '../decorators/afterRender';
-import { isHNode, decorate } from '../d';
+import { Base } from './Base';
+import { AnimationControls, AnimationProperties } from '../interfaces';
 import Map from '@dojo/shim/Map';
-import MetaBase from '../meta/Base';
 
-declare const KeyframeEffect: any;
-declare const Animation: any;
-
-export class AnimationPlayer extends MetaBase {
+export class WebAnimations extends Base {
 
 	private _animationMap = new Map<string, any>();
 
@@ -83,19 +77,19 @@ export class AnimationPlayer extends MetaBase {
 		}
 	}
 
-	private _bindControlCallbacks(controls: AnimationControls, bindScope: any): AnimationControls {
+	// private _bindControlCallbacks(controls: AnimationControls, bindScope: any): AnimationControls {
 
-		const {
-			onFinish,
-			onCancel
-		} = controls;
+	// 	const {
+	// 		onFinish,
+	// 		onCancel
+	// 	} = controls;
 
-		return {
-			...controls,
-			onFinish: onFinish ? onFinish.bind(bindScope) : null,
-			onCancel: onCancel ? onCancel.bind(bindScope) : null
-		};
-	}
+	// 	return {
+	// 		...controls,
+	// 		onFinish: onFinish ? onFinish.bind(bindScope) : null,
+	// 		onCancel: onCancel ? onCancel.bind(bindScope) : null
+	// 	};
+	// }
 
 	add(key: string, animateProperties: AnimationProperties | AnimationProperties[], bindScope: any) {
 		const node = this.getNode(key);
@@ -120,7 +114,7 @@ export class AnimationPlayer extends MetaBase {
 					const { player } = this._animationMap.get(id);
 					const { controls = {} } = properties;
 
-					this._updatePlayer(player, this._bindControlCallbacks(controls, bindScope));
+					this._updatePlayer(player, controls); // this._bindControlCallbacks(controls, bindScope));
 
 					this._animationMap.set(id, {
 						player,
@@ -131,7 +125,9 @@ export class AnimationPlayer extends MetaBase {
 		}
 	}
 
-	clearAnimations() {
+	afterRender() {
+		super.afterRender();
+
 		this._animationMap.forEach((animation, key) => {
 			if (!animation.used) {
 				animation.player.cancel();
@@ -140,36 +136,6 @@ export class AnimationPlayer extends MetaBase {
 			animation.used = false;
 		});
 	}
-
 }
 
-export function AnimatedMixin<T extends Constructor<WidgetBase>>(Base: T): T {
-	class Animated extends Base {
-
-		@afterRender()
-		protected decorateAfterRender(result: DNode): DNode {
-			decorate(result,
-				(node: HNode) => {
-					const { animate, key } = node.properties;
-					if (animate) {
-						if (key) {
-							this.meta(AnimationPlayer).add(key as string, animate, this);
-						}
-						else {
-							console.warn('Animate properties can only be used on a node with a key');
-						}
-					}
-				},
-				(node: DNode) => {
-					return !!(isHNode(node) && node.properties.animate);
-				}
-			);
-			this.meta(AnimationPlayer).clearAnimations();
-			return result;
-		}
-	}
-
-	return Animated;
-}
-
-export default AnimatedMixin;
+export default WebAnimations;

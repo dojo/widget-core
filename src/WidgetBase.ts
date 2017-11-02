@@ -114,6 +114,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 
 	private _nodeHandler: NodeHandler;
 
+	private _metaAfterRenders: (() => void)[] = [];
+
 	/**
 	 * @constructor
 	 */
@@ -157,6 +159,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 				invalidate: this._boundInvalidate,
 				nodeHandler: this._nodeHandler
 			});
+			this._metaAfterRenders.push(cached.afterRender.bind(cached));
 			this._metaMap.set(MetaType, cached);
 			this.own(cached);
 		}
@@ -473,6 +476,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> extends E
 			return afterRenders.reduce((dNode: DNode | DNode[], afterRenderFunction: AfterRender) => {
 				return afterRenderFunction.call(this, dNode);
 			}, dNode);
+		}
+		if (this._metaAfterRenders.length) {
+			this._metaAfterRenders.forEach(afterRender => afterRender());
 		}
 		return dNode;
 	}

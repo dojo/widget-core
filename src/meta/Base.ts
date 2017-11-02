@@ -40,6 +40,10 @@ export class Base extends Destroyable implements WidgetMetaBase {
 	protected invalidate(): void {
 		this._invalidate();
 	}
+
+	public afterRender(): void {
+		// No nothing by default
+	}
 }
 
 export default Base;
