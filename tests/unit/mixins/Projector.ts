@@ -104,7 +104,7 @@ registerSuite('mixins/projectorMixin', {
 				projector.invalidate();
 				result = null;
 				renderedResult = projector.__render__() as HNode;
-				assert.strictEqual(renderedResult.tag, 'h1');
+				assert.strictEqual(renderedResult.tag, 'span');
 				assert.isNull(renderedResult.children![0]);
 			},
 			'undefined root node'() {
@@ -125,7 +125,7 @@ registerSuite('mixins/projectorMixin', {
 				projector.invalidate();
 				result = undefined;
 				renderedResult = projector.__render__() as HNode;
-				assert.strictEqual(renderedResult.tag, 'h1');
+				assert.strictEqual(renderedResult.tag, 'span');
 				assert.isUndefined(renderedResult.children![0]);
 			},
 			'array root node'() {
@@ -133,8 +133,7 @@ registerSuite('mixins/projectorMixin', {
 				projector = new MyWidget();
 
 				const renderedResult = projector.__render__() as HNode;
-				assert.strictEqual(renderedResult.tag, 'span');
-				assert.strictEqual(renderedResult.children, result);
+				assert.strictEqual(renderedResult, result);
 			}
 		},
 		'attach projector': {

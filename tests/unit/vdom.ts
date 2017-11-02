@@ -539,6 +539,136 @@ describe('vdom', () => {
 			assert.strictEqual(textNodeOne.data, 'Hello, bar!');
 		});
 
+		it('should create nodes for an array returned from the top level', () => {
+						class Foo extends WidgetBase {
+							render() {
+								return [
+									v('div', [ '1' ]),
+									v('div', [ '2' ]),
+									v('div', [ '3' ])
+								];
+							}
+						}
+
+						const widget = new Foo();
+						const projection = dom.create(widget.__render__() as HNode, widget);
+						const root = projection.domNode as Element;
+						assert.lengthOf(root.childNodes, 3);
+					});
+
+		it('should create nodes for an array returned from the top level via a widget', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', [ '1' ]),
+						v('div', [ '2' ]),
+						v('div', [ '3' ])
+					];
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return w(Foo, {});
+				}
+			}
+
+			const widget = new Bar();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 3);
+			const firstTextNodeChild = root.childNodes[0].childNodes[0] as Text;
+			const secondTextNodeChild = root.childNodes[1].childNodes[0] as Text;
+			const thirdTextNodeChild = root.childNodes[2].childNodes[0] as Text;
+			assert.strictEqual(firstTextNodeChild.data, '1');
+			assert.strictEqual(secondTextNodeChild.data, '2');
+			assert.strictEqual(thirdTextNodeChild.data, '3');
+		});
+
+		it('should update an array of nodes to single node', () => {
+			class Foo extends WidgetBase {
+				private _array = false;
+				render() {
+					this._array = !this._array;
+					return this._array ? [
+						v('div', { key: '1' }, [ '1' ]),
+						v('div', { key: '2' }, [ '2' ]),
+						v('div', { key: '3' }, [ '3' ])
+					] : v('div', { key: '1' }, [ '2' ]);
+				}
+			}
+
+			const widget = new Foo();
+			const projection = dom.create(widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 3);
+			const firstTextNodeChild = root.childNodes[0].childNodes[0] as Text;
+			const secondTextNodeChild = root.childNodes[1].childNodes[0] as Text;
+			const thirdTextNodeChild = root.childNodes[2].childNodes[0] as Text;
+			assert.strictEqual(firstTextNodeChild.data, '1');
+			assert.strictEqual(secondTextNodeChild.data, '2');
+			assert.strictEqual(thirdTextNodeChild.data, '3');
+			widget.invalidate();
+			projection.update(widget.__render__());
+			assert.lengthOf(root.childNodes, 1);
+			const textNodeChild = root.childNodes[0].childNodes[0] as Text;
+			assert.strictEqual(textNodeChild.data, '2');
+		});
+
+		it('should append nodes for an array returned from the top level', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', [ '1' ]),
+						v('div', [ '2' ]),
+						v('div', [ '3' ])
+					];
+				}
+			}
+
+			const div = document.createElement('div');
+			const widget = new Foo();
+			const projection = dom.append(div, widget.__render__() as HNode, widget);
+			const root = projection.domNode as Element;
+			assert.lengthOf(root.childNodes, 3);
+			const firstTextNodeChild = root.childNodes[0].childNodes[0] as Text;
+			const secondTextNodeChild = root.childNodes[1].childNodes[0] as Text;
+			const thirdTextNodeChild = root.childNodes[2].childNodes[0] as Text;
+			assert.strictEqual(firstTextNodeChild.data, '1');
+			assert.strictEqual(secondTextNodeChild.data, '2');
+			assert.strictEqual(thirdTextNodeChild.data, '3');
+		});
+
+		it('should append nodes for an array returned from the top level via a widget', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', [ '1' ]),
+						v('div', [ '2' ]),
+						v('div', [ '3' ])
+					];
+				}
+			}
+
+			class Bar extends WidgetBase {
+				render() {
+					return w(Foo, {});
+				}
+			}
+
+			const div = document.createElement('div');
+			const widget = new Bar();
+			const projection = dom.append(div, widget.__render__() as HNode, widget);
+			const root = projection.domNode;
+			assert.lengthOf(root.childNodes, 3);
+			const firstTextNodeChild = root.childNodes[0].childNodes[0] as Text;
+			const secondTextNodeChild = root.childNodes[1].childNodes[0] as Text;
+			const thirdTextNodeChild = root.childNodes[2].childNodes[0] as Text;
+			assert.strictEqual(firstTextNodeChild.data, '1');
+			assert.strictEqual(secondTextNodeChild.data, '2');
+			assert.strictEqual(thirdTextNodeChild.data, '3');
+		});
+
 		it('should destroy widgets when they are no longer required', () => {
 			let fooDestroyedCount = 0;
 
@@ -1035,11 +1165,11 @@ describe('vdom', () => {
 			assert.strictEqual((projection.domNode.childNodes[0] as Element).outerHTML, '<div>text</div>');
 		});
 
-		it('should give a meaningful error when the root selector is changed', () => {
+		it('should allow changing the root selector', () => {
 			const projection = dom.create(v('div'), projectorStub);
-			assert.throws(() => {
-				projection.update(v('span'));
-			}, Error, 'may not be changed');
+			assert.strictEqual(projection.domNode.children[0].tagName, 'DIV');
+			projection.update(v('span'));
+			assert.strictEqual(projection.domNode.children[0].tagName, 'SPAN');
 		});
 
 		it('should allow an existing dom node to be used', () => {
@@ -2081,7 +2211,7 @@ describe('vdom', () => {
 		});
 
 		it('element-updated emitted for updated nodes with a key', () => {
-			const projection = dom.create(v('div'), projectorStub);
+			const projection = dom.create(v('div', { key: '1' }), projectorStub);
 			resolvers.resolve();
 			projection.update(v('div', { key: '1' }));
 			resolvers.resolve();
@@ -2089,7 +2219,7 @@ describe('vdom', () => {
 		});
 
 		it('element-updated emitted for updated nodes with a key of 0', () => {
-			const projection = dom.create(v('div'), projectorStub);
+			const projection = dom.create(v('div', { key: 0 }), projectorStub);
 			resolvers.resolve();
 			projection.update(v('div', { key: 0 }));
 			resolvers.resolve();

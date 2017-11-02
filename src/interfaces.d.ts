@@ -78,7 +78,7 @@ export interface ProjectionOptions extends ProjectorOptions {
 
 export interface Projection {
 	readonly domNode: Element;
-	update(updatedDNode: DNode): void;
+	update(updatedDNode: DNode | DNode[]): void;
 }
 
 export type DeferredVirtualProperties = (inserted: boolean) => VirtualDomProperties;
