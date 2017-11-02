@@ -1585,7 +1585,7 @@ describe('vdom', () => {
 			};
 
 			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
-			const element: any = projection.domNode;
+			const element: any = projection.domNode.childNodes[0];
 
 			assert.strictEqual(element.deferredCallbackCount, 1);
 			assert.strictEqual(element.renderCount, 1);
@@ -1627,7 +1627,7 @@ describe('vdom', () => {
 			};
 
 			const projection = dom.create(renderFunction(), projectorStub, { eventHandlerInterceptor: noopEventHandlerInterceptor });
-			const element: any = projection.domNode;
+			const element: any = projection.domNode.childNodes[0];
 
 			assert.strictEqual(element.getAttribute('foo'), 'bar');
 			assert.strictEqual(element.getAttribute('another'), 'property');
