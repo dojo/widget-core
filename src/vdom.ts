@@ -20,6 +20,8 @@ const NAMESPACE_XLINK = NAMESPACE_W3 + '1999/xlink';
 
 const emptyArray: (InternalWNode | InternalHNode)[] = [];
 
+export type RenderResult = DNode<any> | DNode<any>[];
+
 export interface InternalWNode extends WNode<WidgetBase> {
 
 	/**
@@ -819,7 +821,7 @@ function runAfterRenderCallbacks(projectionOptions: ProjectionOptions) {
 function createProjection(dnode: InternalDNode | InternalDNode[], parentInstance: WidgetBase, projectionOptions: ProjectionOptions): Projection {
 	let projectionDNode = Array.isArray(dnode) ? dnode : [ dnode ];
 	return {
-		update: function(updatedDNode: DNode | DNode[]) {
+		update: function(updatedDNode: RenderResult) {
 			let domNode = projectionOptions.rootNode;
 
 			updatedDNode = filterAndDecorateChildren(updatedDNode, parentInstance);
@@ -836,7 +838,7 @@ function createProjection(dnode: InternalDNode | InternalDNode[], parentInstance
 }
 
 export const dom = {
-	create: function(dNode: DNode | DNode[], instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	create: function(dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
 		const rootNode = document.createElement('div');
 		finalProjectorOptions.rootNode = rootNode;
@@ -849,7 +851,7 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	append: function(parentNode: Element, dNode: DNode | DNode[], instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	append: function(parentNode: Element, dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
 		finalProjectorOptions.rootNode = parentNode;
 		const decoratedNode = filterAndDecorateChildren(dNode, instance);
@@ -861,7 +863,7 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	merge: function(element: Element, dNode: DNode | DNode[], instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	merge: function(element: Element, dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		if (Array.isArray(dNode)) {
 			throw new Error('Unable to merge an array of nodes. (consider adding one extra level to the virtual DOM)');
 		}
@@ -879,7 +881,7 @@ export const dom = {
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
-	replace: function(element: Element, dNode: DNode | DNode[], instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
+	replace: function(element: Element, dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
 		if (Array.isArray(dNode)) {
 			throw new Error('Unable to replace a node with an array of nodes. (consider adding one extra level to the virtual DOM)');
 		}
