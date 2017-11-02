@@ -874,7 +874,6 @@ export const dom = {
 		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
 
 		createDom(decoratedNode, finalProjectorOptions.rootNode, undefined, finalProjectorOptions, instance);
-		// initPropertiesAndChildren(element, decoratedNode, instance, finalProjectorOptions);
 		finalProjectorOptions.afterRenderCallbacks.push(() => {
 			instance.emit({ type: 'widget-created' });
 		});
