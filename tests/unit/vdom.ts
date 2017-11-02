@@ -539,23 +539,6 @@ describe('vdom', () => {
 			assert.strictEqual(textNodeOne.data, 'Hello, bar!');
 		});
 
-		it('should create nodes for an array returned from the top level', () => {
-						class Foo extends WidgetBase {
-							render() {
-								return [
-									v('div', [ '1' ]),
-									v('div', [ '2' ]),
-									v('div', [ '3' ])
-								];
-							}
-						}
-
-						const widget = new Foo();
-						const projection = dom.create(widget.__render__() as HNode, widget);
-						const root = projection.domNode as Element;
-						assert.lengthOf(root.childNodes, 3);
-					});
-
 		it('should create nodes for an array returned from the top level via a widget', () => {
 			class Foo extends WidgetBase {
 				render() {
@@ -667,6 +650,42 @@ describe('vdom', () => {
 			assert.strictEqual(firstTextNodeChild.data, '1');
 			assert.strictEqual(secondTextNodeChild.data, '2');
 			assert.strictEqual(thirdTextNodeChild.data, '3');
+		});
+
+		it('should throw an error when attempting to merge an array of node', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', [ '1' ]),
+						v('div', [ '2' ]),
+						v('div', [ '3' ])
+					];
+				}
+			}
+
+			const div = document.createElement('div');
+			const widget = new Foo();
+			assert.throws(() => {
+				dom.merge(div, widget.__render__() as HNode, widget);
+			}, Error, 'Unable to merge an array of nodes. (consider adding one extra level to the virtual DOM)');
+		});
+
+		it('should throw an error when attempting to replace with an array of node', () => {
+			class Foo extends WidgetBase {
+				render() {
+					return [
+						v('div', [ '1' ]),
+						v('div', [ '2' ]),
+						v('div', [ '3' ])
+					];
+				}
+			}
+
+			const div = document.createElement('div');
+			const widget = new Foo();
+			assert.throws(() => {
+				dom.replace(div, widget.__render__() as HNode, widget);
+			}, Error, 'Unable to replace a node with an array of nodes. (consider adding one extra level to the virtual DOM)');
 		});
 
 		it('should destroy widgets when they are no longer required', () => {
