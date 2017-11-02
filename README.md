@@ -319,8 +319,8 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
             animate: {
                 id: 'rootAnimation',
                 effects: [
-                    { height: `10px` },
-                    { height: `100px` }
+                    { height: '10px' },
+                    { height: '100px' }
                 ],
                 controls: {
                     play: true
@@ -347,8 +347,8 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
             animate: this._open ? {
                 id: 'upAnimation',
                 effects: [
-                    { height: `100px` },
-                    { height: `0px` }
+                    { height: '100px' },
+                    { height: '0px' }
                 ],
                 controls: {
                     play: true
@@ -356,8 +356,8 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
             } : {
                 id: 'downAnimation',
                 effects: [
-                    { height: `0px` },
-                    { height: `100px` }
+                    { height: '0px' },
+                    { height: '100px' }
                 ],
                 controls: {
                     play: true
@@ -378,7 +378,7 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
         const { scroll } = this.meta(Dimensions).get('content');
 
         return [
-            { height: `0px` },
+            { height: '0px' },
             { height: `${scroll.height}px` }
         ];
     }

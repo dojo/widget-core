@@ -151,12 +151,17 @@ export function AnimatedMixin<T extends Constructor<WidgetBase>>(Base: T): T {
 			decorate(result,
 				(node: HNode) => {
 					const { animate, key } = node.properties;
-					if (animate && key) {
-						this.meta(AnimationPlayer).add(key as string, animate, this);
+					if (animate) {
+						if (key) {
+							this.meta(AnimationPlayer).add(key as string, animate, this);
+						}
+						else {
+							console.warn('Animate properties can only be used on a node with a key');
+						}
 					}
 				},
 				(node: DNode) => {
-					return !!(isHNode(node) && node.properties.animate && node.properties.key);
+					return !!(isHNode(node) && node.properties.animate);
 				}
 			);
 			this.meta(AnimationPlayer).clearAnimations();
