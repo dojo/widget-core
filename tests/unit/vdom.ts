@@ -2227,7 +2227,7 @@ describe('vdom', () => {
 			}
 			const widget = new Foo();
 			const projection = dom.merge(root, widget.__render__() as HNode, widget);
-			const projectionRoot = projection.domNode as Element;
+			const projectionRoot = projection.domNode.childNodes[0] as Element;
 			assert.lengthOf(projectionRoot.childNodes, 1, 'should have 1 child');
 
 			firstRender = false;
