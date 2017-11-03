@@ -305,28 +305,31 @@ Examples of Dojo 2 mixins can be seen with `ThemedMixin` and `I18nMixin` that ar
 
 ### Animation
 
-Dojo 2 widget-core provides a `Animated` mixin to decorate a widget with the functionality to apply web animations to the nodes that it creates.
+Dojo 2 widget-core provides a `WebAnimation` meta to apply web animations to VNodes.
 
-To specify the web animations pass an `animate` property to the node you wish to animate. This can be a single animation or an array or animations.
+To specify the web animations pass an `AnimationProperties` object to the `WebAnimation` meta along with the key of the node you wish to animate. This can be a single animation or an array or animations.
 
 #### Basic Example
 
 ```ts
-export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
+export default class AnimatedWidget extends WidgetBase {
     protected render() {
-        return v('div', {
-            key: 'root',
-            animate: {
-                id: 'rootAnimation',
-                effects: [
-                    { height: '10px' },
-                    { height: '100px' }
-                ],
-                controls: {
-                    play: true
-                }
+        const animate = {
+            id: 'rootAnimation',
+            effects: [
+                { height: '10px' },
+                { height: '100px' }
+            ],
+            controls: {
+                play: true
             }
-        })
+        };
+
+        this.meta(WebAnimation).add('root', animate);
+
+        return v('div', {
+            key: 'root'
+        });
     }
 }
 ```
@@ -338,31 +341,34 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
 Animations can be changed on each widget render in a reactive pattern, for example changing the animation from `slideUp` to `slideDown` on a title pane depending of if the titlepane is open or not.
 
 ```ts
-export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
+export default class AnimatedWidget extends WidgetBase {
     private _open = false;
 
     protected render() {
-        return v('div', {
-            key: 'root',
-            animate: this._open ? {
-                id: 'upAnimation',
-                effects: [
-                    { height: '100px' },
-                    { height: '0px' }
-                ],
-                controls: {
-                    play: true
-                }
-            } : {
-                id: 'downAnimation',
-                effects: [
-                    { height: '0px' },
-                    { height: '100px' }
-                ],
-                controls: {
-                    play: true
-                }
+        const animate = this._open ? {
+            id: 'upAnimation',
+            effects: [
+                { height: '100px' },
+                { height: '0px' }
+            ],
+            controls: {
+                play: true
             }
+        } : {
+            id: 'downAnimation',
+            effects: [
+                { height: '0px' },
+                { height: '100px' }
+            ],
+            controls: {
+                play: true
+            }
+        };
+
+        this.meta(WebAnimation).add('root', animate);
+
+        return v('div', {
+            key: 'root'
         })
     }
 }
@@ -373,7 +379,7 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
 an `effects` function can be passed to the animation and evaluated at render time. This allows you to create programatic effects such as those depending on measurements from the `Dimensions` `Meta`.
 
 ```ts
-export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
+export default class AnimatedWidget extends WidgetBase {
     private _getEffect() {
         const { scroll } = this.meta(Dimensions).get('content');
 
@@ -384,15 +390,18 @@ export default class AnimatedWidget extends AnimatedMixin(WidgetBase) {
     }
 
     protected render() {
-        return v('div', {
-            key: 'root',
-            animate: {
-                id: 'upAnimation',
-                effects: this._getEffect(),
-                controls: {
-                    play: true
-                }
+        const animate = {
+            id: 'upAnimation',
+            effects: this._getEffect(),
+            controls: {
+                play: true
             }
+        };
+
+        this.meta(WebAnimation).add('root', animate);
+
+        return v('div', {
+            key: 'root'
         })
     }
 }
