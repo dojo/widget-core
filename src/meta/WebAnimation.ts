@@ -69,29 +69,15 @@ export class WebAnimations extends Base {
 		}
 
 		if (onFinish) {
-			player.onfinish = onFinish;
+			player.onfinish = onFinish.bind(this._bind);
 		}
 
 		if (onCancel) {
-			player.oncancel = onCancel;
+			player.oncancel = onCancel.bind(this._bind);
 		}
 	}
 
-	// private _bindControlCallbacks(controls: AnimationControls, bindScope: any): AnimationControls {
-
-	// 	const {
-	// 		onFinish,
-	// 		onCancel
-	// 	} = controls;
-
-	// 	return {
-	// 		...controls,
-	// 		onFinish: onFinish ? onFinish.bind(bindScope) : null,
-	// 		onCancel: onCancel ? onCancel.bind(bindScope) : null
-	// 	};
-	// }
-
-	add(key: string, animateProperties: AnimationProperties | AnimationProperties[], bindScope: any) {
+	add(key: string, animateProperties: AnimationProperties | AnimationProperties[]) {
 		const node = this.getNode(key);
 
 		if (node) {
@@ -114,7 +100,7 @@ export class WebAnimations extends Base {
 					const { player } = this._animationMap.get(id);
 					const { controls = {} } = properties;
 
-					this._updatePlayer(player, controls); // this._bindControlCallbacks(controls, bindScope));
+					this._updatePlayer(player, controls);
 
 					this._animationMap.set(id, {
 						player,

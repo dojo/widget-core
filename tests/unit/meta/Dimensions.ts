@@ -54,7 +54,8 @@ registerSuite('meta - Dimensions', {
 
 			const dimensions = new Dimensions({
 				invalidate: () => {},
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			assert.deepEqual(dimensions.get('foo'), defaultDimensions);
@@ -64,7 +65,8 @@ registerSuite('meta - Dimensions', {
 
 			const dimensions = new Dimensions({
 				invalidate: () => {},
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			assert.deepEqual(dimensions.get(1234), defaultDimensions);
@@ -75,7 +77,8 @@ registerSuite('meta - Dimensions', {
 
 			const dimensions = new Dimensions({
 				invalidate: () => {},
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			dimensions.get('foo');
@@ -89,7 +92,8 @@ registerSuite('meta - Dimensions', {
 
 			const dimensions = new Dimensions({
 				invalidate: invalidateStub,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			dimensions.get('foo');
@@ -131,7 +135,8 @@ registerSuite('meta - Dimensions', {
 
 			const dimensions = new Dimensions({
 				invalidate: () => {},
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			assert.deepEqual(dimensions.get('foo'), {

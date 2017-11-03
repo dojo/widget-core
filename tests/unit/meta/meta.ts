@@ -25,7 +25,8 @@ registerSuite('meta base', {
 			nodeHandler.add(element, 'foo');
 			const meta = new MetaBase({
 				invalidate: () => {},
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			assert.isTrue(meta.has('foo'));
@@ -45,7 +46,8 @@ registerSuite('meta base', {
 
 			const meta = new MyMeta({
 				invalidate,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			const node = meta.callGetNode('foo');
@@ -64,7 +66,8 @@ registerSuite('meta base', {
 
 			const meta = new MyMeta({
 				invalidate,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			meta.callGetNode('foo');
@@ -84,7 +87,8 @@ registerSuite('meta base', {
 
 			const meta = new MyMeta({
 				invalidate,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			meta.callGetNode('foo');
@@ -116,7 +120,8 @@ registerSuite('meta base', {
 
 			const meta = new MyMeta({
 				invalidate,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			meta.callGetNode('foo');
@@ -139,7 +144,8 @@ registerSuite('meta base', {
 
 			const meta = new MyMeta({
 				invalidate,
-				nodeHandler
+				nodeHandler,
+				bind: this
 			});
 
 			meta.callInvalidate();

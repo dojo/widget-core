@@ -8,11 +8,14 @@ export class Base extends Destroyable implements WidgetMetaBase {
 
 	private _requestedNodeKeys = new Set<string | number>();
 
+	protected _bind: any;
+
 	constructor(properties: WidgetMetaProperties) {
 		super();
 
 		this._invalidate = properties.invalidate;
 		this.nodeHandler = properties.nodeHandler;
+		this._bind = properties.bind;
 	}
 
 	public has(key: string | number): boolean {
@@ -42,7 +45,7 @@ export class Base extends Destroyable implements WidgetMetaBase {
 	}
 
 	public afterRender(): void {
-		// No nothing by default
+		// Do nothing by default.
 	}
 }
 
