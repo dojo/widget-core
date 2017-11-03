@@ -20,7 +20,11 @@ function createFakeElement(attributes: any, descriptor: CustomElementDescriptor)
 		setWidgetInstance(instance: WidgetBase<any>) {
 			widgetInstance = instance;
 		},
-		getWidgetConstructor: () => WidgetBase,
+		getWidgetConstructor: () => class extends WidgetBase<any> {
+			render() {
+				return v('div');
+			}
+		},
 		getDescriptor: () => descriptor,
 		children: [],
 		getAttribute(name: string) {
