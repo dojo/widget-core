@@ -75,7 +75,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			const result = element.getWidgetInstance().properties;
 			assert.strictEqual(result.a, '1');
@@ -101,7 +101,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			assert.strictEqual(element.a, '1');
 			assert.strictEqual(element.b, '2');
@@ -125,7 +125,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			element.a = 4;
 
@@ -143,7 +143,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			handleAttributeChanged(element, 'a', 'test', null);
 			handleAttributeChanged(element, 'b', 'test', null);
@@ -158,7 +158,7 @@ registerSuite('customElements', {
 				tagName: 'test'
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			handleAttributeChanged(element, 'b', 'test', null);
 
@@ -177,7 +177,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 			element.getWidgetInstance().__setProperties__({
 				a: 'test'
 			});
@@ -199,7 +199,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 			element.getWidgetInstance().__setProperties__({
 				test: 'test'
 			});
@@ -220,7 +220,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 			element.getWidgetInstance().__setProperties__({
 				a: 4
 			});
@@ -241,7 +241,7 @@ registerSuite('customElements', {
 				]
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 			element.a = 4;
 
 			assert.deepEqual(element.getWidgetInstance().properties.a, 8);
@@ -273,7 +273,7 @@ registerSuite('customElements', {
 					]
 				});
 
-				initializeElement(element);
+				initializeElement(element)();
 
 				assert.isFunction(element.getWidgetInstance().properties.onTest);
 				element.getWidgetInstance().properties.onTest('detail here');
@@ -296,7 +296,7 @@ registerSuite('customElements', {
 				parentNode: element
 			} ];
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			assert.lengthOf(element.removedChildren(), 1);
 			assert.lengthOf(element.getWidgetInstance().children, 1);
@@ -313,7 +313,7 @@ registerSuite('customElements', {
 				}
 			});
 
-			initializeElement(element);
+			initializeElement(element)();
 
 			assert.strictEqual(element.getWidgetInstance().properties.prop1, 'test');
 		}
