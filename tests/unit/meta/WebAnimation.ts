@@ -375,14 +375,54 @@ describe('WebAnimation', () => {
 			widget.__render__();
 			assert.isTrue(keyframeCtorStub.calledTwice);
 		});
-		it('returns animation info when get is called', () => {
-			const widget = new TestWidget();
-			const meta = widget.getMeta();
 
-			// widget.render();
+		describe('get info', () => {
+			beforeEach(() => {
+				global.Animation = class {
+					constructor() {}
+					play() {}
+					pause() {}
+					get startTime() { return 0; }
+					get currentTime() { return 500; }
+					get playState() { return 'running'; }
+					get playbackRate() { return 1; }
+				};
+			});
 
-			const info = meta.get('animation');
-			console.dir(info);
+			it('returns undefined for non existant animation', () => {
+				const widget = new TestWidget();
+				const meta = widget.getMeta();
+				stub(meta, 'getNode').returns(metaNode);
+
+				widget.render();
+
+				const info = meta.get('nonAnimation');
+
+				assert.isUndefined(info);
+			});
+
+			it('returns animation info when get is called', () => {
+				animate.duration = 1000;
+				animate.controls = {
+					play: true
+				};
+
+				const widget = new TestWidget();
+				const meta = widget.getMeta();
+				stub(meta, 'getNode').returns(metaNode);
+
+				widget.render();
+
+				const info = meta.get('animation');
+
+				assert.deepEqual(info, {
+					startTime: 0,
+					currentTime: 500,
+					playState: 'running',
+					playbackRate: 1
+				});
+			});
 		});
+
 	});
 });
