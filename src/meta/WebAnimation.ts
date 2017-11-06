@@ -36,7 +36,7 @@ export class WebAnimations extends Base {
 		return new Animation(keyframeEffect, (document as any).timeline);
 	}
 
-	private _updatePlayer(player: any, controls: AnimationControls) {
+	private _updatePlayer(player: Animation, controls: AnimationControls) {
 		const {
 			play,
 			reverse,
@@ -66,11 +66,11 @@ export class WebAnimations extends Base {
 		}
 
 		if (startTime !== undefined) {
-			player.startTime(startTime);
+			player.startTime = startTime;
 		}
 
 		if (currentTime !== undefined) {
-			player.currentTime(currentTime);
+			player.currentTime = currentTime;
 		}
 
 		if (play) {

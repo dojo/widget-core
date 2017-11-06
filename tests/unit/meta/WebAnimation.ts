@@ -109,10 +109,10 @@ describe('WebAnimation', () => {
 				finish() {
 					finishStub();
 				}
-				startTime(time: number) {
+				set startTime(time: number) {
 					startStub(time);
 				}
-				currentTime(time: number) {
+				set currentTime(time: number) {
 					currentStub(time);
 				}
 				set onfinish(onFinish: () => {}) {
