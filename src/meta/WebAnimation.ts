@@ -77,7 +77,7 @@ export class WebAnimations extends Base {
 		}
 	}
 
-	add(key: string, animateProperties: AnimationProperties | AnimationProperties[]) {
+	animate(key: string, animateProperties: AnimationProperties | AnimationProperties[]) {
 		const node = this.getNode(key);
 
 		if (node) {

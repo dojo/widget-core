@@ -16,7 +16,7 @@ describe('WebAnimation', () => {
 
 	class TestWidget extends WidgetBase {
 		render() {
-			this.meta(WebAnimation).add('animated', animate);
+			this.meta(WebAnimation).animate('animated', animate);
 
 			return v('div', {}, [
 				v('div', {
@@ -64,7 +64,7 @@ describe('WebAnimation', () => {
 			const widget = new TestWidget();
 			const meta = widget.getMeta();
 
-			const addSpy = spy(meta, 'add');
+			const addSpy = spy(meta, 'animate');
 
 			widget.__render__();
 			assert.isTrue(addSpy.calledOnce);
@@ -73,7 +73,7 @@ describe('WebAnimation', () => {
 			const widget = new TestWidget();
 			const meta = widget.getMeta();
 
-			const addSpy = spy(meta, 'add');
+			const addSpy = spy(meta, 'animate');
 			const clearSpy = spy(meta, 'afterRender');
 
 			widget.__render__();
