@@ -3,11 +3,23 @@ import { Base } from './Base';
 import { AnimationControls, AnimationProperties } from '../interfaces';
 import Map from '@dojo/shim/Map';
 
+export interface AnimationPlayer {
+	player: Animation;
+	used: boolean;
+}
+
+export interface AnimationInfo {
+	currentTime: number;
+	playState: AnimationPlayState;
+	playbackRate: number;
+	startTime: number;
+}
+
 export class WebAnimations extends Base {
 
-	private _animationMap = new Map<string, any>();
+	private _animationMap = new Map<string, AnimationPlayer>();
 
-	private _createPlayer(node: HTMLElement, properties: AnimationProperties) {
+	private _createPlayer(node: HTMLElement, properties: AnimationProperties): Animation {
 		const {
 			effects,
 			timing = {}
@@ -97,17 +109,38 @@ export class WebAnimations extends Base {
 						});
 					}
 
-					const { player } = this._animationMap.get(id);
+					const animation = this._animationMap.get(id);
 					const { controls = {} } = properties;
 
-					this._updatePlayer(player, controls);
+					if (animation) {
+						this._updatePlayer(animation.player, controls);
 
-					this._animationMap.set(id, {
-						player,
-						used: true
-					});
+						this._animationMap.set(id, {
+							player: animation.player,
+							used: true
+						});
+					}
 				}
 			});
+		}
+	}
+
+	get(id: string): Readonly<AnimationInfo> | undefined {
+		const animation = this._animationMap.get(id);
+		if (animation) {
+			const {
+				currentTime,
+				playState,
+				playbackRate,
+				startTime
+			} = animation.player;
+
+			return {
+				currentTime,
+				playState,
+				playbackRate,
+				startTime
+			};
 		}
 	}
 

@@ -375,5 +375,14 @@ describe('WebAnimation', () => {
 			widget.__render__();
 			assert.isTrue(keyframeCtorStub.calledTwice);
 		});
+		it('returns animation info when get is called', () => {
+			const widget = new TestWidget();
+			const meta = widget.getMeta();
+
+			// widget.render();
+
+			const info = meta.get('animation');
+			console.dir(info);
+		});
 	});
 });
