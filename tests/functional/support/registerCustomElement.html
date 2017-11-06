@@ -55,6 +55,7 @@
 		var nestedParent = document.createElement('child-wrapper');
 		var topLevelChild = document.createElement('div');
 		var nestedChild = document.createElement('div');
+		dynamicChildren.id = 'dynamic-parent-element';
 		nestedParent.appendChild(nestedChild);
 		dynamicChildren.appendChild(nestedParent);
 		dynamicChildren.appendChild(topLevelChild);
