@@ -13,7 +13,7 @@
 <child-wrapper id="parent-element">
 	<child-wrapper id="nested-parent">
 		<div>nested child</div>
-	</child-wrapper>,
+	</child-wrapper>
 	<div>top level child</div>
 </child-wrapper>
 
@@ -59,8 +59,8 @@
 		nestedParent.appendChild(nestedChild);
 		dynamicChildren.appendChild(nestedParent);
 		dynamicChildren.appendChild(topLevelChild);
-		topLevelChild.textContent = 'Programmatic top level child';
-		nestedChild.textContent = 'Programmatic nested child';
+		topLevelChild.textContent = 'programmatic top level child';
+		nestedChild.textContent = 'programmatic nested child';
 		document.body.appendChild(dynamicChildren);
 		document.body.removeChild(dynamicChildren);
 		document.body.appendChild(dynamicChildren);

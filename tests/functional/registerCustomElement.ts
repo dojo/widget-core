@@ -129,7 +129,7 @@ registerSuite('registerCustomElement', {
 			return this.remote
 				.get((<any> require).toUrl('./support/registerCustomElement.html'))
 				.setFindTimeout(1000)
-				.findByCssSelector('#parent-element > div > child-wrapper#nestedParent > div > div')
+				.findByCssSelector('#parent-element > div > child-wrapper#nested-parent > div > div')
 				.then((element: any) => {
 					return element.getVisibleText();
 				})
@@ -157,7 +157,7 @@ registerSuite('registerCustomElement', {
 					return element.getVisibleText();
 				})
 				.then((text: string) => {
-					assert.strictEqual(text, 'nested child');
+					assert.strictEqual(text, 'programmatic nested child');
 				})
 				.end()
 				.findByCssSelector('#dynamic-parent-element > div > div')
@@ -165,7 +165,7 @@ registerSuite('registerCustomElement', {
 					return element.getVisibleText();
 				})
 				.then((text: string) => {
-					assert.strictEqual(text, 'top level child');
+					assert.strictEqual(text, 'programmatic top level child');
 				});
 		}
 	}
