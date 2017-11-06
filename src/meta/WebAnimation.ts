@@ -2,6 +2,7 @@ import 'web-animations-js/web-animations-next-lite.min';
 import { Base } from './Base';
 import { AnimationControls, AnimationProperties, AnimationInfo } from '../interfaces';
 import Map from '@dojo/shim/Map';
+import global from '@dojo/shim/global';
 
 export interface AnimationPlayer {
 	player: Animation;
@@ -26,7 +27,7 @@ export class WebAnimations extends Base {
 			timing
 		);
 
-		return new Animation(keyframeEffect, (document as any).timeline);
+		return new Animation(keyframeEffect, global.document.timeline);
 	}
 
 	private _updatePlayer(player: Animation, controls: AnimationControls) {
@@ -138,8 +139,6 @@ export class WebAnimations extends Base {
 	}
 
 	afterRender() {
-		super.afterRender();
-
 		this._animationMap.forEach((animation, key) => {
 			if (!animation.used) {
 				animation.player.cancel();
