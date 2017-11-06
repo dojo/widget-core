@@ -1,18 +1,11 @@
 import 'web-animations-js/web-animations-next-lite.min';
 import { Base } from './Base';
-import { AnimationControls, AnimationProperties } from '../interfaces';
+import { AnimationControls, AnimationProperties, AnimationInfo } from '../interfaces';
 import Map from '@dojo/shim/Map';
 
 export interface AnimationPlayer {
 	player: Animation;
 	used: boolean;
-}
-
-export interface AnimationInfo {
-	currentTime: number;
-	playState: AnimationPlayState;
-	playbackRate: number;
-	startTime: number;
 }
 
 export class WebAnimations extends Base {

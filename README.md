@@ -325,7 +325,7 @@ export default class AnimatedWidget extends WidgetBase {
             }
         };
 
-        this.meta(WebAnimation).add('root', animate);
+        this.meta(WebAnimation).animate('root', animate);
 
         return v('div', {
             key: 'root'
@@ -365,7 +365,7 @@ export default class AnimatedWidget extends WidgetBase {
             }
         };
 
-        this.meta(WebAnimation).add('root', animate);
+        this.meta(WebAnimation).animate('root', animate);
 
         return v('div', {
             key: 'root'
@@ -398,11 +398,41 @@ export default class AnimatedWidget extends WidgetBase {
             }
         };
 
-        this.meta(WebAnimation).add('root', animate);
+        this.meta(WebAnimation).animate('root', animate);
 
         return v('div', {
             key: 'root'
         })
+    }
+}
+```
+
+#### Get animation info
+
+The `WebAnimation` meta provides a `get` function that can be used to retrieve information about an animation via it's `id`.
+This info contains the currentTime, playState, playbackRate and startTime of the animation. If no animation is found or the animation has been cleared this will return undefined.
+
+```ts
+export default class AnimatedWidget extends WidgetBase {
+    protected render() {
+        const animate = {
+            id: 'rootAnimation',
+            effects: [
+                { height: '10px' },
+                { height: '100px' }
+            ],
+            controls: {
+                play: true
+            }
+        };
+
+        this.meta(WebAnimation).animate('root', animate);
+
+        const info = this.meta(WebAnimation).get('rootAnimation');
+
+        return v('div', {
+            key: 'root'
+        });
     }
 }
 ```

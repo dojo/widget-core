@@ -126,6 +126,16 @@ export interface AnimationProperties {
 	timing?: AnimationTimingProperties;
 }
 
+/**
+ * Info returned by the `get` function on WebAnimation meta
+ */
+export interface AnimationInfo {
+	currentTime: number;
+	playState: 'idle' | 'pending' | 'running' | 'paused' | 'finished';
+	playbackRate: number;
+	startTime: number;
+}
+
 export interface VirtualDomProperties {
 	/**
 	 * The animation to perform when this node is added to an already existing parent.
