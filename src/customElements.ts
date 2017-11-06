@@ -226,8 +226,11 @@ export function initializeElement(element: CustomElement) {
 	}
 
 	const projector = ProjectorMixin(element.getWidgetConstructor());
-
 	const widgetInstance = new projector();
+
+	widgetInstance.setProperties(initialProperties);
+	element.setWidgetInstance(widgetInstance);
+
 	return function() {
 		// find children
 		let children: DNode[] = [];
@@ -242,9 +245,7 @@ export function initializeElement(element: CustomElement) {
 			element.removeChild(childNode);
 		});
 
-		widgetInstance.setProperties(initialProperties);
 		widgetInstance.setChildren(children);
-		element.setWidgetInstance(widgetInstance);
 		widgetInstance.append(element);
 	};
 }
