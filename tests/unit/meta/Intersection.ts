@@ -271,11 +271,11 @@ registerSuite('meta - Intersection', {
 				assert.equal(observeStub.callCount, 2, 'Should have observed node with different options');
 				assert.lengthOf(observers, 2);
 				intersection.get('bar');
-				assert.equal(observeStub.callCount, 3, 'Should have observed node with a different key');
+				assert.equal(observeStub.callCount, 3, 'Should have observed new node');
 				assert.lengthOf(observers, 2);
 				intersection.get('bar', { root: 'root'});
 				assert.lengthOf(observers, 2);
-				assert.equal(observeStub.callCount, 4, 'Should have observed node with a different key and options');
+				assert.equal(observeStub.callCount, 4, 'Should have observed new node with different options');
 
 				intersection.get('bar', { root: 'root'});
 				intersection.get('bar');
