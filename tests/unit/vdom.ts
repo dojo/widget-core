@@ -1294,7 +1294,7 @@ describe('vdom', () => {
 			// expect(link.getAttribute('disabled')).to.be.null;
 
 			// What JSDom does:
-			assert.isNull(link.disabled);
+			assert.isFalse(!!link.disabled);
 		});
 
 		it('updates properties', () => {
