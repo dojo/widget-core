@@ -466,7 +466,7 @@ export interface NodeHandlerInterface extends Evented {
 export interface WidgetMetaProperties {
 	invalidate: () => void;
 	nodeHandler: NodeHandlerInterface;
-	bind: any;
+	bind: WidgetBaseInterface;
 }
 
 export interface Render {

@@ -1,6 +1,6 @@
 import { Destroyable } from '@dojo/core/Destroyable';
 import Set from '@dojo/shim/Set';
-import { WidgetMetaBase, WidgetMetaProperties, NodeHandlerInterface } from '../interfaces';
+import { WidgetMetaBase, WidgetMetaProperties, NodeHandlerInterface, WidgetBaseInterface } from '../interfaces';
 
 export class Base extends Destroyable implements WidgetMetaBase {
 	private _invalidate: () => void;
@@ -8,7 +8,7 @@ export class Base extends Destroyable implements WidgetMetaBase {
 
 	private _requestedNodeKeys = new Set<string | number>();
 
-	protected _bind: any;
+	protected _bind: WidgetBaseInterface;
 
 	constructor(properties: WidgetMetaProperties) {
 		super();

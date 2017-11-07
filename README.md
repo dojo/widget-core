@@ -376,7 +376,7 @@ export default class AnimatedWidget extends WidgetBase {
 
 #### Passing an effects function
 
-an `effects` function can be passed to the animation and evaluated at render time. This allows you to create programatic effects such as those depending on measurements from the `Dimensions` `Meta`.
+An `effects` function can be passed to the animation and evaluated at render time. This allows you to create programatic effects such as those depending on measurements from the `Dimensions` `Meta`.
 
 ```ts
 export default class AnimatedWidget extends WidgetBase {
