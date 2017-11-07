@@ -13,6 +13,7 @@ import { from as arrayFrom } from '@dojo/shim/array';
 import { isWNode, isHNode, HNODE } from './d';
 import { WidgetBase } from './WidgetBase';
 import { isWidgetBaseConstructor } from './Registry';
+import WeakMap from '@dojo/shim/WeakMap';
 
 const NAMESPACE_W3 = 'http://www.w3.org/';
 const NAMESPACE_SVG = NAMESPACE_W3 + '2000/svg';
@@ -108,7 +109,6 @@ const missingTransition = function() {
 
 const DEFAULT_PROJECTION_OPTIONS: Partial<ProjectionOptions> = {
 	namespace: undefined,
-	eventHandlerInterceptor: undefined,
 	styleApplyer: function(domNode: HTMLElement, styleName: string, value: string) {
 		(domNode.style as any)[styleName] = value;
 	},
@@ -118,6 +118,7 @@ const DEFAULT_PROJECTION_OPTIONS: Partial<ProjectionOptions> = {
 	},
 	deferredRenderCallbacks: [],
 	afterRenderCallbacks: [],
+	nodeMap: new WeakMap(),
 	merge: false
 };
 
@@ -134,8 +135,43 @@ function checkStyleValue(styleValue: Object) {
 	}
 }
 
+function updateEvents(
+	domNode: Node,
+	propName: string,
+	properties: VirtualDomProperties,
+	projectionOptions: ProjectionOptions,
+	previousProperties?: VirtualDomProperties
+) {
+	const previous = previousProperties || Object.create(null);
+	const currentValue = properties[propName];
+	const previousValue = previous[propName];
+
+	const eventName = propName.substr(2);
+	const eventMap = projectionOptions.nodeMap.get(domNode) || new WeakMap();
+
+	if (currentValue !== previousValue) {
+
+		if (previousValue) {
+			const previousEvent = eventMap.get(previousValue);
+			domNode.removeEventListener(eventName, previousEvent);
+		}
+
+		let callback = currentValue.bind(properties.bind);
+
+		if (eventName === 'input') {
+			callback = function(this: any, evt: Event) {
+				currentValue.call(this, evt);
+				(evt.target as any)['oninput-value'] = (evt.target as HTMLInputElement).value;
+			}.bind(properties.bind);
+		}
+
+		domNode.addEventListener(eventName, callback);
+		eventMap.set(currentValue, callback);
+		projectionOptions.nodeMap.set(domNode, eventMap);
+	}
+}
+
 function setProperties(domNode: Node, properties: VirtualDomProperties, projectionOptions: ProjectionOptions) {
-	const eventHandlerInterceptor = projectionOptions.eventHandlerInterceptor;
 	const propNames = Object.keys(properties);
 	const propCount = propNames.length;
 	for (let i = 0; i < propCount; i++) {
@@ -170,20 +206,7 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 			const type = typeof propValue;
 			if (type === 'function') {
 				if (propName.lastIndexOf('on', 0) === 0) {
-					if (eventHandlerInterceptor) {
-						propValue = eventHandlerInterceptor(propName, propValue, domNode, properties);
-					}
-					if (propName === 'oninput') {
-						(function() {
-							// record the evt.target.value, because IE and Edge sometimes do a requestAnimationFrame between changing value and running oninput
-							const oldPropValue = propValue;
-							propValue = function(this: HTMLElement, evt: Event) {
-								oldPropValue.apply(this, [evt]);
-								(evt.target as any)['oninput-value'] = (evt.target as HTMLInputElement).value; // may be HTMLTextAreaElement as well
-							};
-						} ());
-					}
-					(domNode as any)[propName] = propValue;
+					updateEvents(domNode, propName, properties, projectionOptions);
 				}
 			}
 			else if (type === 'string' && propName !== 'value' && propName !== 'innerHTML') {
@@ -198,6 +221,25 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 				(domNode as any)[propName] = propValue;
 			}
 		}
+	}
+}
+
+function removeOrphanedEvents(
+	domNode: Node,
+	previousProperties: VirtualDomProperties,
+	properties: VirtualDomProperties,
+	projectionOptions: ProjectionOptions
+) {
+	const eventMap = projectionOptions.nodeMap.get(domNode);
+	if (eventMap) {
+		Object.keys(previousProperties).forEach((propName) => {
+			if (propName.substr(0, 2) === 'on' && !properties[propName]) {
+				const eventCallback = eventMap.get(previousProperties[propName]);
+				if (eventCallback) {
+					domNode.removeEventListener(propName.substr(2), eventCallback);
+				}
+			}
+		});
 	}
 }
 
@@ -223,6 +265,9 @@ function updateProperties(
 			(domNode as Element).classList.remove(...previousProperties.classes.split(' '));
 		}
 	}
+
+	removeOrphanedEvents(domNode, previousProperties, properties, projectionOptions);
+
 	for (let i = 0; i < propCount; i++) {
 		const propName = propNames[i];
 		let propValue = properties[propName];
@@ -312,9 +357,11 @@ function updateProperties(
 			else if (propValue !== previousValue) {
 				const type = typeof propValue;
 				if (type === 'function') {
-					throw new Error(`Functions may not be updated on subsequent renders (property: ${propName})`);
+					if (propName.lastIndexOf('on', 0) === 0) {
+						updateEvents(domNode, propName, properties, projectionOptions, previousProperties);
+					}
 				}
-				if (type === 'string' && propName !== 'innerHTML') {
+				else if (type === 'string' && propName !== 'innerHTML') {
 					if (projectionOptions.namespace === NAMESPACE_SVG && propName === 'href') {
 						(domNode as Element).setAttributeNS(NAMESPACE_XLINK, propName, propValue);
 					}
