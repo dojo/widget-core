@@ -165,7 +165,10 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 			else {
 				for (let i = 0; i < currentClasses.length; i++) {
 					if (currentClasses[i]) {
-						(domNode as Element).classList.add(...currentClasses[i].split(' '));
+						const classes = currentClasses[i].split(' ');
+						for (let i = 0; i < classes.length; i++) {
+							(domNode as Element).classList.add(classes[i]);
+						}
 					}
 				}
 			}
@@ -235,12 +238,18 @@ function updateProperties(
 			for (let i = 0; i < previousProperties.classes.length; i++) {
 				const previousClassName = previousProperties.classes[i];
 				if (previousClassName) {
-					(domNode as Element).classList.remove(...previousClassName.split(' '));
+					const classes = previousClassName.split(' ');
+					for (let i = 0; i < classes.length; i++) {
+						(domNode as Element).classList.remove(classes[i]);
+					}
 				}
 			}
 		}
 		else {
-			(domNode as Element).classList.remove(...previousProperties.classes.split(' '));
+			const classes = previousProperties.classes.split(' ');
+			for (let i = 0; i < classes.length; i++) {
+				(domNode as Element).classList.remove(classes[i]);
+			}
 		}
 	}
 
@@ -258,7 +267,10 @@ function updateProperties(
 					for (let i = 0; i < previousClasses.length; i++) {
 						const previousClassName = previousClasses[i];
 						if (previousClassName) {
-							(domNode as Element).classList.remove(...previousClassName.split(' '));
+							const classes = previousClassName.split(' ');
+							for (let i = 0; i < classes.length; i++) {
+								(domNode as Element).classList.remove(classes[i]);
+							}
 						}
 					}
 				}
@@ -269,7 +281,10 @@ function updateProperties(
 						if (previousClassName) {
 							const classIndex = newClasses.indexOf(previousClassName);
 							if (classIndex === -1) {
-								(domNode as Element).classList.remove(...previousClassName.split(' '));
+								const classes = previousClassName.split(' ');
+								for (let i = 0; i < classes.length; i++) {
+									(domNode as Element).classList.remove(classes[i]);
+								}
 							}
 							else {
 								newClasses.splice(classIndex, 1);
@@ -279,7 +294,10 @@ function updateProperties(
 					for (let i = 0; i < newClasses.length; i++) {
 						const newClassName = newClasses[i];
 						if (newClassName) {
-							(domNode as Element).classList.add(...newClassName.split(' '));
+							const classes = newClassName.split(' ');
+							for (let i = 0; i < classes.length; i++) {
+								(domNode as Element).classList.add(classes[i]);
+							}
 						}
 					}
 				}
@@ -287,7 +305,10 @@ function updateProperties(
 			else {
 				for (let i = 0; i < currentClasses.length; i++) {
 					if (currentClasses[i]) {
-						(domNode as Element).classList.add(...currentClasses[i].split(' '));
+						const classes = currentClasses[i].split(' ');
+						for (let i = 0; i < classes.length; i++) {
+							(domNode as Element).classList.add(classes[i]);
+						}
 					}
 				}
 			}
