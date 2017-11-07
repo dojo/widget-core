@@ -33,8 +33,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				const hasIntersectionInfo = intersection.has('root');
@@ -45,8 +44,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				const hasIntersectionInfo = intersection.has('root', { root: 'root' });
@@ -57,8 +55,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 				const element = document.createElement('div');
 				nodeHandler.add(element, 'root');
@@ -83,8 +80,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				intersection.get('root');
@@ -97,8 +93,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				intersection.get(1234);
@@ -112,8 +107,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: invalidateStub,
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				intersection.get('root');
@@ -134,8 +128,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: invalidateStub,
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				intersection.get('root');
@@ -181,8 +174,7 @@ registerSuite('meta - Intersection', {
 
 				const intersection = new Intersection({
 					invalidate: invalidateStub,
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				intersection.get('foo', { root: 'root' });
@@ -221,8 +213,7 @@ registerSuite('meta - Intersection', {
 				const nodeHandler = new NodeHandler();
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler,
-					bind: this
+					nodeHandler
 				});
 
 				const root = document.createElement('div');

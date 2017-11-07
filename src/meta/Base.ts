@@ -15,7 +15,9 @@ export class Base extends Destroyable implements WidgetMetaBase {
 
 		this._invalidate = properties.invalidate;
 		this.nodeHandler = properties.nodeHandler;
-		this._bind = properties.bind;
+		if (properties.bind) {
+			this._bind = properties.bind;
+		}
 	}
 
 	public has(key: string | number): boolean {
