@@ -68,19 +68,6 @@ export interface InternalHNode extends HNode {
 
 export type InternalDNode = InternalHNode | InternalWNode;
 
-function extend<T>(base: T, overrides: any): T {
-	const result = {} as any;
-	Object.keys(base).forEach(function(key) {
-		result[key] = (base as any)[key];
-	});
-	if (overrides) {
-		Object.keys(overrides).forEach((key) => {
-			result[key] = overrides[key];
-		});
-	}
-	return result;
-}
-
 function same(dnode1: InternalDNode, dnode2: InternalDNode) {
 	if (isHNode(dnode1) && isHNode(dnode2)) {
 		if (dnode1.tag !== dnode2.tag) {
@@ -107,26 +94,22 @@ const missingTransition = function() {
 	throw new Error('Provide a transitions object to the projectionOptions to do animations');
 };
 
-const DEFAULT_PROJECTION_OPTIONS: Partial<ProjectionOptions> = {
-	namespace: undefined,
-	styleApplyer: function(domNode: HTMLElement, styleName: string, value: string) {
-		(domNode.style as any)[styleName] = value;
-	},
-	transitions: {
-		enter: missingTransition,
-		exit: missingTransition
-	},
-	deferredRenderCallbacks: [],
-	afterRenderCallbacks: [],
-	nodeMap: new WeakMap(),
-	merge: false
-};
-
-function applyDefaultProjectionOptions(projectorOptions?: Partial<ProjectionOptions>): ProjectionOptions {
-	projectorOptions = extend(DEFAULT_PROJECTION_OPTIONS, projectorOptions);
-	projectorOptions.deferredRenderCallbacks = [];
-	projectorOptions.afterRenderCallbacks = [];
-	return projectorOptions as ProjectionOptions;
+function getProjectionOptions(projectorOptions?: Partial<ProjectionOptions>): ProjectionOptions {
+	const defaults = {
+		namespace: undefined,
+		styleApplyer: function(domNode: HTMLElement, styleName: string, value: string) {
+			(domNode.style as any)[styleName] = value;
+		},
+		transitions: {
+			enter: missingTransition,
+			exit: missingTransition
+		},
+		deferredRenderCallbacks: [],
+		afterRenderCallbacks: [],
+		nodeMap: new WeakMap(),
+		merge: false
+	};
+	return { ...defaults, ...projectorOptions } as ProjectionOptions;
 }
 
 function checkStyleValue(styleValue: Object) {
@@ -728,7 +711,7 @@ function createDom(
 		else {
 			if (dnode.domNode === undefined) {
 				if (dnode.tag === 'svg') {
-					projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
+					projectionOptions = { ...projectionOptions, ...{ namespace: NAMESPACE_SVG } };
 				}
 				if (projectionOptions.namespace !== undefined) {
 					domNode = dnode.domNode = doc.createElementNS(projectionOptions.namespace, dnode.tag);
@@ -791,7 +774,7 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 		}
 		else {
 			if (dnode.tag.lastIndexOf('svg', 0) === 0) {
-				projectionOptions = extend(projectionOptions, { namespace: NAMESPACE_SVG });
+				projectionOptions = { ...projectionOptions, ...{ namespace: NAMESPACE_SVG } };
 			}
 			if (previous.children !== dnode.children) {
 				const children = filterAndDecorateChildren(dnode.children, parentInstance);
@@ -902,7 +885,7 @@ function createProjection(dnode: InternalDNode | InternalDNode[], parentInstance
 
 export const dom = {
 	create: function(dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
-		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
+		const finalProjectorOptions = getProjectionOptions(projectionOptions);
 		const rootNode = document.createElement('div');
 		finalProjectorOptions.rootNode = rootNode;
 		const decoratedNode = filterAndDecorateChildren(dNode, instance);
@@ -915,7 +898,7 @@ export const dom = {
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
 	},
 	append: function(parentNode: Element, dNode: RenderResult, instance: WidgetBase<any, any>, projectionOptions?: Partial<ProjectionOptions>): Projection {
-		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
+		const finalProjectorOptions = getProjectionOptions(projectionOptions);
 		finalProjectorOptions.rootNode = parentNode;
 		const decoratedNode = filterAndDecorateChildren(dNode, instance);
 		addChildren(parentNode, decoratedNode, finalProjectorOptions, instance, undefined);
@@ -930,7 +913,7 @@ export const dom = {
 		if (Array.isArray(dNode)) {
 			throw new Error('Unable to merge an array of nodes. (consider adding one extra level to the virtual DOM)');
 		}
-		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
+		const finalProjectorOptions = getProjectionOptions(projectionOptions);
 		finalProjectorOptions.merge = true;
 		finalProjectorOptions.mergeElement = element;
 		finalProjectorOptions.rootNode = element.parentNode as Element;
@@ -948,7 +931,7 @@ export const dom = {
 		if (Array.isArray(dNode)) {
 			throw new Error('Unable to replace a node with an array of nodes. (consider adding one extra level to the virtual DOM)');
 		}
-		const finalProjectorOptions = applyDefaultProjectionOptions(projectionOptions);
+		const finalProjectorOptions = getProjectionOptions(projectionOptions);
 		const decoratedNode = filterAndDecorateChildren(dNode, instance)[0] as InternalHNode;
 		finalProjectorOptions.rootNode = element.parentNode! as Element;
 		createDom(decoratedNode, element.parentNode!, element, finalProjectorOptions, instance);

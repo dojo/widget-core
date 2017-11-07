@@ -68,7 +68,7 @@ export interface ProjectorOptions {
 }
 
 export interface ProjectionOptions extends ProjectorOptions {
-	readonly namespace?: string;
+	namespace?: string;
 	deferredRenderCallbacks: Function [];
 	afterRenderCallbacks: Function[];
 	merge: boolean;
