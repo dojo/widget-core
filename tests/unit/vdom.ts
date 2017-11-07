@@ -1411,6 +1411,13 @@ describe('vdom', () => {
 				dom.merge(div, v('div', { classes: null }), projectorStub);
 				assert.strictEqual(div.className, '');
 			});
+
+			it('can add and remove multiple classes in IE11', () => {
+				const projection = dom.create(v('div', { classes: 'a b c d' }), projectorStub);
+				const root = projection.domNode.childNodes[0] as HTMLElement;
+				assert.strictEqual(root.className, 'a b c d');
+				projection.update(v('div', { classes: 'a b' }));
+			});
 		});
 
 		describe('styles', () => {
