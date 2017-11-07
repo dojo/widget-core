@@ -142,7 +142,7 @@ registerSuite('registerCustomElement', {
 				this.skip('not compatible with iOS 9.1 or Safari 9.1');
 			}
 			return this.remote
-				.get((<any> require).toUrl('./support/registerCustomElement.html'))
+				.get('_build/tests/functional/support/registerCustomElement.html')
 				.setFindTimeout(1000)
 				.findByCssSelector('#parent-element > div > child-wrapper#nested-parent > div > div')
 				.then((element: any) => {
@@ -165,7 +165,7 @@ registerSuite('registerCustomElement', {
 				this.skip('not compatible with iOS 9.1 or Safari 9.1');
 			}
 			return this.remote
-				.get((<any> require).toUrl('./support/registerCustomElement.html'))
+				.get('_build/tests/functional/support/registerCustomElement.html')
 				.setFindTimeout(1000)
 				.findByCssSelector('#dynamic-parent-element > div > child-wrapper > div > div')
 				.then((element: any) => {
