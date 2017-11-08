@@ -297,7 +297,8 @@ registerSuite('customElements', {
 			});
 			element.children = [ {
 				key: 'test',
-				parentNode: element
+				parentNode: element,
+				addEventListener() {}
 			} ];
 
 			initializeElement(element)();
