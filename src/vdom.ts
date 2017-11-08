@@ -6,6 +6,7 @@ import {
 	WNode,
 	ProjectionOptions,
 	Projection,
+	SupportedClassName,
 	TransitionStrategy,
 	VirtualDomProperties
 } from './interfaces';
@@ -151,6 +152,24 @@ function updateEvents(
 	projectionOptions.nodeMap.set(domNode, eventMap);
 }
 
+function addClasses(domNode: Node, classes: SupportedClassName) {
+	if (classes) {
+		const classNames = classes.split(' ');
+		for (let i = 0; i < classNames.length; i++) {
+			(domNode as Element).classList.add(classNames[i]);
+		}
+	}
+}
+
+function removeClasses(domNode: Node, classes: SupportedClassName) {
+	if (classes) {
+		const classNames = classes.split(' ');
+		for (let i = 0; i < classNames.length; i++) {
+			(domNode as Element).classList.remove(classNames[i]);
+		}
+	}
+}
+
 function setProperties(domNode: Node, properties: VirtualDomProperties, projectionOptions: ProjectionOptions) {
 	const propNames = Object.keys(properties);
 	const propCount = propNames.length;
@@ -164,12 +183,7 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 			}
 			else {
 				for (let i = 0; i < currentClasses.length; i++) {
-					if (currentClasses[i]) {
-						const classes = currentClasses[i].split(' ');
-						for (let i = 0; i < classes.length; i++) {
-							(domNode as Element).classList.add(classes[i]);
-						}
-					}
+					addClasses(domNode, currentClasses[i]);
 				}
 			}
 		}
@@ -236,20 +250,11 @@ function updateProperties(
 	if (propNames.indexOf('classes') === -1 && previousProperties.classes) {
 		if (Array.isArray(previousProperties.classes)) {
 			for (let i = 0; i < previousProperties.classes.length; i++) {
-				const previousClassName = previousProperties.classes[i];
-				if (previousClassName) {
-					const classes = previousClassName.split(' ');
-					for (let i = 0; i < classes.length; i++) {
-						(domNode as Element).classList.remove(classes[i]);
-					}
-				}
+				removeClasses(domNode, previousProperties.classes[i]);
 			}
 		}
 		else {
-			const classes = previousProperties.classes.split(' ');
-			for (let i = 0; i < classes.length; i++) {
-				(domNode as Element).classList.remove(classes[i]);
-			}
+			removeClasses(domNode, previousProperties.classes);
 		}
 	}
 
@@ -265,13 +270,7 @@ function updateProperties(
 			if (previousClasses && previousClasses.length > 0) {
 				if (!propValue || propValue.length === 0) {
 					for (let i = 0; i < previousClasses.length; i++) {
-						const previousClassName = previousClasses[i];
-						if (previousClassName) {
-							const classes = previousClassName.split(' ');
-							for (let i = 0; i < classes.length; i++) {
-								(domNode as Element).classList.remove(classes[i]);
-							}
-						}
+						removeClasses(domNode, previousClasses[i]);
 					}
 				}
 				else {
@@ -281,10 +280,7 @@ function updateProperties(
 						if (previousClassName) {
 							const classIndex = newClasses.indexOf(previousClassName);
 							if (classIndex === -1) {
-								const classes = previousClassName.split(' ');
-								for (let i = 0; i < classes.length; i++) {
-									(domNode as Element).classList.remove(classes[i]);
-								}
+								removeClasses(domNode, previousClassName);
 							}
 							else {
 								newClasses.splice(classIndex, 1);
@@ -292,24 +288,13 @@ function updateProperties(
 						}
 					}
 					for (let i = 0; i < newClasses.length; i++) {
-						const newClassName = newClasses[i];
-						if (newClassName) {
-							const classes = newClassName.split(' ');
-							for (let i = 0; i < classes.length; i++) {
-								(domNode as Element).classList.add(classes[i]);
-							}
-						}
+						addClasses(domNode, newClasses[i]);
 					}
 				}
 			}
 			else {
 				for (let i = 0; i < currentClasses.length; i++) {
-					if (currentClasses[i]) {
-						const classes = currentClasses[i].split(' ');
-						for (let i = 0; i < classes.length; i++) {
-							(domNode as Element).classList.add(classes[i]);
-						}
-					}
+					addClasses(domNode, currentClasses[i]);
 				}
 			}
 		}
