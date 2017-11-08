@@ -132,26 +132,23 @@ function updateEvents(
 	const eventName = propName.substr(2);
 	const eventMap = projectionOptions.nodeMap.get(domNode) || new WeakMap();
 
-	if (currentValue !== previousValue) {
-
-		if (previousValue) {
-			const previousEvent = eventMap.get(previousValue);
-			domNode.removeEventListener(eventName, previousEvent);
-		}
-
-		let callback = currentValue.bind(properties.bind);
-
-		if (eventName === 'input') {
-			callback = function(this: any, evt: Event) {
-				currentValue.call(this, evt);
-				(evt.target as any)['oninput-value'] = (evt.target as HTMLInputElement).value;
-			}.bind(properties.bind);
-		}
-
-		domNode.addEventListener(eventName, callback);
-		eventMap.set(currentValue, callback);
-		projectionOptions.nodeMap.set(domNode, eventMap);
+	if (previousValue) {
+		const previousEvent = eventMap.get(previousValue);
+		domNode.removeEventListener(eventName, previousEvent);
 	}
+
+	let callback = currentValue.bind(properties.bind);
+
+	if (eventName === 'input') {
+		callback = function(this: any, evt: Event) {
+			currentValue.call(this, evt);
+			(evt.target as any)['oninput-value'] = (evt.target as HTMLInputElement).value;
+		}.bind(properties.bind);
+	}
+
+	domNode.addEventListener(eventName, callback);
+	eventMap.set(currentValue, callback);
+	projectionOptions.nodeMap.set(domNode, eventMap);
 }
 
 function setProperties(domNode: Node, properties: VirtualDomProperties, projectionOptions: ProjectionOptions) {
