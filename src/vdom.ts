@@ -184,10 +184,8 @@ function setProperties(domNode: Node, properties: VirtualDomProperties, projecti
 		}
 		else if (propName !== 'key' && propValue !== null && propValue !== undefined) {
 			const type = typeof propValue;
-			if (type === 'function') {
-				if (propName.lastIndexOf('on', 0) === 0) {
-					updateEvents(domNode, propName, properties, projectionOptions);
-				}
+			if (type === 'function' && propName.lastIndexOf('on', 0) === 0) {
+				updateEvents(domNode, propName, properties, projectionOptions);
 			}
 			else if (type === 'string' && propName !== 'value' && propName !== 'innerHTML') {
 				if (projectionOptions.namespace === NAMESPACE_SVG && propName === 'href') {
@@ -336,10 +334,8 @@ function updateProperties(
 			}
 			else if (propValue !== previousValue) {
 				const type = typeof propValue;
-				if (type === 'function') {
-					if (propName.lastIndexOf('on', 0) === 0) {
-						updateEvents(domNode, propName, properties, projectionOptions, previousProperties);
-					}
+				if (type === 'function' && propName.lastIndexOf('on', 0) === 0) {
+					updateEvents(domNode, propName, properties, projectionOptions, previousProperties);
 				}
 				else if (type === 'string' && propName !== 'innerHTML') {
 					if (projectionOptions.namespace === NAMESPACE_SVG && propName === 'href') {
