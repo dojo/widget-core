@@ -244,7 +244,8 @@ registerSuite('meta - Intersection', {
 				const observeStub = stub();
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler
+					nodeHandler,
+					bind: bindInstance
 				});
 				const root = document.createElement('div');
 				const bar = document.createElement('div');
@@ -289,7 +290,8 @@ registerSuite('meta - Intersection', {
 				const observeStub = stub();
 				const intersection = new Intersection({
 					invalidate: () => {},
-					nodeHandler
+					nodeHandler,
+					bind: bindInstance
 				});
 				const root = document.createElement('div');
 
