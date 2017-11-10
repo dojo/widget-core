@@ -135,7 +135,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 			this._parentInvalidator = invalidator;
 		}
 		else {
-			console.warn('Unable to update parent invalidator after if has been initially set');
+			console.warn('Unable to update parent invalidator after it has been set');
 		}
 	}
 
