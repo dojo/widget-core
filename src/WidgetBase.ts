@@ -108,14 +108,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 
 	public readonly nodeHandler: NodeHandler = new NodeHandler();
 
-	private _parentInvalidate: Function;
+	protected parentInvalidate: Function;
 
 	/**
 	 * @constructor
 	 */
 	constructor(invalidate?: Function) {
 		if (invalidate) {
-			this._parentInvalidate = invalidate;
+			this.parentInvalidate = invalidate;
 		}
 
 		this._children = [];
@@ -274,8 +274,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	public invalidate(): void {
 		if (this._renderState === WidgetRenderState.IDLE) {
 			this._dirty = true;
-			if (this._parentInvalidate) {
-				this._parentInvalidate();
+			if (this.parentInvalidate) {
+				this.parentInvalidate();
 			}
 		}
 		else if (this._renderState === WidgetRenderState.PROPERTIES) {
