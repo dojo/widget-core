@@ -1,4 +1,4 @@
-import { EventTypedObject } from '@dojo/interfaces/core';
+import { EventObject, EventType } from '@dojo/core/interfaces';
 import Map from '@dojo/shim/Map';
 import WeakMap from '@dojo/shim/WeakMap';
 import { v } from './d';
@@ -39,9 +39,9 @@ interface ReactionFunctionConfig {
 	reaction: DiffPropertyReaction;
 }
 
-export interface WidgetAndElementEvent extends EventTypedObject<'properties:changed'> {
-	key: string;
-	element: HTMLElement;
+export interface WidgetAndElementEvent<T extends EventType> extends EventObject<T> {
+	element: Element;
+	key: string | number;
 	target: WidgetBase;
 }
 
@@ -78,7 +78,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	/**
 	 * Array of property keys considered changed from the previous set properties
 	 */
-	private _changedPropertyKeys: string[] = [];
+	private _changedPropertyKeys: (string | number)[] = [];
 
 	/**
 	 * map of decorators that are applied to this widget
@@ -147,7 +147,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 				bind: this
 			});
 			this._metaMap.set(MetaType, cached);
-			cached;
 		}
 
 		return cached as T;
@@ -159,7 +158,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	 * @param element The dom node represented by the vdom node.
 	 * @param key The vdom node's key.
 	 */
-	protected onElementCreated(element: Element, key: string): void {
+	protected onElementCreated(element: Element, key: string | number): void {
 		// Do nothing by default.
 	}
 
@@ -169,7 +168,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	 * @param element The dom node represented by the vdom node.
 	 * @param key The vdom node's key.
 	 */
-	protected onElementUpdated(element: Element, key: string): void {
+	protected onElementUpdated(element: Element, key: string | number): void {
 		// Do nothing by default.
 	}
 
@@ -185,7 +184,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		return this._properties;
 	}
 
-	public get changedPropertyKeys(): string[] {
+	public get changedPropertyKeys(): (string | number)[] {
 		return [ ...this._changedPropertyKeys ];
 	}
 
@@ -208,14 +207,14 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	public __setProperties__(originalProperties: this['properties']): void {
 		const properties = this._runBeforeProperties(originalProperties);
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
-		const changedPropertyKeys: string[] = [];
+		const changedPropertyKeys: (string | number)[] = [];
 		const propertyNames = Object.keys(properties);
 		const instanceData = widgetInstanceMap.get(this)!;
 		this._renderState = WidgetRenderState.PROPERTIES;
 
 		if (this._initialProperties === false || registeredDiffPropertyNames.length !== 0) {
 			const allProperties = [ ...propertyNames, ...Object.keys(this._properties) ];
-			const checkedProperties: string[] = [];
+			const checkedProperties: (string | number)[] = [];
 			const diffPropertyResults: any = {};
 			let runReactions = false;
 
@@ -400,7 +399,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		return allDecorators;
 	}
 
-	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: string[]): Map<Function, ReactionFunctionArguments> {
+	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: (string | number)[]): Map<Function, ReactionFunctionArguments> {
 		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
 
 		return reactionFunctions.reduce((reactionPropertyMap, { reaction, propertyName }) => {

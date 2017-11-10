@@ -157,7 +157,7 @@ registerSuite('d', {
 			};
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					(<any> node.properties)['decorated'] = true;
+					(node.properties as any)['decorated'] = true;
 				}
 			};
 			const node = <HNode> testWidget.render();
@@ -182,7 +182,7 @@ registerSuite('d', {
 			};
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					(<any> node.properties)['decorated'] = true;
+					(node.properties as any)['decorated'] = true;
 				}
 			};
 			const node = <HNode> testWidget.render();
@@ -204,7 +204,7 @@ registerSuite('d', {
 			const testWidget = new TestWidget();
 			const modifier = (node: DNode): void => {
 				if (isWNode(node)) {
-					(<any> node.properties)['decorated'] = true;
+					(node.properties as any)['decorated'] = true;
 				}
 				else if (isHNode(node)) {
 					assign(node.properties, { id: 'id' });
