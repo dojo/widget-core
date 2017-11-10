@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>dojo2-v0.2.0-keyed</title>
+	<link href="css/currentStyle.css" rel="stylesheet"/>
+</head>
+<body>
+	<div id="main"></div>
+	<script src="../../../../node_modules/@dojo/loader/loader.js"></script>
+	<script>
+		require.config({
+			packages: [
+				{ name: '@dojo', location: '../../../../node_modules/@dojo' },
+				{ name: 'pepjs', location: '../../../../node_modules/pepjs/dist', main: 'pep' }
+			]
+		});
+
+		require([ './App' ], function () {});
+	</script>
+</body>
+</html>
