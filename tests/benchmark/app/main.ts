@@ -1,4 +1,5 @@
-import { ProjectorMixin } from '@dojo/widget-core/mixins/Projector';
+import { ProjectorMixin } from '../../../src/mixins/Projector';
+
 import App from './App';
 
 const root = document.getElementById('main') || undefined;

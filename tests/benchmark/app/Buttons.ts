@@ -1,6 +1,7 @@
-import { WidgetBase } from '@dojo/widget-core/WidgetBase';
-import { v, w } from '@dojo/widget-core/d';
-import { WidgetProperties, DNode } from '@dojo/widget-core/interfaces';
+import { DNode, WidgetProperties } from '../../../src/interfaces';
+import { WidgetBase } from '../../../src/WidgetBase';
+import { v, w } from '../../../src/d';
+
 import { Button } from './Button';
 
 export interface ButtonConfig {

@@ -67,7 +67,7 @@ class BenchResultList {
 }
 
 interface SearchFunc {
-    (source: string, subString: string): boolean;
+	(source: string, subString: string): boolean;
 }
 
 interface FrameworkPredicate {
@@ -80,17 +80,17 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 	let filteredFrameworks = frameworks.filter(f => frameworkPredicate(f)).slice();
 
 	let sortedFrameworks = filteredFrameworks.sort((a: FrameworkData, b: FrameworkData) => {
-		if (a.name == referenceName) {
-			if (b.name == referenceName) { return 0; }
+		if (a.name === referenceName) {
+			if (b.name === referenceName) { return 0; }
 			console.log('found reference name', referenceName);
 			return 1;
-		} else if (b.name == referenceName) {
-			if (a.name == referenceName) { return 0; }
+		} else if (b.name === referenceName) {
+			if (a.name === referenceName) { return 0; }
 			console.log('found reference name', referenceName);
 			return -1;
 		} else {
 			if (a.name < b.name) { return -1; }
-			else if (a.name == b.name) { return 0; }
+			else if (a.name === b.name) { return 0; }
 			else { return 1; }
 		}
 	});

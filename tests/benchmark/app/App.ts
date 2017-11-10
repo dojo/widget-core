@@ -1,6 +1,8 @@
-import { DNode } from '@dojo/widget-core/interfaces';
-import { WidgetBase } from '@dojo/widget-core/WidgetBase';
-import { v, w } from '@dojo/widget-core/d';
+
+import { DNode } from '../../../src/interfaces';
+import { WidgetBase } from '../../../src/WidgetBase';
+import { v, w } from '../../../src/d';
+
 import { Row } from './Row';
 import { Buttons, ButtonConfig } from './Buttons';
 import { Store } from  './Store';
