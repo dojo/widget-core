@@ -110,7 +110,7 @@ export interface CustomElementDescriptor {
 	initialization?: CustomElementInitializer;
 
 	/**
-	 *
+	 * The type of children that the custom element accepts
 	 */
 	childrenType?: ChildrenType;
 }
@@ -132,10 +132,21 @@ export interface CustomElement extends HTMLElement {
 	setWidgetInstance(instance: ProjectorMixin<any>): void;
 }
 
+/**
+ * Properties for DomToWidgetWrapper
+ */
 export type DomToWidgetWrapperProperties = VirtualDomProperties & WidgetProperties;
 
+/**
+ * DomToWidgetWrapper type
+ */
 export type DomToWidgetWrapper = Constructor<WidgetBase<DomToWidgetWrapperProperties>>;
 
+/**
+ * DomToWidgetWrapper HOC
+ *
+ * @param domNode The dom node to wrap
+ */
 export function DomToWidgetWrapper(domNode: CustomElement): DomToWidgetWrapper {
 
 	return class DomToWidgetWrapper extends WidgetBase<DomToWidgetWrapperProperties> {
