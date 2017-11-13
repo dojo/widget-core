@@ -2,7 +2,7 @@ import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, WebDriver, promise, logging } from 'selenium-webdriver';
 import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
 import { setUseShadowRoot } from './webdriverAccess';
-import { startsWith } from '@dojo/shim/String';
+import { startsWith } from '@dojo/shim/string';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
 import { JSONResult, config, FrameworkData, frameworks } from './common';

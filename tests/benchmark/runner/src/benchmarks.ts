@@ -1,7 +1,7 @@
 import { testTextContains, testClassContains, testElementLocatedByXpath, testElementNotLocatedByXPath, testElementLocatedById, clickElementById, clickElementByXPath, getTextByXPath } from './webdriverAccess';
 import { WebDriver } from 'selenium-webdriver';
 import { config, FrameworkData } from './common';
-import { repeat } from '@dojo/shim/String';
+import { repeat } from '@dojo/shim/string';
 
 export enum BenchmarkType { CPU, MEM, STARTUP }
 
