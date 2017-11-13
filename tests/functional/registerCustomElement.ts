@@ -58,7 +58,7 @@ registerSuite('registerCustomElement', {
 				this.skip('not compatible with iOS 9.1 or Safari 9.1');
 			}
 			return this.remote
-				.get((<any> require).toUrl('./support/registerCustomElement.html'))
+				.get('_build/tests/functional/support/registerCustomElement.html')
 				.setFindTimeout(1000)
 				.findByCssSelector('#testButton > button')
 				.click()

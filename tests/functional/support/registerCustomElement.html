@@ -27,13 +27,18 @@
 		baseUrl: '../../../../'
 	}));
 
-	document.getElementById('testButton').addEventListener('button-click', function() {
-		window.buttonClicked = true;
+	document.getElementById('testButton').addEventListener('connected', function() {
+		window.connectedEvent = true;
 	});
 
 	require(['@dojo/shim/main'], function() {
 		require(['_build/tests/functional/support/registerCustomElement'], function () {
 			window.ready = true;
+
+			document.getElementById('testButton').addEventListener('button-click', function() {
+				window.buttonClicked = true;
+			});
+
 			document.getElementById('noAttributes').buttonLabel = 'Test';
 			document.getElementById('testButton-2').label = 'Worlds';
 
