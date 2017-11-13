@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
+
+set -x
 
 # Clean up existing benchmark results, and don't fail if the folder does not exist
 rm html-report/results/*.json || true
