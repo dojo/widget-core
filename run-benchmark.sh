@@ -13,6 +13,9 @@ sleep 2
 echo 'Running curl after server start http://localhost:8080'
 curl http://localhost:8080
 
+echo 'Running curl after server start http://127.0.0.1:8080'
+curl http://127.0.0.1:8080
+
 node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless true --framework dojo2-v0.2.0-non-keyed
 
 # Move the benchmark results somewhere else for now
