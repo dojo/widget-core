@@ -3,20 +3,30 @@
 # Clean up existing benchmark results, and don't fail if the folder does not exist
 rm html-report/results/*.json || true
 
-echo 'Running curl before server start http://localhost:8080'
-curl http://localhost:8080
 
 ./node_modules/.bin/serve -p 8080 &
 SERVER_PID=$!
 sleep 2
 
 echo 'Running curl after server start http://localhost:8080'
-curl http://localhost:8080
+curl http://localhost:8080/tests/benchmark/app/
 
-echo 'Running curl after server start http://127.0.0.1:8080'
-curl http://127.0.0.1:8080
+echo 'Has a main file been built? [main.js]'
 
-node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless true --framework dojo2-v0.2.0-non-keyed
+cat _build/tests/benchmark/app/main.js
+
+echo 'Does casing for the main file matter? [Main.js]'
+
+cat _build/tests/benchmark/app/Main.js
+
+echo '-----------------------'
+echo '-----------------------'
+echo 'BENCHMARK STARTING'
+echo '-----------------------'
+echo '-----------------------'
+echo '-----------------------'
+
+node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless false --framework dojo2-v0.2.0-non-keyed
 
 # Move the benchmark results somewhere else for now
 mkdir -p html-report
