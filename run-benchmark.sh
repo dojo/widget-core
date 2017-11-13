@@ -7,7 +7,7 @@ rm html-report/results/*.json || true
 
 SERVER_PID=$!
 
-node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless false --framework dojo2-v0.2.0-non-keyed
+node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless true --framework dojo2-v0.2.0-non-keyed
 
 # Move the benchmark results somewhere else for now
 mkdir -p html-report
