@@ -6,7 +6,7 @@ rm html-report/results/*.json || true
 echo 'Running curl before server start http://localhost:8080'
 curl http://localhost:8080
 
-./node_modules/.bin/serve -p 8080 --silent &
+./node_modules/.bin/serve -p 8080 &
 SERVER_PID=$!
 sleep 2
 
