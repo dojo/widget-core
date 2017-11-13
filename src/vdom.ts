@@ -486,12 +486,7 @@ function callOnDetach(dNodes: InternalDNode | InternalDNode[], parentInstance: D
 	}
 }
 
-function nodeToRemove(
-	dnode: InternalDNode,
-	transitions: TransitionStrategy,
-	projectionOptions: ProjectionOptions,
-	parentInstance: DefaultWidgetBaseInterface
-) {
+function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, projectionOptions: ProjectionOptions) {
 	if (isWNode(dnode)) {
 		const rendered = dnode.rendered || emptyArray;
 		for (let i = 0; i < rendered.length; i++) {
@@ -500,7 +495,7 @@ function nodeToRemove(
 				child.domNode!.parentNode!.removeChild(child.domNode!);
 			}
 			else {
-				nodeToRemove(child, transitions, projectionOptions, parentInstance);
+				nodeToRemove(child, transitions, projectionOptions);
 			}
 		}
 	}
@@ -597,7 +592,7 @@ function updateChildren(
 					projectionOptions.afterRenderCallbacks.push(() => {
 						callOnDetach(oldChild, parentInstance);
 					});
-					nodeToRemove(oldChild, transitions, projectionOptions, parentInstance);
+					nodeToRemove(oldChild, transitions, projectionOptions);
 					checkDistinguishable(oldChildren, i, domNode, 'removed');
 				}
 				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, domNode, parentInstance) || textUpdated;
@@ -631,7 +626,7 @@ function updateChildren(
 			projectionOptions.afterRenderCallbacks.push(() => {
 				callOnDetach(oldChild, parentInstance);
 			});
-			nodeToRemove(oldChild, transitions, projectionOptions, parentInstance);
+			nodeToRemove(oldChild, transitions, projectionOptions);
 			checkDistinguishable(oldChildren, i, domNode, 'removed');
 		}
 	}
