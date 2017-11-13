@@ -1,5 +1,9 @@
 sudo: false
 language: node_js
+addons:
+  apt:
+    packages:
+      - google-chrome-stable
 node_js:
 - '6'
 env:
