@@ -3,9 +3,15 @@
 # Clean up existing benchmark results, and don't fail if the folder does not exist
 rm html-report/results/*.json || true
 
-./node_modules/.bin/serve -p 8080 --silent &
+echo 'Running curl before server start http://localhost:8080'
+curl http://localhost:8080
 
+./node_modules/.bin/serve -p 8080 --silent &
 SERVER_PID=$!
+sleep 2
+
+echo 'Running curl after server start http://localhost:8080'
+curl http://localhost:8080
 
 node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless true --framework dojo2-v0.2.0-non-keyed
 
@@ -21,4 +27,3 @@ function cleanup {
 }
 
 trap cleanup EXIT
-
