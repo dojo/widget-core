@@ -74,6 +74,8 @@ export type InternalDNode = InternalHNode | InternalWNode;
 export interface WidgetData {
 	onElementCreated: Function;
 	onElementUpdated: Function;
+	onDetach: () => void;
+	onAttach: () => void;
 	parentInvalidate?: Function;
 	dirty: boolean;
 	registry: () => RegistryHandler;
@@ -467,7 +469,32 @@ function nodeAdded(dnode: InternalDNode, transitions: TransitionStrategy) {
 	}
 }
 
-function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, projectionOptions: ProjectionOptions) {
+function callOnDetach(dNodes: InternalDNode | InternalDNode[], parentInstance: DefaultWidgetBaseInterface): void {
+	dNodes = Array.isArray(dNodes) ? dNodes : [ dNodes ];
+	for (let i = 0; i < dNodes.length; i++) {
+		const dNode = dNodes[i];
+		if (isWNode(dNode)) {
+			callOnDetach(dNode.rendered, dNode.instance);
+			const instanceData = widgetInstanceMap.get(dNode.instance)!;
+			instanceData.onDetach();
+		}
+		else {
+			if (dNode.children) {
+				callOnDetach(dNode.children as InternalDNode[], parentInstance);
+			}
+		}
+	}
+}
+
+function nodeToRemove(
+	dnode: InternalDNode,
+	transitions: TransitionStrategy,
+	projectionOptions: ProjectionOptions,
+	parentInstance: DefaultWidgetBaseInterface
+) {
+	projectionOptions.afterRenderCallbacks.push(() => {
+		callOnDetach(dnode, parentInstance);
+	});
 	if (isWNode(dnode)) {
 		const rendered = dnode.rendered || emptyArray;
 		for (let i = 0; i < rendered.length; i++) {
@@ -476,7 +503,7 @@ function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, pro
 				child.domNode!.parentNode!.removeChild(child.domNode!);
 			}
 			else {
-				nodeToRemove(child, transitions, projectionOptions);
+				nodeToRemove(child, transitions, projectionOptions, parentInstance);
 			}
 		}
 	}
@@ -569,7 +596,7 @@ function updateChildren(
 			const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
 			if (findOldIndex >= 0) {
 				for (i = oldIndex; i < findOldIndex; i++) {
-					nodeToRemove(oldChildren[i], transitions, projectionOptions);
+					nodeToRemove(oldChildren[i], transitions, projectionOptions, parentInstance);
 					checkDistinguishable(oldChildren, i, domNode, 'removed');
 				}
 				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, domNode, parentInstance) || textUpdated;
@@ -599,7 +626,7 @@ function updateChildren(
 	if (oldChildrenLength > oldIndex) {
 		// Remove child fragments
 		for (i = oldIndex; i < oldChildrenLength; i++) {
-			nodeToRemove(oldChildren[i], transitions, projectionOptions);
+			nodeToRemove(oldChildren[i], transitions, projectionOptions, parentInstance);
 			checkDistinguishable(oldChildren, i, domNode, 'removed');
 		}
 	}
@@ -697,6 +724,9 @@ function createDom(
 			addChildren(parentNode, filteredRendered, projectionOptions, instance, insertBefore, childNodes);
 		}
 		instanceData.nodeHandler.addRoot();
+		projectionOptions.afterRenderCallbacks.push(() => {
+			instanceData.onAttach();
+		});
 	}
 	else {
 		if (projectionOptions.merge && projectionOptions.mergeElement !== undefined) {
@@ -906,6 +936,9 @@ export const dom = {
 		addChildren(rootNode, decoratedNode, finalProjectorOptions, instance, undefined);
 		const instanceData = widgetInstanceMap.get(instance)!;
 		instanceData.nodeHandler.addRoot();
+		finalProjectorOptions.afterRenderCallbacks.push(() => {
+			instanceData.onAttach();
+		});
 		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
@@ -917,6 +950,9 @@ export const dom = {
 		addChildren(parentNode, decoratedNode, finalProjectorOptions, instance, undefined);
 		const instanceData = widgetInstanceMap.get(instance)!;
 		instanceData.nodeHandler.addRoot();
+		finalProjectorOptions.afterRenderCallbacks.push(() => {
+			instanceData.onAttach();
+		});
 		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
@@ -934,6 +970,9 @@ export const dom = {
 		createDom(decoratedNode, finalProjectorOptions.rootNode, undefined, finalProjectorOptions, instance);
 		const instanceData = widgetInstanceMap.get(instance)!;
 		instanceData.nodeHandler.addRoot();
+		finalProjectorOptions.afterRenderCallbacks.push(() => {
+			instanceData.onAttach();
+		});
 		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		return createProjection(decoratedNode, instance, finalProjectorOptions);
@@ -948,6 +987,9 @@ export const dom = {
 		createDom(decoratedNode, element.parentNode!, element, finalProjectorOptions, instance);
 		const instanceData = widgetInstanceMap.get(instance)!;
 		instanceData.nodeHandler.addRoot();
+		finalProjectorOptions.afterRenderCallbacks.push(() => {
+			instanceData.onAttach();
+		});
 		runDeferredRenderCallbacks(finalProjectorOptions);
 		runAfterRenderCallbacks(finalProjectorOptions);
 		element.parentNode!.removeChild(element);
