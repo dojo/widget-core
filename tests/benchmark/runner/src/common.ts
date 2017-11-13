@@ -19,11 +19,11 @@ export interface FrameworkData {
 	name: string;
 	uri: string;
 	keyed: boolean;
-	useShadowRoot: boolean;
+	useShadowRoot: boolean | undefined;
 }
 
 interface Options {
-	uri: string;
+	uri: string | null;
 	useShadowRoot?: boolean;
 }
 

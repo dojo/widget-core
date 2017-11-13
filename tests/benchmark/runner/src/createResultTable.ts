@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import * as fs from 'fs';
+import Map from '@dojo/shim/Map';
 import { JSONResult, config, frameworks, FrameworkData } from './common';
 import { BenchmarkType, Benchmark, benchmarks } from './benchmarks';
 

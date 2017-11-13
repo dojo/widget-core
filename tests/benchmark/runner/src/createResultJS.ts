@@ -1,8 +1,6 @@
-import * as _ from 'lodash';
 import * as fs from 'fs';
-import { JSONResult, config, frameworks, FrameworkData } from './common';
-import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
-import * as yargs from 'yargs';
+import { JSONResult, frameworks, FrameworkData } from './common';
+import { benchmarks, fileName } from './benchmarks';
 
 let frameworkMap = new Map<string, FrameworkData>();
 frameworks.map(f => frameworkMap.set(f.name, f));

@@ -39,8 +39,10 @@
     "@types/glob": "5.0.*",
     "@types/grunt": "0.4.*",
     "@types/jsdom": "2.0.*",
+    "@types/selenium-webdriver": "^3.0.8",
     "@types/sinon": "^1.16.31",
     "@types/web-animations-js": "^2.2.5",
+    "@types/yargs": "^8.0.2",
     "@webcomponents/custom-elements": "^v1.0.0-rc.3",
     "chromedriver": "2.33.2",
     "codecov.io": "0.1.6",
@@ -59,6 +61,7 @@
     "typescript": "~2.5.2"
   },
   "dependencies": {
+    "@types/ramda": "^0.25.5",
     "intersection-observer": "^0.4.2",
     "pepjs": "^0.4.2",
     "web-animations-js": "^2.3.1"

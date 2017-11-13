@@ -1,6 +1,7 @@
-import { testTextContains, testTextNotContained, testClassContains, testElementLocatedByXpath, testElementNotLocatedByXPath, testElementLocatedById, clickElementById, clickElementByXPath, getTextByXPath } from './webdriverAccess';
-import { Builder, WebDriver, promise, logging } from 'selenium-webdriver';
+import { testTextContains, testClassContains, testElementLocatedByXpath, testElementNotLocatedByXPath, testElementLocatedById, clickElementById, clickElementByXPath, getTextByXPath } from './webdriverAccess';
+import { WebDriver } from 'selenium-webdriver';
 import { config, FrameworkData } from './common';
+import { repeat } from '@dojo/shim/String';
 
 export enum BenchmarkType { CPU, MEM, STARTUP }
 
@@ -59,7 +60,7 @@ const benchUpdate: Benchmark = {
 	},
 	run: async function (driver: WebDriver) {
 			await clickElementById(driver, 'update');
-			await testTextContains(driver, '//tbody/tr[1]/td[2]/a', ' !!!'.repeat(config.WARMUP_COUNT + 1));
+			await testTextContains(driver, '//tbody/tr[1]/td[2]/a', repeat(' !!!', config.WARMUP_COUNT + 1));
 	}
 };
 
@@ -216,7 +217,7 @@ const benchUpdate5Memory: Benchmark = {
 		await clickElementById(driver, 'run');
 		for (let i = 0; i < 5; i++) {
 			await clickElementById(driver, 'update');
-			await testTextContains(driver, '//tbody/tr[1]/td[2]/a', ' !!!'.repeat(i));
+			await testTextContains(driver, '//tbody/tr[1]/td[2]/a', repeat(' !!!', i));
 		}
 	}
 };

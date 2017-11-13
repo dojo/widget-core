@@ -68,7 +68,7 @@ function waitForCondition(driver: WebDriver) {
 // thus we're using a safer way here:
 export async function testTextContains(driver: WebDriver, xpath: string, text: string, timeout = config.TIMEOUT) {
 	return waitForCondition(driver)(`testTextContains ${xpath} ${text}`,
-		async function(driver) {
+		async function(driver): Promise<any> {
 			try {
 				let elem = await shadowRoot(driver);
 				elem = await findByXPath(elem, xpath);

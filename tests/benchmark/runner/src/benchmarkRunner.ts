@@ -2,12 +2,11 @@ import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, WebDriver, promise, logging } from 'selenium-webdriver';
 import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
 import { setUseShadowRoot } from './webdriverAccess';
-
+import {startsWith} from '@dojo/shim/String';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
 import { JSONResult, config, FrameworkData, frameworks } from './common';
 import * as R from 'ramda';
-let chromedriver: any = require('chromedriver');
 let jStat: any = require('jstat').jStat;
 
 promise.USE_PROMISE_MANAGER = false;
@@ -106,9 +105,20 @@ async function computeResultsCPU(driver: WebDriver): Promise<number[]> {
 				throw 'at least one paint event is expected after the click event';
 			}
 
-			let lastPaint = R.reduce((max, elem) => max.end > elem.end ? max : elem, {end: 0}, paints);
+			let lastPaint = R.reduce((max: any, elem: any) => max.end > elem.end ? max : elem, {end: 0}, paints);
 
-			let upperBoundForSoundnessCheck = (R.last(eventsDuringBenchmark).end - eventsDuringBenchmark[0].ts) / 1000.0;
+			const lastEvent: any = R.last(eventsDuringBenchmark);
+			let eventsDuringBenchmarkEnd: any;
+
+			if (lastEvent && lastEvent.end) {
+				eventsDuringBenchmarkEnd = lastEvent.end;
+			} else {
+				eventsDuringBenchmarkEnd = 0;
+			}
+
+			const eventsDuringBenchmarkStart = eventsDuringBenchmark[0].ts;
+
+			let upperBoundForSoundnessCheck = (eventsDuringBenchmarkEnd - eventsDuringBenchmarkStart) / 1000.0;
 			let duration = (lastPaint.end - clicks[0].ts) / 1000.0;
 
 			console.log('*** duraton', duration, 'upper bound ', upperBoundForSoundnessCheck);
@@ -151,7 +161,8 @@ async function computeResultsMEM(driver: WebDriver): Promise<number[]> {
 
 			let gcs = R.filter(type_eq('gc'))(eventsDuringBenchmark);
 
-			let mem = R.last(gcs).mem;
+			const lastGcs: any = R.last(gcs);
+			let mem = lastGcs ? lastGcs.mem : 0;
 			console.log('*** memory', mem);
 			results.push(mem);
 		}
@@ -197,7 +208,7 @@ async function computeResultsStartup(driver: WebDriver): Promise<number> {
 		console.log('at least one paint event is expected after the navigationStart event', eventsAfterNavigationStart);
 		throw 'at least one paint event is expected after the navigationStart event';
 	}
-	let lastPaint = R.last(paints);
+	let lastPaint: any = R.last(paints);
 
 	let upperBoundForSoundnessCheck = (lastPaint.end - eventsDuringBenchmark[0].ts) / 1000.0;
 	let duration = (lastPaint.end - navigationStarts[0].ts) / 1000.0;
@@ -247,7 +258,7 @@ function buildDriver() {
 }
 
 async function forceGC(framework: FrameworkData, driver: WebDriver): Promise<any> {
-	if (framework.name.startsWith('angular-v4')) {
+	if (startsWith(framework.name, 'angular-v4')) {
 		// workaround for window.gc for angular 4 - closure rewrites windows.gc");
 		await driver.executeScript('window.Angular4PreservedGC();');
 	} else {
@@ -255,22 +266,6 @@ async function forceGC(framework: FrameworkData, driver: WebDriver): Promise<any
 			await driver.executeScript('window.gc();');
 		}
 	}
-}
-
-async function snapMemorySize(driver: WebDriver): Promise<number> {
-	let heapSnapshot: any = await driver.executeScript(':takeHeapSnapshot');
-	let node_fields: any = heapSnapshot.snapshot.meta.node_fields;
-	let nodes: any = heapSnapshot.nodes;
-
-	let k = node_fields.indexOf('self_size');
-
-	let selfSize = 0;
-	for (let l = nodes.length, d = node_fields.length; k < l; k += d) {
-		selfSize += nodes[k];
-	}
-
-	let memory = selfSize / 1024.0 / 1024.0;
-	return memory;
 }
 
 async function runBenchmark(driver: WebDriver, benchmark: Benchmark, framework: FrameworkData): Promise<any> {
@@ -367,7 +362,7 @@ async function runMemOrCPUBenchmark(framework: FrameworkData, benchmark: Benchma
 async function runStartupBenchmark(framework: FrameworkData, benchmark: Benchmark, dir: string) {
 	console.log('benchmarking startup', framework, benchmark.id);
 	let results: number[] = [];
-	let chromeDuration = 0;
+
 	try {
 		for (let i = 0; i < config.REPEAT_RUN; i++) {
 			let driver = buildDriver();

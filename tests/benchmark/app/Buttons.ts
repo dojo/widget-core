@@ -1,4 +1,4 @@
-import { DNode, WidgetProperties } from '../../../src/interfaces';
+import { DNode } from '../../../src/interfaces';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v, w } from '../../../src/d';
 

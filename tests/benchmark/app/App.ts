@@ -27,12 +27,6 @@ function stopMeasure() {
 	}
 }
 
-class Container extends WidgetBase {
-	render() {
-		return v('table', { classes: [ 'table', 'table-hover', 'table-striped', 'test-data' ] }, [ v('tbody', {}, this.children) ]);
-	}
-}
-
 export class App extends WidgetBase {
 	private _store: Store = new Store();
 
@@ -40,11 +34,11 @@ export class App extends WidgetBase {
 		stopMeasure();
 	}
 
-	protected onElementUpdated() {
+	public onElementUpdated() {
 		this._printDuration();
 	}
 
-	protected onElementCreated() {
+	public onElementCreated() {
 		this._printDuration();
 	}
 
