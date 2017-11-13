@@ -791,7 +791,7 @@ class MyClass extends WidgetBase {
 
 #### onDetach
 
-`onDetach` is called when a widget is removed from the render tree and therefore the DOM. `onDetach` is called recursively down the widget tree to ensure that even if a widget at the top of the tree is removed all the child widgets `onDetach` callbacks are fired.
+`onDetach` is called when a widget is removed from the widget tree and therefore the DOM. `onDetach` is called recursively down the tree to ensure that even if a widget at the top of the tree is removed all the child widgets `onDetach` callbacks are fired.
 
 ```ts
 class MyClass extends WidgetBase {
