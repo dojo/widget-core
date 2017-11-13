@@ -492,9 +492,6 @@ function nodeToRemove(
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface
 ) {
-	projectionOptions.afterRenderCallbacks.push(() => {
-		callOnDetach(dnode, parentInstance);
-	});
 	if (isWNode(dnode)) {
 		const rendered = dnode.rendered || emptyArray;
 		for (let i = 0; i < rendered.length; i++) {
@@ -596,7 +593,11 @@ function updateChildren(
 			const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
 			if (findOldIndex >= 0) {
 				for (i = oldIndex; i < findOldIndex; i++) {
-					nodeToRemove(oldChildren[i], transitions, projectionOptions, parentInstance);
+					const oldChild = oldChildren[i];
+					projectionOptions.afterRenderCallbacks.push(() => {
+						callOnDetach(oldChild, parentInstance);
+					});
+					nodeToRemove(oldChild, transitions, projectionOptions, parentInstance);
 					checkDistinguishable(oldChildren, i, domNode, 'removed');
 				}
 				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, domNode, parentInstance) || textUpdated;
@@ -626,7 +627,11 @@ function updateChildren(
 	if (oldChildrenLength > oldIndex) {
 		// Remove child fragments
 		for (i = oldIndex; i < oldChildrenLength; i++) {
-			nodeToRemove(oldChildren[i], transitions, projectionOptions, parentInstance);
+			const oldChild = oldChildren[i];
+			projectionOptions.afterRenderCallbacks.push(() => {
+				callOnDetach(oldChild, parentInstance);
+			});
+			nodeToRemove(oldChild, transitions, projectionOptions, parentInstance);
 			checkDistinguishable(oldChildren, i, domNode, 'removed');
 		}
 	}
