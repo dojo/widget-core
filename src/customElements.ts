@@ -4,6 +4,7 @@ import global from '@dojo/shim/global';
 import { Constructor, DNode, HNode, VirtualDomProperties, WidgetProperties } from './interfaces';
 import { WidgetBase } from './WidgetBase';
 import { v, w } from './d';
+import { DomWrapper } from './util/DomWrapper';
 import { ProjectorMixin } from './mixins/Projector';
 import { InternalHNode } from './vdom';
 
@@ -131,41 +132,39 @@ export interface CustomElement extends HTMLElement {
 	setWidgetInstance(instance: ProjectorMixin<any>): void;
 }
 
-export interface CustomElementWrapperOptions {
-	childrenType?: ChildrenType;
-}
+export type DomToWidgetWrapperProperties = VirtualDomProperties & WidgetProperties;
 
-export type CustomElementWrapperProperties = VirtualDomProperties & WidgetProperties;
+export type DomToWidgetWrapper = Constructor<WidgetBase<DomToWidgetWrapperProperties>>;
 
-export type CustomElementWrapper = Constructor<WidgetBase<CustomElementWrapperProperties>>;
+export function DomToWidgetWrapper(domNode: CustomElement): DomToWidgetWrapper {
 
-export function CustomElementWrapper(
-	domNode: CustomElement,
-	options: CustomElementWrapperOptions = {}
-): CustomElementWrapper {
-	const { childrenType = ChildrenType.DOJO } = options;
+	return class DomToWidgetWrapper extends WidgetBase<DomToWidgetWrapperProperties> {
 
-	return class extends WidgetBase<CustomElementWrapperProperties> {
+		private _widgetInstance: ProjectorMixin<any>;
 
-		private _firstRender = true;
+		constructor() {
+			super();
+			domNode.addEventListener('connected', () => {
+				this._widgetInstance = domNode.getWidgetInstance();
+				this.invalidate();
+			});
+		}
 
 		public __render__(): HNode {
-			if (this._firstRender && domNode.getWidgetInstance && domNode.getWidgetInstance()) {
-				this._firstRender = false;
-				this.invalidate();
-			}
 			const vNode = super.__render__() as InternalHNode;
 			vNode.domNode = domNode;
 			return vNode;
 		}
 
 		protected render(): DNode {
-			let properties = { ...this.properties, key: 'root' };
-			const widgetInstance = domNode.getWidgetInstance ? domNode.getWidgetInstance() : undefined;
-			if (widgetInstance) {
-				widgetInstance.setProperties({ key: 'root', ...widgetInstance.properties, ...this.properties });
+			if (this._widgetInstance) {
+				this._widgetInstance.setProperties({
+					key: 'root',
+					...this._widgetInstance.properties,
+					...this.properties
+				});
 			}
-			return v(domNode.tagName, childrenType === ChildrenType.DOJO ? {} : properties);
+			return v(domNode.tagName, {});
 		}
 	};
 }
@@ -283,24 +282,21 @@ export function initializeElement(element: CustomElement) {
 	const projector = ProjectorMixin(element.getWidgetConstructor());
 	const widgetInstance = new projector();
 
-	if (childrenType === ChildrenType.ELEMENT || element.children.length === 0) {
-		widgetInstance.setProperties(initialProperties);
-	}
+	widgetInstance.setProperties(initialProperties);
 	element.setWidgetInstance(widgetInstance);
 
 	return function() {
-		// find children
 		let children: DNode[] = [];
 		let elementChildren = arrayFrom(element.children);
 
 		elementChildren.forEach((childNode: CustomElement, index: number) => {
+			const properties = { key: `child-${index}` };
 			if (childrenType === ChildrenType.DOJO) {
-				childNode.addEventListener('connected', () => {
-					widgetInstance.setProperties(initialProperties);
-				});
+				children.push(w(DomToWidgetWrapper(childNode), properties));
 			}
-			const CustomElement = CustomElementWrapper(childNode, { childrenType  });
-			children.push(w(CustomElement, { key: `child-${index}` }));
+			else {
+				children.push(w(DomWrapper(childNode), properties));
+			}
 		});
 		elementChildren.forEach((childNode: HTMLElement) => {
 			element.removeChild(childNode);
