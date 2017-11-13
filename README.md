@@ -775,11 +775,11 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
 
 ### Method Lifecycle Hooks
 
-Method lifecycle hooks are used by overriding methods in a widget class. Currently `onAttach` and `onDetach` are supported that provide callbacks for when a widget has been first attached and then it has subsequently been removed (destroyed) from the virtual dom.
+These lifecycle hooks are used by overriding methods in a widget class. Currently `onAttach` and `onDetach` are supported and provide callbacks for when a widget has been first attached and removed (destroyed) from the virtual dom.
 
 #### onAttach
 
-On attach is called once when a widget is first rendered and attached to the DOM.
+`onAttach` is called once when a widget is first rendered and attached to the DOM.
 
 ```ts
 class MyClass extends WidgetBase {
@@ -791,12 +791,12 @@ class MyClass extends WidgetBase {
 
 #### onDetach
 
-On detach is called when a widget is removed from the render tree and therefore the DOM. This is called recurvively down the widget tree to ensure that even when a widget at the top of the tree is removed all children widgets `onDetach` callbacks are also fired.
+`onDetach` is called when a widget is removed from the render tree and therefore the DOM. `onDetach` is called recursively down the widget tree to ensure that even if a widget at the top of the tree is removed all the child widgets `onDetach` callbacks are fired.
 
 ```ts
 class MyClass extends WidgetBase {
     onDetach() {
-        // do things when removed to the DOM
+        // do things when removed from the DOM
     }
 }
 ```
