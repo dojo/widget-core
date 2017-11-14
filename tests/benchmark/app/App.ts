@@ -21,7 +21,6 @@ function stopMeasure() {
 		setTimeout(function () {
 			lastMeasure = null;
 			const stop = performance.now();
-			const duration = 0;
 			console.log(`${last} took ${(stop - startTime)}`);
 		}, 0);
 	}
@@ -100,7 +99,7 @@ export class App extends WidgetBase {
 	];
 
 	protected render (): DNode {
-		const { _run, _add, _update, _select, _delete, _runLots, _clear, _swapRows, _store } = this;
+		const { _select, _delete, _store } = this;
 		const rows = _store.data.map(({ id, label }, index) => {
 			return w(Row, {
 				id,

@@ -10,11 +10,6 @@ export interface ButtonProperties {
 }
 
 export class Button extends WidgetBase<ButtonProperties> {
-
-	private _onClick() {
-		this.properties.onClick();
-	}
-
 	protected render(): DNode {
 		const { id, label, onClick } = this.properties;
 
