@@ -44,6 +44,7 @@
     "@types/web-animations-js": "^2.2.5",
     "@types/yargs": "^8.0.2",
     "@webcomponents/custom-elements": "^v1.0.0-rc.3",
+    "bootstrap": "^3.3.7",
     "chromedriver": "2.33.2",
     "codecov.io": "0.1.6",
     "glob": "^7.0.6",
