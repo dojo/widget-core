@@ -1,12 +1,5 @@
 sudo: false
 language: node_js
-cache:
-  directories:
-    - node_modules
-addons:
-  apt:
-    packages:
-      - google-chrome-stable
 node_js:
 - '6'
 env:
@@ -24,6 +17,10 @@ install:
 - travis_retry npm install
 script:
 - grunt
+- grunt intern:browserstack --test-reporter
+- grunt uploadCoverage
+- grunt dist
+- grunt doc
 - npm run benchmark
 notifications:
   slack:
