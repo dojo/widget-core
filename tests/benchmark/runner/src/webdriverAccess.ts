@@ -1,5 +1,4 @@
-import * as chrome from 'selenium-webdriver/chrome';
-import { By, until, Builder, WebDriver, Locator, promise, WebElement, Condition } from 'selenium-webdriver';
+import { By, WebDriver, WebElement, Condition } from 'selenium-webdriver';
 import { config } from './common';
 
 interface PathPart {
@@ -9,8 +8,8 @@ interface PathPart {
 
 let useShadowRoot = false;
 
-export function setUseShadowRoot(val: boolean) {
-	useShadowRoot = val;
+export function setUseShadowRoot(val: boolean | undefined) {
+	useShadowRoot = Boolean(val);
 }
 
 function convertPath(path: string): Array<PathPart> {
@@ -35,14 +34,18 @@ function convertPath(path: string): Array<PathPart> {
 }
 
 // Fake findByXPath for simple XPath expressions to allow usage with shadow dom
-async function findByXPath(node: WebElement, path: string): Promise<WebElement> {
+async function findByXPath(node: WebElement, path: string): Promise<WebElement | null> {
 	let paths = convertPath(path);
 	let n = node;
 	try {
 		for (let p of paths) {
-			// n = n.then(nd => nd.findElements(By.tagName(p.tagName))).then(elems => { // costly since it fetches all elements
 			let elems = await n.findElements(By.css(p.tagName + ':nth-child(' + (p.index) + ')'));
-			if (elems === null || elems.length === 0) { console.log('not found'); return null; }
+
+			if (elems === null || elems.length === 0) {
+				console.log('not found');
+				return null;
+			}
+
 			n = elems[0];
 		}
 	} catch (e) {
@@ -51,11 +54,6 @@ async function findByXPath(node: WebElement, path: string): Promise<WebElement> 
 	}
 
 	return n;
-}
-
-function elemNull(v: any) {
-	console.log('*** ELEMENT WAS NULL');
-	return false;
 }
 
 function waitForCondition(driver: WebDriver) {
@@ -70,10 +68,12 @@ export async function testTextContains(driver: WebDriver, xpath: string, text: s
 	return waitForCondition(driver)(`testTextContains ${xpath} ${text}`,
 		async function(driver): Promise<any> {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await findByXPath(elem, xpath);
-				if (elem === null) { return false; }
-				let v = await elem.getText();
+				const shadowRootElm = await shadowRoot(driver);
+				const elm = await findByXPath(shadowRootElm, xpath);
+				if (elm === null) {
+					return false;
+				}
+				let v = await elm.getText();
 				return v && v.indexOf(text) > -1;
 			} catch (err) {
 				console.log('ignoring error in testTextContains for xpath = ' + xpath + ' text = ' + text, err.toString().split('\n')[0]);
@@ -85,13 +85,14 @@ export function testTextNotContained(driver: WebDriver, xpath: string, text: str
 	return waitForCondition(driver)(`testTextNotContained ${xpath} ${text}`,
 		async function(driver) {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await findByXPath(elem, xpath);
+				const shadowRootElm = await shadowRoot(driver);
+				const elem = await findByXPath(shadowRootElm, xpath);
 				if (elem === null) { return false; }
 				let v = await elem.getText();
-				return v && v.indexOf(text) === -1;
+				return Boolean(v && v.indexOf(text) === -1);
 			} catch (err) {
 				console.log('ignoring error in testTextNotContained for xpath = ' + xpath + ' text = ' + text, err.toString().split('\n')[0]);
+				return false;
 			}
 		}, timeout);
 }
@@ -100,13 +101,14 @@ export function testClassContains(driver: WebDriver, xpath: string, text: string
 	return waitForCondition(driver)(`testClassContains ${xpath} ${text}`,
 		async function(driver) {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await findByXPath(elem, xpath);
+				const shadowRootElm = await shadowRoot(driver);
+				const elem = await findByXPath(shadowRootElm, xpath);
 				if (elem === null) { return false; }
 				let v = await elem.getAttribute('class');
-				return v && v.indexOf(text) > -1;
+				return Boolean(v && v.indexOf(text) > -1);
 			} catch (err) {
 				console.log('ignoring error in testClassContains for xpath = ' + xpath + ' text = ' + text, err.toString().split('\n')[0]);
+				return false;
 			}
 		}, timeout);
 }
@@ -115,11 +117,12 @@ export function testElementLocatedByXpath(driver: WebDriver, xpath: string, time
 	return waitForCondition(driver)(`testElementLocatedByXpath ${xpath}`,
 		async function(driver) {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await findByXPath(elem, xpath);
+				const shadowRootElm = await shadowRoot(driver);
+				const elem = await findByXPath(shadowRootElm, xpath);
 				return elem ? true : false;
 			} catch (err) {
 				console.log('ignoring error in testElementLocatedByXpath for xpath = ' + xpath, err.toString());
+				return false;
 			}
 		}, timeout);
 }
@@ -128,11 +131,12 @@ export function testElementNotLocatedByXPath(driver: WebDriver, xpath: string, t
 	return waitForCondition(driver)(`testElementNotLocatedByXPath ${xpath}`,
 		async function(driver) {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await findByXPath(elem, xpath);
+				const shadowRootElm = await shadowRoot(driver);
+				const elem = await findByXPath(shadowRootElm, xpath);
 				return elem ? false : true;
 			} catch (err) {
 				console.log('ignoring error in testElementNotLocatedByXPath for xpath = ' + xpath, err.toString().split('\n')[0]);
+				return false;
 			}
 	}, timeout);
 }
@@ -141,16 +145,16 @@ export function testElementLocatedById(driver: WebDriver, id: string, timeout = 
 	return waitForCondition(driver)(`testElementLocatedById ${id}`,
 		async function(driver) {
 			try {
-				let elem = await shadowRoot(driver);
-				elem = await elem.findElement(By.id(id));
+				await shadowRoot(driver);
 				return true;
 			} catch (err) {
 				console.log('ignoring error in testElementLocatedById for id = ' + id, err.toString().split('\n')[0]);
+				return false;
 			}
 		}, timeout);
 	}
 
-async function retry<T>(retryCount: number, driver: WebDriver, fun: (driver: WebDriver, retryCount: number) => Promise<T>): Promise<T> {
+async function retry<T>(retryCount: number, driver: WebDriver, fun: (driver: WebDriver, retryCount: number) => Promise<T>): Promise<T | undefined> {
 	for (let i = 0; i < retryCount; i++) {
 		try {
 			return fun(driver, i);
@@ -173,20 +177,24 @@ export function clickElementById(driver: WebDriver, id: string) {
 export function clickElementByXPath(driver: WebDriver, xpath: string) {
 	return retry(5, driver, async function(driver, count) {
 		if (count > 1 && config.LOG_DETAILS) { console.log('clickElementByXPath ', xpath, ' attempt #', count); }
-		let elem = await shadowRoot(driver);
-		elem = await findByXPath(elem, xpath);
-		await  elem.click();
+		const shadowRootElm = await shadowRoot(driver);
+		const elem = await findByXPath(shadowRootElm, xpath);
+		if (elem) {
+			await elem.click();
+		}
 	});
 	// Stale element possible:
 	// return to(driver.findElement(By.xpath(xpath)).click());
 }
 
-export async function getTextByXPath(driver: WebDriver, xpath: string): Promise<string> {
+export async function getTextByXPath(driver: WebDriver, xpath: string): Promise<any> {
 	return await retry(5, driver, async function(driver, count) {
 		if (count > 1 && config.LOG_DETAILS) { console.log('getTextByXPath ', xpath, ' attempt #', count); }
-		let elem = await shadowRoot(driver);
-		elem = await findByXPath(elem, xpath);
-		return await elem.getText();
+		const shadowRootElm = await shadowRoot(driver);
+		const elem = await findByXPath(shadowRootElm, xpath);
+		if (elem) {
+			return await elem.getText();
+		}
 	});
 }
 

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
-import { JSONResult, config, FrameworkData, frameworks } from './common';
+import { Benchmark, benchmarks, fileName } from './benchmarks';
+import { JSONResult, frameworks } from './common';
 
 const dots = require('dot').process({
 	path: './'

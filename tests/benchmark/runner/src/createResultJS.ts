@@ -1,11 +1,10 @@
 import * as fs from 'fs';
-import { JSONResult, frameworks, FrameworkData } from './common';
+import Map from '@dojo/shim/Map';
+import { frameworks, FrameworkData } from './common';
 import { benchmarks, fileName } from './benchmarks';
 
 let frameworkMap = new Map<string, FrameworkData>();
 frameworks.map(f => frameworkMap.set(f.name, f));
-
-let results: Map<string, Map<string, JSONResult>> = new Map();
 
 let resultJS = 'export let results=[';
 

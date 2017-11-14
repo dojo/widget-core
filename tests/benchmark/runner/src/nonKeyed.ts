@@ -1,10 +1,9 @@
 import * as chrome from 'selenium-webdriver/chrome';
-import { Builder, WebDriver, promise, logging } from 'selenium-webdriver';
+import { Builder, logging } from 'selenium-webdriver';
+import Map from '@dojo/shim/Map';
 import * as yargs from 'yargs';
-let chromedriver: any = require('chromedriver');
-import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
-import { setUseShadowRoot, testTextContains, testTextNotContained, testClassContains, testElementLocatedByXpath, testElementNotLocatedByXPath, testElementLocatedById, clickElementById, clickElementByXPath, getTextByXPath } from './webdriverAccess';
-import { JSONResult, config, FrameworkData, frameworks } from './common';
+import { setUseShadowRoot, testTextContains, testTextNotContained, testElementLocatedById, clickElementById, clickElementByXPath, getTextByXPath } from './webdriverAccess';
+import { FrameworkData, frameworks } from './common';
 
 function buildDriver() {
 	let logPref = new logging.Preferences();
@@ -151,9 +150,14 @@ async function runBench(frameworkNames: string[]) {
 			+ (nonKeyedRemove ? 'non-keyed' : 'keyed') + ' for \'remove row benchmark\' '
 			+ (nonKeyedSwap ? 'non-keyed' : 'keyed') + ' for \'swap rows benchmark\' '
 			+ '. It\'ll appear as ' + (nonKeyed ? 'non-keyed' : 'keyed') + ' in the results');
-			if (frameworkMap.get(framework.name).keyed === nonKeyed) {
-				console.log('ERROR: Framework ' + framework.name + ' is not correctly categorized in commons.ts');
+
+			const currentFramework = frameworkMap.get(framework.name);
+			if (currentFramework) {
+				if (currentFramework.keyed === nonKeyed) {
+					console.log('ERROR: Framework ' + framework.name + ' is not correctly categorized in commons.ts');
+				}
 			}
+
 		} finally {
 			await driver.quit();
 		}

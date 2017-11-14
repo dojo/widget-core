@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import Map from '@dojo/shim/Map';
-import { JSONResult, config, frameworks, FrameworkData } from './common';
+import { endsWith } from '@dojo/shim/string';
+import { JSONResult, frameworks, FrameworkData } from './common';
 import { BenchmarkType, Benchmark, benchmarks } from './benchmarks';
 
 const dots = require('dot').process({
@@ -13,7 +14,7 @@ frameworks.map(f => frameworkMap.set(f.name, f));
 
 let results: Map<string, Map<string, JSONResult>> = new Map();
 
-fs.readdirSync('./results').filter(file => file.endsWith('.json')).forEach(name => {
+fs.readdirSync('./results').filter(file => endsWith(file, '.json')).forEach(name => {
 	let data = <JSONResult> JSON.parse(fs.readFileSync('./results/' + name, {
 		encoding: 'utf-8'
 	}));
@@ -21,8 +22,13 @@ fs.readdirSync('./results').filter(file => file.endsWith('.json')).forEach(name 
 	if (!frameworkMap.has(data.framework)) {
 		console.log('WARN: No entry in commons.ts for ' + data.framework + '. Data will not appear in result table.');
 	} else {
-		if (!results.has(data.framework)) { results.set(data.framework, new Map()); }
-		results.get(data.framework).set(data.benchmark, data);
+		const dataFrameworkResult = results.get(data.framework);
+
+		if (dataFrameworkResult) {
+			dataFrameworkResult.set(data.benchmark, data);
+		} else {
+			results.set(data.framework, new Map());
+		}
 	}
 });
 
@@ -30,7 +36,13 @@ let cpuBenchmarks = benchmarks.filter(benchmark => benchmark.type === BenchmarkT
 let memBenchmarks = benchmarks.filter(benchmark => benchmark.type === BenchmarkType.MEM);
 let cpuBenchmarkCount = cpuBenchmarks.length;
 
-let getValue = (framework: string, benchmark: string) => results.has(framework) && results.get(framework).get(benchmark);
+let getValue = (framework: string, benchmark: string) => {
+	const frameworkResult = results.get(framework);
+
+	if (frameworkResult) {
+		return frameworkResult.get(benchmark);
+	}
+};
 
 function color(factor: number): string {
 	if (factor < 2.0) {
@@ -56,7 +68,7 @@ interface TestData {
 }
 
 class BenchResultList {
-	tests: Array<TestData>;
+	tests: Array<TestData | null>;
 	name: string;
 	description: string;
 
@@ -65,10 +77,6 @@ class BenchResultList {
 		this.name = benchmark.label;
 		this.description = benchmark.description;
 	}
-}
-
-interface SearchFunc {
-	(source: string, subString: string): boolean;
 }
 
 interface FrameworkPredicate {
@@ -105,7 +113,10 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 		let values: Array<JSONResult> = [];
 		sortedFrameworks.forEach(framework => {
 			if (frameworkPredicate(framework)) {
-				values.push(getValue(framework.name, benchmark.id));
+				const frameworkValue = getValue(framework.name, benchmark.id);
+				if (frameworkValue) {
+					values.push(frameworkValue);
+				}
 			}
 		});
 
