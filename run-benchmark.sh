@@ -12,6 +12,7 @@ node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless t
 
 # Move the benchmark results somewhere else for now
 mkdir -p html-report
+rm -rf html-report/benchmark-results
 mv results html-report/benchmark-results
 
 # Use node to console.log since it gives pretty printing
