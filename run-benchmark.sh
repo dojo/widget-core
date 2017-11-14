@@ -8,7 +8,7 @@ SERVER_PID=$!
 
 echo '--- Benchmark starting ---'
 
-node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless true --framework dojo2-v0.2.0-non-keyed
+node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless true --framework dojo2-v0.2.0-non-keyed
 
 # Move the benchmark results somewhere else for now
 mkdir -p html-report
@@ -39,12 +39,7 @@ echo 'Benchmark results: \n'
 for file in "${files[@]}"
 do
 	# Pretty printed JSON
-	# node -e "console.dir(require('./html-report/benchmark-results/$file'), {colors: true})"
-
-	node -e "
-		const result = require('./html-report/benchmark-results/$file');\
-		console.log(result.benchmark, ':', result.median);\
-	"
+	node -e "console.dir(require('./html-report/benchmark-results/$file'), {colors: true})"
 done
 
 function cleanup {
