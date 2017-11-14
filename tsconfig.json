@@ -19,7 +19,7 @@
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
-		"noEmitHelpers": true,
+		"importHelpers": true,
 		"downlevelIteration": true,
 		"outDir": "_build/",
 		"removeComments": false,
