@@ -1,24 +1,24 @@
-var startTime;
-var lastMeasure;
-var startMeasure = function(name) {
+let startTime;
+let lastMeasure;
+let startMeasure = function(name) {
 	startTime = performance.now();
 	lastMeasure = name;
-}
+};
 
-var stopMeasure = function() {
-	var last = lastMeasure;
+let stopMeasure = function() {
+	let last = lastMeasure;
 	if (lastMeasure) {
 		window.setTimeout(function () {
 			lastMeasure = null;
-			var stop = performance.now();
-			var duration = 0;
-			console.log(last+' took '+(stop-startTime));
+			let stop = performance.now();
+			let duration = 0;
+			console.log(last + ' took ' + (stop - startTime));
 		}, 0);
 	}
-}
+};
 
 function _random(max) {
-	return Math.round(Math.random()*1000)%max;
+	return Math.round(Math.random() * 1000) % max;
 }
 
 class Store {
@@ -29,23 +29,24 @@ class Store {
 		this.id = 1;
 	}
 	buildData(count = 1000) {
-		var adjectives = ['pretty', 'large', 'big', 'small', 'tall', 'short', 'long', 'handsome', 'plain', 'quaint', 'clean', 'elegant', 'easy', 'angry', 'crazy', 'helpful', 'mushy', 'odd', 'unsightly', 'adorable', 'important', 'inexpensive', 'cheap', 'expensive', 'fancy'];
-		var colours = ['red', 'yellow', 'blue', 'green', 'pink', 'brown', 'purple', 'brown', 'white', 'black', 'orange'];
-		var nouns = ['table', 'chair', 'house', 'bbq', 'desk', 'car', 'pony', 'cookie', 'sandwich', 'burger', 'pizza', 'mouse', 'keyboard'];
-		var data = [];
-		for (var i = 0; i < count; i++)
+		let adjectives = ['pretty', 'large', 'big', 'small', 'tall', 'short', 'long', 'handsome', 'plain', 'quaint', 'clean', 'elegant', 'easy', 'angry', 'crazy', 'helpful', 'mushy', 'odd', 'unsightly', 'adorable', 'important', 'inexpensive', 'cheap', 'expensive', 'fancy'];
+		let colours = ['red', 'yellow', 'blue', 'green', 'pink', 'brown', 'purple', 'brown', 'white', 'black', 'orange'];
+		let nouns = ['table', 'chair', 'house', 'bbq', 'desk', 'car', 'pony', 'cookie', 'sandwich', 'burger', 'pizza', 'mouse', 'keyboard'];
+		let data = [];
+		for (let i = 0; i < count; i++) {
 			data.push({id: this.id++, label: adjectives[_random(adjectives.length)] + ' ' + colours[_random(colours.length)] + ' ' + nouns[_random(nouns.length)] });
+		}
 		return data;
 	}
 	updateData(mod = 10) {
-		for (let i=0;i<this.data.length;i+=10) {
+		for (let i = 0; i < this.data.length; i += 10) {
 			this.data[i].label += ' !!!';
 			// this.data[i] = Object.assign({}, this.data[i], {label: this.data[i].label +' !!!'});
 		}
 	}
 	delete(id) {
-		const idx = this.data.findIndex(d => d.id==id);
-		this.data = this.data.filter((e,i) => i!=idx);
+		const idx = this.data.findIndex(d => d.id === id);
+		this.data = this.data.filter((e, i) => i !== idx);
 		return this;
 	}
 	run() {
@@ -82,29 +83,29 @@ class Store {
 		this.selected = null;
 	}
 	swapRows() {
-		if(this.data.length > 10) {
-			var a = this.data[4];
+		if (this.data.length > 10) {
+			let a = this.data[4];
 			this.data[4] = this.data[9];
 			this.data[9] = a;
 		}
 	}
 }
 
-var td=function(className) {
+let td = function(className) {
 	let td = document.createElement('td');
 	td.className = className;
 	return td;
-}
+};
 
-var getParentId = function(elem) {
+let getParentId = function(elem) {
 	while (elem) {
-		if (elem.tagName==='TR') {
+		if (elem.tagName === 'TR') {
 			return elem.data_id;
 		}
 		elem = elem.parentNode;
 	}
 	return undefined;
-}
+};
 class Main {
 	constructor(props) {
 		this.store = new Store();
@@ -119,67 +120,56 @@ class Main {
 		this.selectedRow = undefined;
 
 		document.getElementById('main').addEventListener('click', e => {
-			//console.log('listener',e);
 			if (e.target.matches('#add')) {
 				e.preventDefault();
-				//console.log('add');
 				this.add();
 			}
 			else if (e.target.matches('#run')) {
 				e.preventDefault();
-				//console.log('run');
 				this.run();
 			}
 			else if (e.target.matches('#update')) {
 				e.preventDefault();
-				//console.log('update');
 				this.update();
 			}
 			else if (e.target.matches('#hideall')) {
 				e.preventDefault();
-				//console.log('hideAll');
 				this.hideAll();
 			}
 			else if (e.target.matches('#showall')) {
 				e.preventDefault();
-				//console.log('showAll');
 				this.showAll();
 			}
 			else if (e.target.matches('#runlots')) {
 				e.preventDefault();
-				//console.log('runLots');
 				this.runLots();
 			}
 			else if (e.target.matches('#clear')) {
 				e.preventDefault();
-				//console.log('clear');
 				this.clear();
 			}
 			else if (e.target.matches('#swaprows')) {
 				e.preventDefault();
-				//console.log('swapRows');
 				this.swapRows();
 			}
 			else if (e.target.matches('.remove')) {
 				e.preventDefault();
 				let id = getParentId(e.target);
 				let idx = this.findIdx(id);
-				//console.log('delete',idx);
 				this.delete(idx);
 			}
 			else if (e.target.matches('.lbl')) {
 				e.preventDefault();
 				let id = getParentId(e.target);
 				let idx = this.findIdx(id);
-				//console.log('select',idx);
 				this.select(idx);
 			}
 		});
 		this.tbody = document.getElementById('tbody');
 	}
 	findIdx(id) {
-		for (let i=0;i<this.data.length;i++){
-			if (this.data[i].id === id) return i;
+		for (let i = 0; i < this.data.length; i++) {
+			if (this.data[i].id === id) { return i; }
 		}
 		return undefined;
 	}
@@ -204,14 +194,14 @@ class Main {
 		startMeasure('update');
 		this.store.update();
 		// this.updateRows();
-		for (let i=0;i<this.data.length;i+=10) {
+		for (let i = 0; i < this.data.length; i += 10) {
 			this.rows[i].childNodes[1].childNodes[0].innerText = this.store.data[i].label;
 		}
 		stopMeasure();
 	}
 	unselect() {
 		if (this.selectedRow !== undefined) {
-			this.selectedRow.className = ';
+			this.selectedRow.className = '';
 			this.selectedRow = undefined;
 		}
 	}
@@ -232,9 +222,9 @@ class Main {
 		// this.data.splice(idx, 1);
 
 		// Faster, shift all rows below the row that should be deleted rows one up and drop the last row
-		for(let i=this.rows.length-2; i>=idx;i--) {
+		for (let i = this.rows.length - 2; i >= idx; i--) {
 			let tr = this.rows[i];
-			let data =  this.store.data[i+1];
+			let data =  this.store.data[i + 1];
 			tr.data_id = data.id;
 			tr.childNodes[0].innerText = data.id;
 			tr.childNodes[1].childNodes[0].innerText = data.label;
@@ -247,7 +237,7 @@ class Main {
 		stopMeasure();
 	}
 	updateRows() {
-		for(let i=0;i<this.rows.length;i++) {
+		for (let i = 0; i < this.rows.length; i++) {
 			if (this.data[i] !== this.store.data[i]) {
 				let tr = this.rows[i];
 				let data = this.store.data[i];
@@ -271,7 +261,7 @@ class Main {
 		// var cNode = tbody.cloneNode(false);
 		// tbody.parentNode.replaceChild(cNode ,tbody);
 		// ~212 msecs
-		this.tbody.textContent = ';
+		this.tbody.textContent = '';
 
 		// ~236 msecs
 		// var rangeObj = new Range();
@@ -302,12 +292,12 @@ class Main {
 	}
 	swapRows() {
 		startMeasure('swapRows');
-		let old_selection = this.store.selected;
+		let oldSelection = this.store.selected;
 		this.store.swapRows();
 		this.updateRows();
 		this.unselect();
-		if (old_selection>=0) {
-			let idx = this.store.data.findIndex(d => d.id === old_selection);
+		if (oldSelection >= 0) {
+			let idx = this.store.data.findIndex(d => d.id === oldSelection);
 			if (idx > 0) {
 				this.store.select(this.data[idx].id);
 				this.selectedRow = this.rows[idx];
@@ -328,11 +318,11 @@ class Main {
 		// this.tbody.appendChild(docfrag);
 
 		// ... than adding directly
-		var rows = this.rows, s_data = this.store.data, data = this.data, tbody = this.tbody;
-		for(let i=rows.length;i<s_data.length; i++) {
-			let tr = this.createRow(s_data[i]);
+		let rows = this.rows, sData = this.store.data, data = this.data, tbody = this.tbody;
+		for (let i = rows.length; i < sData.length; i++) {
+			let tr = this.createRow(sData[i]);
 			rows[i] = tr;
-			data[i] = s_data[i];
+			data[i] = sData[i];
 			tbody.appendChild(tr);
 		}
 	}
@@ -343,7 +333,7 @@ class Main {
 		td1.innerText = data.id;
 		tr.appendChild(td1);
 
-		let td2 = td('col-md-4')
+		let td2 = td('col-md-4');
 		tr.appendChild(td2);
 		let a2 = document.createElement('a');
 		a2.className = 'lbl';
@@ -357,11 +347,11 @@ class Main {
 		td3.appendChild(a);
 		let span = document.createElement('span');
 		span.className = 'glyphicon glyphicon-remove remove';
-		span.setAttribute('aria-hidden','true');
+		span.setAttribute('aria-hidden', 'true');
 		a.appendChild(span);
 
 		let td5 = td('col-md-6');
-		tr.appendChild(td5)
+		tr.appendChild(td5);
 
 		return tr;
 	}
