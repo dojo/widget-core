@@ -1,4 +1,3 @@
-
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v } from '../../../src/d';
 import { DNode } from '../../../src/interfaces';

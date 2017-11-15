@@ -33,5 +33,5 @@ function f(name: string, keyed: boolean, options: Options = {uri: null, useShado
 }
 
 export let frameworks = [
-	f('dojo2-v0.2.0-non-keyed', false, { uri: 'tests/benchmark/app' })
+	f('dojo2-v0.2.0-non-keyed', false, { uri: '_build/tests/benchmark/app' })
 ];

@@ -55,6 +55,7 @@
     "jsdom": "^9.5.0",
     "jstat": "^1.7.1",
     "ramda": "^0.25.0",
+    "@types/ramda": "^0.25.5",
     "selenium-webdriver": "3.6.0",
     "serve": "^6.4.1",
     "sinon": "^1.17.6",
@@ -62,7 +63,6 @@
     "typescript": "~2.5.2"
   },
   "dependencies": {
-    "@types/ramda": "^0.25.5",
     "intersection-observer": "^0.4.2",
     "pepjs": "^0.4.2",
     "web-animations-js": "^2.3.1"

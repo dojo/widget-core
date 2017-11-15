@@ -1,4 +1,3 @@
-
 import { DNode } from '../../../src/interfaces';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { v, w } from '../../../src/d';
@@ -7,84 +6,45 @@ import { Row } from './Row';
 import { Buttons, ButtonConfig } from './Buttons';
 import { Store } from  './Store';
 
-let startTime: number;
-let lastMeasure: string | null;
-
-function startMeasure(name: string) {
-	startTime = performance.now();
-	lastMeasure = name;
-}
-
-function stopMeasure() {
-	const last = lastMeasure;
-	if (lastMeasure) {
-		setTimeout(function () {
-			lastMeasure = null;
-			const stop = performance.now();
-			console.log(`${last} took ${(stop - startTime)}`);
-		}, 0);
-	}
-}
-
 export class App extends WidgetBase {
 	private _store: Store = new Store();
 
-	private _printDuration() {
-		stopMeasure();
-	}
-
-	public onElementUpdated() {
-		this._printDuration();
-	}
-
-	public onElementCreated() {
-		this._printDuration();
-	}
-
 	private _run = () => {
-		startMeasure('run');
 		this._store.run();
 		this.invalidate();
 	}
 
 	private _add = () => {
-		startMeasure('add');
 		this._store.add();
 		this.invalidate();
 	}
 
 	private _update = () => {
-		startMeasure('update');
 		this._store.update();
 		this.invalidate();
 	}
 
 	private _select = (id: number) => {
-		startMeasure('select');
 		this._store.select(id);
 		this.invalidate();
 	}
 
 	private _delete = (id: number) => {
-		startMeasure('delete');
 		this._store.delete(id);
 		this.invalidate();
 	}
 
 	private _runLots = () => {
-		startMeasure('runLots');
 		this._store.runLots();
 		this.invalidate();
 	}
 
 	private _clear = () => {
-		startMeasure('clear');
 		this._store.clear();
 		this.invalidate();
 	}
 
 	private _swapRows = () => {
-		startMeasure('swapRows');
 		this._store.swapRows();
 		this.invalidate();
 	}
@@ -103,7 +63,7 @@ export class App extends WidgetBase {
 		const rows = _store.data.map(({ id, label }, index) => {
 			return w(Row, {
 				id,
-				key: index,
+				key: id,
 				label,
 				onRowSelected: _select,
 				onRowDeleted: _delete,
