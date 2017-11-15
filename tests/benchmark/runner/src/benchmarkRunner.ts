@@ -432,7 +432,7 @@ let count = Number(args.count);
 
 config.REPEAT_RUN = count;
 
-let dir = args.check === 'true' ? 'results_check' : 'results';
+let dir = args.check === 'true' ? 'results_check' : 'benchmark-results';
 let exitOnError = args.exitOnError === 'true';
 
 config.EXIT_ON_ERROR = exitOnError;

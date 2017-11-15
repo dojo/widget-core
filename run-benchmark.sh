@@ -10,13 +10,12 @@ echo '--- Benchmark starting ---'
 
 node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless false --framework dojo2-v0.2.0-non-keyed
 
+node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 1 --headless false --framework vanillajs-non-keyed
+
 # Move the benchmark results somewhere else for now
 mkdir -p html-report
 rm -rf html-report/benchmark-results
 mv results html-report/benchmark-results
-
-# Use node to console.log since it gives pretty printing
-#node -e "console.dir(require('./html-report/benchmark-results/dojo2-v0.2.0-non-keyed_01_run1k.json'), {colors: true})"
 
 files=(
 	"dojo2-v0.2.0-non-keyed_01_run1k.json"

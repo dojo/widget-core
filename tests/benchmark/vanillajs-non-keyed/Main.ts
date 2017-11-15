@@ -1,6 +1,6 @@
-let startTime;
-let lastMeasure;
-let startMeasure = function(name) {
+let startTime: any;
+let lastMeasure: any;
+let startMeasure = function(name: any) {
 	startTime = performance.now();
 	lastMeasure = name;
 };
@@ -11,17 +11,21 @@ let stopMeasure = function() {
 		window.setTimeout(function () {
 			lastMeasure = null;
 			let stop = performance.now();
-			let duration = 0;
 			console.log(last + ' took ' + (stop - startTime));
 		}, 0);
 	}
 };
 
-function _random(max) {
+function _random(max: any) {
 	return Math.round(Math.random() * 1000) % max;
 }
 
 class Store {
+	data: any;
+	backup: any;
+	selected: any;
+	id: any;
+
 	constructor() {
 		this.data = [];
 		this.backup = null;
@@ -44,9 +48,9 @@ class Store {
 			// this.data[i] = Object.assign({}, this.data[i], {label: this.data[i].label +' !!!'});
 		}
 	}
-	delete(id) {
-		const idx = this.data.findIndex(d => d.id === id);
-		this.data = this.data.filter((e, i) => i !== idx);
+	delete(id: any) {
+		const idx = this.data.findIndex((d: any) => d.id === id);
+		this.data = this.data.filter((e: any, i: any) => i !== idx);
 		return this;
 	}
 	run() {
@@ -61,7 +65,7 @@ class Store {
 		this.updateData();
 		this.selected = null;
 	}
-	select(id) {
+	select(id: any) {
 		this.selected = id;
 	}
 	hideAll() {
@@ -91,13 +95,13 @@ class Store {
 	}
 }
 
-let td = function(className) {
+let td = function(className: any) {
 	let td = document.createElement('td');
 	td.className = className;
 	return td;
 };
 
-let getParentId = function(elem) {
+let getParentId = function(elem: any) {
 	while (elem) {
 		if (elem.tagName === 'TR') {
 			return elem.data_id;
@@ -107,7 +111,14 @@ let getParentId = function(elem) {
 	return undefined;
 };
 class Main {
-	constructor(props) {
+	store: any;
+	start: any;
+	rows: any;
+	data: any;
+	selectedRow: any;
+	tbody: any;
+
+	constructor() {
 		this.store = new Store();
 		this.select = this.select.bind(this);
 		this.delete = this.delete.bind(this);
@@ -119,55 +130,60 @@ class Main {
 		this.data = [];
 		this.selectedRow = undefined;
 
-		document.getElementById('main').addEventListener('click', e => {
-			if (e.target.matches('#add')) {
-				e.preventDefault();
-				this.add();
-			}
-			else if (e.target.matches('#run')) {
-				e.preventDefault();
-				this.run();
-			}
-			else if (e.target.matches('#update')) {
-				e.preventDefault();
-				this.update();
-			}
-			else if (e.target.matches('#hideall')) {
-				e.preventDefault();
-				this.hideAll();
-			}
-			else if (e.target.matches('#showall')) {
-				e.preventDefault();
-				this.showAll();
-			}
-			else if (e.target.matches('#runlots')) {
-				e.preventDefault();
-				this.runLots();
-			}
-			else if (e.target.matches('#clear')) {
-				e.preventDefault();
-				this.clear();
-			}
-			else if (e.target.matches('#swaprows')) {
-				e.preventDefault();
-				this.swapRows();
-			}
-			else if (e.target.matches('.remove')) {
-				e.preventDefault();
-				let id = getParentId(e.target);
-				let idx = this.findIdx(id);
-				this.delete(idx);
-			}
-			else if (e.target.matches('.lbl')) {
-				e.preventDefault();
-				let id = getParentId(e.target);
-				let idx = this.findIdx(id);
-				this.select(idx);
-			}
-		});
+		const mainEl = document.getElementById('main');
+		if (mainEl) {
+			mainEl.addEventListener('click', e => {
+				const currentTarget = <HTMLElement> e.target;
+				if (currentTarget.matches('#add')) {
+					e.preventDefault();
+					this.add();
+				}
+				else if (currentTarget.matches('#run')) {
+					e.preventDefault();
+					this.run();
+				}
+				else if (currentTarget.matches('#update')) {
+					e.preventDefault();
+					this.update();
+				}
+				else if (currentTarget.matches('#hideall')) {
+					e.preventDefault();
+					// this.hideAll();
+				}
+				else if (currentTarget.matches('#showall')) {
+					e.preventDefault();
+					// this.showAll();
+				}
+				else if (currentTarget.matches('#runlots')) {
+					e.preventDefault();
+					this.runLots();
+				}
+				else if (currentTarget.matches('#clear')) {
+					e.preventDefault();
+					this.clear();
+				}
+				else if (currentTarget.matches('#swaprows')) {
+					e.preventDefault();
+					this.swapRows();
+				}
+				else if (currentTarget.matches('.remove')) {
+					e.preventDefault();
+					let id = getParentId(currentTarget);
+					let idx = this.findIdx(id);
+					this.delete(idx);
+				}
+				else if (currentTarget.matches('.lbl')) {
+					e.preventDefault();
+					let id = getParentId(currentTarget);
+					let idx = this.findIdx(id);
+					this.select(idx);
+				}
+			});
+		}
+
 		this.tbody = document.getElementById('tbody');
 	}
-	findIdx(id) {
+	findIdx(id: any) {
 		for (let i = 0; i < this.data.length; i++) {
 			if (this.data[i].id === id) { return i; }
 		}
@@ -205,7 +221,7 @@ class Main {
 			this.selectedRow = undefined;
 		}
 	}
-	select(idx) {
+	select(idx: any) {
 		startMeasure('select');
 		this.unselect();
 		this.store.select(this.data[idx].id);
@@ -213,7 +229,7 @@ class Main {
 		this.selectedRow.className = 'danger';
 		stopMeasure();
 	}
-	delete(idx) {
+	delete(idx: any) {
 		startMeasure('delete');
 		// Remove that row from the DOM
 		// this.store.delete(this.data[idx].id);
@@ -297,7 +313,7 @@ class Main {
 		this.updateRows();
 		this.unselect();
 		if (oldSelection >= 0) {
-			let idx = this.store.data.findIndex(d => d.id === oldSelection);
+			let idx = this.store.data.findIndex((d: any) => d.id === oldSelection);
 			if (idx > 0) {
 				this.store.select(this.data[idx].id);
 				this.selectedRow = this.rows[idx];
@@ -326,8 +342,8 @@ class Main {
 			tbody.appendChild(tr);
 		}
 	}
-	createRow(data) {
-		let tr = document.createElement('tr');
+	createRow(data: any) {
+		let tr = <any> document.createElement('tr');
 		tr.data_id = data.id;
 		let td1 = td('col-md-1');
 		td1.innerText = data.id;
