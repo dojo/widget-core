@@ -11,7 +11,6 @@ node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless t
 
 node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless true --framework dojo2-v0.2.0-non-keyed
 
-
 files=(
 	"_01_run1k.json"
 	"_02_replace1k.json"
@@ -41,7 +40,6 @@ for file in "${files[@]}"
 do
 	dojoMedian="$(./node_modules/.bin/jq '.median' benchmark-results/dojo2-v0.2.0-non-keyed$file)"
 	vanillaJSMedian="$(./node_modules/.bin/jq '.median' benchmark-results/vanillajs-non-keyed$file)"
-
 	# node tests/benchmark/runner/output.ts
 done
 
