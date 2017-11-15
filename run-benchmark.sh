@@ -36,12 +36,7 @@ do
 	./node_modules/.bin/jq '.' benchmark-results/vanillajs-non-keyed$file
 done
 
-for file in "${files[@]}"
-do
-	dojoMedian="$(./node_modules/.bin/jq '.median' benchmark-results/dojo2-v0.2.0-non-keyed$file)"
-	vanillaJSMedian="$(./node_modules/.bin/jq '.median' benchmark-results/vanillajs-non-keyed$file)"
-	# node tests/benchmark/runner/output.ts
-done
+ls benchmark-results
 
 function cleanup {
     kill $SERVER_PID
