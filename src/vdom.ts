@@ -581,7 +581,15 @@ function updateChildren(
 				if (child) {
 					while (insertBefore === undefined) {
 						if (isWNode(child)) {
-							child = child.rendered[0];
+							if (child.rendered) {
+								child = child.rendered[0];
+							}
+							else if (oldChildren[oldIndex + 1]) {
+								child = oldChildren[oldIndex + 1];
+							}
+							else {
+								break;
+							}
 						}
 						else {
 							insertBefore = child.domNode;

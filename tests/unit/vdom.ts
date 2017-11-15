@@ -529,7 +529,8 @@ describe('vdom', () => {
 					return v('div', [
 						v('div', [ 'first' ]),
 						w(widget, {}),
-						v('div', [ 'second' ])
+						v('div', [ 'second' ]),
+						w(widget, {})
 					]);
 				}
 			}
@@ -552,11 +553,13 @@ describe('vdom', () => {
 			assert.strictEqual(root.childNodes[0].childNodes[0].data, 'first');
 			assert.strictEqual(root.childNodes[1].childNodes[0].data, 'foo');
 			assert.strictEqual(root.childNodes[2].childNodes[0].data, 'second');
+			assert.strictEqual(root.childNodes[3].childNodes[0].data, 'foo');
 			widget.__setProperties__({ widget: 'bar' });
 			projection.update(widget.__render__());
 			assert.strictEqual(root.childNodes[0].childNodes[0].data, 'first');
 			assert.strictEqual(root.childNodes[1].childNodes[0].data, 'bar');
 			assert.strictEqual(root.childNodes[2].childNodes[0].data, 'second');
+			assert.strictEqual(root.childNodes[3].childNodes[0].data, 'bar');
 			widget.__setProperties__({ widget: 'other' });
 			projection.update(widget.__render__());
 			assert.strictEqual(root.childNodes[0].childNodes[0].data, 'first');
@@ -566,6 +569,7 @@ describe('vdom', () => {
 			assert.strictEqual(root.childNodes[0].childNodes[0].data, 'first');
 			assert.strictEqual(root.childNodes[1].childNodes[0].data, 'bar');
 			assert.strictEqual(root.childNodes[2].childNodes[0].data, 'second');
+			assert.strictEqual(root.childNodes[3].childNodes[0].data, 'bar');
 		});
 
 		it('should allow a widget returned from render', () => {
