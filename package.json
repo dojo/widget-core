@@ -53,7 +53,6 @@
     "grunt-dojo2": "latest",
     "grunt-tslint": "^5.0.1",
     "intern": "~4.1.0",
-    "jq-cli-wrapper": "^0.4.0",
     "jsdom": "^9.5.0",
     "jstat": "^1.7.1",
     "ramda": "^0.25.0",

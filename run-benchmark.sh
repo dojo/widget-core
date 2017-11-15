@@ -11,32 +11,9 @@ node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless t
 
 node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless true --framework dojo2-v0.2.0-non-keyed
 
-files=(
-	"_01_run1k.json"
-	"_02_replace1k.json"
-	"_03_update10th1k.json"
-	"_04_select1k.json"
-	"_05_swap1k.json"
-	"_06_remove-one-1k.json"
-	"_07_create10k.json"
-	"_08_create1k-after10k.json"
-	"_09_clear10k.json"
-	"_21_ready-memory.json"
-	"_22_run-memory.json"
-	"_23_update5-memory.json"
-	"_24_run5-memory.json"
-	"_25_run-clear-memory.json"
-	"_30_startup.json"
-)
-
-echo 'Benchmark results: \n'
-for file in "${files[@]}"
-do
-	./node_modules/.bin/jq '.' benchmark-results/dojo2-v0.2.0-non-keyed$file
-	./node_modules/.bin/jq '.' benchmark-results/vanillajs-non-keyed$file
-done
-
 ls benchmark-results
+
+node _build/tests/benchmark/runner/process-benchmark-results.js
 
 function cleanup {
     kill $SERVER_PID
