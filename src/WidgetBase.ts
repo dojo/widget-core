@@ -1,4 +1,3 @@
-import { EventObject, EventType } from '@dojo/core/interfaces';
 import Map from '@dojo/shim/Map';
 import WeakMap from '@dojo/shim/WeakMap';
 import { v } from './d';
@@ -39,12 +38,6 @@ interface ReactionFunctionConfig {
 	reaction: DiffPropertyReaction;
 }
 
-export interface WidgetAndElementEvent<T extends EventType> extends EventObject<T> {
-	element: Element;
-	key: string | number;
-	target: WidgetBase;
-}
-
 export type BoundFunctionData = { boundFunc: (...args: any[]) => any, scope: any };
 
 const decoratorMap = new Map<Function, Map<string, any[]>>();
@@ -78,7 +71,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	/**
 	 * Array of property keys considered changed from the previous set properties
 	 */
-	private _changedPropertyKeys: (string | number)[] = [];
+	private _changedPropertyKeys: string[] = [];
 
 	/**
 	 * map of decorators that are applied to this widget
@@ -184,7 +177,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		return this._properties;
 	}
 
-	public get changedPropertyKeys(): (string | number)[] {
+	public get changedPropertyKeys(): string[] {
 		return [ ...this._changedPropertyKeys ];
 	}
 
@@ -207,7 +200,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	public __setProperties__(originalProperties: this['properties']): void {
 		const properties = this._runBeforeProperties(originalProperties);
 		const registeredDiffPropertyNames = this.getDecorator('registeredDiffProperty');
-		const changedPropertyKeys: (string | number)[] = [];
+		const changedPropertyKeys: string[] = [];
 		const propertyNames = Object.keys(properties);
 		const instanceData = widgetInstanceMap.get(this)!;
 		this._renderState = WidgetRenderState.PROPERTIES;
@@ -399,7 +392,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		return allDecorators;
 	}
 
-	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: (string | number)[]): Map<Function, ReactionFunctionArguments> {
+	private _mapDiffPropertyReactions(newProperties: any, changedPropertyKeys: string[]): Map<Function, ReactionFunctionArguments> {
 		const reactionFunctions: ReactionFunctionConfig[] = this.getDecorator('diffReaction');
 
 		return reactionFunctions.reduce((reactionPropertyMap, { reaction, propertyName }) => {
