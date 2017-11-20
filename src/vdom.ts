@@ -565,7 +565,7 @@ function checkDistinguishable(
 }
 
 function updateChildren(
-	parentDNode: InternalDNode,
+	parentHNode: InternalHNode,
 	oldChildren: InternalDNode[],
 	newChildren: InternalDNode[],
 	parentInstance: DefaultWidgetBaseInterface,
@@ -586,7 +586,7 @@ function updateChildren(
 		const newChild = newChildren[newIndex];
 
 		if (oldChild !== undefined && same(oldChild, newChild)) {
-			textUpdated = updateDom(oldChild, newChild, projectionOptions, parentDNode, parentInstance) || textUpdated;
+			textUpdated = updateDom(oldChild, newChild, projectionOptions, parentHNode, parentInstance) || textUpdated;
 			oldIndex++;
 		}
 		else {
@@ -601,7 +601,7 @@ function updateChildren(
 					});
 					nodeToRemove(oldChildren[i], transitions, projectionOptions);
 				}
-				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, parentDNode, parentInstance) || textUpdated;
+				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, parentHNode, parentInstance) || textUpdated;
 				oldIndex = findOldIndex + 1;
 			}
 			else {
@@ -628,7 +628,7 @@ function updateChildren(
 					}
 				}
 
-				createDom(newChild, parentDNode, insertBefore, projectionOptions, parentInstance);
+				createDom(newChild, parentHNode, insertBefore, projectionOptions, parentInstance);
 				nodeAdded(newChild, transitions);
 				const indexToCheck = newIndex;
 				projectionOptions.afterRenderCallbacks.push(() => {
@@ -654,7 +654,7 @@ function updateChildren(
 }
 
 function addChildren(
-	parentDNode: InternalDNode,
+	parentHNode: InternalHNode,
 	children: InternalDNode[] | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface,
@@ -665,8 +665,8 @@ function addChildren(
 		return;
 	}
 
-	if (projectionOptions.merge && childNodes === undefined && isHNode(parentDNode)) {
-		childNodes = arrayFrom(parentDNode.domNode!.childNodes);
+	if (projectionOptions.merge && childNodes === undefined) {
+		childNodes = arrayFrom(parentHNode.domNode!.childNodes);
 	}
 
 	for (let i = 0; i < children.length; i++) {
@@ -682,10 +682,10 @@ function addChildren(
 					}
 				}
 			}
-			createDom(child, parentDNode, insertBefore, projectionOptions, parentInstance);
+			createDom(child, parentHNode, insertBefore, projectionOptions, parentInstance);
 		}
 		else {
-			createDom(child, parentDNode, insertBefore, projectionOptions, parentInstance, childNodes);
+			createDom(child, parentHNode, insertBefore, projectionOptions, parentInstance, childNodes);
 		}
 	}
 }
@@ -713,7 +713,7 @@ function initPropertiesAndChildren(
 
 function createDom(
 	dnode: InternalDNode,
-	parentDNode: any,
+	parentHNode: InternalHNode,
 	insertBefore: Node | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface,
@@ -741,7 +741,7 @@ function createDom(
 		if (rendered) {
 			const filteredRendered = filterAndDecorateChildren(rendered, instance);
 			dnode.rendered = filteredRendered;
-			addChildren(parentDNode, filteredRendered, projectionOptions, instance, insertBefore, childNodes);
+			addChildren(parentHNode, filteredRendered, projectionOptions, instance, insertBefore, childNodes);
 		}
 		instanceData.nodeHandler.addRoot();
 		projectionOptions.afterRenderCallbacks.push(() => {
@@ -755,7 +755,7 @@ function createDom(
 			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions);
 			return;
 		}
-		const doc = parentDNode.domNode!.ownerDocument;
+		const doc = parentHNode.domNode!.ownerDocument;
 		if (dnode.tag === '') {
 			if (dnode.domNode !== undefined) {
 				const newDomNode = dnode.domNode.ownerDocument.createTextNode(dnode.text!);
@@ -765,10 +765,10 @@ function createDom(
 			else {
 				domNode = dnode.domNode = doc.createTextNode(dnode.text!);
 				if (insertBefore !== undefined) {
-					parentDNode.domNode!.insertBefore(domNode, insertBefore);
+					parentHNode.domNode!.insertBefore(domNode, insertBefore);
 				}
 				else {
-					parentDNode.domNode!.appendChild(domNode);
+					parentHNode.domNode!.appendChild(domNode);
 				}
 			}
 		}
@@ -788,17 +788,17 @@ function createDom(
 				domNode = dnode.domNode;
 			}
 			if (insertBefore !== undefined) {
-				parentDNode.domNode!.insertBefore(domNode, insertBefore);
+				parentHNode.domNode!.insertBefore(domNode, insertBefore);
 			}
-			else if (domNode!.parentNode !== parentDNode.domNode!) {
-				parentDNode.domNode!.appendChild(domNode);
+			else if (domNode!.parentNode !== parentHNode.domNode!) {
+				parentHNode.domNode!.appendChild(domNode);
 			}
 			initPropertiesAndChildren(domNode!, dnode, parentInstance, projectionOptions);
 		}
 	}
 }
 
-function updateDom(previous: any, dnode: InternalDNode, projectionOptions: ProjectionOptions, parentDNode: InternalDNode, parentInstance: DefaultWidgetBaseInterface) {
+function updateDom(previous: any, dnode: InternalDNode, projectionOptions: ProjectionOptions, parentHNode: InternalHNode, parentInstance: DefaultWidgetBaseInterface) {
 	if (isWNode(dnode)) {
 		const { instance, rendered: previousRendered } = previous;
 		if (instance && previousRendered) {
@@ -810,12 +810,12 @@ function updateDom(previous: any, dnode: InternalDNode, projectionOptions: Proje
 			const rendered = instance.__render__();
 			dnode.rendered = filterAndDecorateChildren(rendered, instance);
 			if (hasRenderChanged(previousRendered, rendered)) {
-				updateChildren(parentDNode, previousRendered, dnode.rendered, instance, projectionOptions);
+				updateChildren(parentHNode, previousRendered, dnode.rendered, instance, projectionOptions);
 				instanceData.nodeHandler.addRoot();
 			}
 		}
 		else {
-			createDom(dnode, parentDNode, undefined, projectionOptions, parentInstance);
+			createDom(dnode, parentHNode, undefined, projectionOptions, parentInstance);
 		}
 	}
 	else {
