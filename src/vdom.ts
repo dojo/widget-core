@@ -534,40 +534,35 @@ function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, pro
 function checkDistinguishable(
 	childNodes: InternalDNode[],
 	indexToCheck: number,
-	parentHNode: InternalHNode,
-	operation: string
+	parentInstance: DefaultWidgetBaseInterface
 ) {
 	const childNode = childNodes[indexToCheck];
 	if (isHNode(childNode) && childNode.tag === '') {
 		return; // Text nodes need not be distinguishable
 	}
-	const properties = childNode.properties;
-	const key = properties && properties.key;
+	const { key } = childNode.properties;
 
-	if (!key) {
+	if (key === undefined || key === null) {
 		for (let i = 0; i < childNodes.length; i++) {
 			if (i !== indexToCheck) {
 				const node = childNodes[i];
 				if (same(node, childNode)) {
+					let nodeIdentifier: string;
+					const parentName = (parentInstance as any).constructor.name;
 					if (isWNode(childNode)) {
-						const widgetName = (childNode.widgetConstructor as any).name;
-						let errorMsg = 'It is recommended to provide a unique \'key\' property when using the same widget multiple times as siblings';
-
-						if (widgetName) {
-							errorMsg = `It is recommended to provide a unique 'key' property when using the same widget (${widgetName}) multiple times as siblings`;
-						}
-						console.warn(errorMsg);
+						nodeIdentifier = (childNode.widgetConstructor as any).name;
 					}
 					else {
-						if (operation === 'added') {
-							throw new Error(parentHNode.tag + ' had a ' + childNode.tag + ' child ' +
-								'added, but there is now more than one. You must add unique key properties to make them distinguishable.');
-						}
-						else {
-							throw new Error(parentHNode.tag + ' had a ' + childNode.tag + ' child ' +
-								'removed, but there were more than one. You must add unique key properties to make them distinguishable.');
-						}
+						nodeIdentifier = childNode.tag;
 					}
+
+					let errorMsg = 'A widget has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique \'key\' property when using the same widget or element multiple times as siblings';
+
+					if (nodeIdentifier && parentName) {
+						errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${nodeIdentifier}) multiple times as siblings`;
+					}
+					console.warn(errorMsg);
+					break;
 				}
 			}
 		}
@@ -604,11 +599,12 @@ function updateChildren(
 			if (findOldIndex >= 0) {
 				for (i = oldIndex; i < findOldIndex; i++) {
 					const oldChild = oldChildren[i];
+					const indexToCheck = i;
 					projectionOptions.afterRenderCallbacks.push(() => {
 						callOnDetach(oldChild, parentInstance);
+						checkDistinguishable(oldChildren, indexToCheck, parentInstance);
 					});
 					nodeToRemove(oldChildren[i], transitions, projectionOptions);
-					checkDistinguishable(oldChildren, i, parentDNode as InternalHNode, 'removed');
 				}
 				textUpdated = updateDom(oldChildren[findOldIndex], newChild, projectionOptions, parentDNode, parentInstance) || textUpdated;
 				oldIndex = findOldIndex + 1;
@@ -639,7 +635,10 @@ function updateChildren(
 
 				createDom(newChild, parentDNode, insertBefore, projectionOptions, parentInstance);
 				nodeAdded(newChild, transitions);
-				checkDistinguishable(newChildren, newIndex, parentDNode as InternalHNode, 'added');
+				const indexToCheck = newIndex;
+				projectionOptions.afterRenderCallbacks.push(() => {
+					checkDistinguishable(newChildren, indexToCheck, parentInstance);
+				});
 			}
 		}
 		newIndex++;
@@ -648,11 +647,12 @@ function updateChildren(
 		// Remove child fragments
 		for (i = oldIndex; i < oldChildrenLength; i++) {
 			const oldChild = oldChildren[i];
+			const indexToCheck = i;
 			projectionOptions.afterRenderCallbacks.push(() => {
 				callOnDetach(oldChild, parentInstance);
+				checkDistinguishable(oldChildren, indexToCheck, parentInstance);
 			});
 			nodeToRemove(oldChildren[i], transitions, projectionOptions);
-			checkDistinguishable(oldChildren, i, parentDNode as InternalHNode, 'removed');
 		}
 	}
 	return textUpdated;
