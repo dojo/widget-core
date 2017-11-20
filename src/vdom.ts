@@ -940,9 +940,7 @@ function createProjection(dnode: InternalDNode | InternalDNode[], parentInstance
 			let domNode = projectionOptions.rootNode;
 
 			updatedDNode = filterAndDecorateChildren(updatedDNode, parentInstance);
-			const parentDNode = toTextHNode('');
-			parentDNode.domNode = domNode;
-			updateChildren(parentDNode, projectionDNode, updatedDNode as InternalDNode[], parentInstance, projectionOptions);
+			updateChildren(toParentHNode(domNode), projectionDNode, updatedDNode as InternalDNode[], parentInstance, projectionOptions);
 			const instanceData = widgetInstanceMap.get(parentInstance)!;
 			instanceData.nodeHandler.addRoot();
 			runDeferredRenderCallbacks(projectionOptions);
