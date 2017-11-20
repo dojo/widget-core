@@ -1050,14 +1050,10 @@ describe('vdom', () => {
 				}
 			}
 
-			const widgetName = (Foo as any).name;
-			const parentName = (Baz as any).name;
+			const widgetName = (Foo as any).name || 'unknown';
+			const parentName = (Baz as any).name || 'unknown';
 
-			let errorMsg = 'A widget has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique \'key\' property when using the same widget or element multiple times as siblings';
-
-			if (widgetName) {
-				errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
-			}
+			const errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
 
 			const widget = new Baz();
 			const projection = dom.create(widget.__render__() as HNode, widget);
@@ -2079,13 +2075,9 @@ describe('vdom', () => {
 
 		it('will throw an error when vdom is not sure which node is added', () => {
 			const widgetName = 'span';
-			const parentName = projectorStub.constructor.name;
+			const parentName = projectorStub.constructor.name || 'unknown';
+			const errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
 
-			let errorMsg = 'A widget has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique \'key\' property when using the same widget or element multiple times as siblings';
-
-			if (widgetName) {
-				errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
-			}
 			const projection = dom.create(v('div', [
 				v('span', [ 'a' ]),
 				v('span', [ 'c' ])
@@ -2107,13 +2099,8 @@ describe('vdom', () => {
 
 		it('will throw an error when vdom is not sure which node is removed', () => {
 			const widgetName = 'span';
-			const parentName = projectorStub.constructor.name;
-
-			let errorMsg = 'A widget has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique \'key\' property when using the same widget or element multiple times as siblings';
-
-			if (widgetName) {
-				errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
-			}
+			const parentName = projectorStub.constructor.name || 'unknown';
+			const errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${widgetName}) multiple times as siblings`;
 
 			const projection = dom.create(v('div', [
 				v('span', [ 'a' ]),

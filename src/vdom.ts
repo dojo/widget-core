@@ -548,20 +548,15 @@ function checkDistinguishable(
 				const node = childNodes[i];
 				if (same(node, childNode)) {
 					let nodeIdentifier: string;
-					const parentName = (parentInstance as any).constructor.name;
+					const parentName = (parentInstance as any).constructor.name || 'unknown';
 					if (isWNode(childNode)) {
-						nodeIdentifier = (childNode.widgetConstructor as any).name;
+						nodeIdentifier = (childNode.widgetConstructor as any).name || 'unknown';
 					}
 					else {
 						nodeIdentifier = childNode.tag;
 					}
 
-					let errorMsg = 'A widget has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique \'key\' property when using the same widget or element multiple times as siblings';
-
-					if (nodeIdentifier && parentName) {
-						errorMsg = `A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${nodeIdentifier}) multiple times as siblings`;
-					}
-					console.warn(errorMsg);
+					console.warn(`A widget (${parentName}) has had a child addded or removed, but they were not able to uniquely identified. It is recommended to provide a unique 'key' property when using the same widget or element (${nodeIdentifier}) multiple times as siblings`);
 					break;
 				}
 			}
