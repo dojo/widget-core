@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import * as fs from 'fs';
 import Map from '@dojo/shim/Map';
 import { endsWith } from '@dojo/shim/string';
@@ -120,7 +119,7 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 			}
 		});
 
-		let sorted = _.compact(values).map(data => {
+		let sorted = values.filter(value => value).map(data => {
 			return data.mean;
 		}).sort((a, b) => a - b);
 
@@ -130,7 +129,7 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 			min = sorted[0];
 		}
 
-		_.forEach(values, function (value, idx) {
+		values.forEach(function (value, idx) {
 			if (value) {
 				try {
 					let factor: number;

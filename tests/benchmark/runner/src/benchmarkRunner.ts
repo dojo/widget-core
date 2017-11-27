@@ -2,7 +2,6 @@ import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, WebDriver, promise, logging } from 'selenium-webdriver';
 import { BenchmarkType, Benchmark, benchmarks, fileName } from './benchmarks';
 import { setUseShadowRoot } from './webdriverAccess';
-import { startsWith } from '@dojo/shim/string';
 import * as fs from 'fs';
 import * as yargs from 'yargs';
 import { JSONResult, config, FrameworkData, frameworks } from './common';
@@ -36,14 +35,6 @@ function extractRelevantEvents(entries: logging.Entry[]) {
 			filteredEvents.push({type: 'navigationStart', ts: +e.params.ts, dur: 0, end: +e.params.ts});
 		} else if (e.params.name === 'Paint') {
 			filteredEvents.push({type: 'paint', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts + e.params.dur, evt: JSON.stringify(e)});
-		// } else if (e.params.name==='Rasterize') {
-		//     filteredEvents.push({type:'paint', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts+e.params.dur, evt: JSON.stringify(e)});
-		// } else if (e.params.name==='CompositeLayers') {
-		//     filteredEvents.push({type:'paint', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts, evt: JSON.stringify(e)});
-		// } else if (e.params.name==='Layout') {
-		//     filteredEvents.push({type:'paint', ts: +e.params.ts, dur: +e.params.dur, end: e.params.ts, evt: JSON.stringify(e)});
-		// } else if (e.params.name==='UpdateLayerTree') {
-		//     filteredEvents.push({type:'paint', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts+e.params.dur, evt: JSON.stringify(e)});
 		} else if (e.params.name === 'MajorGC' && e.params.args.usedHeapSizeAfter) {
 			filteredEvents.push({type: 'gc', ts: +e.params.ts, end: +e.params.ts, mem: Number(e.params.args.usedHeapSizeAfter) / 1024 / 1024});
 		}
@@ -112,7 +103,8 @@ async function computeResultsCPU(driver: WebDriver): Promise<number[]> {
 
 			if (lastEvent && lastEvent.end) {
 				eventsDuringBenchmarkEnd = lastEvent.end;
-			} else {
+			}
+			else {
 				eventsDuringBenchmarkEnd = 0;
 			}
 
@@ -237,12 +229,11 @@ function buildDriver() {
 	logPref.setLevel(logging.Type.BROWSER, logging.Level.ALL);
 
 	let options = new chrome.Options();
-	// options = options.setChromeBinaryPath("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome");
-	// options = options.setChromeBinaryPath("/Applications/Chromium.app/Contents/MacOS/Chromium");
-	// options = options.setChromeBinaryPath("/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary");
+
 	if (args.headless) {
-	options = options.addArguments('--headless');
+		options = options.addArguments('--headless');
 	}
+
 	options = options.addArguments('--js-flags=--expose-gc');
 	options = options.addArguments('--disable-infobars');
 	options = options.addArguments('--disable-background-networking');
@@ -258,13 +249,8 @@ function buildDriver() {
 }
 
 async function forceGC(framework: FrameworkData, driver: WebDriver): Promise<any> {
-	if (startsWith(framework.name, 'angular-v4')) {
-		// workaround for window.gc for angular 4 - closure rewrites windows.gc");
-		await driver.executeScript('window.Angular4PreservedGC();');
-	} else {
-		for (let i = 0; i < 5; i++) {
-			await driver.executeScript('window.gc();');
-		}
+	for (let i = 0; i < 5; i++) {
+		await driver.executeScript('window.gc();');
 	}
 }
 
