@@ -17,7 +17,8 @@ frameworks.forEach((framework, fIdx) => {
 				encoding: 'utf-8'
 			});
 			resultJS += '\n' + data + ',';
-		} else {
+		}
+		else {
 			console.log('MISSING FILE', file);
 		}
 	});

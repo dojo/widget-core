@@ -25,7 +25,8 @@ function convertPath(path: string): Array<PathPart> {
 				console.log('Index can\'t be parsed', components[1]);
 				throw 'Index can\'t be parsed ' + components[1];
 			}
-		} else {
+		}
+		else {
 			index = 1;
 		}
 		res.push({tagName, index});
@@ -183,8 +184,6 @@ export function clickElementByXPath(driver: WebDriver, xpath: string) {
 			await elem.click();
 		}
 	});
-	// Stale element possible:
-	// return to(driver.findElement(By.xpath(xpath)).click());
 }
 
 export async function getTextByXPath(driver: WebDriver, xpath: string): Promise<any> {

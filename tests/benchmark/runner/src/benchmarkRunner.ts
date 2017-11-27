@@ -28,14 +28,18 @@ function extractRelevantEvents(entries: logging.Entry[]) {
 			if (e.params.args.data.type === 'click') {
 				filteredEvents.push({type: 'click', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts + e.params.dur});
 			}
-		} else if (e.params.name === 'TimeStamp' &&
+		}
+		else if (e.params.name === 'TimeStamp' &&
 			(e.params.args.data.message === 'afterBenchmark' || e.params.args.data.message === 'finishedBenchmark' || e.params.args.data.message === 'runBenchmark' || e.params.args.data.message === 'initBenchmark')) {
 			filteredEvents.push({type: e.params.args.data.message, ts: +e.params.ts, dur: 0, end: +e.params.ts});
-		} else if (e.params.name === 'navigationStart') {
+		}
+		else if (e.params.name === 'navigationStart') {
 			filteredEvents.push({type: 'navigationStart', ts: +e.params.ts, dur: 0, end: +e.params.ts});
-		} else if (e.params.name === 'Paint') {
+		}
+		else if (e.params.name === 'Paint') {
 			filteredEvents.push({type: 'paint', ts: +e.params.ts, dur: +e.params.dur, end: +e.params.ts + e.params.dur, evt: JSON.stringify(e)});
-		} else if (e.params.name === 'MajorGC' && e.params.args.usedHeapSizeAfter) {
+		}
+		else if (e.params.name === 'MajorGC' && e.params.args.usedHeapSizeAfter) {
 			filteredEvents.push({type: 'gc', ts: +e.params.ts, end: +e.params.ts, mem: Number(e.params.args.usedHeapSizeAfter) / 1024 / 1024});
 		}
 	});
@@ -395,7 +399,8 @@ async function runBench(frameworkNames: string[], benchmarkNames: string[], dir:
 		let benchmark = data[i][1];
 		if (benchmark.type === BenchmarkType.STARTUP) {
 			await runStartupBenchmark(framework, benchmark, dir);
-		} else {
+		}
+		else {
 			await runMemOrCPUBenchmark(framework, benchmark, dir);
 		}
 	}
@@ -429,6 +434,7 @@ if (!fs.existsSync(dir)) {
 
 if (args.help) {
 	yargs.showHelp();
-} else {
+}
+else {
 	runBench(runFrameworks, runBenchmarks, dir);
 }

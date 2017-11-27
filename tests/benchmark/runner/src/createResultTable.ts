@@ -20,12 +20,14 @@ fs.readdirSync('./results').filter(file => endsWith(file, '.json')).forEach(name
 
 	if (!frameworkMap.has(data.framework)) {
 		console.log('WARN: No entry in commons.ts for ' + data.framework + '. Data will not appear in result table.');
-	} else {
+	}
+	else {
 		const dataFrameworkResult = results.get(data.framework);
 
 		if (dataFrameworkResult) {
 			dataFrameworkResult.set(data.benchmark, data);
-		} else {
+		}
+		else {
 			results.set(data.framework, new Map());
 		}
 	}
@@ -50,7 +52,8 @@ function color(factor: number): string {
 		let g = (1.0 - a) * 191 + a * 236;
 		let b = (1.0 - a) * 124 + a * 132;
 		return `rgb(${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)})`;
-	} else  {
+	}
+	else {
 		let a = Math.min((factor - 2.0) / 2.0, 1.0);
 		let r = (1.0 - a) * 255 + a * 249;
 		let g = (1.0 - a) * 236 + a * 105;
@@ -92,13 +95,19 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 			if (b.name === referenceName) { return 0; }
 			console.log('found reference name', referenceName);
 			return 1;
-		} else if (b.name === referenceName) {
+		}
+		else if (b.name === referenceName) {
 			if (a.name === referenceName) { return 0; }
 			console.log('found reference name', referenceName);
 			return -1;
-		} else {
-			if (a.name < b.name) { return -1; }
-			else if (a.name === b.name) { return 0; }
+		}
+		else {
+			if (a.name < b.name) {
+				return -1;
+			}
+			else if (a.name === b.name) {
+				return 0;
+			}
 			else { return 1; }
 		}
 	});
@@ -137,7 +146,8 @@ let generateBenchData = (benchmarks: Array<Benchmark>, frameworkPredicate: Frame
 						// Clamp to 1 fps
 						factor = Math.max(16, value.mean) / Math.max(16, min);
 						factors[idx] = factors[idx] * factor;
-					} else {
+					}
+					else {
 						factor = value.mean / min;
 					}
 
