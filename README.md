@@ -1012,8 +1012,7 @@ import MetaBase from "@dojo/widget-core/meta/Base";
 
 class HtmlMeta extends MetaBase {
     get(key: string): string {
-        this.requireNode(key);
-        const node = this.nodes.get(key);
+        const node = this.getNode(key);
         return node ? node.innerHTML : '';
     }
 }
@@ -1028,21 +1027,18 @@ class MyWidget extends WidgetBase<WidgetProperties> {
         // run your meta
         const html = this.meta(HtmlMeta).get('comment');
 
-        return v('div', { key: 'root', innerHTML: html });
+        return v('div', { key: 'comment', innerHTML: html });
     }
     // ...
 }
 ```
 
-Meta classes are provided with a few hooks into the widget, passed to the constructor:
+Extending the base class found in `meta/Base` will provide the following functionality:
 
-* `nodes` - A map of `key` strings to DOM elements. Only `v` nodes rendered with `key` properties are stored.
-* `requireNode` - A method that accepts a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, the widget will be re-rendered and if the node does not exist on the next render, an **error** will be thrown.
+* `has` - A method that accepts a `key` and returns a `boolean` to denote if that node exists in the rendered DOM.
+* `getNode` - A method that accepts a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, a callback is created which will invalidate the widget when the node becomes available. This uses the underlying `nodeHandler` event system.
 * `invalidate` - A method that will invalidate the widget.
-
-Extending the base class found in `meta/Base` will automatically add these hooks to the class instance as well as providing a `has` method:
-
-* `has(key: string)` - A method that returns `true` if the DOM element with the passed `key` exists in the rendered DOM.
+* `afterRender` - A function that is called after the render is complete. This can be used to clear down any maps etc... that a meta may have created. This is used, for instance, in the `WebAnimation` meta to clear down unused animations.
 
 Meta classes that require extra options should accept them in their methods.
 
@@ -1055,8 +1051,7 @@ interface IsTallMetaOptions {
 
 class IsTallMeta extends MetaBase {
     isTall(key: string, { minHeight }: IsTallMetaOptions = { minHeight: 300 }): boolean {
-        this.requireNode(key);
-        const node = this.nodes.get(key);
+        const node = this.getNode(key);
         if (node) {
             return node.offsetHeight >= minHeight;
         }
