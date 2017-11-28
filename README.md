@@ -1038,7 +1038,7 @@ Extending the base class found in `meta/Base` will provide the following functio
 * `has` - A method that accepts a `key` and returns a `boolean` to denote if the corresponding node exists in the rendered DOM.
 * `getNode` - A method that accepts a `key` string to inform the widget it needs a rendered DOM element corresponding to that key. If one is available, it will be returned immediately. If not, a callback is created which will invalidate the widget when the node becomes available. This uses the underlying `nodeHandler` event system.
 * `invalidate` - A method that will invalidate the widget.
-* `afterRender` - This provides a hook into the widget afterRender lifecycle that can be used to clear up any resources that the meta has created. This is used, for instance, in the `WebAnimation` meta to clear down unused animations.
+* `afterRender` - This provides a hook into the widget `afterRender` lifecycle that can be used to clear up any resources that the meta has created. This is used, for instance, in the `WebAnimation` meta to clear down unused animations.
 
 Meta classes that require extra options should accept them in their methods.
 
