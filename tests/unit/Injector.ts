@@ -19,5 +19,12 @@ registerSuite('Injector', {
 		});
 		injector.set({});
 		assert.isTrue(invalidateCalled);
+	},
+	'without an initial payload'() {
+		const injector = new Injector();
+		assert.strictEqual(injector.get(), injector);
+
+		injector.set({});
+		assert.notStrictEqual(injector.get(), injector);
 	}
 });

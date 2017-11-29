@@ -805,7 +805,7 @@ class MyClass extends WidgetBase {
 
 There is built in support for side-loading/injecting values into sections of the widget tree and mapping them to a widget's properties. This is achieved by registering a `@dojo/widget-core/Injector` instance against a `registry` that is available to your application (i.e. set on the projector instance, `projector.setProperties({ registry })`).
 
-Create an `Injector` instance and pass the `payload` that needs to be injected to the constructor:
+Create an `Injector` instance and pass an optional `payload` that needs to be injected to the constructor (if no `payload` is provided, then the injector itself is used as the initial payload):
 
 ```ts
 const injector = new Injector({ foo: 'baz' });
