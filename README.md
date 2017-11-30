@@ -1183,7 +1183,11 @@ class MyWidgetWithTsx extends Themed(WidgetBase)<MyProperties> {
 Widgets can be turned into [Custom Elements](https://www.w3.org/TR/2016/WD-custom-elements-20161013/) with
 minimal extra effort.
 
-Just create a `CustomElementDescriptor` factory and use the `@dojo/cli` build tooling to do the rest of the work,
+There are two ways to turn a widget into a custom element.
+
+#### Using the `CustomElementDescriptor` factory and `@dojo/cli`
+
+Create a file that declares your widget's `CustomElementDescriptor` factory:
 
 ```ts
 import { CustomElementDescriptor } from '@dojo/widget-core/customElements';
@@ -1357,6 +1361,52 @@ The initialization function is run from the context of the HTML element.
 ```
 
 It should be noted that children nodes are removed from the DOM when widget instantiation occurs, and added as children to the widget instance.
+
+#### Using the `customElement` class decorator
+
+The `customElement` decorator can be used to annotate the widget class
+that should be converted to a custom element,
+
+```typescript
+interface MyWidgetProperties {
+	onClick: (event: Event) => void;
+	foo: string;
+	bar: string;
+}
+@customElement<MyWidgetProperties>({
+	tag: 'my-widget',
+	attribute: [ 'foo', 'bar' ],
+	events: [ 'onClick' ]
+})
+class MyWidget extends WidgetBase<MyWidgetProperties> {
+// ...
+}
+```
+
+No additional steps are required in this case; the custom element
+can be used in your application automatically. The configuration
+provided to the `customElement` decorator is similar to that provded in
+a `CustomElementDescriptor` factory, with some simplifications.
+
+##### Attributes
+
+Only the attribute name can be provided, and the attribute name
+should be the same as the corresponding property.
+
+##### Properties
+
+Only the property name can be provided, and the property name must match
+the corresponding widget property.
+
+##### Events
+
+Only the event handler property name can be provided, the event name is assumed
+to match the property name, with the `'on'` removed, and in lowercase.
+
+##### WidgetConstructor
+
+No widget constructor is provided, the class that is decorated is used as
+the widget constructor.
 
 ## API
 
