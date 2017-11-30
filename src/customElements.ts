@@ -57,8 +57,8 @@ export interface CustomElementEventDescriptor {
  * Defines a custom element initializing function. Passes in initial properties so they can be extended
  * by the initializer.
  */
-export interface CustomElementInitializer {
-	(properties: WidgetProperties): void;
+export interface CustomElementInitializer<P extends WidgetProperties = WidgetProperties> {
+	(properties: P): void;
 }
 
 export enum ChildrenType {

@@ -1,2 +1,3 @@
-import './Drag';
-import './registerCustomElement';
+// import './Drag';
+// import './registerCustomElement';
+import './customElement';
