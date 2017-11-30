@@ -39,7 +39,7 @@ export interface CustomElementConfig<P> {
  */
 export function customElement<P extends {} = WidgetProperties>({ tag, properties, attributes, events, initialization }: CustomElementConfig<P>) {
 	return function <T extends Constructor<any>>(target: T) {
-		registerCustomElement(() => ({
+		registerCustomElement<P>(() => ({
 			tagName: tag,
 			widgetConstructor: target,
 			attributes: (attributes || []).map(attributeName => ({ attributeName })),

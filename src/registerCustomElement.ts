@@ -15,8 +15,8 @@ declare namespace customElements {
 /**
  * Describes a function that returns a CustomElementDescriptor
  */
-export interface CustomElementDescriptorFactory {
-	(): CustomElementDescriptor;
+export interface CustomElementDescriptorFactory<P extends {} = WidgetProperties> {
+	(): CustomElementDescriptor<P>;
 }
 
 /**
@@ -26,7 +26,7 @@ export interface CustomElementDescriptorFactory {
  *
  * @param descriptorFactory
  */
-export function registerCustomElement(descriptorFactory: CustomElementDescriptorFactory) {
+export function registerCustomElement<P extends {} = WidgetProperties>(descriptorFactory: CustomElementDescriptorFactory<P>) {
 	const descriptor = descriptorFactory();
 
 	customElements.define(descriptor.tagName, class extends HTMLElement {
