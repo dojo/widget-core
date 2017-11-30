@@ -34,8 +34,8 @@ export interface CustomElementConfig<P> {
 }
 
 /**
- * Decorator is provided properties and modifies the target class to add a method that
- * returns a custom element descriptor.
+ * This Decorator is provided properties that define the behavior of a custom element, and
+ * registers that custom element.
  */
 export function customElement<P extends {} = WidgetProperties>({ tag, properties, attributes, events, initialization }: CustomElementConfig<P>) {
 	return function <T extends Constructor<any>>(target: T) {
