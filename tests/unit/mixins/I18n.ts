@@ -114,14 +114,19 @@ registerSuite('mixins/I18nMixin', {
 
 			'properties can be registered with helper'() {
 				const registry = new Registry();
-				registerI18nInjector({ locale: 'fr' }, registry);
+				const injector = registerI18nInjector({ locale: 'fr' }, registry);
 
 				localized = new Localized();
 				localized.__setCoreProperties__({ bind: localized, baseRegistry: registry });
 				localized.__setProperties__({});
 
-				const result = localized.__render__();
+				let result = localized.__render__();
 				assert.strictEqual(result.properties!['lang'], 'fr');
+
+				injector.set({ locale: 'jp' });
+				localized.__setProperties__({});
+				result = localized.__render__();
+				assert.strictEqual(result.properties!['lang'], 'jp');
 			}
 		},
 		'does not decorate properties for wNode'() {
