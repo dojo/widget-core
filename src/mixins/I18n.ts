@@ -88,18 +88,8 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 	@inject({
 		name: INJECTOR_KEY,
 		getProperties: (localeData: LocaleData, properties: I18nProperties) => {
-			const { locale, rtl } = localeData;
-			const injected: Partial<I18nProperties> = {};
-
-			if (!properties.locale) {
-				injected.locale = locale;
-			}
-
-			if (typeof properties.rtl === 'undefined') {
-				injected.rtl = rtl;
-			}
-
-			return injected;
+			const { locale = localeData.locale, rtl = localeData.rtl } = properties;
+			return { locale, rtl };
 		}
 	})
 	class I18n extends Base {
