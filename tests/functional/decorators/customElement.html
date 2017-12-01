@@ -17,11 +17,12 @@
 	</child-wrapper>
 	<div>top level child</div>
 </child-wrapper>
-
+<not-used></not-used>
 <script>
 	window.buttonClicked = false;
 	window.ready = false;
 	window.connectedEvent = false;
+	window.__dojoCustomElements__ = true;
 
 	require.config(shimAmdDependencies({
 		baseUrl: '../../../../'
