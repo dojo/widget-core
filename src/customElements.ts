@@ -57,8 +57,8 @@ export interface CustomElementEventDescriptor {
  * Defines a custom element initializing function. Passes in initial properties so they can be extended
  * by the initializer.
  */
-export interface CustomElementInitializer<P extends WidgetProperties = WidgetProperties> {
-	(properties: P): void;
+export interface CustomElementInitializer {
+	(properties: WidgetProperties): void;
 }
 
 export enum ChildrenType {
@@ -78,7 +78,7 @@ export enum ChildrenType {
  * @property events              A list of events to expose on this element
  * @property initialization      A method to run to set custom properties on the wrapped widget
  */
-export interface CustomElementDescriptor<P extends {} = WidgetProperties> {
+export interface CustomElementDescriptor {
 	/**
 	 * The name of the custom element tag
 	 */
@@ -107,7 +107,7 @@ export interface CustomElementDescriptor<P extends {} = WidgetProperties> {
 	/**
 	 * Initialization function called before the widget is created (for custom property setting)
 	 */
-	initialization?: CustomElementInitializer<P>;
+	initialization?: CustomElementInitializer;
 
 	/**
 	 * The type of children that the custom element accepts

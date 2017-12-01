@@ -5,7 +5,7 @@ import registerCustomElement from '../registerCustomElement';
 /**
  * Defines the custom element configuration used by the customElement decorator
  */
-export interface CustomElementConfig<P> {
+export interface CustomElementConfig<P extends WidgetProperties> {
 
 	/**
 	 * The tag of the custom element
@@ -30,16 +30,16 @@ export interface CustomElementConfig<P> {
 	/**
 	 * Initialization function called before the widget is created (for custom property setting)
 	 */
-	initialization?: CustomElementInitializer<P>;
+	initialization?: CustomElementInitializer;
 }
 
 /**
  * This Decorator is provided properties that define the behavior of a custom element, and
  * registers that custom element.
  */
-export function customElement<P extends {} = WidgetProperties>({ tag, properties, attributes, events, initialization }: CustomElementConfig<P>) {
+export function customElement<P extends WidgetProperties = WidgetProperties>({ tag, properties, attributes, events, initialization }: CustomElementConfig<P>) {
 	return function <T extends Constructor<any>>(target: T) {
-		registerCustomElement<P>(() => ({
+		registerCustomElement(() => ({
 			tagName: tag,
 			widgetConstructor: target,
 			attributes: (attributes || []).map(attributeName => ({ attributeName })),
