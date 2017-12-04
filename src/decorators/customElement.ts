@@ -45,7 +45,7 @@ function createAttributeDescriptor(attributeConfig: string | { attributeName: st
  */
 export function customElement<P extends WidgetProperties = WidgetProperties>({ tag, properties, attributes, events, initialization }: CustomElementConfig<P>) {
 	return function <T extends Constructor<any>>(target: T) {
-		if (__dojoCustomElements__) {
+		if (typeof __dojoCustomElements__ !== 'undefined') {
 			registerCustomElement(() => ({
 				tagName: tag,
 				widgetConstructor: target,
