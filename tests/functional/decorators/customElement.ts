@@ -11,7 +11,7 @@ interface TestButtonProperties extends WidgetProperties {
 
 @customElement<TestButtonProperties>({
 	tag: 'test-button',
-	attributes: [ 'label', { attributeName: 'labelSuffix', value: attribute => attribute && attribute.trim() } ],
+	attributes: [ 'label', 'labelSuffix' ],
 	events: [ 'onClick' ]
 })
 @customElement<TestButtonProperties>({
