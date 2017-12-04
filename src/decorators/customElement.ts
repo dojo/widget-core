@@ -1,4 +1,4 @@
-import { CustomElementInitializer } from '../customElements';
+import { CustomElementInitializer, CustomElementAttributeDescriptor } from '../customElements';
 import { Constructor, WidgetProperties } from '../interfaces';
 import registerCustomElement from '../registerCustomElement';
 
@@ -22,7 +22,7 @@ export interface CustomElementConfig<P extends WidgetProperties> {
 	/**
 	 * List of attributes on the custom element to map to widget properties
 	 */
-	attributes?: (keyof P)[];
+	attributes?: ((keyof P) | { attributeName: keyof P, value?: (attribute: string | null) => any })[];
 
 	/**
 	 * List of events to expose
@@ -35,6 +35,10 @@ export interface CustomElementConfig<P extends WidgetProperties> {
 	initialization?: CustomElementInitializer;
 }
 
+function createAttributeDescriptor(attributeConfig: string | { attributeName: string, value?: (attribute: string | null) => any }): CustomElementAttributeDescriptor {
+	return typeof attributeConfig === 'string' ? { attributeName: attributeConfig } : attributeConfig;
+}
+
 /**
  * This Decorator is provided properties that define the behavior of a custom element, and
  * registers that custom element.
@@ -45,7 +49,7 @@ export function customElement<P extends WidgetProperties = WidgetProperties>({ t
 			registerCustomElement(() => ({
 				tagName: tag,
 				widgetConstructor: target,
-				attributes: (attributes || []).map(attributeName => ({ attributeName })),
+				attributes: (attributes || []).map<CustomElementAttributeDescriptor>(createAttributeDescriptor),
 				properties: (properties || []).map(propertyName => ({ propertyName })),
 				events: (events || []).map(propertyName => ({
 					propertyName,
