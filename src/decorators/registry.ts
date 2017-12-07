@@ -5,8 +5,8 @@ import { handleDecorator } from './handleDecorator';
  */
 export function registry(name: string, loader: any) {
 	return handleDecorator((target, propertyKey) => {
-		target.addDecorator('constructor', () => {
-			target.registry.define(name, loader);
+		target.addDecorator('constructor', function(this: any) {
+			this.registry.define(name, loader);
 		});
 	});
 }
