@@ -1,5 +1,5 @@
 {
-	"extends": "./node_modules/@dojo/scripts/tsconfig/umd.json",
+	"extends": "./node_modules/@dojo/scripts/tsconfig/esm.json",
 	"compilerOptions": {
 		"jsx": "react",
 		"jsxFactory": "tsx",

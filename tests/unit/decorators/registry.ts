@@ -1,5 +1,6 @@
 const { describe, it } = intern.getInterface('bdd');
 import { v, w } from '../../../src/d';
+import { DNode } from '../../../src/interfaces';
 const { assert } = intern.getPlugin('chai');
 
 import { registry } from './../../../src/decorators/registry';
@@ -7,13 +8,13 @@ import { WidgetBase } from './../../../src/WidgetBase';
 import ProjectorMixin from './../../../src/mixins/Projector';
 
 export class Widget1 extends WidgetBase {
-	protected render() {
+	protected render(): DNode {
 		return v('span', { classes: ['widget1'] });
 	}
 }
 
 export class Widget2 extends WidgetBase {
-	protected render() {
+	protected render(): DNode {
 		return v('span', { classes: ['widget2'] });
 	}
 }
@@ -27,8 +28,8 @@ describe('decorators/registry', () => {
 			}
 		}
 
-		const Projector = ProjectorMixin(TestWidget1);
-		const projector = new Projector();
+		const projectorConstuctor = ProjectorMixin(TestWidget1);
+		const projector = new projectorConstuctor();
 		projector.async = false;
 
 		const root = document.createElement('div');
@@ -49,8 +50,8 @@ describe('decorators/registry', () => {
 			}
 		}
 
-		const Projector = ProjectorMixin(TestWidget2);
-		const projector = new Projector();
+		const projectorConstructor = ProjectorMixin(TestWidget2);
+		const projector = new projectorConstructor();
 		projector.async = false;
 
 		const root = document.createElement('div');
