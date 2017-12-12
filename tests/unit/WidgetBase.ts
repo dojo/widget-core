@@ -189,10 +189,6 @@ describe('WidgetBase', () => {
 			assert.isUndefined(widget.properties.foobar);
 		});
 
-		it('Runs registered reactions when property is considered changed', () => {
-
-		});
-
 		it('Automatically binds functions properties', () => {
 			class TestWidget extends BaseTestWidget {
 				public called = false;
@@ -282,6 +278,16 @@ describe('WidgetBase', () => {
 			assert.strictEqual(widget.registry.getInjector('label'), 'item' as any);
 			assert.isTrue(invalidateSpy.called);
 		});
+	});
+
+	it('destroys registry when WidgetBase is detached', () => {
+		const widget = new BaseTestWidget();
+		const registry = widget.registry;
+		const instanceData = widgetInstanceMap.get(widget)!;
+		instanceData.onDetach();
+		assert.throws(() => {
+			registry.own({ destroy() {} });
+		}, 'Call made to destroyed method');
 	});
 
 	describe('meta', () => {
