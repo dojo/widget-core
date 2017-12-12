@@ -330,6 +330,22 @@ describe('WidgetBase', () => {
 			instanceData.nodeHandler.addRoot();
 			assert.isTrue(meta.widgetEvent);
 		});
+
+		it('Meta is destroyed when the widget is detached', () => {
+			let metaDestroyed = false;
+			class DestroyableMeta extends TestMeta {
+				destroy() {
+					const result = super.destroy();
+					metaDestroyed = true;
+					return result;
+				}
+			}
+			const widget = new BaseTestWidget();
+			widget.meta(DestroyableMeta);
+			const instanceData = widgetInstanceMap.get(widget)!;
+			instanceData.onDetach();
+			assert.isTrue(metaDestroyed);
+		});
 	});
 
 	describe('decorators', () => {
