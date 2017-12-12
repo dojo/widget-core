@@ -185,11 +185,7 @@ export class Registry extends Evented<{}, RegistryLabel, RegistryEventObject> im
 	}
 
 	private _ctorIsDefaultExport<T>(module: WidgetBaseConstructor | ESMDefaultWidgetBase<T>): boolean {
-		// __esModule
-		// Object.default
-		// default is widgetbase consructor: isWidgetBaseConstructor
-
-		return (module.hasOwnProperty('__esModule') &&
+		return (module && module.hasOwnProperty('__esModule') &&
 			module.hasOwnProperty('default') &&
 			isWidgetBaseConstructor((module as ESMDefaultWidgetBase<T>).default));
 	}
