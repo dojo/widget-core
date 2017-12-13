@@ -1,6 +1,6 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-import { createResolvers } from './../../support/util';
+import { createResolvers } from '@dojo/test-extras/resolvers';
 import { WidgetBase } from './../../../src/WidgetBase';
 import { v, w } from './../../../src/d';
 import { DomWrapper } from '../../../src/util/DomWrapper';

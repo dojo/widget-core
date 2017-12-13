@@ -1,7 +1,7 @@
 const { afterEach, beforeEach, describe, it } = intern.getInterface('bdd');
 const { assert } = intern.getPlugin('chai');
 import { match, spy, stub, SinonStub } from 'sinon';
-import { createResolvers } from './../support/util';
+import { createResolvers } from '@dojo/test-extras/resolvers';
 import sendEvent from './../support/sendEvent';
 
 import { dom, InternalHNode, InternalWNode, widgetInstanceMap } from '../../src/vdom';

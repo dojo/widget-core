@@ -35,6 +35,7 @@
   "devDependencies": {
     "@dojo/interfaces": "~0.2.0",
     "@dojo/loader": "~0.1.1",
+    "@dojo/test-extras": "file:./deps/dojo-test-extras-0.3.1-rc.1.tgz",
     "@types/glob": "5.0.*",
     "@types/grunt": "0.4.*",
     "@types/jsdom": "2.0.*",
