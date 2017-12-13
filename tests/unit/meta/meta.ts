@@ -2,7 +2,7 @@ const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
 import { Base as MetaBase } from '../../../src/meta/Base';
 import { stub, spy } from 'sinon';
-import { createResolvers } from './../../support/util';
+import { createResolvers } from '@dojo/test-extras/resolvers';
 import NodeHandler, { NodeEventType } from '../../../src/NodeHandler';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';

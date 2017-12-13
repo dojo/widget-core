@@ -2,7 +2,7 @@ const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
 
 import sendEvent from '../../support/sendEvent';
-import { createResolvers } from './../../support/util';
+import { createResolvers } from '@dojo/test-extras/resolvers';
 import { v } from '../../../src/d';
 import { ProjectorMixin } from '../../../src/main';
 import { WidgetBase } from '../../../src/WidgetBase';
