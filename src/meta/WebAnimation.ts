@@ -1,8 +1,60 @@
 import 'web-animations-js/web-animations-next-lite.min';
 import { Base } from './Base';
-import { AnimationControls, AnimationProperties, AnimationInfo } from '../interfaces';
 import Map from '@dojo/shim/Map';
 import global from '@dojo/shim/global';
+
+/**
+ * Animation controls are used to control the web animation that has been applied
+ * to a vdom node.
+ */
+export interface AnimationControls {
+	play?: boolean;
+	onFinish?: () => void;
+	onCancel?: () => void;
+	reverse?: boolean;
+	cancel?: boolean;
+	finish?: boolean;
+	playbackRate?: number;
+	startTime?: number;
+	currentTime?: number;
+}
+
+export enum AnimationFill { 'none', 'forwards', 'backwards', 'both', 'auto' }
+export enum AnimationDirection { 'normal', 'reverse', 'alternate', 'alternate-reverse' }
+
+/**
+ * Animation timing properties passed to a new KeyframeEffect.
+ */
+export interface AnimationTimingProperties {
+	duration?: number;
+	delay?: number;
+	direction?: AnimationDirection;
+	easing?: string;
+	endDelay?: number;
+	fill?: AnimationFill;
+	iterations?: number;
+	iterationStart?: number;
+}
+
+/**
+ * Animation propertiues that can be passed as vdom property `animate`
+ */
+export interface AnimationProperties {
+	id: string;
+	effects: any[];
+	controls?: AnimationControls;
+	timing?: AnimationTimingProperties;
+}
+
+/**
+ * Info returned by the `get` function on WebAnimation meta
+ */
+export interface AnimationInfo {
+	currentTime: number;
+	playState: 'idle' | 'pending' | 'running' | 'paused' | 'finished';
+	playbackRate: number;
+	startTime: number;
+}
 
 export interface AnimationPlayer {
 	player: Animation;
@@ -24,7 +76,7 @@ export class WebAnimations extends Base {
 		const keyframeEffect = new KeyframeEffect(
 			node,
 			fx,
-			timing as AnimationEffectTiming
+			timing as any
 		);
 
 		return new Animation(keyframeEffect, global.document.timeline);
