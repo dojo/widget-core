@@ -103,16 +103,19 @@ export interface AnimationControls {
 	currentTime?: number;
 }
 
+export enum AnimationFill { 'none', 'forwards', 'backwards', 'both', 'auto' }
+export enum AnimationDirection { 'normal', 'reverse', 'alternate', 'alternate-reverse' }
+
 /**
  * Animation timing properties passed to a new KeyframeEffect.
  */
 export interface AnimationTimingProperties {
 	duration?: number;
 	delay?: number;
-	direction?: 'normal' | 'reverse' | 'alternate' | 'alternate-reverse';
+	direction?: AnimationDirection;
 	easing?: string;
 	endDelay?: number;
-	fill?: 'none' | 'forwards' | 'backwards' | 'both' | 'auto';
+	fill?: AnimationFill;
 	iterations?: number;
 	iterationStart?: number;
 }

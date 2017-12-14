@@ -24,7 +24,7 @@ export class WebAnimations extends Base {
 		const keyframeEffect = new KeyframeEffect(
 			node,
 			fx,
-			timing
+			timing as AnimationEffectTiming
 		);
 
 		return new Animation(keyframeEffect, global.document.timeline);
