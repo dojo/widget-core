@@ -48,11 +48,11 @@ export class Focus extends Base {
 
 	private _createListener() {
 		global.document.addEventListener('focusin', this._boundFocusHandler);
-		this.own(createHandle(this._removeListener));
+		this.own(createHandle(this._removeListener.bind(this)));
 	}
 
 	private _removeListener() {
-		global.document.removeEventListener('focusin', this._onFocus);
+		global.document.removeEventListener('focusin', this._boundFocusHandler);
 	}
 }
 
