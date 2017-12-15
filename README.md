@@ -710,7 +710,7 @@ class MyWidget extends WidgetBase {
 
 #### Registry Decorator
 
-A registry decorator is provided to make adding widgets to a local registry easier. The decorator can take a single registry entry or an object containing multiple entries.
+A registry decorator is provided to make adding widgets to a local registry easier. The decorator can be stacked to register multiple entries.
 
 ```ts
 // single entry
@@ -726,10 +726,8 @@ class MyWidget extends WidgetBase {
 }
 
 // multiple entries
-@registry({
-    'loading': LoadingWidget,
-    'heading': () => import('./HeadingWidget')
-})
+@registry('loading', LoadingWidget)
+@registry('heading', () => import('./HeadingWidget')
 class MyWidget extends WidgetBase {
     render() {
         if (this.properties) {
