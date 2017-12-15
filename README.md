@@ -703,16 +703,51 @@ class MyWidget extends WidgetBase {
             const LoadingWidget = this.registry.get('loading', true);
             return w(LoadingWidget, {});
         }
-        return w(MyActualChildWidget, {};)
+        return w(MyActualChildWidget, {});
+    }
+}
+```
+
+#### Registry Decorator
+
+A registry decorator is provided to make adding widgets to a local registry easier. The decorator can take a single registry entry or an object containing multiple entries.
+
+```ts
+// single entry
+@registry('loading', LoadingWidget)
+class MyWidget extends WidgetBase {
+    render() {
+        if (this.properties) {
+            const LoadingWidget = this.registry.get('loading', true);
+            return w(LoadingWidget, {});
+        }
+        return w(MyActualChildWidget, {});
+    }
+}
+
+// multiple entries
+@registry({
+    'loading': LoadingWidget,
+    'heading': () => import('./HeadingWidget')
+})
+class MyWidget extends WidgetBase {
+    render() {
+        if (this.properties) {
+            const LoadingWidget = this.registry.get('loading', true);
+            return w(LoadingWidget, {});
+        }
+        return w(MyActualChildWidget, {}, [
+            w('heading', {})
+        ]);
     }
 }
 ```
 
 ### Decorator Lifecycle Hooks
 
-Occasionally, in a mixin or a widget class, it my be required to provide logic that needs to be executed before properties are diffed using `beforeProperties` or either side of a widget's `render` call using `beforeRender` & `afterRender`.
+Occasionally, in a mixin or a widget class, it my be required to provide logic that needs to be executed before properties are diffed using `beforeProperties`, either side of a widget's `render` call using `beforeRender` & `afterRender` or after a constructor using `afterContructor`.
 
-This functionality is provided by the `beforeProperties`, `beforeRender` and `afterRender` decorators that can be found in the `decorators` directory.
+This functionality is provided by the `beforeProperties`, `beforeRender`, `afterRender` and `afterConstructor` decorators that can be found in the `decorators` directory.
 
 ***Note:*** All lifecycle functions are executed in the order that they are specified from the super class up to the final class.
 
@@ -771,6 +806,10 @@ class MyBaseClass extends WidgetBase<WidgetProperties> {
     }
 }
 ```
+
+##### AfterConstructor
+
+The `afterConstructor` lifecycle hook does not receive any params and is ran after the `WidgetBase` constructor code. It is currently used in the `registry decorator` to create registry entries.
 
 ### Method Lifecycle Hooks
 
