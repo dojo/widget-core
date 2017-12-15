@@ -518,7 +518,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	}
 
 	private _runAfterConstructors(): void {
-		const afterConstructors = this.getDecorator('constructor');
+		const afterConstructors = this.getDecorator('afterConstructor');
 
 		if (afterConstructors.length > 0) {
 			afterConstructors.forEach(afterConstructor => afterConstructor.call(this));

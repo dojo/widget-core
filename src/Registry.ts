@@ -89,6 +89,15 @@ export interface ESMDefaultWidgetBase<T> {
 	__esModule: boolean;
 }
 
+export function isWidgetConstructorDefaultExport<T>(item: any): item is ESMDefaultWidgetBase <T> {
+	return Boolean(
+		item &&
+		item.hasOwnProperty('__esModule') &&
+		item.hasOwnProperty('default') &&
+		isWidgetBaseConstructor(item.default)
+	);
+}
+
 /**
  * The Registry implementation
  */
@@ -170,8 +179,8 @@ export class Registry extends Evented<{}, RegistryLabel, RegistryEventObject> im
 
 		promise.then((widgetCtor) => {
 
-			if (this._ctorIsDefaultExport<T>(widgetCtor)) {
-				widgetCtor = ((widgetCtor as any) as ESMDefaultWidgetBase<T>).default;
+			if (isWidgetConstructorDefaultExport<T>(widgetCtor)) {
+				widgetCtor = widgetCtor.default;
 			}
 
 			this._widgetRegistry.set(label, widgetCtor);
@@ -182,12 +191,6 @@ export class Registry extends Evented<{}, RegistryLabel, RegistryEventObject> im
 		});
 
 		return null;
-	}
-
-	private _ctorIsDefaultExport<T>(module: WidgetBaseConstructor | ESMDefaultWidgetBase<T>): boolean {
-		return (module && module.hasOwnProperty('__esModule') &&
-			module.hasOwnProperty('default') &&
-			isWidgetBaseConstructor((module as ESMDefaultWidgetBase<T>).default));
 	}
 
 	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
