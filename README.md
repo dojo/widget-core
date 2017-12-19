@@ -692,6 +692,8 @@ In some scenarios, it might be desirable to allow the `baseRegistry` to override
 
 The following example sets a default loading indicator widget, but passes `true` when getting the widget from the `registry`. This allows a consumer to register an overriding loading indicator in the `baseRegistry`.
 
+The Registry will automatically detect and handle widget constructors as default exports for imported esModules for you.
+
 ```ts
 class MyWidget extends WidgetBase {
     constructor() {
