@@ -89,7 +89,7 @@ export interface ESMDefaultWidgetBase<T> {
 	__esModule: boolean;
 }
 
-export function isWidgetConstructorDefaultExport<T>(item: any): item is ESMDefaultWidgetBase <T> {
+export function isWidgetConstructorDefaultExport<T>(item: any): item is ESMDefaultWidgetBase<T> {
 	return Boolean(
 		item &&
 		item.hasOwnProperty('__esModule') &&
