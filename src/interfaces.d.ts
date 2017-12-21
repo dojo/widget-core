@@ -87,7 +87,7 @@ export type SupportedClassName = string | null | undefined;
 
 export type DeferredVirtualProperties = (inserted: boolean) => VNodeProperties;
 
-export interface VirtualDomProperties {
+export interface VNodeProperties {
 	/**
 	 * The animation to perform when this node is added to an already existing parent.
 	 * When this value is a string, you must pass a `projectionOptions.transitions` object when creating the
