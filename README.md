@@ -1075,6 +1075,8 @@ class VerticalScrollBarController extends WidgetBase {
 As can be seen in the above code, the meta provider simply provides information which the widgets can react to.  The implementation
 needs to react to these changes.
 
+#### Focus
+
 #### Matches
 
 The `Matches` meta determines if the target of a DOM event matches a particular virtual DOM key.

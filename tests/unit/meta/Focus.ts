@@ -21,6 +21,11 @@ let invalidateStub: any;
 registerSuite('meta - Focus', {
 
 	beforeEach() {
+		// const { browserName } = this.remote.session.capabilities;
+		// if (browserName === 'safari') {
+		// 	this.skip('SafariDriver does not allow stubbing of global.document.activeElement');
+		// }
+
 		invalidateStub = sinon.stub();
 		nodeHandler = new NodeHandler();
 		focus = new Focus({

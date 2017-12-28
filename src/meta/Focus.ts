@@ -1,6 +1,5 @@
 import { Base } from './Base';
 import { createHandle } from '@dojo/core/lang';
-import { assign } from '@dojo/core/lang';
 import global from '@dojo/shim/global';
 
 export interface FocusResults {
@@ -15,13 +14,12 @@ const defaultResults = {
 
 export class Focus extends Base {
 	private _activeElement: Element;
-	private _boundFocusHandler = this._onFocus.bind(this);
 
 	public get(key: string | number): FocusResults {
 		const node = this.getNode(key);
 
 		if (!node) {
-			return assign({}, defaultResults);
+			return { ...defaultResults };
 		}
 
 		if (!this._activeElement) {
@@ -37,22 +35,22 @@ export class Focus extends Base {
 
 	public set(key: string | number, selector?: string) {
 		const node = this.getNode(key);
-		const target = node && selector ? node.querySelector(selector) : node;
-		target && (target as HTMLElement).focus();
+		const target = node && selector ? node.querySelector(selector) as HTMLElement : node as HTMLElement;
+		target && target.focus();
 	}
 
-	private _onFocus() {
+	private _onFocus = () => {
 		this._activeElement = global.document.activeElement;
 		this.invalidate();
 	}
 
 	private _createListener() {
-		global.document.addEventListener('focusin', this._boundFocusHandler);
+		global.document.addEventListener('focusin', this._onFocus);
 		this.own(createHandle(this._removeListener.bind(this)));
 	}
 
 	private _removeListener() {
-		global.document.removeEventListener('focusin', this._boundFocusHandler);
+		global.document.removeEventListener('focusin', this._onFocus);
 	}
 }
 
