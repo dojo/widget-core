@@ -150,19 +150,6 @@ registerSuite('meta - Focus', {
 
 			focus.set('root');
 			assert.isTrue(setFocus.calledOnce);
-		},
-
-		'set focus on child of element'() {
-			const child = document.createElement('span');
-			const setChildFocus = sinon.stub();
-			sinon.stub(child, 'focus').callsFake(setChildFocus);
-
-			element.appendChild(child);
-			nodeHandler.add(element, 'root');
-
-			focus.set('root', 'span');
-			assert.isTrue(setChildFocus.calledOnce);
 		}
-
 	}
 });
