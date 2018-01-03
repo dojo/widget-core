@@ -25,7 +25,7 @@
     "benchmark": "./run-benchmark.sh",
     "prepublish": "grunt peerDepInstall",
     "precommit": "lint-staged",
-    "prettier": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
+    "prettier": "prettier --write 'src/**/*.ts*' 'tests/**/*.ts*'",
     "test": "grunt test"
   },
   "peerDependencies": {
