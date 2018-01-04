@@ -1,30 +1,40 @@
-const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
+const { afterEach, beforeEach, describe, it} = intern.getInterface('bdd');
 import global from '@dojo/shim/global';
 import * as sinon from 'sinon';
 import Focus from '../../../src/meta/Focus';
 import NodeHandler from '../../../src/NodeHandler';
 import WidgetBase from '../../../src/WidgetBase';
 
-const bindInstance = new WidgetBase();
-const defaultFocus = {
-	active: false,
-	containsFocus: false
-};
-let element: HTMLElement;
-let activeElement: any;
-let activeGetter: any;
-let focus: any;
-let nodeHandler: any;
-let invalidateStub: any;
+function supportsActiveElementStub() {
+	try {
+		const testStub = sinon.stub();
+		sinon.stub(global.document, 'activeElement').get(testStub);
+		global.document.activeElement;
+		return testStub.called;
+	}
+	catch (e) {
+		return false;
+	}
+}
 
-registerSuite('meta - Focus', {
+describe('meta - Focus', () => {
+	const bindInstance = new WidgetBase();
+	const defaultFocus = {
+		active: false,
+		containsFocus: false
+	};
+	let element: HTMLElement;
+	let activeElement: any;
+	let activeGetter: any;
+	let focus: any;
+	let nodeHandler: any;
+	let invalidateStub: any;
 
-	beforeEach() {
-		// const { browserName } = this.remote.session.capabilities;
-		// if (browserName === 'safari') {
-		// 	this.skip('SafariDriver does not allow stubbing of global.document.activeElement');
-		// }
+	beforeEach((test) => {
+		if (!supportsActiveElementStub()) {
+			test.skip('This environment does not allow stubbing of global.document.activeElement');
+		}
 
 		invalidateStub = sinon.stub();
 		nodeHandler = new NodeHandler();
@@ -37,31 +47,32 @@ registerSuite('meta - Focus', {
 		element = document.createElement('div');
 		activeGetter = sinon.stub().returns(element);
 		activeElement = sinon.stub(global.document, 'activeElement').get(activeGetter);
-	},
+	});
 
-	afterEach() {
+	afterEach(() => {
 		focus.destroy();
 		nodeHandler.destroy();
 		activeElement.restore();
-	},
+	});
 
-	tests: {
-		'Will return default dimensions if node not loaded'() {
+	describe('get', () => {
+		it('will return default dimensions if a node is not loaded', () => {
 			assert.deepEqual(focus.get('foo'), defaultFocus);
-		},
-		'Will accept a number key'() {
+		});
+		it('will accept a number key', () => {
 			assert.deepEqual(focus.get(1234), defaultFocus);
-		},
-
-		'get element with focus'() {
+		});
+		it('will return true/true for an element with focus', (test) => {
 			nodeHandler.add(element, 'root');
+			if (!element.contains(element)) {
+				test.skip('IE11 Webdriver handles .contains() improperly');
+			}
 
 			const focusResults = focus.get('root');
 			assert.equal(focusResults.active, true);
 			assert.equal(focusResults.containsFocus, true);
-		},
-
-		'get element containing focus'() {
+		});
+		it('will return false/true for an element containing focus', () => {
 			const containingEl = document.createElement('div');
 			containingEl.appendChild(element);
 			nodeHandler.add(containingEl, 'root');
@@ -69,32 +80,27 @@ registerSuite('meta - Focus', {
 			const focusResults = focus.get('root');
 			assert.equal(focusResults.active, false);
 			assert.equal(focusResults.containsFocus, true);
-		},
-
-		'get element without focus'() {
+		});
+		it('will return false/false for an element without focus', () => {
 			const rootEl = document.createElement('div');
 			nodeHandler.add(rootEl, 'root');
 
 			const focusResults = focus.get('root');
 			assert.equal(focusResults.active, false);
 			assert.equal(focusResults.containsFocus, false);
-		},
-
-		'document.activeElement only called once'() {
+		});
+		it('will only query the dom once for multiple requests', () => {
 			nodeHandler.add(element, 'root');
 
 			let focusResults = focus.get('root');
 			assert.isTrue(activeGetter.calledOnce, 'activeElement called on first .get()');
 			assert.equal(focusResults.active, true);
-			assert.equal(focusResults.containsFocus, true);
 
 			focusResults = focus.get('root');
 			assert.isTrue(activeGetter.calledOnce, 'cached value used on second .get()');
 			assert.equal(focusResults.active, true);
-			assert.equal(focusResults.containsFocus, true);
-		},
-
-		'invalidate called on focus event'() {
+		});
+		it('will invalidate on focus events', () => {
 			const focusEvent = global.document.createEvent('Event');
 			focusEvent.initEvent('focusin', true, true);
 			nodeHandler.add(element, 'root');
@@ -102,9 +108,8 @@ registerSuite('meta - Focus', {
 			focus.get('root');
 			global.document.dispatchEvent(focusEvent);
 			assert.isTrue(invalidateStub.calledOnce);
-		},
-
-		'focus event updates saved activeElement value'() {
+		});
+		it('updates the saved activeElement value on focus events', () => {
 			const child = document.createElement('span');
 			const focusEvent = global.document.createEvent('Event');
 			focusEvent.initEvent('focusin', true, true);
@@ -126,9 +131,8 @@ registerSuite('meta - Focus', {
 			assert.isFalse(activeGetter.called, 'activeElement not called on second .get()');
 			assert.equal(focusResults.active, false);
 			assert.equal(focusResults.containsFocus, true);
-		},
-
-		'focus listener removed when meta is destroyed'() {
+		});
+		it('removes the focus listener when the meta is destroyed', () => {
 			const focusEvent = global.document.createEvent('Event');
 			focusEvent.initEvent('focusin', true, true);
 			nodeHandler.add(element, 'root');
@@ -141,15 +145,17 @@ registerSuite('meta - Focus', {
 			activeGetter.reset();
 			global.document.dispatchEvent(focusEvent);
 			assert.isFalse(activeGetter.called, 'focus handler is removed');
-		},
+		});
+	});
 
-		'set focus on element'() {
+	describe('set', () => {
+		it('sets focus on element', () => {
 			const setFocus = sinon.stub();
 			sinon.stub(element, 'focus').callsFake(setFocus);
 			nodeHandler.add(element, 'root');
 
 			focus.set('root');
 			assert.isTrue(setFocus.calledOnce);
-		}
-	}
+		});
+	});
 });
