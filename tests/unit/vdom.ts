@@ -1,5 +1,3 @@
-import Test from 'intern/lib/Test';
-
 const { afterEach, beforeEach, describe, it } = intern.getInterface('bdd');
 const { assert } = intern.getPlugin('chai');
 import { match, spy, stub, SinonStub } from 'sinon';
@@ -2713,9 +2711,9 @@ describe('vdom', () => {
 	});
 
 	describe('behavior', () => {
-		it('will append nodes with attributes already attached', function(this: Test) {
+		it('will append nodes with attributes already attached', (test) => {
 			if (!global.window || !global.window.hasOwnProperty('MutationObserver')) {
-				this.skip('MutationObserver not present');
+				test.skip('MutationObserver not present');
 			}
 
 			class Foo extends WidgetBase {
@@ -2739,10 +2737,10 @@ describe('vdom', () => {
 			const widget = new Foo();
 			dom.append(parent, widget.__render__(), widget);
 
-			const results = [...log, ...observer.takeRecords()];
+			log.push(...observer.takeRecords());
 			observer.disconnect();
-			assert.isTrue(results.every((mutation) => mutation.type !== 'attributes'));
-			assert.lengthOf(results, 2);
+			assert.isTrue(log.every((mutation) => mutation.type !== 'attributes'));
+			assert.lengthOf(log, 2);
 		});
 	});
 });
