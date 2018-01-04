@@ -744,12 +744,13 @@ function createDom(
 			} else {
 				domNode = dnode.domNode;
 			}
+			// add attributes and children so we have a fully formed node prior to attach
+			initPropertiesAndChildren(domNode! as Element, dnode, parentInstance, projectionOptions);
 			if (insertBefore !== undefined) {
 				parentVNode.domNode!.insertBefore(domNode, insertBefore);
 			} else if (domNode!.parentNode !== parentVNode.domNode!) {
 				parentVNode.domNode!.appendChild(domNode);
 			}
-			initPropertiesAndChildren(domNode! as Element, dnode, parentInstance, projectionOptions);
 		}
 	}
 }

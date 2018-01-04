@@ -1,6 +1,9 @@
+import Test from 'intern/lib/Test';
+
 const { afterEach, beforeEach, describe, it } = intern.getInterface('bdd');
 const { assert } = intern.getPlugin('chai');
 import { match, spy, stub, SinonStub } from 'sinon';
+import global from '@dojo/shim/global';
 import { createResolvers } from './../support/util';
 import sendEvent from './../support/sendEvent';
 
@@ -2706,6 +2709,40 @@ describe('vdom', () => {
 					projection.update(v('div', [v('span', { enterAnimation: 'fadeIn' })]));
 				});
 			});
+		});
+	});
+
+	describe('behavior', () => {
+		it('will append nodes with attributes already attached', function(this: Test) {
+			if (!global.window || !global.window.hasOwnProperty('MutationObserver')) {
+				this.skip('MutationObserver not present');
+			}
+
+			class Foo extends WidgetBase {
+				render() {
+					return [v('div', { attr: 'test' }), v('div', { attr: 'test' })];
+				}
+			}
+
+			const doc = global.window.document;
+			const log: MutationRecord[] = [];
+			const observer = new MutationObserver((mutations: MutationRecord[]) => {
+				log.push(...mutations);
+			});
+
+			const parent = doc.createElement('div');
+			observer.observe(parent, {
+				attributes: true,
+				childList: true,
+				subtree: true
+			});
+			const widget = new Foo();
+			dom.append(parent, widget.__render__() as VNode, widget);
+
+			const results = [...log, ...observer.takeRecords()];
+			observer.disconnect();
+			assert.isTrue(results.every((mutation) => mutation.type !== 'attributes'));
+			assert.lengthOf(results, 2);
 		});
 	});
 });
