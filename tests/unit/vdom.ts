@@ -2737,7 +2737,7 @@ describe('vdom', () => {
 				subtree: true
 			});
 			const widget = new Foo();
-			dom.append(parent, widget.__render__() as VNode, widget);
+			dom.append(parent, widget.__render__(), widget);
 
 			const results = [...log, ...observer.takeRecords()];
 			observer.disconnect();
