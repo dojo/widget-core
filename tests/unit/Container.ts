@@ -6,7 +6,6 @@ import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
 import { Injector } from './../../src/Injector';
 import { ProjectorMixin } from './../../src/mixins/Projector';
-import { widgetInstanceMap } from './../../src/vdom';
 
 interface TestWidgetProperties {
 	foo: string;
@@ -95,21 +94,38 @@ registerSuite('mixins/Container', {
 
 			assert.strictEqual(renderResult.widgetConstructor, 'test-widget');
 		},
-		'container always marked as dirty'() {
+		'Container should always render but invalidate when properties have not changed'() {
+			let invalidateCount = 0;
+			let renderCount = 0;
 			class Child extends WidgetBase<{ foo: string }> {}
-			const ContainerClass = Container(Child, 'test-state-1', { getProperties });
-			const widget = new ContainerClass();
-			const instanceData = widgetInstanceMap.get(widget)!;
-			assert.isTrue(instanceData.dirty);
-			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
-			widget.__setProperties__({ foo: 'bar' });
-			assert.isTrue(instanceData.dirty);
-			widgetInstanceMap.set(widget, { ...instanceData, dirty: false })!;
-			widget.__setProperties__({ foo: 'bar' });
-			assert.isTrue(instanceData.dirty);
-			widgetInstanceMap.set(widget, { ...instanceData, dirty: false })!;
-			widget.__setProperties__({ foo: 'bar' });
-			assert.isTrue(instanceData.dirty);
+			class ContainerClass extends ProjectorMixin(Container(Child, 'test-state-1', { getProperties })) {
+				invalidate() {
+					invalidateCount++;
+					super.invalidate();
+				}
+				render() {
+					renderCount++;
+					return super.render();
+				}
+			}
+			const projector = new ContainerClass();
+			projector.setProperties({ registry, foo: 'bar' });
+			projector.async = false;
+			projector.append();
+			invalidateCount = 0;
+			renderCount = 0;
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 1);
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 2);
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 3);
 		},
 		'integration test'() {
 			class Child extends WidgetBase<{ foo: string }> {}
