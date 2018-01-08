@@ -1,12 +1,11 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-import { v } from '../../src/d';
+import { v, w } from '../../src/d';
 import { WidgetBase } from '../../src/WidgetBase';
-import { diffProperty } from './../../src/decorators/diffProperty';
-import { always } from '../../src/diff';
 import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
 import { Injector } from './../../src/Injector';
+import { ProjectorMixin } from './../../src/mixins/Projector';
 
 interface TestWidgetProperties {
 	foo: string;
@@ -95,25 +94,55 @@ registerSuite('mixins/Container', {
 
 			assert.strictEqual(renderResult.widgetConstructor, 'test-widget');
 		},
-		'container always updates'() {
-			@diffProperty('foo', always)
+		'Container should always render but not invalidate when properties have not changed'() {
+			let invalidateCount = 0;
+			let renderCount = 0;
 			class Child extends WidgetBase<{ foo: string }> {}
-			let invalidatedCount = 0;
-
-			class ContainerClass extends Container(Child, 'test-state-1', { getProperties }) {
+			class ContainerClass extends ProjectorMixin(Container(Child, 'test-state-1', { getProperties })) {
 				invalidate() {
-					invalidatedCount++;
+					invalidateCount++;
 					super.invalidate();
 				}
+				render() {
+					renderCount++;
+					return super.render();
+				}
 			}
-			const widget = new ContainerClass();
-			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 3);
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 4);
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 5);
+			const projector = new ContainerClass();
+			projector.setProperties({ registry, foo: 'bar' });
+			projector.async = false;
+			projector.append();
+			invalidateCount = 0;
+			renderCount = 0;
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 1);
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 2);
+
+			projector.setProperties({ foo: 'bar', registry });
+			assert.strictEqual(invalidateCount, 0);
+			assert.strictEqual(renderCount, 3);
+		},
+		'integration test'() {
+			class Child extends WidgetBase<{ foo: string }> {}
+			const ContainerChild = Container(Child, 'test-state-1', { getProperties });
+			class Parent extends WidgetBase {
+				render() {
+					return w(ContainerChild, {});
+				}
+			}
+			const Projector = ProjectorMixin(Parent);
+			const projector = new Projector();
+			projector.setProperties({ registry });
+			projector.async = false;
+			projector.append();
+			assert.doesNotThrow(() => {
+				injector.emit({ type: 'invalidate' });
+			});
 		}
 	}
 });
