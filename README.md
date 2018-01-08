@@ -1084,22 +1084,21 @@ The `Focus` meta determines whether a given node is focused or contains document
 |`active`|A boolean indicating whether the specified node itself is focused.|
 |`containsFocus`|A boolean indicating whether one of the descendants of the specified node is currently focused. This will return true if `active` is true.|
 
-The `Focus` meta also provides a `set` method to call focus on a given node. This is most relevant when it is necessary to shift focus in response to a user action, e.g. when opening a modal or navigating to a new page. You can use it like this:
+An example usage that opens a tooltip if the trigger is focused might look like this:
 
 ```typescript
 class MyWidget extends WidgetBase<WidgetProperties> {
     // ...
     render() {
         // run your meta
+        const buttonFocus = this.meta(FocusMeta).get('button');
         return v('div', {
           w(Button, {
-            onClick: () => {
-              this.meta(Focus).set('modal');
-            }
-          }, [ 'Open Modal' ]),
-          v('div', {
-            key: 'modal',
-            tabIndex: -1
+            key: 'button'
+          }, [ 'Open Tooltip' ]),
+          w(Tooltip, {
+            content: 'Foo',
+            open: buttonFocus.active
           }, [ 'modal content' ])
         });
     }
