@@ -2,6 +2,7 @@ import { WidgetBase } from './WidgetBase';
 import { inject, GetProperties } from './decorators/inject';
 import { Constructor, DNode, RegistryLabel } from './interfaces';
 import { w } from './d';
+import { widgetInstanceMap } from './vdom';
 
 export type Container<T extends WidgetBase> = Constructor<WidgetBase<Partial<T['properties']>>>;
 
@@ -14,7 +15,8 @@ export function Container<W extends WidgetBase>(
 	class WidgetContainer extends WidgetBase<Partial<W['properties']>> {
 		public __setProperties__(properties: Partial<W['properties']>): void {
 			super.__setProperties__(properties as any);
-			this.invalidate();
+			const instanceData = widgetInstanceMap.get(this)!;
+			instanceData.dirty = true;
 		}
 		protected render(): DNode {
 			return w(component, this.properties, this.children);

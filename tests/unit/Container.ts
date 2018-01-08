@@ -6,6 +6,7 @@ import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
 import { Injector } from './../../src/Injector';
 import { ProjectorMixin } from './../../src/mixins/Projector';
+import { widgetInstanceMap } from './../../src/vdom';
 
 interface TestWidgetProperties {
 	foo: string;
@@ -93,6 +94,22 @@ registerSuite('mixins/Container', {
 			const renderResult: any = widget.__render__();
 
 			assert.strictEqual(renderResult.widgetConstructor, 'test-widget');
+		},
+		'container always marked as dirty'() {
+			class Child extends WidgetBase<{ foo: string }> {}
+			const ContainerClass = Container(Child, 'test-state-1', { getProperties });
+			const widget = new ContainerClass();
+			const instanceData = widgetInstanceMap.get(widget)!;
+			assert.isTrue(instanceData.dirty);
+			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
+			widget.__setProperties__({ foo: 'bar' });
+			assert.isTrue(instanceData.dirty);
+			widgetInstanceMap.set(widget, { ...instanceData, dirty: false })!;
+			widget.__setProperties__({ foo: 'bar' });
+			assert.isTrue(instanceData.dirty);
+			widgetInstanceMap.set(widget, { ...instanceData, dirty: false })!;
+			widget.__setProperties__({ foo: 'bar' });
+			assert.isTrue(instanceData.dirty);
 		},
 		'integration test'() {
 			class Child extends WidgetBase<{ foo: string }> {}
