@@ -9,8 +9,9 @@ import WidgetBase from '../../../src/WidgetBase';
 function supportsActiveElementStub() {
 	try {
 		const testStub = sinon.stub();
-		sinon.stub(global.document, 'activeElement').get(testStub);
+		const activeStub = sinon.stub(global.document, 'activeElement').get(testStub);
 		global.document.activeElement;
+		activeStub.restore();
 		return testStub.called;
 	} catch (e) {
 		return false;
@@ -49,9 +50,11 @@ describe('meta - Focus', () => {
 	});
 
 	afterEach(() => {
-		focus.destroy();
-		nodeHandler.destroy();
-		activeElement.restore();
+		if (supportsActiveElementStub()) {
+			focus.destroy();
+			nodeHandler.destroy();
+			activeElement.restore();
+		}
 	});
 
 	it('will return default dimensions if a node is not loaded', () => {
