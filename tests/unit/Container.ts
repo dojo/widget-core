@@ -94,7 +94,7 @@ registerSuite('mixins/Container', {
 
 			assert.strictEqual(renderResult.widgetConstructor, 'test-widget');
 		},
-		'Container should always render but invalidate when properties have not changed'() {
+		'Container should always render but not invalidate when properties have not changed'() {
 			let invalidateCount = 0;
 			let renderCount = 0;
 			class Child extends WidgetBase<{ foo: string }> {}
