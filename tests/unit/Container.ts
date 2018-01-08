@@ -1,12 +1,11 @@
 const { registerSuite } = intern.getInterface('object');
 const { assert } = intern.getPlugin('chai');
-import { v } from '../../src/d';
+import { v, w } from '../../src/d';
 import { WidgetBase } from '../../src/WidgetBase';
-import { diffProperty } from './../../src/decorators/diffProperty';
-import { always } from '../../src/diff';
 import { Container } from './../../src/Container';
 import { Registry } from './../../src/Registry';
 import { Injector } from './../../src/Injector';
+import { ProjectorMixin } from './../../src/mixins/Projector';
 
 interface TestWidgetProperties {
 	foo: string;
@@ -95,25 +94,22 @@ registerSuite('mixins/Container', {
 
 			assert.strictEqual(renderResult.widgetConstructor, 'test-widget');
 		},
-		'container always updates'() {
-			@diffProperty('foo', always)
+		'integration test'() {
 			class Child extends WidgetBase<{ foo: string }> {}
-			let invalidatedCount = 0;
-
-			class ContainerClass extends Container(Child, 'test-state-1', { getProperties }) {
-				invalidate() {
-					invalidatedCount++;
-					super.invalidate();
+			const ContainerChild = Container(Child, 'test-state-1', { getProperties });
+			class Parent extends WidgetBase {
+				render() {
+					return w(ContainerChild, {});
 				}
 			}
-			const widget = new ContainerClass();
-			widget.__setCoreProperties__({ bind: widget, baseRegistry: registry });
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 3);
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 4);
-			widget.__setProperties__({ foo: 'bar' });
-			assert.strictEqual(invalidatedCount, 5);
+			const Projector = ProjectorMixin(Parent);
+			const projector = new Projector();
+			projector.setProperties({ registry });
+			projector.async = false;
+			projector.append();
+			assert.doesNotThrow(() => {
+				injector.emit({ type: 'invalidate' });
+			});
 		}
 	}
 });
