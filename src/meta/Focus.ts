@@ -33,6 +33,12 @@ export class Focus extends Base {
 		};
 	}
 
+	public set(key: string | number, selector?: string) {
+		const node = this.getNode(key);
+		const target = node && selector ? (node.querySelector(selector) as HTMLElement) : (node as HTMLElement);
+		target && target.focus();
+	}
+
 	private _onFocus = () => {
 		this._activeElement = global.document.activeElement;
 		this.invalidate();
