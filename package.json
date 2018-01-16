@@ -41,8 +41,7 @@
     "@types/jsdom": "2.0.*",
     "@types/ramda": "^0.25.5",
     "@types/selenium-webdriver": "^3.0.8",
-    "@types/sinon": "~4.1.2",
-    "@types/web-animations-js": "^2.2.5",
+    "@types/sinon": "^1.16.31",
     "@types/yargs": "^8.0.2",
     "@webcomponents/custom-elements": "^v1.0.0-rc.3",
     "bootstrap": "^3.3.7",
@@ -69,7 +68,8 @@
     "intersection-observer": "^0.4.2",
     "pepjs": "^0.4.2",
     "tslib": "~1.8.1",
-    "web-animations-js": "^2.3.1"
+    "web-animations-js": "^2.3.1",
+    "@types/web-animations-js": "^2.2.5"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
