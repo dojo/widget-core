@@ -769,24 +769,6 @@ describe('vdom', () => {
 			);
 		});
 
-		it('should throw an error when attempting to replace with an array of node', () => {
-			class Foo extends WidgetBase {
-				render() {
-					return [v('div', ['1']), v('div', ['2']), v('div', ['3'])];
-				}
-			}
-
-			const div = document.createElement('div');
-			const widget = new Foo();
-			assert.throws(
-				() => {
-					dom.replace(div, widget.__render__() as VNode, widget);
-				},
-				Error,
-				'Unable to replace a node with an array of nodes. (consider adding one extra level to the virtual DOM)'
-			);
-		});
-
 		it('removes existing widget and uses new widget when widget changes', () => {
 			let fooCreated = false;
 			let barCreatedCount = 0;

@@ -150,20 +150,6 @@ registerSuite('mixins/projectorMixin', {
 				assert.strictEqual(child.tagName.toLowerCase(), 'div');
 				assert.strictEqual((child.firstChild as HTMLElement).tagName.toLowerCase(), 'h2');
 			},
-			replace() {
-				const projector = new class extends BaseTestWidget {
-					render() {
-						return v('body', this.children);
-					}
-				}();
-
-				projector.setChildren([v('h2', ['foo'])]);
-				projector.replace();
-				assert.strictEqual(document.body.childNodes.length, 1, 'child should have been added');
-				const child = document.body.lastChild as HTMLElement;
-				assert.strictEqual(child.innerHTML, 'foo');
-				assert.strictEqual(child.tagName.toLowerCase(), 'h2');
-			},
 			merge: {
 				standard() {
 					const div = document.createElement('div');
@@ -313,20 +299,6 @@ registerSuite('mixins/projectorMixin', {
 				projector.append(div);
 				assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
 				assert.strictEqual(projector.toHtml(), (projector.root.lastChild as Element).outerHTML);
-				projector.destroy();
-			},
-			replaced() {
-				const div = document.createElement('div');
-				const root = document.createElement('div');
-				document.body.appendChild(root);
-				root.appendChild(div);
-
-				const projector = new BaseTestWidget();
-				projector.setChildren([v('h2', ['foo'])]);
-
-				projector.replace(div);
-				assert.strictEqual(projector.toHtml(), `<div><h2>foo</h2></div>`);
-				assert.strictEqual(projector.toHtml(), (root.lastChild as Element).outerHTML);
 				projector.destroy();
 			},
 			merged() {
