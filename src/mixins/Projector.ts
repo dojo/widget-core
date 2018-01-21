@@ -24,8 +24,7 @@ export enum ProjectorAttachState {
  */
 export enum AttachType {
 	Append = 1,
-	Merge = 2,
-	Replace = 3
+	Merge = 2
 }
 
 export interface AttachOptions {
@@ -61,11 +60,6 @@ export interface ProjectorMixin<P> {
 	 * @param root The root element that the root virtual DOM node will be merged with.  Defaults to `document.body`.
 	 */
 	merge(root?: Element): Handle;
-
-	/**
-	 * Replace the root with the projector node.
-	 */
-	replace(root?: Element): Handle;
 
 	/**
 	 * Pause the projector.
@@ -150,7 +144,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _scheduled: number | undefined;
 		private _paused: boolean;
 		private _boundDoRender: () => void;
-		private _boundRender: Function;
 		private _projectorChildren: DNode[] = [];
 		private _projectorProperties: this['properties'] = {} as this['properties'];
 		private _handles: Function[] = [];
@@ -168,7 +161,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			};
 
 			this._boundDoRender = this._doRender.bind(this);
-			this._boundRender = this.__render__.bind(this);
 			this.root = document.body;
 			this.projectorState = ProjectorAttachState.Detached;
 		}
@@ -185,15 +177,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		public merge(root?: Element): Handle {
 			const options = {
 				type: AttachType.Merge,
-				root
-			};
-
-			return this._attach(options);
-		}
-
-		public replace(root?: Element): Handle {
-			const options = {
-				type: AttachType.Replace,
 				root
 			};
 
@@ -316,7 +299,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			this._scheduled = undefined;
 
 			if (this._projection) {
-				this._projection.update(this._boundRender());
+				this._projection.update();
 			}
 		}
 
@@ -359,13 +342,10 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			switch (type) {
 				case AttachType.Append:
-					this._projection = dom.append(this.root, this._boundRender(), this, this._projectionOptions);
+					this._projection = dom.append(this.root, this, this._projectionOptions);
 					break;
 				case AttachType.Merge:
-					this._projection = dom.merge(this.root, this._boundRender(), this, this._projectionOptions);
-					break;
-				case AttachType.Replace:
-					this._projection = dom.replace(this.root, this._boundRender(), this, this._projectionOptions);
+					this._projection = dom.merge(this.root, this, this._projectionOptions);
 					break;
 			}
 

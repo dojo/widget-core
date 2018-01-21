@@ -80,7 +80,7 @@ export interface ProjectionOptions extends ProjectorOptions {
 
 export interface Projection {
 	readonly domNode: Element;
-	update(updatedDNode: DNode | DNode[]): void;
+	update(): void;
 }
 
 export type SupportedClassName = string | null | undefined;
