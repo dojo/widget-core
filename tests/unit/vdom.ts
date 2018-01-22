@@ -696,6 +696,75 @@ describe('vdom', () => {
 			assert.strictEqual(textNodeChild.data, '2');
 		});
 
+		it('should only render a sub tree from an invalidation', () => {
+			let parentRenderCount = 0;
+			let barRenderCount = 0;
+			let bazRenderCount = 0;
+			let barClicker: () => void = () => {};
+			let bazClicker: () => void = () => {};
+
+			class Bar extends WidgetBase {
+				private _counter = 0;
+
+				private _onClick = () => {
+					this._counter++;
+					this.invalidate();
+				};
+
+				constructor() {
+					super();
+					barClicker = this._onClick;
+				}
+
+				protected render() {
+					barRenderCount++;
+					return v('div', [`bar ${this._counter}`]);
+				}
+			}
+
+			class Baz extends WidgetBase {
+				private _counter = 0;
+
+				private _onClick = () => {
+					this._counter++;
+					this.invalidate();
+				};
+
+				constructor() {
+					super();
+					bazClicker = this._onClick;
+				}
+
+				protected render() {
+					bazRenderCount++;
+					return v('div', [`baz ${this._counter}`]);
+				}
+			}
+
+			class Foo extends WidgetBase {
+				protected render() {
+					parentRenderCount++;
+					return v('div', [w(Bar, {}), w(Baz, {})]);
+				}
+			}
+
+			const widget = new Foo();
+			dom.create(widget);
+			assert.strictEqual(parentRenderCount, 1);
+			assert.strictEqual(barRenderCount, 1);
+			assert.strictEqual(bazRenderCount, 1);
+			bazClicker();
+			resolvers.resolve();
+			assert.strictEqual(parentRenderCount, 1);
+			assert.strictEqual(barRenderCount, 1);
+			assert.strictEqual(bazRenderCount, 2);
+			barClicker();
+			resolvers.resolve();
+			assert.strictEqual(parentRenderCount, 1);
+			assert.strictEqual(barRenderCount, 2);
+			assert.strictEqual(bazRenderCount, 2);
+		});
+
 		it('should append nodes for an array returned from the top level', () => {
 			class Foo extends WidgetBase {
 				render() {
