@@ -9,7 +9,8 @@ import {
 	Projection,
 	SupportedClassName,
 	TransitionStrategy,
-	VNodeProperties
+	VNodeProperties,
+	ProjectorOptions
 } from './interfaces';
 import { from as arrayFrom } from '@dojo/shim/array';
 import { isWNode, isVNode, VNODE, WNODE } from './d';
@@ -576,7 +577,7 @@ function updateChildren(
 	const oldChildrenLength = oldChildren.length;
 	const newChildrenLength = newChildren.length;
 	const transitions = projectionOptions.transitions!;
-	projectionOptions = { ...projectionOptions, ...{ depth: projectionOptions.depth + 1 } };
+	projectionOptions = { ...projectionOptions, depth: projectionOptions.depth + 1 };
 	let oldIndex = 0;
 	let newIndex = 0;
 	let i: number;
@@ -669,7 +670,7 @@ function addChildren(
 		childNodes = arrayFrom(parentVNode.domNode!.childNodes) as (Element | Text)[];
 	}
 
-	projectionOptions = { ...projectionOptions, ...{ depth: projectionOptions.depth + 1 } };
+	projectionOptions = { ...projectionOptions, depth: projectionOptions.depth + 1 };
 
 	for (let i = 0; i < children.length; i++) {
 		const child = children[i];
@@ -884,7 +885,7 @@ function addDeferredProperties(vnode: InternalVNode, projectionOptions: Projecti
 	});
 }
 
-function runDeferredRenderCallbacks(projectionOptions: { deferredRenderCallbacks: Function[]; sync: boolean }) {
+function runDeferredRenderCallbacks(projectionOptions: ProjectionOptions) {
 	if (projectionOptions.deferredRenderCallbacks.length) {
 		if (projectionOptions.sync) {
 			while (projectionOptions.deferredRenderCallbacks.length) {
@@ -902,7 +903,7 @@ function runDeferredRenderCallbacks(projectionOptions: { deferredRenderCallbacks
 	}
 }
 
-function runAfterRenderCallbacks(projectionOptions: { afterRenderCallbacks: Function[]; sync: boolean }) {
+function runAfterRenderCallbacks(projectionOptions: ProjectionOptions) {
 	if (projectionOptions.sync) {
 		while (projectionOptions.afterRenderCallbacks.length) {
 			const callback = projectionOptions.afterRenderCallbacks.shift();
