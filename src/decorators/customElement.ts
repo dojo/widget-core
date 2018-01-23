@@ -1,6 +1,5 @@
 import { CustomElementInitializer } from '../customElements';
 import { Constructor, WidgetProperties } from '../interfaces';
-import registerCustomElement from '../registerCustomElement';
 
 declare const __dojoCustomElements__: boolean;
 
@@ -47,7 +46,7 @@ export function customElement<P extends WidgetProperties = WidgetProperties>({
 }: CustomElementConfig<P>) {
 	return function<T extends Constructor<any>>(target: T) {
 		if (typeof __dojoCustomElements__ !== 'undefined') {
-			registerCustomElement(() => ({
+			target.prototype.__customElementDescriptor = {
 				tagName: tag,
 				widgetConstructor: target,
 				attributes: (attributes || []).map((attributeName) => ({ attributeName })),
@@ -57,7 +56,7 @@ export function customElement<P extends WidgetProperties = WidgetProperties>({
 					eventName: propertyName.replace('on', '').toLowerCase()
 				})),
 				initialization
-			}));
+			};
 		}
 	};
 }
