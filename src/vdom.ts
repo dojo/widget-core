@@ -9,8 +9,7 @@ import {
 	Projection,
 	SupportedClassName,
 	TransitionStrategy,
-	VNodeProperties,
-	ProjectorOptions
+	VNodeProperties
 } from './interfaces';
 import { from as arrayFrom } from '@dojo/shim/array';
 import { isWNode, isVNode, VNODE, WNODE } from './d';
