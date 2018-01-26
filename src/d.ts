@@ -46,17 +46,11 @@ export function isVNode(child: DNode): child is VNode {
  * If no predicate is supplied then the modifier will be executed on all nodes.
  */
 export function decorate<T extends DNode>(
-	dNodes: DNode,
+	dNodes: DNode | DNode[],
 	modifier: (dNode: T) => void,
 	predicate: (dNode: DNode) => dNode is T
-): DNode;
-export function decorate<T extends DNode>(
-	dNodes: DNode[],
-	modifier: (dNode: T) => void,
-	predicate: (dNode: DNode) => dNode is T
-): DNode[];
-export function decorate(dNodes: DNode, modifier: (dNode: DNode) => void): DNode;
-export function decorate(dNodes: DNode[], modifier: (dNode: DNode) => void): DNode[];
+): DNode | DNode[];
+export function decorate(dNodes: DNode | DNode[], modifier: (dNode: DNode) => void): DNode | DNode[];
 export function decorate(
 	dNodes: DNode | DNode[],
 	modifier: (dNode: DNode) => void,
