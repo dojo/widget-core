@@ -1126,6 +1126,79 @@ describe('vdom', () => {
 			assert.isTrue(consoleStub.calledWith(errorMsg));
 		});
 
+		it('Should support widgets using deferred properties', () => {
+			let deferredPropertyCallCount = 0;
+
+			class Bar extends WidgetBase<any> {
+				render() {
+					return v(
+						'div',
+						() => {
+							deferredPropertyCallCount++;
+							return {
+								id: 'bar-root',
+								key: 'bar-root'
+							};
+						},
+						[
+							v('div', () => {
+								deferredPropertyCallCount++;
+								return {
+									id: 'bar-container',
+									key: 'bar-container',
+									innerHTML: 'bar-container'
+								};
+							})
+						]
+					);
+				}
+			}
+
+			class Foo extends WidgetBase<any> {
+				render() {
+					return v(
+						'div',
+						() => {
+							deferredPropertyCallCount++;
+							return {
+								id: 'foo-root',
+								key: 'root'
+							};
+						},
+						[
+							v('div', () => {
+								deferredPropertyCallCount++;
+								return {
+									key: 'foo-container',
+									id: 'container',
+									innerHTML: 'foo-container'
+								};
+							}),
+							w(Bar, { key: 'bar' })
+						]
+					);
+				}
+			}
+
+			const widget = new Foo();
+			const projection = dom.create(widget, { sync: true });
+			assert.strictEqual(deferredPropertyCallCount, 8);
+			const root: any = projection.domNode.childNodes[0];
+			assert.lengthOf(root.childNodes, 2);
+			const fooContainer = root.childNodes[0];
+			assert.lengthOf(fooContainer.childNodes, 1);
+			const fooLabel = fooContainer.childNodes[0] as Text;
+			assert.strictEqual(fooLabel.data, 'foo-container');
+			const barRoot = root.childNodes[1];
+			assert.lengthOf(barRoot.childNodes, 1);
+			const barContainer = barRoot.childNodes[0];
+			assert.lengthOf(barContainer.childNodes, 1);
+			const barLabel = barContainer.childNodes[0] as Text;
+			assert.strictEqual(barLabel.data, 'bar-container');
+			widget.invalidate();
+			assert.strictEqual(deferredPropertyCallCount, 12);
+		});
+
 		describe('supports merging with a widget returned a the top level', () => {
 			it('Supports merging DNodes onto existing HTML', () => {
 				const iframe = document.createElement('iframe');

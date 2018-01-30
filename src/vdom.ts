@@ -698,7 +698,7 @@ function initPropertiesAndChildren(
 	projectionOptions: ProjectionOptions
 ) {
 	addChildren(dnode, dnode.children, projectionOptions, parentInstance, undefined);
-	if (typeof dnode.deferredPropertiesCallback === 'function') {
+	if (typeof dnode.deferredPropertiesCallback === 'function' && dnode.inserted === undefined) {
 		addDeferredProperties(dnode, projectionOptions);
 	}
 	setProperties(domNode, dnode.properties, projectionOptions);
