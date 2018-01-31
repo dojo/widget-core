@@ -2934,4 +2934,95 @@ describe('vdom', () => {
 			});
 		});
 	});
+
+	describe('focus', () => {
+		it('focus is only called once when set to true', () => {
+			const onFocusStub = stub();
+			const projection = dom.append(
+				document.body,
+				v('input', {
+					focus: true,
+					onfocus: onFocusStub
+				}),
+				projectorStub,
+				{ sync: true }
+			);
+			resolvers.resolve();
+			assert.isTrue(onFocusStub.calledOnce);
+			const input = projection.domNode.lastChild as HTMLElement;
+			const focusSpy = spy(input, 'focus');
+			projection.update(v('input', { focus: true, onfocus: onFocusStub }));
+			resolvers.resolve();
+			assert.isTrue(focusSpy.notCalled);
+			assert.isTrue(onFocusStub.calledOnce);
+			document.body.removeChild(input);
+		});
+
+		it('focus is called when focus property is set to true from false', () => {
+			const onFocusStub = stub();
+			const projection = dom.append(
+				document.body,
+				v('input', {
+					focus: false,
+					onfocus: onFocusStub
+				}),
+				projectorStub
+			);
+			const input = projection.domNode.lastChild as HTMLElement;
+			const focusSpy = spy(input, 'focus');
+			resolvers.resolve();
+			assert.isTrue(focusSpy.notCalled);
+			assert.isTrue(onFocusStub.notCalled);
+			projection.update(v('input', { focus: true, onfocus: onFocusStub }));
+			resolvers.resolve();
+			assert.isTrue(focusSpy.calledOnce);
+			assert.isTrue(onFocusStub.calledOnce);
+			document.body.removeChild(input);
+		});
+
+		it('Should focus if function for focus returns true', () => {
+			const shouldFocus = () => true;
+			const onFocusStub = stub();
+			const projection = dom.append(
+				document.body,
+				v('input', {
+					focus: shouldFocus,
+					onfocus: onFocusStub
+				}),
+				projectorStub
+			);
+			const input = projection.domNode.lastChild as HTMLElement;
+			const focusSpy = spy(input, 'focus');
+			resolvers.resolve();
+			assert.isTrue(focusSpy.calledOnce);
+			assert.isTrue(onFocusStub.calledOnce);
+			projection.update(v('input', { focus: shouldFocus, onfocus: onFocusStub }));
+			resolvers.resolve();
+			assert.isTrue(focusSpy.calledTwice);
+			document.body.removeChild(input);
+		});
+
+		it('Should never focus if function for focus returns false', () => {
+			const shouldFocus = () => false;
+			const onFocusStub = stub();
+			const projection = dom.append(
+				document.body,
+				v('input', {
+					focus: shouldFocus,
+					onfocus: onFocusStub
+				}),
+				projectorStub
+			);
+			const input = projection.domNode.lastChild as HTMLElement;
+			const focusSpy = spy(input, 'focus');
+			resolvers.resolve();
+			assert.isTrue(focusSpy.notCalled);
+			assert.isTrue(onFocusStub.notCalled);
+			projection.update(v('input', { focus: shouldFocus, onfocus: onFocusStub }));
+			resolvers.resolve();
+			assert.isTrue(focusSpy.notCalled);
+			assert.isTrue(onFocusStub.notCalled);
+			document.body.removeChild(input);
+		});
+	});
 });
