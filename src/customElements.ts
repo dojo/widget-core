@@ -236,6 +236,10 @@ export function initializeElement(element: CustomElement) {
 		initialProperties[propertyName] = propertyValue;
 	});
 
+	properties.forEach(({ propertyName, widgetPropertyName }) => {
+		initialProperties[widgetPropertyName || propertyName] = (element as any)[propertyName];
+	});
+
 	let customProperties: PropertyDescriptorMap = {};
 
 	attributes.reduce((properties, attribute) => {
@@ -312,9 +316,9 @@ export function initializeElement(element: CustomElement) {
 
 	return function() {
 		let children: DNode[] = [];
-		let elementChildren = arrayFrom(element.children) as CustomElement[];
+		let elementChildren = element.childNodes ? (arrayFrom(element.childNodes) as CustomElement[]) : [];
 
-		elementChildren.forEach((childNode: CustomElement, index: number) => {
+		elementChildren.forEach((childNode, index) => {
 			const properties = { key: `child-${index}` };
 			if (childrenType === ChildrenType.DOJO) {
 				children.push(w(DomToWidgetWrapper(childNode), properties));
@@ -322,7 +326,7 @@ export function initializeElement(element: CustomElement) {
 				children.push(w(DomWrapper(childNode), properties));
 			}
 		});
-		elementChildren.forEach((childNode: Element) => {
+		elementChildren.forEach((childNode) => {
 			element.removeChild(childNode);
 		});
 
