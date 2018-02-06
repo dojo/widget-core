@@ -32,7 +32,17 @@
 					}
 				}
 			}
-		}
+		},
+		"plugins": [
+			{
+				"script": "./node_modules/@webcomponents/custom-elements/custom-elements.min.js",
+				"useLoader": true
+			},
+			{
+				"script": "./node_modules/@webcomponents/custom-elements/src/native-shim.js",
+				"useLoader": true
+			}
+		]
 	},
 	"node" : {
 		"plugins": [
