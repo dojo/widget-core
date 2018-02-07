@@ -10,6 +10,7 @@ import {
 	WidgetBaseInterface,
 	WNode
 } from './interfaces';
+import { RenderResult } from './vdom';
 
 /**
  * The symbol identifier for a WNode type
@@ -45,9 +46,13 @@ export interface Modifier<T extends DNode> {
 	(dNode: T, breaker: DecorateBreak): void;
 }
 
+export interface Predicate<T extends DNode> {
+	(dNode: DNode): dNode is T;
+}
+
 export interface DecorateOptions<T extends DNode> {
 	modifier: Modifier<T>;
-	predicate?: (dNode: DNode) => dNode is T;
+	predicate?: Predicate<T>;
 	shallow?: boolean;
 }
 
@@ -68,8 +73,31 @@ export interface DecorateOptions<T extends DNode> {
 export function decorate<T extends DNode>(dNodes: DNode, options: DecorateOptions<T>): DNode;
 export function decorate<T extends DNode>(dNodes: DNode[], options: DecorateOptions<T>): DNode[];
 export function decorate<T extends DNode>(dNodes: DNode | DNode[], options: DecorateOptions<T>): DNode | DNode[];
-export function decorate(dNodes: DNode | DNode[], options: DecorateOptions<DNode>): DNode | DNode[] {
-	const { shallow, predicate, modifier } = options;
+export function decorate<T extends DNode>(dNodes: DNode, modifier: Modifier<T>, predicate: Predicate<T>): DNode;
+export function decorate<T extends DNode>(dNodes: DNode[], modifier: Modifier<T>, predicate: Predicate<T>): DNode[];
+export function decorate<T extends DNode>(
+	dNodes: RenderResult,
+	modifier: Modifier<T>,
+	predicate: Predicate<T>
+): RenderResult;
+export function decorate(dNodes: DNode, modifier: Modifier<DNode>): DNode;
+export function decorate(dNodes: DNode[], modifier: Modifier<DNode>): DNode[];
+export function decorate(dNodes: RenderResult, modifier: Modifier<DNode>): RenderResult;
+export function decorate(
+	dNodes: DNode | DNode[],
+	optionsOrModifier: Modifier<DNode> | DecorateOptions<DNode>,
+	predicate?: Predicate<DNode>
+): DNode | DNode[] {
+	let shallow = false;
+	let modifier;
+	if (typeof optionsOrModifier === 'function') {
+		modifier = optionsOrModifier;
+	} else {
+		modifier = optionsOrModifier.modifier;
+		predicate = optionsOrModifier.predicate;
+		shallow = optionsOrModifier.shallow || false;
+	}
+
 	let nodes = Array.isArray(dNodes) ? [...dNodes] : [dNodes];
 	function breaker() {
 		nodes = [];

@@ -180,7 +180,7 @@ registerSuite('d', {
 			};
 			const node = testWidget.render();
 			assert.isOk(node);
-			decorate(node, { modifier, predicate });
+			decorate(node, modifier, predicate);
 			if (node) {
 				const children = node.children as any[];
 				assert.isUndefined(children[0].properties['decorated']);
@@ -204,7 +204,7 @@ registerSuite('d', {
 			};
 			const children: any = (<VNode>testWidget.render()).children;
 			assert.isOk(children);
-			decorate(children, { modifier });
+			decorate(children, modifier);
 			if (children) {
 				assert.strictEqual(children[0].properties['id'], 'id');
 				assert.strictEqual(children[1].properties['id'], 'id');
