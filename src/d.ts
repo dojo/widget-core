@@ -65,10 +65,8 @@ export interface DecorateOptions<T extends DNode> {
  * If no predicate is supplied then the modifier will be executed on all nodes. A `breaker` function is passed to the
  * modifier which will drain the nodes array and exit the decoration.
  *
- * When `shallow` is set to `true` the only the top node or nodes will be decorated.
- *
- * @param dNodes A DNode or array of DNodes for decoration.
- * @param options Options that provide the modifier and an optional predicate and shallow flag
+ * When the `shallow` options is set to `true` the only the top node or nodes will be decorated (only supported using
+ * `DecorateOptions`).
  */
 export function decorate<T extends DNode>(dNodes: DNode, options: DecorateOptions<T>): DNode;
 export function decorate<T extends DNode>(dNodes: DNode[], options: DecorateOptions<T>): DNode[];
