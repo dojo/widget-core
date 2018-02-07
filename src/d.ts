@@ -38,18 +38,23 @@ export function isVNode(child: DNode): child is VNode {
 	return Boolean(child && typeof child !== 'string' && child.type === VNODE);
 }
 
-export interface DecorateBreak {
-	(): void;
-}
-
+/**
+ * Interface for the decorate modifier
+ */
 export interface Modifier<T extends DNode> {
-	(dNode: T, breaker: DecorateBreak): void;
+	(dNode: T, breaker: () => void): void;
 }
 
+/**
+ * The predicate function for decorate
+ */
 export interface Predicate<T extends DNode> {
 	(dNode: DNode): dNode is T;
 }
 
+/**
+ * Decorator options
+ */
 export interface DecorateOptions<T extends DNode> {
 	modifier: Modifier<T>;
 	predicate?: Predicate<T>;
