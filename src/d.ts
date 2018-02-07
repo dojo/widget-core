@@ -37,40 +37,51 @@ export function isVNode(child: DNode): child is VNode {
 	return Boolean(child && typeof child !== 'string' && child.type === VNODE);
 }
 
+export interface DecorateBreak {
+	(): void;
+}
+
+export interface Modifier<T extends DNode> {
+	(dNode: T, breaker: DecorateBreak): void;
+}
+
+export interface DecorateOptions<T extends DNode> {
+	modifier: Modifier<T>;
+	predicate?: (dNode: DNode) => dNode is T;
+	shallow?: boolean;
+}
+
 /**
  * Generic decorate function for DNodes. The nodes are modified in place based on the provided predicate
  * and modifier functions.
  *
  * The children of each node are flattened and added to the array for decoration.
  *
- * If no predicate is supplied then the modifier will be executed on all nodes.
+ * If no predicate is supplied then the modifier will be executed on all nodes. A `breaker` function is passed to the
+ * modifier which will drain the nodes array and exit the decoration.
+ *
+ * When `shallow` is set to `true` the only the top node or nodes will be decorated.
+ *
+ * @param dNodes A DNode or array of DNodes for decoration.
+ * @param options Options that provide the modifier and an optional predicate and shallow flag
  */
-export function decorate<T extends DNode>(
-	dNodes: DNode,
-	modifier: (dNode: T) => void,
-	predicate: (dNode: DNode) => dNode is T
-): DNode;
-export function decorate<T extends DNode>(
-	dNodes: DNode[],
-	modifier: (dNode: T) => void,
-	predicate: (dNode: DNode) => dNode is T
-): DNode[];
-export function decorate(dNodes: DNode, modifier: (dNode: DNode) => void): DNode;
-export function decorate(dNodes: DNode[], modifier: (dNode: DNode) => void): DNode[];
-export function decorate(
-	dNodes: DNode | DNode[],
-	modifier: (dNode: DNode) => void,
-	predicate?: (dNode: DNode) => boolean
-): DNode | DNode[] {
+export function decorate<T extends DNode>(dNodes: DNode, options: DecorateOptions<T>): DNode;
+export function decorate<T extends DNode>(dNodes: DNode[], options: DecorateOptions<T>): DNode[];
+export function decorate<T extends DNode>(dNodes: DNode | DNode[], options: DecorateOptions<T>): DNode | DNode[];
+export function decorate(dNodes: DNode | DNode[], options: DecorateOptions<DNode>): DNode | DNode[] {
+	const { shallow, predicate, modifier } = options;
 	let nodes = Array.isArray(dNodes) ? [...dNodes] : [dNodes];
+	function breaker() {
+		nodes = [];
+	}
 	while (nodes.length) {
-		const node = nodes.pop();
+		const node = nodes.shift();
 		if (node) {
-			if (!predicate || predicate(node)) {
-				modifier(node);
-			}
-			if ((isWNode(node) || isVNode(node)) && node.children) {
+			if (!shallow && (isWNode(node) || isVNode(node)) && node.children) {
 				nodes = [...nodes, ...node.children];
+			}
+			if (!predicate || predicate(node)) {
+				modifier(node, breaker);
 			}
 		}
 	}
