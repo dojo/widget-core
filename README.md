@@ -464,10 +464,10 @@ The following example passes `css.root` that will be themeable and `css.rootFixe
 
 ```typescript
 import * as css from './styles/myWidget.m.css';
-import { ThemeableMixin, theme } from '@dojo/widget-core/mixins/Themeable';
+import { ThemedMixin, theme } from '@dojo/widget-core/mixins/Themed';
 
 @theme(css)
-export default class MyWidget extends ThemeableMixin(WidgetBase) {
+export default class MyWidget extends ThemedMixin(WidgetBase) {
     protected render() {
         return v('div', { classes: [ this.theme(css.root), css.rootFixed ] });
     }
@@ -955,6 +955,58 @@ If the node has not yet been rendered, all values will contain `0`. If you need 
 ```ts
 const hasRootBeenRendered = this.meta(Dimensions).has('root');
 ```
+
+#### Intersection
+
+The Intersection Meta provides information on whether a Node is visible in the applications viewport using Intersection Observers (this is polyfilled for unsupported browsers).
+
+This example renders a list with images, the image src is only added when the item is in the viewport which prevents needlessly downloading images until the user scrolls to them:
+
+```ts
+import { WidgetBase } from '@dojo/widget-core/WidgetBase';
+import { v, w } from '@dojo/widget-core/d';
+import { DNode } from '@dojo/widget-core/interfaces';
+import { Intersection } from '@dojo/widget-core/meta/Intersection';
+
+// Add image URLs here to load
+const images = [];
+
+class Item extends WidgetBase<{ imageSrc: string }> {
+	protected render() {
+		const { imageSrc } = this.properties;
+		const { isIntersecting } = this.meta(Intersection).get('root');
+		let imageProperties: any = {
+			key: 'root',
+			styles: {
+				height: '200px',
+				width: '200px'
+			}
+		};
+
+        // Only adds the image source if the node is in the viewport
+		if (isIntersecting) {
+			imageProperties = { ...imageProperties, src: imageSrc };
+		}
+
+		return v('img', imageProperties);
+	}
+}
+
+class List extends WidgetBase {
+	protected render() {
+		let items: DNode[] = [];
+		for (let i = 0; i < images.length; i++) {
+			items.push(v('ul', { key: i }, [ w(Item, { key: i, imageSrc: images[i] }) ]));
+		}
+
+		return v('div', items);
+	}
+}
+```
+
+#### Animations
+
+See the [Animations](#animations) section more information.
 
 #### Drag
 
