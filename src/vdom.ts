@@ -208,6 +208,19 @@ function buildPreviousProperties(domNode: any, previous: InternalVNode, current:
 	if (diffType === 'none') {
 		return {};
 	} else if (diffType === 'dom') {
+		if (properties.properties && properties.attributes) {
+			let newProperties: any = {
+				properties: {},
+				attributes: {}
+			};
+			Object.keys(properties.properties).forEach((propName) => {
+				newProperties.properties[propName] = domNode[propName];
+			});
+			Object.keys(properties.attributes).forEach((attrName) => {
+				newProperties.attributes[attrName] = domNode.getAttribute(attrName);
+			});
+			return newProperties;
+		}
 		return Object.keys(properties).reduce(
 			(props, property) => {
 				props[property] = domNode.getAttribute(property) || domNode[property];
@@ -233,51 +246,6 @@ function focusNode(propValue: any, previousValue: any, domNode: Element, project
 	}
 }
 
-function setProperties(domNode: Element, properties: VNodeProperties, projectionOptions: ProjectionOptions) {
-	const propNames = Object.keys(properties);
-	const propCount = propNames.length;
-	for (let i = 0; i < propCount; i++) {
-		const propName = propNames[i];
-		let propValue = properties[propName];
-		if (propName === 'classes') {
-			const currentClasses = Array.isArray(propValue) ? propValue : [propValue];
-			if (!domNode.className) {
-				domNode.className = currentClasses.join(' ').trim();
-			} else {
-				for (let i = 0; i < currentClasses.length; i++) {
-					addClasses(domNode, currentClasses[i]);
-				}
-			}
-		} else if (propName === 'focus') {
-			focusNode(propValue, false, domNode, projectionOptions);
-		} else if (propName === 'styles') {
-			const styleNames = Object.keys(propValue);
-			const styleCount = styleNames.length;
-			for (let j = 0; j < styleCount; j++) {
-				const styleName = styleNames[j];
-				const styleValue = propValue[styleName];
-				if (styleValue) {
-					checkStyleValue(styleValue);
-					projectionOptions.styleApplyer!(domNode as HTMLElement, styleName, styleValue);
-				}
-			}
-		} else if (propName !== 'key' && propValue !== null && propValue !== undefined) {
-			const type = typeof propValue;
-			if (type === 'function' && propName.lastIndexOf('on', 0) === 0) {
-				updateEvents(domNode, propName, properties, projectionOptions);
-			} else if (type === 'string' && propName !== 'value' && propName !== 'innerHTML') {
-				if (projectionOptions.namespace === NAMESPACE_SVG && propName === 'href') {
-					(domNode as Element).setAttributeNS(NAMESPACE_XLINK, propName, propValue);
-				} else {
-					(domNode as Element).setAttribute(propName, propValue);
-				}
-			} else {
-				(domNode as any)[propName] = propValue;
-			}
-		}
-	}
-}
-
 function removeOrphanedEvents(
 	domNode: Element,
 	previousProperties: VNodeProperties,
@@ -297,6 +265,34 @@ function removeOrphanedEvents(
 	}
 }
 
+function updateAttribute(domNode: Element, attrName: string, attrValue: string, projectionOptions: ProjectionOptions) {
+	if (projectionOptions.namespace === NAMESPACE_SVG && attrName === 'href') {
+		domNode.setAttributeNS(NAMESPACE_XLINK, attrName, attrValue);
+	} else if (attrName === 'role' && attrValue === '') {
+		domNode.removeAttribute(attrName);
+	} else {
+		domNode.setAttribute(attrName, attrValue);
+	}
+}
+
+function updateAttributes(
+	domNode: Element,
+	previousAttributes: { [index: string]: string },
+	attributes: { [index: string]: string },
+	projectionOptions: ProjectionOptions
+) {
+	const attrNames = Object.keys(attributes);
+	const attrCount = attrNames.length;
+	for (let i = 0; i < attrCount; i++) {
+		const attrName = attrNames[i];
+		const attrValue = attributes[attrName];
+		const previousAttrValue = previousAttributes[attrName];
+		if (attrValue !== previousAttrValue) {
+			updateAttribute(domNode, attrName, attrValue, projectionOptions);
+		}
+	}
+}
+
 function updateProperties(
 	domNode: Element,
 	previousProperties: VNodeProperties,
@@ -304,6 +300,9 @@ function updateProperties(
 	projectionOptions: ProjectionOptions
 ) {
 	let propertiesUpdated = false;
+	let includesAttributes = !properties.properties;
+	properties = includesAttributes ? properties : properties.properties;
+	previousProperties = includesAttributes ? previousProperties : previousProperties.properties || {};
 	const propNames = Object.keys(properties);
 	const propCount = propNames.length;
 	if (propNames.indexOf('classes') === -1 && previousProperties.classes) {
@@ -360,7 +359,7 @@ function updateProperties(
 			for (let j = 0; j < styleCount; j++) {
 				const styleName = styleNames[j];
 				const newStyleValue = propValue[styleName];
-				const oldStyleValue = previousValue[styleName];
+				const oldStyleValue = previousValue && previousValue[styleName];
 				if (newStyleValue === oldStyleValue) {
 					continue;
 				}
@@ -394,14 +393,8 @@ function updateProperties(
 				const type = typeof propValue;
 				if (type === 'function' && propName.lastIndexOf('on', 0) === 0) {
 					updateEvents(domNode, propName, properties, projectionOptions, previousProperties);
-				} else if (type === 'string' && propName !== 'innerHTML') {
-					if (projectionOptions.namespace === NAMESPACE_SVG && propName === 'href') {
-						domNode.setAttributeNS(NAMESPACE_XLINK, propName, propValue);
-					} else if (propName === 'role' && propValue === '') {
-						domNode.removeAttribute(propName);
-					} else {
-						domNode.setAttribute(propName, propValue);
-					}
+				} else if (type === 'string' && propName !== 'innerHTML' && includesAttributes) {
+					updateAttribute(domNode, propName, propValue, projectionOptions);
 				} else {
 					if ((domNode as any)[propName] !== propValue) {
 						// Comparison is here for side-effects in Edge with scrollLeft and scrollTop
@@ -735,7 +728,11 @@ function initPropertiesAndChildren(
 	if (typeof dnode.deferredPropertiesCallback === 'function' && dnode.inserted === undefined) {
 		addDeferredProperties(dnode, projectionOptions);
 	}
-	setProperties(domNode, dnode.properties, projectionOptions);
+
+	if (dnode.properties.attributes) {
+		updateAttributes(domNode, {}, dnode.properties.attributes, projectionOptions);
+	}
+	updateProperties(domNode, {}, dnode.properties, projectionOptions);
 	if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 		const instanceData = widgetInstanceMap.get(parentInstance)!;
 		instanceData.nodeHandler.add(domNode as HTMLElement, `${dnode.properties.key}`);
@@ -891,6 +888,14 @@ function updateDom(
 			}
 
 			const previousProperties = buildPreviousProperties(domNode, previous, dnode);
+			if (dnode.properties.attributes) {
+				updateAttributes(
+					domNode,
+					previousProperties.attributes,
+					dnode.properties.attributes,
+					projectionOptions
+				);
+			}
 			updated = updateProperties(domNode, previousProperties, dnode.properties, projectionOptions) || updated;
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {

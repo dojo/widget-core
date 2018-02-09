@@ -1,7 +1,7 @@
 import { WidgetBase } from './../WidgetBase';
 import { Constructor, DNode, VNode, VNodeProperties, WidgetProperties } from './../interfaces';
 import { v } from './../d';
-import { InternalVNode } from './../vdom';
+import { InternalVNode, toTextVNode } from './../vdom';
 
 export interface DomWrapperOptions {
 	onAttached?(): void;
@@ -29,8 +29,7 @@ export function DomWrapper(domNode: Element | Text, options: DomWrapperOptions =
 
 		protected render(): DNode {
 			const properties = { ...this.properties, key: 'root' };
-			const tag = isElement(domNode) ? domNode.tagName : '';
-			return v(tag, properties);
+			return isElement(domNode) ? v(domNode.tagName, properties) : toTextVNode(domNode.data);
 		}
 	};
 }

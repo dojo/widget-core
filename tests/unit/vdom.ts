@@ -5,7 +5,7 @@ import { createResolvers } from './../support/util';
 import sendEvent from './../support/sendEvent';
 
 import { dom, InternalVNode, InternalWNode, widgetInstanceMap, RenderResult } from '../../src/vdom';
-import { v, w, VNODE } from '../../src/d';
+import { ce, v, w, VNODE } from '../../src/d';
 import { VNode } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
 import { Registry } from '../../src/Registry';
@@ -2032,6 +2032,24 @@ describe('vdom', () => {
 			widget.renderResult = v('div', { foo: 'qux', bar: 3 });
 			assert.strictEqual('qux', root.getAttribute('foo'));
 			assert.strictEqual(3, root.bar);
+		});
+	});
+
+	describe('custom element vnode', () => {
+		it('Should respect attributes and properties from the VNode', () => {
+			let vnode = ce('div', { attributes: { foo: 'foo' }, properties: { bar: 1, baz: 'baz' } });
+			vnode.diffType = 'dom';
+			const widget = getWidget(vnode);
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual('foo', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			assert.strictEqual('baz', root.baz);
+			root.baz = 'new';
+			widget.renderResult = { ...vnode };
+			assert.strictEqual('foo', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			assert.strictEqual('baz', root.baz);
 		});
 	});
 

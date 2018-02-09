@@ -114,8 +114,7 @@ registerSuite('DomWrapper', {
 			projector.append(root);
 			resolvers.resolve();
 			resolvers.resolve();
-			assert.strictEqual(domNode.data, 'text-node');
-			assert.strictEqual(root.childNodes[0], domNode);
+			assert.strictEqual((root.childNodes[0] as Text).data, 'text-node');
 		},
 		onAttached() {
 			let attached = false;

@@ -157,6 +157,8 @@ export function v(
 	if (typeof properties === 'function') {
 		deferredPropertiesCallback = properties;
 		properties = {};
+	} else {
+		Object;
 	}
 
 	return {
@@ -164,6 +166,22 @@ export function v(
 		deferredPropertiesCallback,
 		children,
 		properties,
+		type: VNODE
+	};
+}
+
+export interface VirtualDomProperties {
+	properties?: VNodeProperties;
+	attributes?: { [index: string]: string };
+}
+
+export function ce(tag: string, { properties = {}, attributes = {} }: VirtualDomProperties = {}): VNode {
+	return {
+		tag,
+		properties: {
+			properties,
+			attributes
+		},
 		type: VNODE
 	};
 }
