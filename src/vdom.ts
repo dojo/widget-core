@@ -205,31 +205,31 @@ function removeClasses(domNode: Element, classes: SupportedClassName) {
 
 function buildPreviousProperties(domNode: any, previous: InternalVNode, current: InternalVNode) {
 	const { diffType, properties, attributes } = current;
-	if (diffType === 'none') {
+	if (!diffType || diffType === 'vdom') {
+		return previous.properties;
+	} else if (diffType === 'none') {
 		return {};
-	} else if (diffType === 'dom') {
-		if (attributes) {
-			let newProperties: any = {
-				properties: {},
-				attributes: {}
-			};
-			Object.keys(properties).forEach((propName) => {
-				newProperties.properties[propName] = domNode[propName];
-			});
-			Object.keys(attributes).forEach((attrName) => {
-				newProperties.attributes[attrName] = domNode.getAttribute(attrName);
-			});
-			return newProperties;
-		}
-		return Object.keys(properties).reduce(
-			(props, property) => {
-				props[property] = domNode.getAttribute(property) || domNode[property];
-				return props;
-			},
-			{} as any
-		);
 	}
-	return previous.properties;
+	if (attributes) {
+		let newProperties: any = {
+			properties: {},
+			attributes: {}
+		};
+		Object.keys(properties).forEach((propName) => {
+			newProperties.properties[propName] = domNode[propName];
+		});
+		Object.keys(attributes).forEach((attrName) => {
+			newProperties.attributes[attrName] = domNode.getAttribute(attrName);
+		});
+		return newProperties;
+	}
+	return Object.keys(properties).reduce(
+		(props, property) => {
+			props[property] = domNode.getAttribute(property) || domNode[property];
+			return props;
+		},
+		{} as any
+	);
 }
 
 function focusNode(propValue: any, previousValue: any, domNode: Element, projectionOptions: ProjectionOptions): void {
