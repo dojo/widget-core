@@ -291,6 +291,11 @@ export interface VNode {
 	 * Text node string
 	 */
 	text?: string;
+
+	/**
+	 * Indicates the type of diff for the VNode
+	 */
+	diffType?: 'none' | 'vdom' | 'dom';
 }
 
 /**

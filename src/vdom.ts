@@ -203,6 +203,22 @@ function removeClasses(domNode: Element, classes: SupportedClassName) {
 	}
 }
 
+function buildPreviousProperties(domNode: any, previous: InternalVNode, current: InternalVNode) {
+	const { diffType, properties } = current;
+	if (diffType === 'none') {
+		return {};
+	} else if (diffType === 'dom') {
+		return Object.keys(properties).reduce(
+			(props, property) => {
+				props[property] = domNode.getAttribute(property) || domNode[property];
+				return props;
+			},
+			{} as any
+		);
+	}
+	return previous.properties;
+}
+
 function focusNode(propValue: any, previousValue: any, domNode: Element, projectionOptions: ProjectionOptions): void {
 	let result;
 	if (typeof propValue === 'function') {
@@ -874,7 +890,8 @@ function updateDom(
 					updateChildren(dnode, previous.children, children, parentInstance, projectionOptions) || updated;
 			}
 
-			updated = updateProperties(domNode, previous.properties, dnode.properties, projectionOptions) || updated;
+			const previousProperties = buildPreviousProperties(domNode, previous, dnode);
+			updated = updateProperties(domNode, previousProperties, dnode.properties, projectionOptions) || updated;
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 				const instanceData = widgetInstanceMap.get(parentInstance)!;

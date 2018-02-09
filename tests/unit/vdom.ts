@@ -1951,6 +1951,90 @@ describe('vdom', () => {
 		});
 	});
 
+	describe('diffType', () => {
+		it('Should diff against previous properties with diffType `vdom`', () => {
+			let vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'vdom';
+			const widget = getWidget(vnode);
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			root.bar = 2;
+			root.setAttribute('foo', 'baz');
+			vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'vdom';
+			widget.renderResult = vnode;
+			assert.strictEqual('baz', root.getAttribute('foo'));
+			assert.strictEqual(2, root.bar);
+			vnode = v('div', { foo: 'qux', bar: 3 });
+			vnode.diffType = 'vdom';
+			widget.renderResult = vnode;
+			assert.strictEqual('qux', root.getAttribute('foo'));
+			assert.strictEqual(3, root.bar);
+		});
+
+		it('Should always set properties/attribute with diffType `none`', () => {
+			let vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'none';
+			const widget = getWidget(vnode);
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			root.bar = 2;
+			root.setAttribute('foo', 'baz');
+			vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'none';
+			widget.renderResult = vnode;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			vnode = v('div', { foo: 'qux', bar: 3 });
+			vnode.diffType = 'none';
+			widget.renderResult = vnode;
+			assert.strictEqual('qux', root.getAttribute('foo'));
+			assert.strictEqual(3, root.bar);
+		});
+
+		it('Should diff against values on the DOM with diffType `dom`', () => {
+			let vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'dom';
+			const widget = getWidget(vnode);
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			root.bar = 2;
+			root.setAttribute('foo', 'baz');
+			vnode = v('div', { foo: 'bar', bar: 1 });
+			vnode.diffType = 'dom';
+			widget.renderResult = vnode;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			vnode = v('div', { foo: 'qux', bar: 3 });
+			vnode.diffType = 'dom';
+			widget.renderResult = vnode;
+			assert.strictEqual('qux', root.getAttribute('foo'));
+			assert.strictEqual(3, root.bar);
+		});
+
+		it('Should use diffType `vdom` by default', () => {
+			const widget = getWidget(v('div', { foo: 'bar', bar: 1 }));
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual('bar', root.getAttribute('foo'));
+			assert.strictEqual(1, root.bar);
+			root.bar = 2;
+			root.setAttribute('foo', 'baz');
+			widget.renderResult = v('div', { foo: 'bar', bar: 1 });
+			assert.strictEqual('baz', root.getAttribute('foo'));
+			assert.strictEqual(2, root.bar);
+			widget.renderResult = v('div', { foo: 'qux', bar: 3 });
+			assert.strictEqual('qux', root.getAttribute('foo'));
+			assert.strictEqual(3, root.bar);
+		});
+	});
+
 	describe('deferred properties', () => {
 		it('can call a callback on render and on the next rAF for vnode properties', () => {
 			let deferredCallbackCount = 0;
