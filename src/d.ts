@@ -157,8 +157,6 @@ export function v(
 	if (typeof properties === 'function') {
 		deferredPropertiesCallback = properties;
 		properties = {};
-	} else {
-		Object;
 	}
 
 	return {
