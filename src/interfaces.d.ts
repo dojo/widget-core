@@ -91,6 +91,11 @@ export type DeferredVirtualProperties = (inserted: boolean) => VNodeProperties;
 
 export type FocusFunction = () => boolean;
 
+export interface VNodeOptions {
+	properties?: VNodeProperties;
+	attributes?: { [index: string]: string };
+}
+
 export interface VNodeProperties {
 	/**
 	 * The animation to perform when this node is added to an already existing parent.
@@ -271,6 +276,11 @@ export interface VNode {
 	 * VNode properties
 	 */
 	properties: VNodeProperties;
+
+	/**
+	 * VNode attributes
+	 */
+	attributes?: { [index: string]: string };
 
 	/**
 	 * Deferred callback for VNode properties

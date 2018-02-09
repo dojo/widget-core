@@ -204,19 +204,19 @@ function removeClasses(domNode: Element, classes: SupportedClassName) {
 }
 
 function buildPreviousProperties(domNode: any, previous: InternalVNode, current: InternalVNode) {
-	const { diffType, properties } = current;
+	const { diffType, properties, attributes } = current;
 	if (diffType === 'none') {
 		return {};
 	} else if (diffType === 'dom') {
-		if (properties.properties && properties.attributes) {
+		if (attributes) {
 			let newProperties: any = {
 				properties: {},
 				attributes: {}
 			};
-			Object.keys(properties.properties).forEach((propName) => {
+			Object.keys(properties).forEach((propName) => {
 				newProperties.properties[propName] = domNode[propName];
 			});
-			Object.keys(properties.attributes).forEach((attrName) => {
+			Object.keys(attributes).forEach((attrName) => {
 				newProperties.attributes[attrName] = domNode.getAttribute(attrName);
 			});
 			return newProperties;
@@ -297,12 +297,10 @@ function updateProperties(
 	domNode: Element,
 	previousProperties: VNodeProperties,
 	properties: VNodeProperties,
-	projectionOptions: ProjectionOptions
+	projectionOptions: ProjectionOptions,
+	includesAttributes: boolean
 ) {
 	let propertiesUpdated = false;
-	let includesAttributes = !properties.properties;
-	properties = includesAttributes ? properties : properties.properties;
-	previousProperties = includesAttributes ? previousProperties : previousProperties.properties || {};
 	const propNames = Object.keys(properties);
 	const propCount = propNames.length;
 	if (propNames.indexOf('classes') === -1 && previousProperties.classes) {
@@ -729,10 +727,12 @@ function initPropertiesAndChildren(
 		addDeferredProperties(dnode, projectionOptions);
 	}
 
-	if (dnode.properties.attributes) {
-		updateAttributes(domNode, {}, dnode.properties.attributes, projectionOptions);
+	if (dnode.attributes) {
+		updateAttributes(domNode, {}, dnode.attributes, projectionOptions);
+		updateProperties(domNode, {}, dnode.properties, projectionOptions, false);
+	} else {
+		updateProperties(domNode, {}, dnode.properties, projectionOptions, true);
 	}
-	updateProperties(domNode, {}, dnode.properties, projectionOptions);
 	if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 		const instanceData = widgetInstanceMap.get(parentInstance)!;
 		instanceData.nodeHandler.add(domNode as HTMLElement, `${dnode.properties.key}`);
@@ -888,15 +888,20 @@ function updateDom(
 			}
 
 			const previousProperties = buildPreviousProperties(domNode, previous, dnode);
-			if (dnode.properties.attributes) {
-				updateAttributes(
-					domNode,
-					previousProperties.attributes,
-					dnode.properties.attributes,
-					projectionOptions
-				);
+			if (dnode.attributes) {
+				updateAttributes(domNode, previousProperties.attributes, dnode.attributes, projectionOptions);
+				updated =
+					updateProperties(
+						domNode,
+						previousProperties.properties,
+						dnode.properties,
+						projectionOptions,
+						false
+					) || updated;
+			} else {
+				updated =
+					updateProperties(domNode, previousProperties, dnode.properties, projectionOptions, true) || updated;
 			}
-			updated = updateProperties(domNode, previousProperties, dnode.properties, projectionOptions) || updated;
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 				const instanceData = widgetInstanceMap.get(parentInstance)!;
@@ -919,7 +924,7 @@ function addDeferredProperties(vnode: InternalVNode, projectionOptions: Projecti
 			...vnode.deferredPropertiesCallback!(!!vnode.inserted),
 			...vnode.decoratedDeferredProperties
 		};
-		updateProperties(vnode.domNode! as Element, vnode.properties, properties, projectionOptions);
+		updateProperties(vnode.domNode! as Element, vnode.properties, properties, projectionOptions, true);
 		vnode.properties = properties;
 	});
 }

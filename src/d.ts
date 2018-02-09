@@ -8,9 +8,10 @@ import {
 	RegistryLabel,
 	VNodeProperties,
 	WidgetBaseInterface,
-	WNode
+	WNode,
+	VNodeOptions
 } from './interfaces';
-import { RenderResult } from './vdom';
+import { InternalVNode, RenderResult } from './vdom';
 
 /**
  * The symbol identifier for a WNode type
@@ -168,18 +169,18 @@ export function v(
 	};
 }
 
-export interface VirtualDomProperties {
-	properties?: VNodeProperties;
-	attributes?: { [index: string]: string };
-}
-
-export function ce(tag: string, { properties = {}, attributes = {} }: VirtualDomProperties = {}): VNode {
+/**
+ * Create a VNode for an existing DOM Node.
+ *
+ * @param domNode DOM Node to create a VNode
+ * @param options specify the nodes attributes and properties
+ */
+export function dom(domNode: Element, { properties = {}, attributes = {} }: VNodeOptions = {}): VNode {
 	return {
-		tag,
-		properties: {
-			properties,
-			attributes
-		},
-		type: VNODE
-	};
+		tag: domNode.tagName,
+		properties,
+		attributes,
+		type: VNODE,
+		domNode
+	} as InternalVNode;
 }

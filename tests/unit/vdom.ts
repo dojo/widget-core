@@ -5,7 +5,7 @@ import { createResolvers } from './../support/util';
 import sendEvent from './../support/sendEvent';
 
 import { dom, InternalVNode, InternalWNode, widgetInstanceMap, RenderResult } from '../../src/vdom';
-import { ce, v, w, VNODE } from '../../src/d';
+import { dom as d, v, w, VNODE } from '../../src/d';
 import { VNode } from '../../src/interfaces';
 import { WidgetBase } from '../../src/WidgetBase';
 import { Registry } from '../../src/Registry';
@@ -2037,7 +2037,8 @@ describe('vdom', () => {
 
 	describe('custom element vnode', () => {
 		it('Should respect attributes and properties from the VNode', () => {
-			let vnode = ce('div', { attributes: { foo: 'foo' }, properties: { bar: 1, baz: 'baz' } });
+			const div = document.createElement('div');
+			let vnode = d(div, { attributes: { foo: 'foo' }, properties: { bar: 1, baz: 'baz' } });
 			vnode.diffType = 'dom';
 			const widget = getWidget(vnode);
 			const projection = dom.create(widget, { sync: true });
