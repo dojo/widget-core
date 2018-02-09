@@ -438,7 +438,7 @@ registerSuite('customElements', {
 		widget.__setProperties__({ foo: 'bar' });
 		const invalidateSpy = sinon.spy(widget, 'invalidate');
 		const renderResult = widget.__render__() as InternalVNode;
-		assert.strictEqual(renderResult.tag, 'DIV');
+		assert.strictEqual(renderResult.tag, 'div');
 		assert.strictEqual(renderResult.domNode, div);
 		assert.deepEqual(renderResult.properties, {});
 		assert.deepEqual(widget.properties, { foo: 'bar' });
@@ -456,7 +456,7 @@ registerSuite('customElements', {
 		widget.__setProperties__({ foo: 'bar' });
 		const invalidateSpy = sinon.spy(widget, 'invalidate');
 		const renderResult = widget.__render__() as InternalVNode;
-		assert.strictEqual(renderResult.tag, 'DIV');
+		assert.strictEqual(renderResult.tag, 'div');
 		assert.strictEqual(renderResult.domNode, div);
 		assert.deepEqual(renderResult.properties, {});
 		assert.deepEqual(widget.properties, { foo: 'bar' });

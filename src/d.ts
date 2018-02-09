@@ -39,6 +39,10 @@ export function isVNode(child: DNode): child is VNode {
 	return Boolean(child && typeof child !== 'string' && child.type === VNODE);
 }
 
+export function isElementNode(value: any): value is Element {
+	return !!value.tagName;
+}
+
 /**
  * Interface for the decorate modifier
  */
@@ -177,12 +181,13 @@ export function dom(
 	children?: DNode[]
 ): VNode {
 	return {
-		tag: domNode.tagName.toLowerCase(),
+		tag: isElementNode(domNode) ? domNode.tagName.toLowerCase() : '',
 		properties,
 		attributes,
 		children,
 		type: VNODE,
 		domNode,
+		text: isElementNode(domNode) ? undefined : domNode.data,
 		diffType
 	} as InternalVNode;
 }
