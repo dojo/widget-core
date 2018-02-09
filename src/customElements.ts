@@ -3,8 +3,7 @@ import { from as arrayFrom } from '@dojo/shim/array';
 import global from '@dojo/shim/global';
 import { Constructor, DNode, VNode, VNodeProperties, WidgetProperties } from './interfaces';
 import { WidgetBase } from './WidgetBase';
-import { v, w } from './d';
-import { DomWrapper } from './util/DomWrapper';
+import { v, w, dom } from './d';
 import { ProjectorMixin } from './mixins/Projector';
 import { InternalVNode } from './vdom';
 
@@ -326,7 +325,7 @@ export function initializeElement(element: CustomElement) {
 			if (childrenType === ChildrenType.DOJO) {
 				children.push(w(DomToWidgetWrapper(childNode), properties));
 			} else {
-				children.push(w(DomWrapper(childNode), properties));
+				children.push(dom({ domNode: childNode, properties }));
 			}
 		});
 		elementChildren.forEach((childNode) => {
