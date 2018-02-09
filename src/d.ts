@@ -9,7 +9,7 @@ import {
 	VNodeProperties,
 	WidgetBaseInterface,
 	WNode,
-	VNodeOptions
+	DomOptions
 } from './interfaces';
 import { InternalVNode, RenderResult } from './vdom';
 
@@ -171,16 +171,18 @@ export function v(
 
 /**
  * Create a VNode for an existing DOM Node.
- *
- * @param domNode DOM Node to create a VNode
- * @param options specify the nodes attributes and properties
  */
-export function dom(domNode: Element, { properties = {}, attributes = {} }: VNodeOptions = {}): VNode {
+export function dom(
+	{ domNode, attributes = {}, properties = {}, diffType = 'none' }: DomOptions,
+	children?: DNode[]
+): VNode {
 	return {
-		tag: domNode.tagName,
+		tag: domNode.tagName.toLowerCase(),
 		properties,
 		attributes,
+		children,
 		type: VNODE,
-		domNode
+		domNode,
+		diffType
 	} as InternalVNode;
 }

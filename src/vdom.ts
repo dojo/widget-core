@@ -206,15 +206,15 @@ function removeClasses(domNode: Element, classes: SupportedClassName) {
 function buildPreviousProperties(domNode: any, previous: InternalVNode, current: InternalVNode) {
 	const { diffType, properties, attributes } = current;
 	if (!diffType || diffType === 'vdom') {
-		return previous.properties;
+		return { properties: previous.properties, attributes: previous.attributes };
 	} else if (diffType === 'none') {
-		return {};
+		return { properties: {}, attributes: previous.attributes ? {} : undefined };
 	}
+	let newProperties: any = {
+		properties: {}
+	};
 	if (attributes) {
-		let newProperties: any = {
-			properties: {},
-			attributes: {}
-		};
+		newProperties.attributes = {};
 		Object.keys(properties).forEach((propName) => {
 			newProperties.properties[propName] = domNode[propName];
 		});
@@ -223,13 +223,14 @@ function buildPreviousProperties(domNode: any, previous: InternalVNode, current:
 		});
 		return newProperties;
 	}
-	return Object.keys(properties).reduce(
+	newProperties.properties = Object.keys(properties).reduce(
 		(props, property) => {
 			props[property] = domNode.getAttribute(property) || domNode[property];
 			return props;
 		},
 		{} as any
 	);
+	return newProperties;
 }
 
 function focusNode(propValue: any, previousValue: any, domNode: Element, projectionOptions: ProjectionOptions): void {
@@ -268,7 +269,7 @@ function removeOrphanedEvents(
 function updateAttribute(domNode: Element, attrName: string, attrValue: string, projectionOptions: ProjectionOptions) {
 	if (projectionOptions.namespace === NAMESPACE_SVG && attrName === 'href') {
 		domNode.setAttributeNS(NAMESPACE_XLINK, attrName, attrValue);
-	} else if (attrName === 'role' && attrValue === '') {
+	} else if ((attrName === 'role' && attrValue === '') || attrValue === undefined) {
 		domNode.removeAttribute(attrName);
 	} else {
 		domNode.setAttribute(attrName, attrValue);
@@ -277,7 +278,7 @@ function updateAttribute(domNode: Element, attrName: string, attrValue: string, 
 
 function updateAttributes(
 	domNode: Element,
-	previousAttributes: { [index: string]: string },
+	previousAttributes: { [index: string]: string } = {},
 	attributes: { [index: string]: string },
 	projectionOptions: ProjectionOptions
 ) {
@@ -295,7 +296,7 @@ function updateAttributes(
 
 function updateProperties(
 	domNode: Element,
-	previousProperties: VNodeProperties,
+	previousProperties: VNodeProperties = {},
 	properties: VNodeProperties,
 	projectionOptions: ProjectionOptions,
 	includesAttributes: boolean
@@ -900,7 +901,13 @@ function updateDom(
 					) || updated;
 			} else {
 				updated =
-					updateProperties(domNode, previousProperties, dnode.properties, projectionOptions, true) || updated;
+					updateProperties(
+						domNode,
+						previousProperties.properties,
+						dnode.properties,
+						projectionOptions,
+						true
+					) || updated;
 			}
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {

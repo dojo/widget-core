@@ -91,9 +91,13 @@ export type DeferredVirtualProperties = (inserted: boolean) => VNodeProperties;
 
 export type FocusFunction = () => boolean;
 
-export interface VNodeOptions {
+export type DiffType = 'none' | 'dom' | 'vdom';
+
+export interface DomOptions {
+	domNode: Element;
 	properties?: VNodeProperties;
-	attributes?: { [index: string]: string };
+	attributes?: { [index: string]: string | undefined };
+	diffType?: DiffType;
 }
 
 export interface VNodeProperties {
@@ -305,7 +309,7 @@ export interface VNode {
 	/**
 	 * Indicates the type of diff for the VNode
 	 */
-	diffType?: 'none' | 'vdom' | 'dom';
+	diffType?: DiffType;
 }
 
 /**
