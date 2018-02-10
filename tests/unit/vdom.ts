@@ -2039,9 +2039,9 @@ describe('vdom', () => {
 		it('Should diff against previous properties with diffType `vdom`', () => {
 			const div = document.createElement('div');
 			let vnode = d({
-				domNode: div,
-				properties: { foo: 'bar', bar: 1 },
-				attributes: { baz: 'foo' },
+				node: div,
+				props: { foo: 'bar', bar: 1 },
+				attrs: { baz: 'foo' },
 				diffType: 'vdom'
 			});
 			const widget = getWidget(vnode);
@@ -2053,9 +2053,9 @@ describe('vdom', () => {
 			root.bar = 2;
 			root.setAttribute('foo', 'baz');
 			vnode = d({
-				domNode: div,
-				properties: { foo: 'bar', bar: 1 },
-				attributes: { baz: undefined },
+				node: div,
+				props: { foo: 'bar', bar: 1 },
+				attrs: { baz: undefined },
 				diffType: 'vdom'
 			});
 			widget.renderResult = vnode;
@@ -2063,9 +2063,9 @@ describe('vdom', () => {
 			assert.strictEqual(null, root.getAttribute('baz'));
 			assert.strictEqual(2, root.bar);
 			vnode = d({
-				domNode: div,
-				properties: { foo: 'qux', bar: 3 },
-				attributes: { baz: 'foo' },
+				node: div,
+				props: { foo: 'qux', bar: 3 },
+				attrs: { baz: 'foo' },
 				diffType: 'vdom'
 			});
 			root.baz = 'baz';
@@ -2077,7 +2077,7 @@ describe('vdom', () => {
 
 		it('Should always set properties/attribute with diffType `none`', () => {
 			const div = document.createElement('div');
-			let vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' }, diffType: 'none' });
+			let vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' }, diffType: 'none' });
 			const widget = getWidget(vnode);
 			const projection = dom.create(widget, { sync: true });
 			const root = projection.domNode.childNodes[0] as any;
@@ -2085,11 +2085,11 @@ describe('vdom', () => {
 			assert.strictEqual(1, root.bar);
 			root.bar = 2;
 			root.setAttribute('foo', 'baz');
-			vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' }, diffType: 'none' });
+			vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' }, diffType: 'none' });
 			widget.renderResult = vnode;
 			assert.strictEqual('bar', root.getAttribute('foo'));
 			assert.strictEqual(1, root.bar);
-			vnode = d({ domNode: div, properties: { bar: 3 }, attributes: { foo: 'qux' }, diffType: 'none' });
+			vnode = d({ node: div, props: { bar: 3 }, attrs: { foo: 'qux' }, diffType: 'none' });
 			vnode.diffType = 'none';
 			widget.renderResult = vnode;
 			assert.strictEqual('qux', root.getAttribute('foo'));
@@ -2098,7 +2098,7 @@ describe('vdom', () => {
 
 		it('Should diff against values on the DOM with diffType `dom`', () => {
 			const div = document.createElement('div');
-			let vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' }, diffType: 'dom' });
+			let vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' }, diffType: 'dom' });
 			const widget = getWidget(vnode);
 			const projection = dom.create(widget, { sync: true });
 			const root = projection.domNode.childNodes[0] as any;
@@ -2106,11 +2106,11 @@ describe('vdom', () => {
 			assert.strictEqual(1, root.bar);
 			root.bar = 2;
 			root.setAttribute('foo', 'baz');
-			vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' }, diffType: 'dom' });
+			vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' }, diffType: 'dom' });
 			widget.renderResult = vnode;
 			assert.strictEqual('bar', root.getAttribute('foo'));
 			assert.strictEqual(1, root.bar);
-			vnode = d({ domNode: div, properties: { bar: 3 }, attributes: { foo: 'qux' }, diffType: 'dom' });
+			vnode = d({ node: div, props: { bar: 3 }, attrs: { foo: 'qux' }, diffType: 'dom' });
 			widget.renderResult = vnode;
 			assert.strictEqual('qux', root.getAttribute('foo'));
 			assert.strictEqual(3, root.bar);
@@ -2118,7 +2118,7 @@ describe('vdom', () => {
 
 		it('Should use diffType `none` by default', () => {
 			const div = document.createElement('div');
-			let vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' } });
+			let vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' } });
 			const widget = getWidget(vnode);
 			const projection = dom.create(widget, { sync: true });
 			const root = projection.domNode.childNodes[0] as any;
@@ -2126,11 +2126,11 @@ describe('vdom', () => {
 			assert.strictEqual(1, root.bar);
 			root.bar = 2;
 			root.setAttribute('foo', 'baz');
-			vnode = d({ domNode: div, properties: { bar: 1 }, attributes: { foo: 'bar' } });
+			vnode = d({ node: div, props: { bar: 1 }, attrs: { foo: 'bar' } });
 			widget.renderResult = vnode;
 			assert.strictEqual('bar', root.getAttribute('foo'));
 			assert.strictEqual(1, root.bar);
-			vnode = d({ domNode: div, properties: { bar: 3 }, attributes: { foo: 'qux' } });
+			vnode = d({ node: div, props: { bar: 3 }, attrs: { foo: 'qux' } });
 			vnode.diffType = 'none';
 			widget.renderResult = vnode;
 			assert.strictEqual('qux', root.getAttribute('foo'));

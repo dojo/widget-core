@@ -94,9 +94,9 @@ export type FocusFunction = () => boolean;
 export type DiffType = 'none' | 'dom' | 'vdom';
 
 export interface DomOptions {
-	domNode: Element | Text;
-	properties?: VNodeProperties;
-	attributes?: { [index: string]: string | undefined };
+	node: Element | Text;
+	props?: VNodeProperties;
+	attrs?: { [index: string]: string | undefined };
 	diffType?: DiffType;
 }
 

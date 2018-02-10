@@ -155,9 +155,9 @@ registerSuite('d', {
 			const div = document.createElement('div');
 			const vnode = dom(
 				{
-					domNode: div,
-					properties: { foo: 1, bar: 'bar' },
-					attributes: { baz: 'baz' }
+					node: div,
+					props: { foo: 1, bar: 'bar' },
+					attrs: { baz: 'baz' }
 				},
 				[v('div'), w(WidgetBase, {})]
 			) as InternalVNode;
@@ -171,7 +171,7 @@ registerSuite('d', {
 		'creates an empty properties and attribute object and undefined children when not passed'() {
 			const span = document.createElement('span');
 			const vnode = dom({
-				domNode: span
+				node: span
 			}) as InternalVNode;
 			assert.strictEqual(vnode.domNode, span);
 			assert.strictEqual(vnode.tag, 'span');
@@ -184,7 +184,7 @@ registerSuite('d', {
 		'can override the default diffType'() {
 			const span = document.createElement('span');
 			const vnode = dom({
-				domNode: span,
+				node: span,
 				diffType: 'dom'
 			}) as InternalVNode;
 			assert.strictEqual(vnode.domNode, span);

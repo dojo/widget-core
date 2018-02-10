@@ -168,7 +168,7 @@ export function DomToWidgetWrapper(domNode: CustomElement): DomToWidgetWrapper {
 					...this.properties
 				});
 			}
-			return dom({ domNode });
+			return dom({ node: domNode });
 		}
 	};
 }
@@ -318,7 +318,7 @@ export function initializeElement(element: CustomElement) {
 			if (childrenType === ChildrenType.DOJO) {
 				children.push(w(DomToWidgetWrapper(childNode), properties));
 			} else {
-				children.push(dom({ domNode: childNode, properties }));
+				children.push(dom({ node: childNode, props: properties }));
 			}
 		});
 		elementChildren.forEach((childNode) => {
