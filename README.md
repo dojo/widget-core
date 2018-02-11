@@ -33,6 +33,7 @@ widget-core is a library to create powerful, composable user interface widgets.
     - [Containers](#containers--injectors)
     - [Decorators](#decorators)
     - [Meta Configuration](#meta-configuration)
+    - [Inserting DOM Nodes Into The VDom Tree](#inserting-dom-nodes-into-the-vdom-tree)
     - [JSX Support](#jsx-support)
     - [Web Components](#web-components)
 - [How Do I Contribute?](#how-do-i-contribute)
@@ -1168,6 +1169,22 @@ class IsTallMeta extends MetaBase {
         return false;
     }
 }
+```
+
+### Inserting DOM nodes into the VDom Tree
+
+The `dom()` function is used to wrap DOM that is created outside of Dojo 2, this is the only mechanism to integrate foreign DOM nodes into the virtual DOM system.
+
+`dom()` works much like `v()` but instead of taking a `tag` it accepts an existing DOM node and creates a `VNode` that references the DOM node and the vdom system will reuse this node. Unlike `v()` a `diffType` can be passed that indicates the mode to use when determining if a property or attribute has changed and needs to be applied, the default is `none`.
+
+* `none`: This mode will always pass an empty object as the previous `attributes` and `properties` so the `props` and `attrs` passed to `dom()` will always be applied.
+* `dom`: This mode uses the `attributes` and `properties` from the DOM node for the diff.
+* `vdom`: This mode will use the previous `VNode` for the diff, this is the mode used normally during the vdom rendering.
+
+```ts
+const node = document.createElement('div');
+
+const vnode = dom({ node, props: { foo: 'foo', bar: 1 }, attrs: { baz: 'baz' }, diffType: 'none' | 'dom' | 'vdom' });
 ```
 
 ### JSX Support
