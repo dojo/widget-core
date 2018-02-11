@@ -2041,7 +2041,7 @@ describe('vdom', () => {
 			let vnode = d({
 				node: div,
 				props: { foo: 'bar', bar: 1 },
-				attrs: { baz: 'foo' },
+				attrs: { baz: 'foo', qux: 'qux' },
 				diffType: 'vdom'
 			});
 			const widget = getWidget(vnode);
@@ -2049,29 +2049,32 @@ describe('vdom', () => {
 			const root = projection.domNode.childNodes[0] as any;
 			assert.strictEqual('bar', root.foo);
 			assert.strictEqual('foo', root.getAttribute('baz'));
+			assert.strictEqual('qux', root.getAttribute('qux'));
 			assert.strictEqual(1, root.bar);
 			root.bar = 2;
 			root.setAttribute('foo', 'baz');
 			vnode = d({
 				node: div,
 				props: { foo: 'bar', bar: 1 },
-				attrs: { baz: undefined },
+				attrs: { baz: undefined, qux: 'qux' },
 				diffType: 'vdom'
 			});
 			widget.renderResult = vnode;
 			assert.strictEqual('bar', root.foo);
 			assert.strictEqual(null, root.getAttribute('baz'));
+			assert.strictEqual('qux', root.getAttribute('qux'));
 			assert.strictEqual(2, root.bar);
 			vnode = d({
 				node: div,
 				props: { foo: 'qux', bar: 3 },
-				attrs: { baz: 'foo' },
+				attrs: { baz: 'foo', qux: 'qux' },
 				diffType: 'vdom'
 			});
 			root.baz = 'baz';
 			widget.renderResult = vnode;
 			assert.strictEqual('qux', root.foo);
 			assert.strictEqual('foo', root.getAttribute('baz'));
+			assert.strictEqual('qux', root.getAttribute('qux'));
 			assert.strictEqual(3, root.bar);
 		});
 

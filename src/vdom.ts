@@ -278,7 +278,7 @@ function updateAttribute(domNode: Element, attrName: string, attrValue: string, 
 
 function updateAttributes(
 	domNode: Element,
-	previousAttributes: { [index: string]: string } = {},
+	previousAttributes: { [index: string]: string },
 	attributes: { [index: string]: string },
 	projectionOptions: ProjectionOptions
 ) {
@@ -296,7 +296,7 @@ function updateAttributes(
 
 function updateProperties(
 	domNode: Element,
-	previousProperties: VNodeProperties = {},
+	previousProperties: VNodeProperties,
 	properties: VNodeProperties,
 	projectionOptions: ProjectionOptions,
 	includesAttributes: boolean
