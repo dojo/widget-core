@@ -247,7 +247,7 @@ function focusNode(propValue: any, previousValue: any, domNode: Element, project
 function removeOrphanedEvents(
 	domNode: Element,
 	previousProperties: VNodeProperties,
-	properties: VNodeProperties = {},
+	properties: VNodeProperties,
 	projectionOptions: ProjectionOptions,
 	onlyEvents: boolean = false
 ) {
