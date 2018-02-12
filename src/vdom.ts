@@ -950,7 +950,7 @@ function addDeferredProperties(vnode: InternalVNode, projectionOptions: Projecti
 			...vnode.deferredPropertiesCallback!(!!vnode.inserted),
 			...vnode.decoratedDeferredProperties
 		};
-		updateProperties(vnode.domNode! as Element, vnode.properties, properties, projectionOptions, true);
+		updateProperties(vnode.domNode! as Element, vnode.properties, properties, projectionOptions);
 		vnode.properties = properties;
 	});
 }
