@@ -26,16 +26,20 @@ function createTestWidget(options: any) {
 		events
 	})
 	class Bar extends WidgetBase<any> {
+		private _called = false;
+
 		private _onClick() {
 			const { onBar } = this.properties;
 			onBar && onBar();
 		}
+
 		render() {
 			if (this.children.length) {
 				const [child] = this.children;
 				(child as any).properties.myAttr = 'set attribute from parent';
 				(child as any).properties.onBar = () => {
-					debugger;
+					this._called = true;
+					this.invalidate();
 				};
 			}
 			const { myProp = '', myAttr = '' } = this.properties;
@@ -43,6 +47,7 @@ function createTestWidget(options: any) {
 				v('button', { classes: ['event'], onclick: this._onClick }),
 				v('div', { classes: ['prop'] }, [`${myProp}`]),
 				v('div', { classes: ['attr'] }, [`${myAttr}`]),
+				v('div', { classes: ['handler'] }, [`${this._called}`]),
 				v('div', { classes: ['children'] }, this.children)
 			]);
 		}
@@ -127,19 +132,27 @@ describe('registerCustomElement', () => {
 		document.body.appendChild(element);
 		element.appendChild(barB);
 		(barB as any).myProp = 'set property on child';
+
 		resolvers.resolve();
+
 		const container = element.querySelector('.children');
 		const children = (container as any).children;
+		let called = false;
+		children[0].addEventListener('bar', () => {
+			called = true;
+		});
+		const event = children[0].querySelector('.event') as HTMLElement;
+		event.click();
+
 		assert.equal(children[0].tagName, 'BAR-B');
 		const attr = children[0].querySelector('.attr');
 		const prop = children[0].querySelector('.prop');
 		assert.equal(attr.innerHTML, 'set attribute from parent');
 		assert.equal(prop.innerHTML, 'set property on child');
-		const event = children[0].querySelector('.event') as HTMLElement;
-		event.click();
-		children[0].addEventListener('bar', () => {
-			debugger;
-		});
-		/*return new Promise((resolve) => {});*/
+		assert.isTrue(called);
+
+		resolvers.resolve();
+		const handler = element.querySelector('.handler') as HTMLElement;
+		assert.equal(handler.innerHTML, 'true');
 	});
 });
