@@ -1173,7 +1173,7 @@ class IsTallMeta extends MetaBase {
 
 ### Inserting DOM nodes into the VDom Tree
 
-The `dom()` function is used to wrap DOM that is created outside of Dojo 2, this is the only mechanism to integrate foreign DOM nodes into the virtual DOM system.
+The `dom()` function is used to wrap DOM that is created outside of Dojo 2. This is the only mechanism to integrate foreign DOM nodes into the virtual DOM system.
 
 `dom()` works much like `v()` but instead of taking a `tag` it accepts an existing DOM node and creates a `VNode` that references the DOM node and the vdom system will reuse this node. Unlike `v()` a `diffType` can be passed that indicates the mode to use when determining if a property or attribute has changed and needs to be applied, the default is `none`.
 
