@@ -958,7 +958,7 @@ const hasRootBeenRendered = this.meta(Dimensions).has('root');
 
 #### Intersection
 
-The Intersection Meta provides information on whether a Node is visible in the applications viewport using Intersection Observers (this is polyfilled for unsupported browsers).
+The Intersection Meta provides information on whether a Node is visible in the applications viewport using the [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) (this is polyfilled for unsupported browsers).
 
 This example renders a list with images, the image src is only added when the item is in the viewport which prevents needlessly downloading images until the user scrolls to them:
 
