@@ -93,10 +93,15 @@ export type FocusFunction = () => boolean;
 
 export type DiffType = 'none' | 'dom' | 'vdom';
 
+export interface On {
+	[index: string]: <T extends Event>(event?: T) => void | undefined;
+}
+
 export interface DomOptions {
 	node: Element | Text;
 	props?: VNodeProperties;
 	attrs?: { [index: string]: string | undefined };
+	on?: On;
 	diffType?: DiffType;
 }
 
@@ -285,6 +290,11 @@ export interface VNode {
 	 * VNode attributes
 	 */
 	attributes?: { [index: string]: string };
+
+	/**
+	 * VNode events
+	 */
+	events?: On;
 
 	/**
 	 * Deferred callback for VNode properties

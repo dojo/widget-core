@@ -152,18 +152,14 @@ function checkStyleValue(styleValue: Object) {
 	}
 }
 
-function updateEvents(
+function updateEvent(
 	domNode: Node,
-	propName: string,
-	properties: VNodeProperties,
+	eventName: string,
+	currentValue: Function,
 	projectionOptions: ProjectionOptions,
-	previousProperties?: VNodeProperties
+	bind: any,
+	previousValue?: Function
 ) {
-	const previous = previousProperties || Object.create(null);
-	const currentValue = properties[propName];
-	const previousValue = previous[propName];
-
-	const eventName = propName.substr(2);
 	const eventMap = projectionOptions.nodeMap.get(domNode) || new WeakMap();
 
 	if (previousValue) {
@@ -171,13 +167,13 @@ function updateEvents(
 		domNode.removeEventListener(eventName, previousEvent);
 	}
 
-	let callback = currentValue.bind(properties.bind);
+	let callback = currentValue.bind(bind);
 
 	if (eventName === 'input') {
 		callback = function(this: any, evt: Event) {
 			currentValue.call(this, evt);
 			(evt.target as any)['oninput-value'] = (evt.target as HTMLInputElement).value;
-		}.bind(properties.bind);
+		}.bind(bind);
 	}
 
 	domNode.addEventListener(eventName, callback);
@@ -206,15 +202,16 @@ function removeClasses(domNode: Element, classes: SupportedClassName) {
 function buildPreviousProperties(domNode: any, previous: InternalVNode, current: InternalVNode) {
 	const { diffType, properties, attributes } = current;
 	if (!diffType || diffType === 'vdom') {
-		return { properties: previous.properties, attributes: previous.attributes };
+		return { properties: previous.properties, attributes: previous.attributes, events: previous.events };
 	} else if (diffType === 'none') {
-		return { properties: {}, attributes: previous.attributes ? {} : undefined };
+		return { properties: {}, attributes: previous.attributes ? {} : undefined, events: previous.events };
 	}
 	let newProperties: any = {
 		properties: {}
 	};
 	if (attributes) {
 		newProperties.attributes = {};
+		newProperties.events = previous.events;
 		Object.keys(properties).forEach((propName) => {
 			newProperties.properties[propName] = domNode[propName];
 		});
@@ -250,16 +247,19 @@ function focusNode(propValue: any, previousValue: any, domNode: Element, project
 function removeOrphanedEvents(
 	domNode: Element,
 	previousProperties: VNodeProperties,
-	properties: VNodeProperties,
-	projectionOptions: ProjectionOptions
+	properties: VNodeProperties = {},
+	projectionOptions: ProjectionOptions,
+	onlyEvents: boolean = false
 ) {
 	const eventMap = projectionOptions.nodeMap.get(domNode);
 	if (eventMap) {
 		Object.keys(previousProperties).forEach((propName) => {
-			if (propName.substr(0, 2) === 'on' && !properties[propName]) {
+			const isEvent = propName.substr(0, 2) === 'on' || onlyEvents;
+			const eventName = onlyEvents ? propName : propName.substr(2);
+			if (isEvent && !properties[propName]) {
 				const eventCallback = eventMap.get(previousProperties[propName]);
 				if (eventCallback) {
-					domNode.removeEventListener(propName.substr(2), eventCallback);
+					domNode.removeEventListener(eventName, eventCallback);
 				}
 			}
 		});
@@ -299,7 +299,7 @@ function updateProperties(
 	previousProperties: VNodeProperties,
 	properties: VNodeProperties,
 	projectionOptions: ProjectionOptions,
-	includesAttributes: boolean
+	includesEventsAndAttributes = true
 ) {
 	let propertiesUpdated = false;
 	const propNames = Object.keys(properties);
@@ -314,7 +314,7 @@ function updateProperties(
 		}
 	}
 
-	removeOrphanedEvents(domNode, previousProperties, properties, projectionOptions);
+	includesEventsAndAttributes && removeOrphanedEvents(domNode, previousProperties, properties, projectionOptions);
 
 	for (let i = 0; i < propCount; i++) {
 		const propName = propNames[i];
@@ -390,9 +390,16 @@ function updateProperties(
 				}
 			} else if (propValue !== previousValue) {
 				const type = typeof propValue;
-				if (type === 'function' && propName.lastIndexOf('on', 0) === 0) {
-					updateEvents(domNode, propName, properties, projectionOptions, previousProperties);
-				} else if (type === 'string' && propName !== 'innerHTML' && includesAttributes) {
+				if (type === 'function' && propName.lastIndexOf('on', 0) === 0 && includesEventsAndAttributes) {
+					updateEvent(
+						domNode,
+						propName.substr(2),
+						propValue,
+						projectionOptions,
+						properties.bind,
+						previousValue
+					);
+				} else if (type === 'string' && propName !== 'innerHTML' && includesEventsAndAttributes) {
 					updateAttribute(domNode, propName, propValue, projectionOptions);
 				} else {
 					if ((domNode as any)[propName] !== propValue) {
@@ -728,11 +735,16 @@ function initPropertiesAndChildren(
 		addDeferredProperties(dnode, projectionOptions);
 	}
 
-	if (dnode.attributes) {
+	if (dnode.attributes && dnode.events) {
 		updateAttributes(domNode, {}, dnode.attributes, projectionOptions);
 		updateProperties(domNode, {}, dnode.properties, projectionOptions, false);
+		removeOrphanedEvents(domNode, {}, dnode.events, projectionOptions, true);
+		const events = dnode.events;
+		Object.keys(events).forEach((event) => {
+			updateEvent(domNode, event, events[event], projectionOptions, dnode.properties.bind);
+		});
 	} else {
-		updateProperties(domNode, {}, dnode.properties, projectionOptions, true);
+		updateProperties(domNode, {}, dnode.properties, projectionOptions);
 	}
 	if (dnode.properties.key !== null && dnode.properties.key !== undefined) {
 		const instanceData = widgetInstanceMap.get(parentInstance)!;
@@ -889,7 +901,7 @@ function updateDom(
 			}
 
 			const previousProperties = buildPreviousProperties(domNode, previous, dnode);
-			if (dnode.attributes) {
+			if (dnode.attributes && dnode.events) {
 				updateAttributes(domNode, previousProperties.attributes, dnode.attributes, projectionOptions);
 				updated =
 					updateProperties(
@@ -899,15 +911,22 @@ function updateDom(
 						projectionOptions,
 						false
 					) || updated;
+				removeOrphanedEvents(domNode, previousProperties.events, dnode.events, projectionOptions, true);
+				const events = dnode.events;
+				Object.keys(events).forEach((event) => {
+					updateEvent(
+						domNode,
+						event,
+						events[event],
+						projectionOptions,
+						dnode.properties.bind,
+						previousProperties.events[event]
+					);
+				});
 			} else {
 				updated =
-					updateProperties(
-						domNode,
-						previousProperties.properties,
-						dnode.properties,
-						projectionOptions,
-						true
-					) || updated;
+					updateProperties(domNode, previousProperties.properties, dnode.properties, projectionOptions) ||
+					updated;
 			}
 
 			if (dnode.properties.key !== null && dnode.properties.key !== undefined) {

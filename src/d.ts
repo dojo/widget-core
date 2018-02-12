@@ -176,11 +176,15 @@ export function v(
 /**
  * Create a VNode for an existing DOM Node.
  */
-export function dom({ node, attrs = {}, props = {}, diffType = 'none' }: DomOptions, children?: DNode[]): VNode {
+export function dom(
+	{ node, attrs = {}, props = {}, on = {}, diffType = 'none' }: DomOptions,
+	children?: DNode[]
+): VNode {
 	return {
 		tag: isElementNode(node) ? node.tagName.toLowerCase() : '',
 		properties: props,
 		attributes: attrs,
+		events: on,
 		children,
 		type: VNODE,
 		domNode: node,
