@@ -1181,10 +1181,25 @@ The `dom()` function is used to wrap DOM that is created outside of Dojo 2. This
 * `dom`: This mode uses the `attributes` and `properties` from the DOM node for the diff.
 * `vdom`: This mode will use the previous `VNode` for the diff, this is the mode used normally during the vdom rendering.
 
+**Note:** All modes use the events from the previous VNode to ensure that they are correctly removed and applied each render.
+
 ```ts
 const node = document.createElement('div');
 
-const vnode = dom({ node, props: { foo: 'foo', bar: 1 }, attrs: { baz: 'baz' }, diffType: 'none' | 'dom' | 'vdom' });
+const vnode = dom({
+    node,
+    props: {
+        foo: 'foo',
+        bar: 1
+    },
+    attrs: {
+        baz: 'baz'
+    },
+    on: {
+        click: () => { console.log('clicker'); }
+    },
+    diffType: 'none' | 'dom' | 'vdom'
+});
 ```
 
 ### JSX Support
