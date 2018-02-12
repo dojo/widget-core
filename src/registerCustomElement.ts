@@ -4,6 +4,18 @@ import { from } from '@dojo/shim/array';
 import { w, dom } from './d';
 import global from '@dojo/shim/global';
 
+export function DomToWidgetWrapper(domNode: HTMLElement): any {
+	return class DomToWidgetWrapper extends WidgetBase<any> {
+		protected render() {
+			return dom({ node: domNode, props: this.properties });
+		}
+
+		static get domNode() {
+			return domNode;
+		}
+	};
+}
+
 export function create(descriptor: any, WidgetConstructor: any) {
 	const { attributes } = descriptor;
 	const attributeMap: any = {};
@@ -67,7 +79,7 @@ export function create(descriptor: any, WidgetConstructor: any) {
 
 			from(this.children).forEach((childNode: Node) => {
 				childNode.addEventListener('dojo-ce-render', () => this._render());
-				this._children.push(dom({ node: childNode as HTMLElement }));
+				this._children.push(DomToWidgetWrapper(childNode as HTMLElement));
 			});
 
 			this.addEventListener('dojo-ce-connected', (e: any) => this._childConnected(e));
@@ -98,7 +110,7 @@ export function create(descriptor: any, WidgetConstructor: any) {
 				const exists = this._children.some((child) => child.domNode === node);
 				if (!exists) {
 					node.addEventListener('dojo-ce-render', () => this._render());
-					this._children.push(dom({ node }));
+					this._children.push(DomToWidgetWrapper(node));
 					this._render();
 				}
 			}
@@ -123,13 +135,7 @@ export function create(descriptor: any, WidgetConstructor: any) {
 		public __children__() {
 			return this._children.filter((Child) => Child.domNode).map((Child: any) => {
 				const { domNode } = Child;
-				return dom(
-					{
-						node: domNode,
-						props: { ...domNode.__properties__() }
-					},
-					[...domNode.__children__()]
-				);
+				return w(Child, { ...domNode.__properties__() }, [...domNode.__children__()]);
 			});
 		}
 
