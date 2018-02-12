@@ -16,7 +16,7 @@ export function DomToWidgetWrapper(domNode: HTMLElement): any {
 	};
 }
 
-export function create(descriptor: any, WidgetConstructor: any) {
+export function create(descriptor: any, WidgetConstructor: any): any {
 	const { attributes } = descriptor;
 	const attributeMap: any = {};
 
@@ -182,7 +182,7 @@ export function create(descriptor: any, WidgetConstructor: any) {
 	};
 }
 
-export function register(WidgetConstructor: any) {
+export function register(WidgetConstructor: any): void {
 	const descriptor = WidgetConstructor.prototype.__customElementDescriptor;
 
 	if (!descriptor) {
