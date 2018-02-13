@@ -35,6 +35,7 @@ function createTestWidget(options: any) {
 		}
 
 		render() {
+			let childProp = '';
 			if (this.children.length) {
 				const [child] = this.children;
 				(child as any).properties.myAttr = 'set attribute from parent';
@@ -42,6 +43,9 @@ function createTestWidget(options: any) {
 					this._called = true;
 					this.invalidate();
 				};
+				if ((child as any).properties.myProp) {
+					childProp = (child as any).properties.myProp;
+				}
 			}
 			const { myProp = '', myAttr = '' } = this.properties;
 			return v('div', [
@@ -49,6 +53,7 @@ function createTestWidget(options: any) {
 				v('div', { classes: ['prop'] }, [`${myProp}`]),
 				v('div', { classes: ['attr'] }, [`${myAttr}`]),
 				v('div', { classes: ['handler'] }, [`${this._called}`]),
+				v('div', { classes: ['childProp'] }, [`${childProp}`]),
 				v('div', { classes: ['children'] }, this.children)
 			]);
 		}
@@ -161,11 +166,14 @@ describe('registerCustomElement', () => {
 		const event = children[0].querySelector('.event') as HTMLElement;
 		event.click();
 
+		const childProp = element.querySelector('.childProp') as HTMLElement;
+
 		assert.equal(children[0].tagName, 'BAR-B');
 		const attr = children[0].querySelector('.attr');
 		const prop = children[0].querySelector('.prop');
 		assert.equal(attr.innerHTML, 'set attribute from parent');
 		assert.equal(prop.innerHTML, 'set property on child');
+		assert.equal(childProp.innerHTML, 'set property on child');
 		assert.isTrue(called);
 
 		resolvers.resolve();
