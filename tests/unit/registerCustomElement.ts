@@ -146,8 +146,8 @@ describe('registerCustomElement', () => {
 		customElements.define('bar-b', CustomElementB);
 		element = document.createElement('bar-a');
 		const barB = document.createElement('bar-b');
-		document.body.appendChild(element);
 		element.appendChild(barB);
+		document.body.appendChild(element);
 		(barB as any).myProp = 'set property on child';
 
 		resolvers.resolve();

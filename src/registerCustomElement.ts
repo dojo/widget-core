@@ -148,7 +148,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 		}
 
 		public __children__() {
-			return this._children.filter((Child) => Child.domNode).map((Child: any) => {
+			return this._children.filter((Child) => Child.domNode.isWidget).map((Child: any) => {
 				const { domNode } = Child;
 				return w(Child, { ...domNode.__properties__() }, [...domNode.__children__()]);
 			});
