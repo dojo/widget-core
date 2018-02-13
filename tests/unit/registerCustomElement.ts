@@ -86,6 +86,13 @@ describe('registerCustomElement', () => {
 		delete global.dojo;
 	});
 
+	it('throws error when no descriptor found', () => {
+		assert.throws(
+			() => register({}),
+			'Cannot get descriptor for Custom Element, have you added the @customElement decorator to your Widget?'
+		);
+	});
+
 	it('custom element', () => {
 		register(Foo);
 		element = document.createElement('foo-element');

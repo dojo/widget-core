@@ -198,10 +198,12 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 }
 
 export function register(WidgetConstructor: any): void {
-	const descriptor = WidgetConstructor.prototype.__customElementDescriptor;
+	const descriptor = WidgetConstructor.prototype && WidgetConstructor.prototype.__customElementDescriptor;
 
 	if (!descriptor) {
-		throw new Error('cannot get descriptor');
+		throw new Error(
+			'Cannot get descriptor for Custom Element, have you added the @customElement decorator to your Widget?'
+		);
 	}
 
 	global.customElements.define(descriptor.tagName, create(descriptor, WidgetConstructor));
