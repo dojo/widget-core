@@ -98,7 +98,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 			};
 			const registry = new Registry();
 			const themeContext = registerThemeInjector(this._getTheme(), registry);
-			window.addEventListener('dojo-theme-set', () => themeContext.set(this._getTheme()));
+			global.addEventListener('dojo-theme-set', () => themeContext.set(this._getTheme()));
 			const Projector = ProjectorMixin(Wrapper);
 			this._projector = new Projector();
 			this._projector.setProperties({ registry });

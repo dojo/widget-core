@@ -4,6 +4,7 @@ import WidgetBase from '../../src/WidgetBase';
 import { v } from '../../src/d';
 import register, { create } from '../../src/registerCustomElement';
 import { createResolvers } from './../support/util';
+import { ThemedMixin, theme } from '../../src/mixins/Themed';
 
 const { describe, it, beforeEach, afterEach, before } = intern.getInterface('bdd');
 const { assert } = intern.getPlugin('chai');
@@ -55,6 +56,14 @@ function createTestWidget(options: any) {
 	return Bar;
 }
 
+@customElement({ tag: 'themed-element' })
+@theme({ ' _key': 'themedWidget', foo: 'bar' })
+class ThemedWidget extends ThemedMixin(WidgetBase) {
+	render() {
+		return v('div', { classes: ['root'] }, [this.theme('bar')]);
+	}
+}
+
 describe('registerCustomElement', () => {
 	let element: Element | undefined;
 	const resolvers = createResolvers();
@@ -74,6 +83,7 @@ describe('registerCustomElement', () => {
 			(element.parentNode as Element).removeChild(element);
 		}
 		element = undefined;
+		delete global.dojo;
 	});
 
 	it('custom element', () => {
@@ -154,5 +164,27 @@ describe('registerCustomElement', () => {
 		resolvers.resolve();
 		const handler = element.querySelector('.handler') as HTMLElement;
 		assert.equal(handler.innerHTML, 'true');
+	});
+
+	it('custom element with global theme', () => {
+		const CustomElement = create((ThemedWidget.prototype as any).__customElementDescriptor, ThemedWidget);
+		customElements.define('themed-element', CustomElement);
+		element = document.createElement('themed-element');
+		document.body.appendChild(element);
+		global.dojo = {
+			theme: 'dojo',
+			themes: {
+				dojo: {
+					themedWidget: {
+						foo: 'baz'
+					}
+				}
+			}
+		};
+		global.dispatchEvent(new CustomEvent('dojo-theme-set', {}));
+		const root = element.querySelector('.root') as HTMLElement;
+		assert.equal(root.innerHTML, 'bar');
+		resolvers.resolve();
+		assert.equal(root.innerHTML, 'baz');
 	});
 });
