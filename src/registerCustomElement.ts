@@ -24,6 +24,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 		const attributeName = propertyName.toLowerCase();
 		attributeMap[attributeName] = propertyName;
 	});
+
 	return class extends HTMLElement {
 		private _projector: any;
 		private _properties: any = {};
@@ -61,6 +62,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 					set: (value: any) => this._setEventProperty(propertyName, value)
 				};
 
+				this._eventProperties[propertyName] = undefined;
 				this._properties[propertyName] = (...args: any[]) => {
 					const eventCallback = this._getEventProperty(propertyName);
 					if (typeof eventCallback === 'function') {
@@ -79,6 +81,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 
 			from(this.children).forEach((childNode: Node) => {
 				childNode.addEventListener('dojo-ce-render', () => this._render());
+				childNode.addEventListener('dojo-ce-connected', () => this._render());
 				this._children.push(DomToWidgetWrapper(childNode as HTMLElement));
 			});
 
@@ -129,7 +132,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 		}
 
 		public __properties__() {
-			return this._properties;
+			return { ...this._properties, ...this._eventProperties };
 		}
 
 		public __children__() {
