@@ -3,6 +3,8 @@ import { ProjectorMixin } from './mixins/Projector';
 import { from } from '@dojo/shim/array';
 import { w, dom } from './d';
 import global from '@dojo/shim/global';
+import Registry from './Registry';
+import { registerThemeInjector } from './mixins/Themed';
 
 export function DomToWidgetWrapper(domNode: HTMLElement): any {
 	return class DomToWidgetWrapper extends WidgetBase<any> {
@@ -94,8 +96,12 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 					return w(WidgetConstructor, widgetProperties, renderChildren());
 				}
 			};
+			const registry = new Registry();
+			const themeContext = registerThemeInjector(this._getTheme(), registry);
+			window.addEventListener('dojo-theme-set', () => themeContext.set(this._getTheme()));
 			const Projector = ProjectorMixin(Wrapper);
 			this._projector = new Projector();
+			this._projector.setProperties({ registry });
 			this._projector.append(this);
 
 			this._initialised = true;
@@ -105,6 +111,12 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 					detail: this
 				})
 			);
+		}
+
+		private _getTheme() {
+			if (global && global.dojo && global.dojo.theme) {
+				return global.dojo.themes[global.dojo.theme];
+			}
 		}
 
 		private _childConnected(e: any) {
