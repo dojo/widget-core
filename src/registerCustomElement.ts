@@ -137,7 +137,7 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 				this.dispatchEvent(
 					new CustomEvent('dojo-ce-render', {
 						bubbles: false,
-						detail: event
+						detail: this
 					})
 				);
 			}
