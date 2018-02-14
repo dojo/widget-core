@@ -186,7 +186,7 @@ describe('registerCustomElement', () => {
 		customElements.define('themed-element', CustomElement);
 		element = document.createElement('themed-element');
 		document.body.appendChild(element);
-		global.dojo = {
+		global.dojoce = {
 			theme: 'dojo',
 			themes: {
 				dojo: {

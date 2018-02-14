@@ -114,8 +114,8 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 		}
 
 		private _getTheme() {
-			if (global && global.dojo && global.dojo.theme) {
-				return global.dojo.themes[global.dojo.theme];
+			if (global && global.dojoce && global.dojoce.theme) {
+				return global.dojoce.themes[global.dojoce.theme];
 			}
 		}
 
