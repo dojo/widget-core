@@ -9,7 +9,18 @@ import { registerThemeInjector } from './mixins/Themed';
 export function DomToWidgetWrapper(domNode: HTMLElement): any {
 	return class DomToWidgetWrapper extends WidgetBase<any> {
 		protected render() {
-			return dom({ node: domNode, props: this.properties });
+			const properties = Object.keys(this.properties).reduce(
+				(props, key: string) => {
+					const value = this.properties[key];
+					if (key.indexOf('on') === 0) {
+						key = `__${key}`;
+					}
+					props[key] = value;
+					return props;
+				},
+				{} as any
+			);
+			return dom({ node: domNode, props: properties });
 		}
 
 		static get domNode() {
@@ -46,11 +57,12 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 
 			[...attributes, ...properties].forEach((propertyName: string) => {
 				const value = (this as any)[propertyName];
+				const filteredPropertyName = propertyName.replace(/^on/, '__');
 				if (value !== undefined) {
 					this._properties[propertyName] = value;
 				}
 
-				domProperties[propertyName] = {
+				domProperties[filteredPropertyName] = {
 					get: () => this._getProperty(propertyName),
 					set: (value: any) => this._setProperty(propertyName, value)
 				};
@@ -58,8 +70,9 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 
 			events.forEach((propertyName: string) => {
 				const eventName = propertyName.replace(/^on/, '').toLowerCase();
+				const filteredPropertyName = propertyName.replace(/^on/, '__on');
 
-				domProperties[propertyName] = {
+				domProperties[filteredPropertyName] = {
 					get: () => this._getEventProperty(propertyName),
 					set: (value: any) => this._setEventProperty(propertyName, value)
 				};
