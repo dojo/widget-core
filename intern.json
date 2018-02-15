@@ -35,11 +35,7 @@
 		},
 		"plugins": [
 			{
-				"script": "./node_modules/@webcomponents/custom-elements/custom-elements.min.js",
-				"useLoader": true
-			},
-			{
-				"script": "./node_modules/@webcomponents/custom-elements/src/native-shim.js",
+				"script": "./tests/support/loadCustomElements.js",
 				"useLoader": true
 			}
 		]
