@@ -1,4 +1,5 @@
 import { Constructor, WidgetProperties } from '../interfaces';
+import { CustomElementChildType } from '../registerCustomElement';
 
 export type CustomElementPropertyNames<P extends object> = ((keyof P) | (keyof WidgetProperties))[];
 
@@ -25,6 +26,8 @@ export interface CustomElementConfig<P extends object = { [index: string]: any }
 	 * List of events to expose
 	 */
 	events?: CustomElementPropertyNames<P>;
+
+	childType?: CustomElementChildType;
 }
 
 /**
@@ -35,14 +38,16 @@ export function customElement<P extends object = { [index: string]: any }>({
 	tag,
 	properties = [],
 	attributes = [],
-	events = []
+	events = [],
+	childType = CustomElementChildType.DOJO
 }: CustomElementConfig<P>) {
 	return function<T extends Constructor<any>>(target: T) {
 		target.prototype.__customElementDescriptor = {
 			tagName: tag,
 			attributes,
 			properties,
-			events
+			events,
+			childType
 		};
 	};
 }

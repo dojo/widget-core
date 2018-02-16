@@ -2,7 +2,7 @@ import global from '@dojo/shim/global';
 import customElement from '../../src/decorators/customElement';
 import WidgetBase from '../../src/WidgetBase';
 import { v } from '../../src/d';
-import register, { create } from '../../src/registerCustomElement';
+import register, { create, CustomElementChildType } from '../../src/registerCustomElement';
 import { createResolvers } from './../support/util';
 import { ThemedMixin, theme } from '../../src/mixins/Themed';
 
@@ -19,12 +19,13 @@ class Foo extends WidgetBase {
 }
 
 function createTestWidget(options: any) {
-	const { properties, attributes, events } = options;
+	const { properties, attributes, events, childType = CustomElementChildType.DOJO } = options;
 	@customElement<any>({
 		tag: 'bar-element',
 		properties,
 		attributes,
-		events
+		events,
+		childType
 	})
 	class Bar extends WidgetBase<any> {
 		private _called = false;
@@ -38,13 +39,17 @@ function createTestWidget(options: any) {
 			let childProp = '';
 			if (this.children.length) {
 				const [child] = this.children;
-				(child as any).properties.myAttr = 'set attribute from parent';
-				(child as any).properties.onBar = () => {
-					this._called = true;
-					this.invalidate();
-				};
-				if ((child as any).properties.myProp) {
-					childProp = (child as any).properties.myProp;
+				if (childType === CustomElementChildType.DOJO) {
+					(child as any).properties.myAttr = 'set attribute from parent';
+					(child as any).properties.onBar = () => {
+						this._called = true;
+						this.invalidate();
+					};
+					if ((child as any).properties.myProp) {
+						childProp = (child as any).properties.myProp;
+					}
+				} else if (childType === CustomElementChildType.NODE) {
+					childProp = (child as any).properties.myProp = 'can write prop to dom node';
 				}
 			}
 			const { myProp = '', myAttr = '' } = this.properties;
@@ -74,7 +79,12 @@ describe('registerCustomElement', () => {
 	const resolvers = createResolvers();
 
 	before((suite) => {
-		if (global.customElements === undefined) {
+		try {
+			const Test = createTestWidget({});
+			const CustomElement = create((Test.prototype as any).__customElementDescriptor, Test);
+			customElements.define('supports-custom-elements', CustomElement);
+			document.createElement('supports-custom-elements');
+		} catch (e) {
 			suite.skip();
 		}
 	});
@@ -82,6 +92,7 @@ describe('registerCustomElement', () => {
 	beforeEach(() => {
 		resolvers.stub();
 	});
+
 	afterEach(() => {
 		resolvers.restore();
 		if (element) {
@@ -142,7 +153,7 @@ describe('registerCustomElement', () => {
 		assert.isTrue(called);
 	});
 
-	it('custom element with child element', () => {
+	it('custom element with child dojo element', () => {
 		const BarA = createTestWidget({});
 		const CustomElementA = create((BarA.prototype as any).__customElementDescriptor, BarA);
 		customElements.define('bar-a', CustomElementA);
@@ -179,6 +190,32 @@ describe('registerCustomElement', () => {
 		resolvers.resolve();
 		const handler = element.querySelector('.handler') as HTMLElement;
 		assert.equal(handler.innerHTML, 'true');
+	});
+
+	it('custom element with child dom node', () => {
+		const BazA = createTestWidget({ childType: CustomElementChildType.NODE });
+		const CustomElementA = create((BazA.prototype as any).__customElementDescriptor, BazA);
+		customElements.define('baz-a', CustomElementA);
+		element = document.createElement('baz-a');
+		const div = document.createElement('div');
+		div.innerHTML = 'hello world';
+		element.appendChild(div);
+		document.body.appendChild(element);
+		const children = element.querySelector('.children') as HTMLElement;
+		const child = children.firstChild as HTMLElement;
+		assert.equal(child.innerHTML, 'hello world');
+		assert.equal((child as any).myProp, 'can write prop to dom node');
+	});
+
+	it('custom element with child text node', () => {
+		const QuxA = createTestWidget({ childType: CustomElementChildType.TEXT });
+		const CustomElementA = create((QuxA.prototype as any).__customElementDescriptor, QuxA);
+		customElements.define('qux-a', CustomElementA);
+		element = document.createElement('qux-a');
+		const textNode = document.createTextNode('text node');
+		element.appendChild(textNode);
+		document.body.appendChild(element);
+		const children = element.querySelector('.children') as HTMLElement;
 	});
 
 	it('custom element with global theme', () => {

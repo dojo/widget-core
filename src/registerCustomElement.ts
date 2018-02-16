@@ -6,6 +6,12 @@ import global from '@dojo/shim/global';
 import Registry from './Registry';
 import { registerThemeInjector } from './mixins/Themed';
 
+export enum CustomElementChildType {
+	DOJO = 'DOJO',
+	NODE = 'NODE',
+	TEXT = 'TEXT'
+}
+
 export function DomToWidgetWrapper(domNode: HTMLElement): any {
 	return class DomToWidgetWrapper extends WidgetBase<any> {
 		protected render() {
@@ -30,7 +36,7 @@ export function DomToWidgetWrapper(domNode: HTMLElement): any {
 }
 
 export function create(descriptor: any, WidgetConstructor: any): any {
-	const { attributes } = descriptor;
+	const { attributes, childType } = descriptor;
 	const attributeMap: any = {};
 
 	attributes.forEach((propertyName: string) => {
@@ -94,10 +100,16 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 
 			Object.defineProperties(this, domProperties);
 
-			from(this.children).forEach((childNode: Node) => {
-				childNode.addEventListener('dojo-ce-render', () => this._render());
-				childNode.addEventListener('dojo-ce-connected', () => this._render());
-				this._children.push(DomToWidgetWrapper(childNode as HTMLElement));
+			const children = childType === CustomElementChildType.TEXT ? this.childNodes : this.children;
+
+			from(children).forEach((childNode: Node) => {
+				if (childType === CustomElementChildType.DOJO) {
+					childNode.addEventListener('dojo-ce-render', () => this._render());
+					childNode.addEventListener('dojo-ce-connected', () => this._render());
+					this._children.push(DomToWidgetWrapper(childNode as HTMLElement));
+				} else {
+					this._children.push(dom({ node: childNode as HTMLElement }));
+				}
 			});
 
 			this.addEventListener('dojo-ce-connected', (e: any) => this._childConnected(e));
@@ -161,10 +173,14 @@ export function create(descriptor: any, WidgetConstructor: any): any {
 		}
 
 		public __children__() {
-			return this._children.filter((Child) => Child.domNode.isWidget).map((Child: any) => {
-				const { domNode } = Child;
-				return w(Child, { ...domNode.__properties__() }, [...domNode.__children__()]);
-			});
+			if (childType === CustomElementChildType.DOJO) {
+				return this._children.filter((Child) => Child.domNode.isWidget).map((Child: any) => {
+					const { domNode } = Child;
+					return w(Child, { ...domNode.__properties__() }, [...domNode.__children__()]);
+				});
+			} else {
+				return this._children;
+			}
 		}
 
 		public attributeChangedCallback(name: string, oldValue: string | null, value: string | null) {
