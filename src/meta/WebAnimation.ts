@@ -45,8 +45,6 @@ export interface AnimationProperties {
 
 export type AnimationPropertiesFunction = () => AnimationProperties;
 
-export type AnimationPropertiesOrAnimationPropertiesFunction = AnimationProperties | AnimationPropertiesFunction;
-
 /**
  * Info returned by the `get` function on WebAnimation meta
  */
@@ -120,8 +118,9 @@ export class WebAnimations extends Base {
 	animate(
 		key: string,
 		animateProperties:
-			| AnimationPropertiesOrAnimationPropertiesFunction
-			| AnimationPropertiesOrAnimationPropertiesFunction[]
+			| AnimationProperties
+			| AnimationPropertiesFunction
+			| (AnimationProperties | AnimationPropertiesFunction)[]
 	) {
 		const node = this.getNode(key) as HTMLElement;
 
