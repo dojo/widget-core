@@ -33,12 +33,16 @@ export interface AnimationTimingProperties {
 	iterationStart?: number;
 }
 
+export interface Effects extends AnimationKeyFrame {}
+export type EffectsFunction = () => Effects;
+export type EffectsOrEffectsFunction = EffectsFunction | Effects;
+
 /**
  * Animation propertiues that can be passed as vdom property `animate`
  */
 export interface AnimationProperties {
 	id: string;
-	effects: any[];
+	effects: EffectsOrEffectsFunction[];
 	controls?: AnimationControls;
 	timing?: AnimationTimingProperties;
 }
