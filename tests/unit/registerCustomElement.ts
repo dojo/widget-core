@@ -216,6 +216,9 @@ describe('registerCustomElement', () => {
 		element.appendChild(textNode);
 		document.body.appendChild(element);
 		const children = element.querySelector('.children') as HTMLElement;
+		const child = children.firstChild as HTMLElement;
+		assert.equal(child.nodeType, Node.TEXT_NODE);
+		assert.equal(child.textContent, 'text node');
 	});
 
 	it('custom element with global theme', () => {
