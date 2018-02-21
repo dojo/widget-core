@@ -63,7 +63,7 @@ You can also use the [dojo cli](https://github.com/dojo/cli) to create a complet
 
 Dojo 2 applications use the Virtual DOM (vdom) paradigm to represent what should be shown on the view. These vdom nodes are plain JavaScript objects that are more efficient to create from a performance perspective than browser DOM elements. Dojo 2 uses these vdom elements to synchronize and update the browser DOM so that the application shows the expected view.
 
-There are two types of vdom within Dojo 2, the first is pure representations of DOM elements and are the fundamental building blocks of all Dojo 2 applications. These are called `VNode`s and are created using the `v()` function available from the `@dojo/widget-core/d` module.
+There are two types of vdom within Dojo 2. The first type provides a pure representation of DOM elements, the fundamental building blocks of all Dojo 2 applications. These are called `VNode`s and are created using the `v()` function available from the `@dojo/widget-core/d` module.
 
 The following will create a `VNode` that represents a simple `div` DOM element, with a text node child: `Hello, Dojo 2!`:
 
