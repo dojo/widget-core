@@ -39,6 +39,12 @@ interface I18nVNodeProperties extends VNodeProperties {
 
 export type LocalizedMessages<T extends Messages> = T & {
 	/**
+	 * Indicates whether the messages are placeholders while waiting for the actual localized messages to load.
+	 * This is always `false` if the associated bundle does not list any supported locales.
+	 */
+	readonly isPlaceholder: boolean;
+
+	/**
 	 * Formats an ICU-formatted message template for the represented bundle.
 	 *
 	 * @param key
@@ -90,17 +96,35 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 	class I18n extends Base {
 		public properties: I18nProperties;
 
-		public localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T> {
+		/**
+		 * Return a localized messages object for the provided bundle. If the localized messages have not yet been loaded,
+		 * return either a blank bundle or the default messages.
+		 *
+		 * @param bundle
+		 * The bundle to localize
+		 *
+		 * @param useDefaults
+		 * If `true`, the default messages will be used when the localized messages have not yet been loaded. If `false`
+		 * (the default), then a blank bundle will be returned (i.e., each key's value will be an empty string).
+		 */
+		public localizeBundle<T extends Messages>(
+			bundle: Bundle<T>,
+			useDefaults: boolean = false
+		): LocalizedMessages<T> {
 			const { locale } = this.properties;
-			const messages = this._getLocaleMessages(bundle) || bundle.messages;
+			const messages = this._getLocaleMessages(bundle);
+			const isPlaceholder = !messages;
+			const format =
+				isPlaceholder && !useDefaults
+					? (key: string, options?: any) => ''
+					: (key: string, options?: any) => formatMessage(bundle, key, options, locale);
 
 			return assign(
 				Object.create({
-					format(key: string, options?: any) {
-						return formatMessage(bundle, key, options, locale);
-					}
+					isPlaceholder,
+					format
 				}),
-				messages
+				messages || (useDefaults ? bundle.messages : this._getBlankMessages(bundle))
 			) as LocalizedMessages<T>;
 		}
 
@@ -125,6 +149,24 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 				predicate: isVNode
 			});
 			return result;
+		}
+
+		/**
+		 * @private
+		 * Return a message bundle containing an empty string for each key in the provided bundle.
+		 *
+		 * @param bundle
+		 * The message bundle
+		 *
+		 * @return
+		 * The blank message bundle
+		 */
+		private _getBlankMessages<T extends Messages>(bundle: Bundle<T>): T {
+			const blank = {} as T;
+			return Object.keys(bundle.messages).reduce((blank, key) => {
+				blank[key] = '';
+				return blank;
+			}, blank);
 		}
 
 		/**

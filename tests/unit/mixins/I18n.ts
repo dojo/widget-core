@@ -42,12 +42,42 @@ registerSuite('mixins/I18nMixin', {
 		},
 
 		'.localizeBundle()': {
-			'Returns default messages when locale bundle not loaded'() {
+			'Returns blank messages when locale bundle not loaded'() {
 				switchLocale('fr');
 
 				localized = new Localized();
 				const messages = localized.localizeBundle(bundle);
 
+				assert.isTrue(messages.isPlaceholder);
+				assert.strictEqual(messages.hello, '');
+				assert.strictEqual(messages.goodbye, '');
+				assert.strictEqual(messages.format('hello'), '');
+			},
+
+			'Returns default messages with second argument when locale bundle not loaded'() {
+				switchLocale('fr');
+
+				localized = new Localized();
+				const messages = localized.localizeBundle(bundle, true);
+
+				assert.isTrue(messages.isPlaceholder);
+				assert.strictEqual(messages.hello, 'Hello');
+				assert.strictEqual(messages.goodbye, 'Goodbye');
+				assert.strictEqual(messages.format('hello'), 'Hello');
+			},
+
+			'Returns default messages when bundle has no supported locales'() {
+				switchLocale('fr');
+
+				localized = new Localized();
+				const messages = localized.localizeBundle({
+					messages: {
+						hello: 'Hello',
+						goodbye: 'Goodbye'
+					}
+				});
+
+				assert.isFalse(messages.isPlaceholder);
 				assert.strictEqual(messages.hello, 'Hello');
 				assert.strictEqual(messages.goodbye, 'Goodbye');
 			},
@@ -57,6 +87,7 @@ registerSuite('mixins/I18nMixin', {
 				localized.__setProperties__({ locale: 'fr' });
 				return i18n(bundle, 'fr').then(() => {
 					const messages = localized.localizeBundle(bundle);
+					assert.isFalse(messages.isPlaceholder);
 					assert.strictEqual(messages.hello, 'Bonjour');
 					assert.strictEqual(messages.goodbye, 'Au revoir');
 				});
@@ -68,6 +99,7 @@ registerSuite('mixins/I18nMixin', {
 				localized = new Localized();
 				return i18n(bundle, 'fr').then(() => {
 					const messages = localized.localizeBundle(bundle);
+					assert.isFalse(messages.isPlaceholder);
 					assert.strictEqual(messages.hello, 'Bonjour');
 					assert.strictEqual(messages.goodbye, 'Au revoir');
 				});
