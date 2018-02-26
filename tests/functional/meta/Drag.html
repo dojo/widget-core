@@ -11,10 +11,8 @@
 			baseUrl: '../../../../'
 		}));
 
-		require(['@dojo/shim/main'], function () {
-			require(['@dojo/shim/browser'], function () {
-				require([ '_build/tests/functional/meta/Drag' ], function () {});
-			});
+		require(['@dojo/shim/main', '@dojo/shim/browser'], function () {
+			require([ '_build/tests/functional/meta/Drag' ], function () {});
 		});
 	</script>
 </body>
