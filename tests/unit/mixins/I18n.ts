@@ -46,38 +46,38 @@ registerSuite('mixins/I18nMixin', {
 				switchLocale('fr');
 
 				localized = new Localized();
-				const messages = localized.localizeBundle(bundle);
+				const { format, isPlaceholder, messages } = localized.localizeBundle(bundle);
 
-				assert.isTrue(messages.isPlaceholder);
+				assert.isTrue(isPlaceholder);
 				assert.strictEqual(messages.hello, '');
 				assert.strictEqual(messages.goodbye, '');
-				assert.strictEqual(messages.format('hello'), '');
+				assert.strictEqual(format('hello'), '');
 			},
 
 			'Returns default messages with second argument when locale bundle not loaded'() {
 				switchLocale('fr');
 
 				localized = new Localized();
-				const messages = localized.localizeBundle(bundle, true);
+				const { format, isPlaceholder, messages } = localized.localizeBundle(bundle, true);
 
-				assert.isTrue(messages.isPlaceholder);
+				assert.isTrue(isPlaceholder);
 				assert.strictEqual(messages.hello, 'Hello');
 				assert.strictEqual(messages.goodbye, 'Goodbye');
-				assert.strictEqual(messages.format('hello'), 'Hello');
+				assert.strictEqual(format('hello'), 'Hello');
 			},
 
 			'Returns default messages when bundle has no supported locales'() {
 				switchLocale('fr');
 
 				localized = new Localized();
-				const messages = localized.localizeBundle({
+				const { isPlaceholder, messages } = localized.localizeBundle({
 					messages: {
 						hello: 'Hello',
 						goodbye: 'Goodbye'
 					}
 				});
 
-				assert.isFalse(messages.isPlaceholder);
+				assert.isFalse(isPlaceholder);
 				assert.strictEqual(messages.hello, 'Hello');
 				assert.strictEqual(messages.goodbye, 'Goodbye');
 			},
@@ -86,8 +86,8 @@ registerSuite('mixins/I18nMixin', {
 				localized = new Localized();
 				localized.__setProperties__({ locale: 'fr' });
 				return i18n(bundle, 'fr').then(() => {
-					const messages = localized.localizeBundle(bundle);
-					assert.isFalse(messages.isPlaceholder);
+					const { isPlaceholder, messages } = localized.localizeBundle(bundle);
+					assert.isFalse(isPlaceholder);
 					assert.strictEqual(messages.hello, 'Bonjour');
 					assert.strictEqual(messages.goodbye, 'Au revoir');
 				});
@@ -98,8 +98,8 @@ registerSuite('mixins/I18nMixin', {
 
 				localized = new Localized();
 				return i18n(bundle, 'fr').then(() => {
-					const messages = localized.localizeBundle(bundle);
-					assert.isFalse(messages.isPlaceholder);
+					const { isPlaceholder, messages } = localized.localizeBundle(bundle);
+					assert.isFalse(isPlaceholder);
 					assert.strictEqual(messages.hello, 'Bonjour');
 					assert.strictEqual(messages.goodbye, 'Au revoir');
 				});
@@ -107,16 +107,16 @@ registerSuite('mixins/I18nMixin', {
 
 			'Returns an object with a `format` method'() {
 				localized = new Localized();
-				let messages = localized.localizeBundle(bundle);
+				let { format } = localized.localizeBundle(bundle);
 
-				assert.isFunction(messages.format);
-				assert.strictEqual(messages.format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
+				assert.isFunction(format);
+				assert.strictEqual(format('welcome', { name: 'Bill' }), 'Welcome, Bill!');
 
 				switchLocale('fr');
 
 				return i18n(bundle, 'fr').then(() => {
-					messages = localized.localizeBundle(bundle);
-					assert.strictEqual(messages.format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
+					format = localized.localizeBundle(bundle).format;
+					assert.strictEqual(format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
 				});
 			}
 		},

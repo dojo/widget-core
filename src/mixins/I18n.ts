@@ -1,5 +1,4 @@
 /* tslint:disable:interface-name */
-import { assign } from '@dojo/core/lang';
 import i18n, { Bundle, formatMessage, getCachedMessages, Messages } from '@dojo/i18n/i18n';
 import { isVNode, decorate } from './../d';
 import { afterRender } from './../decorators/afterRender';
@@ -37,7 +36,7 @@ interface I18nVNodeProperties extends VNodeProperties {
 	lang: string | null;
 }
 
-export type LocalizedMessages<T extends Messages> = T & {
+export type LocalizedMessages<T extends Messages> = {
 	/**
 	 * Indicates whether the messages are placeholders while waiting for the actual localized messages to load.
 	 * This is always `false` if the associated bundle does not list any supported locales.
@@ -57,6 +56,12 @@ export type LocalizedMessages<T extends Messages> = T & {
 	 * The formatted string.
 	 */
 	format(key: string, options?: any): string;
+
+	/**
+	 * The localized messages if available, or either the default messages or a blank bundle depending on the
+	 * call signature for `localizeBundle`.
+	 */
+	readonly messages: T;
 };
 
 /**
@@ -72,7 +77,8 @@ export interface I18nMixin {
 	 * The required bundle object for which available locale messages should be loaded.
 	 *
 	 * @return
-	 * The localized messages, along with a `format` method for formatting ICU-formatted templates.
+	 * An object containing the localized messages, along with a `format` method for formatting ICU-formatted
+	 * templates and an `isPlaceholder` property indicating whether the returned messages are the defaults.
 	 */
 	localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T>;
 
@@ -119,13 +125,11 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 					? (key: string, options?: any) => ''
 					: (key: string, options?: any) => formatMessage(bundle, key, options, locale);
 
-			return assign(
-				Object.create({
-					isPlaceholder,
-					format
-				}),
-				messages || (useDefaults ? bundle.messages : this._getBlankMessages(bundle))
-			) as LocalizedMessages<T>;
+			return Object.create({
+				format,
+				isPlaceholder,
+				messages: messages || (useDefaults ? bundle.messages : this._getBlankMessages(bundle))
+			});
 		}
 
 		@afterRender()
