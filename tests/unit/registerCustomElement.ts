@@ -154,7 +154,7 @@ describe('registerCustomElement', () => {
 	});
 
 	it('custom element with child dojo element', () => {
-		const BarA = createTestWidget({ properties: ['parentProp'] });
+		const BarA = createTestWidget({});
 		const CustomElementA = create((BarA.prototype as any).__customElementDescriptor, BarA);
 		customElements.define('bar-a', CustomElementA);
 		const BarB = createTestWidget({ attributes: ['myAttr'], properties: ['myProp'], events: ['onBar'] });
