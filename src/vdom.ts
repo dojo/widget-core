@@ -103,7 +103,6 @@ interface ProjectorState {
 export const widgetInstanceMap = new WeakMap<any, WidgetData>();
 
 const instanceMap = new WeakMap<DefaultWidgetBaseInterface, InstanceMapData>();
-// const renderQueueMap = new WeakMap<DefaultWidgetBaseInterface, RenderQueue[]>();
 const projectorStateMap = new WeakMap<DefaultWidgetBaseInterface, ProjectorState>();
 const projectionRenderScheduledMap = new Map<number, number | undefined>();
 let projectionRenderScheduledCounter = 0;
