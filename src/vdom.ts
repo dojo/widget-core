@@ -97,12 +97,13 @@ interface ProjectorState {
 	afterRenderCallbacks: Function[];
 	nodeMap: WeakMap<Node, WeakMap<Function, EventListener>>;
 	renderScheduled?: number;
+	renderQueue: RenderQueue[];
 }
 
 export const widgetInstanceMap = new WeakMap<any, WidgetData>();
 
 const instanceMap = new WeakMap<DefaultWidgetBaseInterface, InstanceMapData>();
-const renderQueueMap = new WeakMap<DefaultWidgetBaseInterface, RenderQueue[]>();
+// const renderQueueMap = new WeakMap<DefaultWidgetBaseInterface, RenderQueue[]>();
 const projectorStateMap = new WeakMap<DefaultWidgetBaseInterface, ProjectorState>();
 const projectionRenderScheduledMap = new Map<number, number | undefined>();
 let projectionRenderScheduledCounter = 0;
@@ -793,8 +794,7 @@ function createDom(
 		instanceData.invalidate = () => {
 			instanceData.dirty = true;
 			if (instanceData.rendering === false) {
-				const renderQueue = renderQueueMap.get(projectionOptions.projectorInstance)!;
-				renderQueue.push({ instance, depth: projectionOptions.depth });
+				projectorState.renderQueue.push({ instance, depth: projectionOptions.depth });
 				scheduleRender(projectionOptions);
 			}
 		};
@@ -1036,9 +1036,9 @@ function scheduleRender(projectionOptions: ProjectionOptions) {
 function render(projectionOptions: ProjectionOptions) {
 	const projectorState = projectorStateMap.get(projectionOptions.projectorInstance)!;
 	projectorState.renderScheduled = undefined;
-	const renderQueue = renderQueueMap.get(projectionOptions.projectorInstance)!;
+	const renderQueue = projectorState.renderQueue;
 	const renders = [...renderQueue];
-	renderQueueMap.set(projectionOptions.projectorInstance, []);
+	projectorState.renderQueue = [];
 	renders.sort((a, b) => a.depth - b.depth);
 
 	while (renders.length) {
@@ -1063,21 +1063,19 @@ export const dom = {
 			afterRenderCallbacks: [],
 			deferredRenderCallbacks: [],
 			nodeMap: new WeakMap(),
-			renderScheduled: undefined
+			renderScheduled: undefined,
+			renderQueue: []
 		};
 		projectorStateMap.set(instance, projectorState);
 
 		finalProjectorOptions.rootNode = parentNode;
 		const parentVNode = toParentVNode(finalProjectorOptions.rootNode);
 		const node = toInternalWNode(instance, instanceData);
-		const renderQueue: RenderQueue[] = [];
 		instanceMap.set(instance, { dnode: node, parentVNode });
-		renderQueueMap.set(finalProjectorOptions.projectorInstance, renderQueue);
 		instanceData.invalidate = () => {
 			instanceData.dirty = true;
 			if (instanceData.rendering === false) {
-				const renderQueue = renderQueueMap.get(finalProjectorOptions.projectorInstance)!;
-				renderQueue.push({ instance, depth: finalProjectorOptions.depth });
+				projectorState.renderQueue.push({ instance, depth: finalProjectorOptions.depth });
 				scheduleRender(finalProjectorOptions);
 			}
 		};
