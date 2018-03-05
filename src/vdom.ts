@@ -638,51 +638,91 @@ function updateChildren(
 		if (oldChild !== undefined && same(oldChild, newChild)) {
 			textUpdated = updateDom(oldChild, newChild, projectionOptions, parentVNode, parentInstance) || textUpdated;
 			oldIndex++;
-		} else {
-			const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
-			if (findOldIndex >= 0) {
-				for (i = oldIndex; i < findOldIndex; i++) {
-					const oldChild = oldChildren[i];
-					const indexToCheck = i;
-					projectorState.afterRenderCallbacks.push(() => {
-						callOnDetach(oldChild, parentInstance);
-						checkDistinguishable(oldChildren, indexToCheck, parentInstance);
-					});
-					nodeToRemove(oldChildren[i], transitions, projectionOptions);
-				}
-				textUpdated =
-					updateDom(oldChildren[findOldIndex], newChild, projectionOptions, parentVNode, parentInstance) ||
-					textUpdated;
-				oldIndex = findOldIndex + 1;
-			} else {
-				let insertBefore: Element | Text | undefined = undefined;
-				let child: InternalDNode = oldChildren[oldIndex];
-				if (child) {
-					let nextIndex = oldIndex + 1;
-					while (insertBefore === undefined) {
-						if (isWNode(child)) {
-							if (child.rendered) {
-								child = child.rendered[0];
-							} else if (oldChildren[nextIndex]) {
-								child = oldChildren[nextIndex];
-								nextIndex++;
-							} else {
-								break;
-							}
+			newIndex++;
+			continue;
+		}
+
+		const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
+
+		if (!oldChild || findOldIndex === -1) {
+			let insertBefore: Element | Text | undefined = undefined;
+			let child: InternalDNode = oldChildren[oldIndex];
+			if (child) {
+				let nextIndex = oldIndex + 1;
+				while (insertBefore === undefined) {
+					if (isWNode(child)) {
+						if (child.rendered) {
+							child = child.rendered[0];
+						} else if (oldChildren[nextIndex]) {
+							child = oldChildren[nextIndex];
+							nextIndex++;
 						} else {
-							insertBefore = child.domNode;
+							break;
 						}
+					} else {
+						insertBefore = child.domNode;
 					}
 				}
+			}
 
-				createDom(newChild, parentVNode, insertBefore, projectionOptions, parentInstance);
-				nodeAdded(newChild, transitions);
-				const indexToCheck = newIndex;
-				projectorState.afterRenderCallbacks.push(() => {
-					checkDistinguishable(newChildren, indexToCheck, parentInstance);
-				});
+			createDom(newChild, parentVNode, insertBefore, projectionOptions, parentInstance);
+			nodeAdded(newChild, transitions);
+			const indexToCheck = newIndex;
+			projectorState.afterRenderCallbacks.push(() => {
+				checkDistinguishable(newChildren, indexToCheck, parentInstance);
+			});
+			newIndex++;
+			continue;
+		}
+
+		const findNewIndex = findIndexOfChild(newChildren, oldChild, newIndex + 1);
+
+		if (findNewIndex === -1) {
+			const indexToCheck = oldIndex;
+			projectorState.afterRenderCallbacks.push(() => {
+				callOnDetach(oldChild, parentInstance);
+				checkDistinguishable(oldChildren, indexToCheck, parentInstance);
+			});
+			nodeToRemove(oldChild, transitions, projectionOptions);
+			oldIndex++;
+			// newIndex++;
+			continue;
+		}
+
+		// new and old exist but have moved
+		let insertBefore: Element | Text | undefined = undefined;
+		let child: InternalDNode = oldChildren[oldIndex];
+		if (child) {
+			let nextIndex = oldIndex + 1;
+			while (insertBefore === undefined) {
+				if (isWNode(child)) {
+					if (child.rendered) {
+						child = child.rendered[0];
+					} else if (oldChildren[nextIndex]) {
+						child = oldChildren[nextIndex];
+						nextIndex++;
+					} else {
+						break;
+					}
+				} else {
+					insertBefore = child.domNode;
+				}
 			}
 		}
+
+		createDom(newChild, parentVNode, insertBefore, projectionOptions, parentInstance);
+		nodeAdded(newChild, transitions);
+		const newIndexToCheck = newIndex;
+		const oldIndexToCheck = oldIndex;
+		projectorState.afterRenderCallbacks.push(() => {
+			checkDistinguishable(newChildren, newIndexToCheck, parentInstance);
+		});
+		projectorState.afterRenderCallbacks.push(() => {
+			callOnDetach(oldChild, parentInstance);
+			checkDistinguishable(oldChildren, oldIndexToCheck, parentInstance);
+		});
+		nodeToRemove(oldChild, transitions, projectionOptions);
+		oldIndex++;
 		newIndex++;
 	}
 	if (oldChildrenLength > oldIndex) {

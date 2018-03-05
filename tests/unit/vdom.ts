@@ -2638,7 +2638,7 @@ describe('vdom', () => {
 			widget.renderResult = v('div', [v('span', { key: 'b' }), v('span', { key: 'a' })]);
 
 			assert.lengthOf(div.childNodes, 2);
-			assert.strictEqual(div.childNodes[0], lastSpan);
+			assert.notStrictEqual(div.childNodes[0], lastSpan);
 			assert.notStrictEqual(div.childNodes[1], firstSpan);
 		});
 
