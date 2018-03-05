@@ -17,7 +17,6 @@ import { isWidgetBaseConstructor } from './Registry';
 import WeakMap from '@dojo/shim/WeakMap';
 import NodeHandler from './NodeHandler';
 import RegistryHandler from './RegistryHandler';
-import { Map } from '@dojo/shim/Map';
 
 const NAMESPACE_W3 = 'http://www.w3.org/';
 const NAMESPACE_SVG = NAMESPACE_W3 + '2000/svg';
@@ -104,8 +103,6 @@ export const widgetInstanceMap = new WeakMap<any, WidgetData>();
 
 const instanceMap = new WeakMap<DefaultWidgetBaseInterface, InstanceMapData>();
 const projectorStateMap = new WeakMap<DefaultWidgetBaseInterface, ProjectorState>();
-const projectionRenderScheduledMap = new Map<number, number | undefined>();
-let projectionRenderScheduledCounter = 0;
 
 function same(dnode1: InternalDNode, dnode2: InternalDNode) {
 	if (isVNode(dnode1) && isVNode(dnode2)) {
@@ -136,8 +133,6 @@ function getProjectionOptions(
 	projectorOptions: Partial<ProjectionOptions>,
 	projectorInstance: DefaultWidgetBaseInterface
 ): ProjectionOptions {
-	const renderScheduled = projectionRenderScheduledCounter++;
-	projectionRenderScheduledMap.set(renderScheduled, undefined);
 	const defaults: Partial<ProjectionOptions> = {
 		namespace: undefined,
 		styleApplyer: function(domNode: HTMLElement, styleName: string, value: string) {
