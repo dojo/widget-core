@@ -2710,7 +2710,7 @@ describe('vdom', () => {
 				v('span', { key: '13', id: '13' })
 			]);
 
-			assert.lengthOf(root.childNodes, 13);
+			assert.lengthOf(root.childNodes, 16);
 			assert.strictEqual(root.childNodes[0], childOne);
 			assert.notEqual(root.childNodes[1], childTwo);
 			assert.notEqual(root.childNodes[1], childEight);
@@ -2718,6 +2718,7 @@ describe('vdom', () => {
 			assert.notEqual(root.childNodes[2], childNine);
 			assert.notEqual(root.childNodes[3], childFour);
 			assert.notEqual(root.childNodes[3], childTen);
+			assert.isNull(childFive.parentNode);
 			assert.strictEqual(root.childNodes[4], childSix);
 			assert.strictEqual(root.childNodes[9], childSeven);
 			assert.notEqual(root.childNodes[10], childEight);
