@@ -2701,7 +2701,7 @@ describe('vdom', () => {
 				v('span', { key: '16', id: '16' }),
 				v('span', { key: '17', id: '17' }),
 				v('span', { key: '18', id: '18' }),
-				v('span', { key: '7', id: '7' }),
+				v('span', { key: '7', id: '7', href: 'href' }),
 				v('span', { key: '2', id: '2' }),
 				v('span', { key: '3', id: '3' }),
 				v('span', { key: '4', id: '4' }),
@@ -2721,6 +2721,7 @@ describe('vdom', () => {
 			assert.isNull(childFive.parentNode);
 			assert.strictEqual(root.childNodes[4], childSix);
 			assert.strictEqual(root.childNodes[9], childSeven);
+			assert.strictEqual((root.childNodes[9] as HTMLElement).getAttribute('href'), 'href');
 			assert.notEqual(root.childNodes[10], childEight);
 			assert.notEqual(root.childNodes[10], childTwo);
 			assert.notEqual(root.childNodes[11], childNine);
