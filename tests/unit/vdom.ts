@@ -400,7 +400,7 @@ describe('vdom', () => {
 			}
 			class RegistryWidget extends WidgetBase {
 				render() {
-					return v('div', ['Registry, World!']);
+					return v('div', ['Registry, world!']);
 				}
 			}
 			const promise = new Promise<any>((resolve) => {
@@ -416,14 +416,12 @@ describe('vdom', () => {
 			}
 			const widget = new App();
 			widget.__setCoreProperties__({ bind: widget, baseRegistry });
-			const projection = dom.create(widget);
-			resolvers.resolve();
+			const projection = dom.create(widget, { sync: true });
 			const root = projection.domNode as HTMLElement;
 			assert.lengthOf(root.childNodes, 1);
 			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, 'Hello, world!');
 			resolver();
 			return promise.then(() => {
-				resolvers.resolve();
 				assert.lengthOf(root.childNodes, 2);
 				assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, 'Registry, world!');
 				assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, 'Hello, world!');
