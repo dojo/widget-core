@@ -97,6 +97,9 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		this._properties = <P>{};
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
+		this._registry = new RegistryHandler();
+		this.own(this._registry);
+		this.own(this._registry.on('invalidate', this._boundInvalidate));
 
 		widgetInstanceMap.set(this, {
 			dirty: true,
@@ -158,11 +161,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		const instanceData = widgetInstanceMap.get(this)!;
 
 		if (instanceData.coreProperties.baseRegistry !== baseRegistry) {
-			if (this._registry === undefined) {
-				this._registry = new RegistryHandler();
-				this.own(this._registry);
-				this.own(this._registry.on('invalidate', this._boundInvalidate));
-			}
 			this._registry.base = baseRegistry;
 			this.invalidate();
 		}
@@ -405,11 +403,6 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	}
 
 	public get registry(): RegistryHandler {
-		if (this._registry === undefined) {
-			this._registry = new RegistryHandler();
-			this.own(this._registry);
-			this.own(this._registry.on('invalidate', this._boundInvalidate));
-		}
 		return this._registry;
 	}
 

@@ -1,4 +1,3 @@
-import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/core/interfaces';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, Projection, ProjectionOptions } from './../interfaces';
@@ -7,6 +6,8 @@ import { afterRender } from './../decorators/afterRender';
 import { v } from './../d';
 import { Registry } from './../Registry';
 import { dom } from './../vdom';
+import { reference } from '../diff';
+import diffProperty from '../decorators/diffProperty';
 
 /**
  * Represents the attach state of the projector
@@ -118,7 +119,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _attachHandle: Handle;
 		private _projectionOptions: Partial<ProjectionOptions>;
 		private _projection: Projection | undefined;
-		private _projectorProperties: this['properties'] = {} as this['properties'];
 
 		constructor(...args: any[]) {
 			super(...args);
@@ -129,6 +129,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this.root = document.body;
 			this.projectorState = ProjectorAttachState.Detached;
+			super.__setCoreProperties__({ bind: this, baseRegistry: new Registry() });
 		}
 
 		public append(root?: Element): Handle {
@@ -200,15 +201,9 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 			this.__setProperties__(properties);
 		}
 
-		public __setProperties__(properties: this['properties']): void {
-			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
-				if (this._projectorProperties.registry) {
-					this._projectorProperties.registry.destroy();
-				}
-			}
-			this._projectorProperties = assign({}, properties);
-			super.__setCoreProperties__({ bind: this, baseRegistry: properties.registry });
-			super.__setProperties__(properties);
+		@diffProperty('registry', reference)
+		protected onRegistryChange(oldProperty: any, { registry }: ProjectorProperties) {
+			super.__setCoreProperties__({ bind: this, baseRegistry: registry });
 		}
 
 		public toHtml(): string {
