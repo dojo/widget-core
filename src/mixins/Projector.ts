@@ -8,6 +8,7 @@ import { Registry } from './../Registry';
 import { dom } from './../vdom';
 import { reference } from '../diff';
 import diffProperty from '../decorators/diffProperty';
+import { beforeProperties } from '../decorators/beforeProperties';
 
 /**
  * Represents the attach state of the projector
@@ -119,6 +120,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _attachHandle: Handle;
 		private _projectionOptions: Partial<ProjectionOptions>;
 		private _projection: Projection | undefined;
+		private _baseRegistry: Registry = new Registry();
 
 		constructor(...args: any[]) {
 			super(...args);
@@ -129,7 +131,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 			this.root = document.body;
 			this.projectorState = ProjectorAttachState.Detached;
-			super.__setCoreProperties__({ bind: this, baseRegistry: new Registry() });
+			super.__setCoreProperties__({ bind: this, baseRegistry: this._baseRegistry });
 		}
 
 		public append(root?: Element): Handle {
@@ -203,6 +205,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 
 		@diffProperty('registry', reference)
 		protected onRegistryChange(oldProperty: any, { registry }: ProjectorProperties) {
+			registry = registry ? registry : this._baseRegistry;
 			super.__setCoreProperties__({ bind: this, baseRegistry: registry });
 		}
 
