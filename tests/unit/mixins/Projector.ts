@@ -4,10 +4,13 @@ const { assert } = intern.getPlugin('chai');
 import global from '@dojo/shim/global';
 import has from '@dojo/has/has';
 import { spy, stub, SinonStub } from 'sinon';
-import { v } from '../../../src/d';
+import { v, w } from '../../../src/d';
 import { ProjectorMixin, ProjectorAttachState } from '../../../src/mixins/Projector';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { VNode } from './../../../src/interfaces';
+import { Injector } from '../../../src/Injector';
+import { Container } from '../../../src/Container';
+import Registry from '../../../src/Registry';
 
 const Event = global.window.Event;
 
@@ -510,6 +513,51 @@ registerSuite('mixins/projectorMixin', {
 			sendAnimationEndEvents(domNode);
 
 			assert.isNull(document.getElementById('test-element'));
+		},
+		'Creates a default base registry'() {
+			const div = document.createElement('div');
+			div.setAttribute('id', 'default-registry-root');
+			document.body.appendChild(div);
+			class Foo extends WidgetBase<any> {
+				render() {
+					return [this.properties.foo];
+				}
+			}
+
+			const FooContainer = Container(Foo, 'inject', {
+				getProperties: (inject: Injector) => {
+					return inject;
+				}
+			});
+
+			class Bar extends WidgetBase<any> {
+				constructor() {
+					super();
+					const injector = new Injector({ foo: 'bar' });
+					this.registry.defineInjector('inject', injector);
+				}
+
+				render() {
+					return w(FooContainer, {});
+				}
+			}
+
+			const Projector = ProjectorMixin(Bar);
+			const projector = new Projector();
+			projector.async = false;
+			projector.append(div);
+			const domNode = document.getElementById('default-registry-root')!;
+			assert.lengthOf(domNode.childNodes, 1);
+			assert.strictEqual((domNode.childNodes[0] as Text).data, 'bar');
+			const registry = new Registry();
+			registry.defineInjector('inject', new Injector({ foo: 'foo' }));
+			projector.setProperties({ registry });
+			assert.lengthOf(domNode.childNodes, 1);
+			assert.strictEqual((domNode.childNodes[0] as Text).data, 'foo');
+			projector.setProperties({ registry: undefined });
+			assert.lengthOf(domNode.childNodes, 1);
+			assert.strictEqual((domNode.childNodes[0] as Text).data, 'bar');
+			document.body.removeChild(div);
 		}
 	}
 });

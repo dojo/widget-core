@@ -92,7 +92,8 @@ describe('WidgetBase', () => {
 	it('updated core properties available on instance data', () => {
 		const child = new BaseTestWidget();
 		const instanceData = widgetInstanceMap.get(child)!;
-		assert.deepEqual(instanceData.coreProperties, {});
+		assert.strictEqual(instanceData.coreProperties.bind, child);
+		assert.isOk(instanceData.coreProperties.baseRegistry);
 		child.__setCoreProperties__({ bind: child, baseRegistry: 'base' });
 		assert.deepEqual(instanceData.coreProperties, { bind: child, baseRegistry: 'base' });
 	});

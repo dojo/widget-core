@@ -117,7 +117,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _attachHandle: Handle;
 		private _projectionOptions: Partial<ProjectionOptions>;
 		private _projection: Projection | undefined;
-		private _baseRegistry: Registry = new Registry();
 
 		constructor(...args: any[]) {
 			super(...args);
@@ -200,8 +199,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public __setProperties__(properties: this['properties']): void {
-			const baseRegistry = properties.registry ? properties.registry : this._baseRegistry;
-			super.__setCoreProperties__({ bind: this, baseRegistry });
+			this.__setCoreProperties__({ bind: this, baseRegistry: properties.registry || this.baseRegistry });
 			super.__setProperties__(properties);
 		}
 

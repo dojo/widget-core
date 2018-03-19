@@ -19,7 +19,7 @@ import {
 import RegistryHandler from './RegistryHandler';
 import NodeHandler from './NodeHandler';
 import { widgetInstanceMap } from './vdom';
-import { isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './Registry';
+import { Registry, isWidgetBaseConstructor, WIDGET_BASE_TYPE } from './Registry';
 
 interface ReactionFunctionArguments {
 	previousProperties: any;
@@ -71,7 +71,7 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 	 */
 	private _decoratorCache: Map<string, any[]>;
 
-	private _registry: RegistryHandler;
+	private _registry: RegistryHandler = new RegistryHandler();
 
 	/**
 	 * Map of functions properties for the bound function
@@ -88,6 +88,8 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 
 	private _handles: Handle[] = [];
 
+	protected baseRegistry: Registry | undefined = new Registry();
+
 	/**
 	 * @constructor
 	 */
@@ -97,9 +99,12 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 		this._properties = <P>{};
 		this._boundRenderFunc = this.render.bind(this);
 		this._boundInvalidate = this.invalidate.bind(this);
-		this._registry = new RegistryHandler();
+		const baseRegistry = new Registry();
 		this.own(this._registry);
+		this.own(baseRegistry);
 		this.own(this._registry.on('invalidate', this._boundInvalidate));
+		this._registry.base = baseRegistry;
+		this.baseRegistry = baseRegistry;
 
 		widgetInstanceMap.set(this, {
 			dirty: true,
@@ -114,7 +119,10 @@ export class WidgetBase<P = WidgetProperties, C extends DNode = DNode> implement
 			registry: () => {
 				return this.registry;
 			},
-			coreProperties: {} as CoreProperties,
+			coreProperties: {
+				bind: this,
+				baseRegistry
+			},
 			rendering: false,
 			inputProperties: {}
 		});
