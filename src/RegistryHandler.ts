@@ -41,7 +41,7 @@ export class RegistryHandler extends Evented<RegistryHandlerEventMap> {
 	}
 
 	public defineInjector(label: RegistryLabel, injector: Injector): void {
-		this._registry.defineInjector(label, injector);
+		this.baseRegistry && this.baseRegistry.defineInjector(label, injector);
 	}
 
 	public has(label: RegistryLabel): boolean {
@@ -59,8 +59,8 @@ export class RegistryHandler extends Evented<RegistryHandlerEventMap> {
 		return this._get(label, globalPrecedence, 'get', this._registryWidgetLabelMap);
 	}
 
-	public getInjector<T extends Injector>(label: RegistryLabel, globalPrecedence: boolean = false): T | null {
-		return this._get(label, globalPrecedence, 'getInjector', this._registryInjectorLabelMap);
+	public getInjector<T extends Injector>(label: RegistryLabel): T | null {
+		return this._get(label, true, 'getInjector', this._registryInjectorLabelMap);
 	}
 
 	private _get(

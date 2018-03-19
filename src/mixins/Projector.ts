@@ -1,4 +1,3 @@
-import { assign } from '@dojo/core/lang';
 import { Handle } from '@dojo/core/interfaces';
 import cssTransitions from '../animations/cssTransitions';
 import { Constructor, DNode, Projection, ProjectionOptions } from './../interfaces';
@@ -118,7 +117,6 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		private _attachHandle: Handle;
 		private _projectionOptions: Partial<ProjectionOptions>;
 		private _projection: Projection | undefined;
-		private _projectorProperties: this['properties'] = {} as this['properties'];
 
 		constructor(...args: any[]) {
 			super(...args);
@@ -201,13 +199,7 @@ export function ProjectorMixin<P, T extends Constructor<WidgetBase<P>>>(Base: T)
 		}
 
 		public __setProperties__(properties: this['properties']): void {
-			if (this._projectorProperties && this._projectorProperties.registry !== properties.registry) {
-				if (this._projectorProperties.registry) {
-					this._projectorProperties.registry.destroy();
-				}
-			}
-			this._projectorProperties = assign({}, properties);
-			super.__setCoreProperties__({ bind: this, baseRegistry: properties.registry });
+			this.__setCoreProperties__({ bind: this, baseRegistry: properties.registry || this.baseRegistry });
 			super.__setProperties__(properties);
 		}
 
