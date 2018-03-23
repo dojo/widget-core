@@ -539,7 +539,7 @@ In the above example, the tabPanel will receive its original `root` class in add
 
 ### Internationalization
 
-Widgets can be internationalized by adding the `I18nMixin` mixin from `@dojo/widget-core/mixins/I18n`. [Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`. Note that with this pattern it is possible for a widget to obtain its messages from multiple bundles; however, we recommend limiting widgets to a single bundle whenever possible.
+Widgets can be internationalized by adding the `I18nMixin` mixin from `@dojo/widget-core/mixins/I18n`. [Message bundles](https://github.com/dojo/i18n) are localized by passing them to `localizeBundle`. Note that with this pattern it is possible for a widget to obtain its messages from multiple bundles; however, we strongly recommend limiting widgets to a single bundle whenever possible.
 
 If the bundle supports the widget's current locale, but those locale-specific messages have not yet been loaded, then a bundle of blank message values is returned. Alternatively, the `localizeBundle` method accepts a second boolean argument, which, when `true`, causes the default messages to be returned instead of the blank bundle. The widget will be invalidated once the locale-specific messages have been loaded, triggering a re-render with the localized message content.
 
@@ -582,46 +582,30 @@ class I18nWidget extends MyWidgetBase<I18nWidgetProperties> {
 }
 ```
 
-Once the `I18n` mixin has been added to a widget, the default bundle can be overridden with the `overrideBundle` property. An override bundle can be a complete bundle, in which case it will be used in place of the widget's default bundle, or it can be an object with a `locales` property. In the latter case, a new bundle is created with the default bundle's messages and locale loaders, as well as all with of the new locale loaders. This is useful when you need to provide support for more locales than are supported by the default bundle, or when you want to provide a different set of messages for a particular locale.
-
-Finally, while we recommend against using multiple bundles in the same widget, there may be times when you need to consume a third-party widget that does so. As such, `overrideBundle` can also be a `Map` of default bundles to override bundles.
+Once the `I18n` mixin has been added to a widget, the default bundle can be replaced with the `i18nBundle` property. Further, while we recommend against using multiple bundles in the same widget, there may be times when you need to consume a third-party widget that does so. As such, `i18nBundle` can also be a `Map` of default bundles to override bundles.
 
 ```typescript
 import { Bundle } from '@dojo/i18n/i18n';
 
-// The `OverrideBundle` type is satisfied by either a messages bundle or an object with a
-// `locales` loader object.
-import { OverrideBundle } from '@dojo/widget-core/mixins/I18n';
-
 // A complete bundle to replace WidgetA's message bundle
 import overrideBundleForWidgetA from './nls/widgetA';
 
-// Bundles for WidgetC
-import widgetC1 from 'third-party/nls/widgetC1';
-import overrideBundleForWidgetC from './nls/widgetC';
+// Bundles for WidgetB
+import widgetB1 from 'third-party/nls/widgetB1';
+import overrideBundleForWidgetB from './nls/widgetB';
 
-// WidgetB's bundle does not support Farsi, so add support for that locale:
-const extendedLocalesForWidgetB = {
-	locales: {
-		fa: () => import('./nls/fa/widgetB')
-	}
-};
-
-// WidgetC uses multiple bundles, but only `thirdy-party/nls/widgetC1` needs to be overridden
-const overrideMapForWidgetC = new Map<Bundle<any>, OverrideBundle<any>>();
-map.set(widgetC1, overrideBundleForWidgetC);
+// WidgetB uses multiple bundles, but only `thirdy-party/nls/widgetB1` needs to be overridden
+const overrideMapForWidgetB = new Map<Bundle<any>, Bundle<any>>();
+map.set(widgetB1, overrideBundleForWidgetB);
 
 export class MyWidget extends WidgetBase {
 	protected render() {
 		return [
 			w(WidgetA, {
-				overrideBundle: overrideBundleForWidgetA
+				i18nBundle: overrideBundleForWidgetA
 			}),
 			w(WidgetB) {
-				overrideBundle: extendedLocalesForWidgetB
-			},
-			w(WidgetC) {
-				overrideBundle: overrideMapForWidgetC
+				i18nBundle: overrideMapForWidgetB
 			},
 		];
 	}

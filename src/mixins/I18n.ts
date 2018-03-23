@@ -1,5 +1,5 @@
 /* tslint:disable:interface-name */
-import i18n, { Bundle, formatMessage, getCachedMessages, LocaleLoaders, Messages } from '@dojo/i18n/i18n';
+import i18n, { Bundle, formatMessage, getCachedMessages, Messages } from '@dojo/i18n/i18n';
 import Map from '@dojo/shim/Map';
 import { isVNode, decorate } from './../d';
 import { afterRender } from './../decorators/afterRender';
@@ -10,19 +10,6 @@ import { Registry } from './../Registry';
 import { WidgetBase } from './../WidgetBase';
 
 export const INJECTOR_KEY = Symbol('i18n');
-
-/**
- * A cache for message bundles whose `locales` object has been extended.
- *
- * @dojo/i18n registers bundles with Globalize using a dynamically-generated ID. These IDs are assigned to the bundle
- * objects themselves. However, if an object containing only `locales` is passed in, a new bundle object would be created
- * with each render if not for this cache.
- */
-const extendedBundleMap = new Map<ExtraBundleLocales<any>, Bundle<any>>();
-
-export interface ExtraBundleLocales<T extends Messages> {
-	locales: LocaleLoaders<T>;
-}
 
 export interface LocaleData {
 	/**
@@ -45,7 +32,7 @@ export interface I18nProperties<T extends Messages = Messages> extends LocaleDat
 	 * then it will completely replace the underlying bundle. Otherwise, a new bundle will be created with the additional
 	 * locale loaders.
 	 */
-	overrideBundle?: OverrideBundle<T> | Map<Bundle<T>, OverrideBundle<T>>;
+	i18nBundle?: Bundle<T> | Map<Bundle<T>, Bundle<T>>;
 }
 
 /**
@@ -106,12 +93,6 @@ export interface I18nMixin<T extends Messages = Messages> {
 	properties: I18nProperties<T>;
 }
 
-export type OverrideBundle<T extends Messages> = Bundle<T> | ExtraBundleLocales<T>;
-
-function isBundle<T extends Messages>(value: OverrideBundle<T>): value is Bundle<T> {
-	return 'messages' in value;
-}
-
 export function registerI18nInjector(localeData: LocaleData, registry: Registry): Injector {
 	const injector = new Injector(localeData);
 	registry.defineInjector(INJECTOR_KEY, (invalidator) => {
@@ -135,7 +116,7 @@ export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<a
 		public abstract properties: I18nProperties<M>;
 
 		/**
-		 * Return a localized messages object for the provided bundle, deferring to the `overrideBundle` property
+		 * Return a localized messages object for the provided bundle, deferring to the `i18nBundle` property
 		 * when present. If the localized messages have not yet been loaded, return either a blank bundle or the
 		 * default messages.
 		 *
@@ -232,41 +213,26 @@ export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<a
 		/**
 		 * @private
 		 * Resolve the bundle to use for the widget's messages to either the provided bundle or to the
-		 * `overrideBundle` property. If the `overrideBundle` property contains only a `locales` property,
-		 * then it will be converted to a full bundle object with the base bundle's messages.
+		 * `i18nBundle` property.
 		 *
 		 * @param bundle
 		 * The base bundle
 		 *
 		 * @return
-		 * Either the override bundle or the base bundle extended with additional locales
+		 * Either override bundle or the original bundle.
 		 */
 		private _resolveBundle(bundle: Bundle<M>): Bundle<M> {
-			let { overrideBundle } = this.properties;
-			if (overrideBundle) {
-				if (overrideBundle instanceof Map) {
-					overrideBundle = overrideBundle.get(bundle);
+			let { i18nBundle } = this.properties;
+			if (i18nBundle) {
+				if (i18nBundle instanceof Map) {
+					i18nBundle = i18nBundle.get(bundle);
 
-					if (!overrideBundle) {
+					if (!i18nBundle) {
 						return bundle;
 					}
 				}
 
-				if (isBundle(overrideBundle)) {
-					return overrideBundle as Bundle<M>;
-				}
-
-				let cached = extendedBundleMap.get(overrideBundle);
-
-				if (!cached) {
-					cached = {
-						locales: { ...bundle.locales, ...overrideBundle.locales },
-						messages: bundle.messages
-					};
-					extendedBundleMap.set(overrideBundle, cached);
-				}
-
-				return cached;
+				return i18nBundle;
 			}
 			return bundle;
 		}

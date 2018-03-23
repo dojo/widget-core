@@ -136,11 +136,11 @@ registerSuite('mixins/I18nMixin', {
 			}
 		},
 		'.localizeBundle() with an override': {
-			'Uses the `overrideBundle` property'(this: any) {
+			'Uses the `i18nBundle` property'(this: any) {
 				const dfd = this.async();
 
 				localized = new Localized();
-				localized.__setProperties__({ overrideBundle });
+				localized.__setProperties__({ i18nBundle: overrideBundle });
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
@@ -153,10 +153,13 @@ registerSuite('mixins/I18nMixin', {
 					})
 				);
 			},
-			'Merges locales with the base bundle when the override contains no messages'(this: any) {
+			'Allows `i18nBundle` to be a `Map`'(this: any) {
 				const dfd = this.async();
+				const i18nBundleMap = new Map<any, any>();
+				i18nBundleMap.set(bundle, overrideBundle);
+
 				localized = new Localized();
-				localized.__setProperties__({ overrideBundle: { locales: overrideBundle.locales } });
+				localized.__setProperties__({ i18nBundle: i18nBundleMap });
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
@@ -169,47 +172,12 @@ registerSuite('mixins/I18nMixin', {
 					})
 				);
 			},
-			'Preserves existing locale loaders when the override contains no messages'(this: any) {
+			'Uses the base bundle when the `i18nBundle` map does not contain an override'(this: any) {
 				const dfd = this.async();
-				localized = new Localized();
-				localized.__setProperties__({ overrideBundle: { locales: overrideBundle.locales } });
-
-				switchLocale('fr');
-				localized.localizeBundle(bundle);
-				setTimeout(
-					dfd.callback(() => {
-						const { format, messages } = localized.localizeBundle(bundle);
-						assert.strictEqual(messages.hello, 'Bonjour');
-						assert.strictEqual(messages.goodbye, 'Au revoir');
-						assert.strictEqual(format('welcome', { name: 'Jean' }), 'Bienvenue, Jean!');
-					})
-				);
-			},
-			'Allows `overrideBundle` to be a `Map`'(this: any) {
-				const dfd = this.async();
-				const overrideBundleMap = new Map<any, any>();
-				overrideBundleMap.set(bundle, overrideBundle);
+				const i18nBundleMap = new Map<any, any>();
 
 				localized = new Localized();
-				localized.__setProperties__({ overrideBundle: overrideBundleMap });
-
-				switchLocale('es');
-				localized.localizeBundle(bundle);
-				setTimeout(
-					dfd.callback(() => {
-						const { format, messages } = localized.localizeBundle(bundle);
-						assert.strictEqual(messages.hello, 'Hola');
-						assert.strictEqual(messages.goodbye, 'Adiós');
-						assert.strictEqual(format('welcome', { name: 'Jean' }), 'Bienvenido, Jean');
-					})
-				);
-			},
-			'Uses the base bundle when the `overrideBundle` map does not contain an override'(this: any) {
-				const dfd = this.async();
-				const overrideBundleMap = new Map<any, any>();
-
-				localized = new Localized();
-				localized.__setProperties__({ overrideBundle: overrideBundleMap });
+				localized.__setProperties__({ i18nBundle: i18nBundleMap });
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
