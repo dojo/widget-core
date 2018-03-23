@@ -1,5 +1,6 @@
 /* tslint:disable:interface-name */
-import i18n, { Bundle, formatMessage, getCachedMessages, Messages } from '@dojo/i18n/i18n';
+import i18n, { Bundle, formatMessage, getCachedMessages, LocaleLoaders, Messages } from '@dojo/i18n/i18n';
+import Map from '@dojo/shim/Map';
 import { isVNode, decorate } from './../d';
 import { afterRender } from './../decorators/afterRender';
 import { inject } from './../decorators/inject';
@@ -9,6 +10,19 @@ import { Registry } from './../Registry';
 import { WidgetBase } from './../WidgetBase';
 
 export const INJECTOR_KEY = Symbol('i18n');
+
+/**
+ * A cache for message bundles whose `locales` object has been extended.
+ *
+ * @dojo/i18n registers bundles with Globalize using a dynamically-generated ID. These IDs are assigned to the bundle
+ * objects themselves. However, if an object containing only `locales` is passed in, a new bundle object would be created
+ * with each render if not for this cache.
+ */
+const extendedBundleMap = new Map<ExtraBundleLocales<any>, Bundle<any>>();
+
+export interface ExtraBundleLocales<T extends Messages> {
+	locales: LocaleLoaders<T>;
+}
 
 export interface LocaleData {
 	/**
@@ -25,7 +39,14 @@ export interface LocaleData {
 	rtl?: boolean;
 }
 
-export interface I18nProperties extends LocaleData, WidgetProperties {}
+export interface I18nProperties<T extends Messages = Messages> extends LocaleData, WidgetProperties {
+	/**
+	 * An optional override for the bundle passed to the `localizeBundle`. If the override contains a `messages` object,
+	 * then it will completely replace the underlying bundle. Otherwise, a new bundle will be created with the additional
+	 * locale loaders.
+	 */
+	overrideBundle?: OverrideBundle<T> | Map<Bundle<T>, OverrideBundle<T>>;
+}
 
 /**
  * @private
@@ -67,7 +88,7 @@ export type LocalizedMessages<T extends Messages> = {
 /**
  * interface for I18n functionality
  */
-export interface I18nMixin {
+export interface I18nMixin<T extends Messages = Messages> {
 	/**
 	 * Return the cached messages for the specified bundle for the current locale, assuming they have already
 	 * been loaded. If the locale-specific messages have not been loaded, they are fetched and the widget state
@@ -80,9 +101,15 @@ export interface I18nMixin {
 	 * An object containing the localized messages, along with a `format` method for formatting ICU-formatted
 	 * templates and an `isPlaceholder` property indicating whether the returned messages are the defaults.
 	 */
-	localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T>;
+	localizeBundle(bundle: Bundle<T>): LocalizedMessages<T>;
 
-	properties: I18nProperties;
+	properties: I18nProperties<T>;
+}
+
+export type OverrideBundle<T extends Messages> = Bundle<T> | ExtraBundleLocales<T>;
+
+function isBundle<T extends Messages>(value: OverrideBundle<T>): value is Bundle<T> {
+	return 'messages' in value;
 }
 
 export function registerI18nInjector(localeData: LocaleData, registry: Registry): Injector {
@@ -94,20 +121,23 @@ export function registerI18nInjector(localeData: LocaleData, registry: Registry)
 	return injector;
 }
 
-export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<I18nMixin> {
+export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<any>>>(
+	Base: T
+): T & Constructor<I18nMixin<M>> {
 	@inject({
 		name: INJECTOR_KEY,
-		getProperties: (localeData: LocaleData, properties: I18nProperties) => {
+		getProperties: (localeData: LocaleData, properties: I18nProperties<M>) => {
 			const { locale = localeData.locale, rtl = localeData.rtl } = properties;
 			return { locale, rtl };
 		}
 	})
 	abstract class I18n extends Base {
-		public abstract properties: I18nProperties;
+		public abstract properties: I18nProperties<M>;
 
 		/**
-		 * Return a localized messages object for the provided bundle. If the localized messages have not yet been loaded,
-		 * return either a blank bundle or the default messages.
+		 * Return a localized messages object for the provided bundle, deferring to the `overrideBundle` property
+		 * when present. If the localized messages have not yet been loaded, return either a blank bundle or the
+		 * default messages.
 		 *
 		 * @param bundle
 		 * The bundle to localize
@@ -116,13 +146,11 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 		 * If `true`, the default messages will be used when the localized messages have not yet been loaded. If `false`
 		 * (the default), then a blank bundle will be returned (i.e., each key's value will be an empty string).
 		 */
-		public localizeBundle<T extends Messages>(
-			bundle: Bundle<T>,
-			useDefaults: boolean = false
-		): LocalizedMessages<T> {
-			const { locale } = this.properties;
+		public localizeBundle(baseBundle: Bundle<M>, useDefaults: boolean = false): LocalizedMessages<M> {
+			const bundle = this._resolveBundle(baseBundle);
 			const messages = this._getLocaleMessages(bundle);
 			const isPlaceholder = !messages;
+			const { locale } = this.properties;
 			const format =
 				isPlaceholder && !useDefaults
 					? (key: string, options?: any) => ''
@@ -168,8 +196,8 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 		 * @return
 		 * The blank message bundle
 		 */
-		private _getBlankMessages<T extends Messages>(bundle: Bundle<T>): T {
-			const blank = {} as T;
+		private _getBlankMessages(bundle: Bundle<M>): M {
+			const blank = {} as M;
 			return Object.keys(bundle.messages).reduce((blank, key) => {
 				blank[key] = '';
 				return blank;
@@ -199,6 +227,48 @@ export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & 
 			i18n(bundle, locale).then(() => {
 				this.invalidate();
 			});
+		}
+
+		/**
+		 * @private
+		 * Resolve the bundle to use for the widget's messages to either the provided bundle or to the
+		 * `overrideBundle` property. If the `overrideBundle` property contains only a `locales` property,
+		 * then it will be converted to a full bundle object with the base bundle's messages.
+		 *
+		 * @param bundle
+		 * The base bundle
+		 *
+		 * @return
+		 * Either the override bundle or the base bundle extended with additional locales
+		 */
+		private _resolveBundle(bundle: Bundle<M>): Bundle<M> {
+			let { overrideBundle } = this.properties;
+			if (overrideBundle) {
+				if (overrideBundle instanceof Map) {
+					overrideBundle = overrideBundle.get(bundle);
+
+					if (!overrideBundle) {
+						return bundle;
+					}
+				}
+
+				if (isBundle(overrideBundle)) {
+					return overrideBundle as Bundle<M>;
+				}
+
+				let cached = extendedBundleMap.get(overrideBundle);
+
+				if (!cached) {
+					cached = {
+						locales: { ...bundle.locales, ...overrideBundle.locales },
+						messages: bundle.messages
+					};
+					extendedBundleMap.set(overrideBundle, cached);
+				}
+
+				return cached;
+			}
+			return bundle;
 		}
 	}
 
