@@ -6,25 +6,16 @@ import Resize, { ContentRect } from '../../../src/meta/Resize';
 import NodeHandler from '../../../src/NodeHandler';
 import WidgetBase from '../../../src/WidgetBase';
 
-// let rAF: any;
 let resizeObserver: any;
 let resizeCallback: ([]: any[]) => void;
 const bindInstance = new WidgetBase();
 let isFoo: SinonStub;
 let isBar: SinonStub;
 
-// function resolveRAF() {
-// 	for (let i = 0; i < rAF.callCount; i++) {
-// 		rAF.getCall(i).args[0]();
-// 	}
-// 	rAF.resetHistory();
-// }
-
 registerSuite('meta - Resize', {
 	beforeEach() {
 		isFoo = stub();
 		isBar = stub();
-		// rAF = stub(global, 'requestAnimationFrame');
 		resizeObserver = stub().callsFake(function(callback: any) {
 			const observer = {
 				observe: stub()
@@ -37,7 +28,6 @@ registerSuite('meta - Resize', {
 	},
 
 	afterEach() {
-		// rAF.restore();
 		isFoo.reset();
 		isBar.reset();
 		resizeObserver.reset();
