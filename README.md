@@ -1176,6 +1176,35 @@ class TestWidget extends WidgetBase<WidgetProperties> {
 }
 ```
 
+#### Resize
+
+The resize observer meta uses the latest [`ResizeObserver`](https://wicg.github.io/ResizeObserver/) within your widgets. This is currently supported within `Chrome 64+` and supported via [polyfill](https://github.com/WICG/ResizeObserver/issues/3).
+
+This allows you to observe resize events at the component level. The `meta` accepts an object of `predicate` functions which receive `ContentRect` dimensions and will be executed when a resize event has occured. The results are made available in your widgets `render` function. This is an incredibly powerful tool for creating responsive layouts.
+
+```ts
+class TestWidget extends WidgetBase<WidgetProperties> {
+    render() {
+        function isMediumPredicate(contentRect: ContentRect) {
+            return contentRect.width < 500;
+        }
+
+        const { isMediumSized } = this.meta(Resize).get('root', {
+            isMediumSized: isMediumPredicate
+        });
+
+        return v('div', {
+            key: 'root'
+            classes: isMediumSized ? css.medium : css.large
+        }, [
+            v('div', {
+                innerHTML: 'Hello World'
+            })
+        ]);
+    }
+}
+```
+
 ##### Implementing Custom Meta
 
 You can create your own meta if you need access to DOM nodes.
