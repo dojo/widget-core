@@ -5,24 +5,24 @@ interface Observer {
 	observe(node: HTMLElement): void;
 }
 
-declare var ResizeObserver: {
+declare const ResizeObserver: {
 	prototype: Observer;
 	new (callback: (entries: ResizeObserverEntry[]) => any): any;
 };
 
 interface ResizeObserverEntry {
-	readonly contentRect: ContentRect;
+	contentRect: ContentRect;
 }
 
 export interface ContentRect {
-	bottom: number;
-	height: number;
-	left: number;
-	right: number;
-	top: number;
-	width: number;
-	x: number;
-	y: number;
+	readonly bottom: number;
+	readonly height: number;
+	readonly left: number;
+	readonly right: number;
+	readonly top: number;
+	readonly width: number;
+	readonly x: number;
+	readonly y: number;
 }
 
 export interface PredicateFunction {
@@ -42,29 +42,31 @@ export class Resize extends Base {
 		const node = this.getNode(key);
 
 		if (!node) {
-			return {} as PredicateResponses<T>;
+			const defaultResponse: PredicateResponses = {};
+			for (let predicateId in predicates) {
+				defaultResponse[predicateId] = false;
+			}
+			return defaultResponse as PredicateResponses<T>;
 		}
 
 		if (!this._details.has(key)) {
 			this._details.set(key, {});
 			const resizeObserver = new ResizeObserver(([entry]) => {
-				if (entry) {
-					const { contentRect } = entry;
-					const previousDetails = this._details.get(key);
-					let predicateChanged = false;
-					let predicateResponses: PredicateResponses = {};
+				const { contentRect } = entry;
+				const previousDetails = this._details.get(key);
+				let predicateChanged = false;
+				let predicateResponses: PredicateResponses = {};
 
-					for (let predicateId in predicates) {
-						const response = predicates[predicateId](contentRect);
-						predicateResponses[predicateId] = response;
-						if (!predicateChanged && previousDetails && response !== previousDetails[predicateId]) {
-							predicateChanged = true;
-						}
+				for (let predicateId in predicates) {
+					const response = predicates[predicateId](contentRect);
+					predicateResponses[predicateId] = response;
+					if (!predicateChanged && previousDetails && response !== previousDetails[predicateId]) {
+						predicateChanged = true;
 					}
-
-					this._details.set(key, predicateResponses);
-					predicateChanged && this.invalidate();
 				}
+
+				this._details.set(key, predicateResponses);
+				predicateChanged && this.invalidate();
 			});
 			resizeObserver.observe(node);
 		}
