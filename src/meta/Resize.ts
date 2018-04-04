@@ -60,7 +60,7 @@ export class Resize extends Base {
 				for (let predicateId in predicates) {
 					const response = predicates[predicateId](contentRect);
 					predicateResponses[predicateId] = response;
-					if (!predicateChanged && previousDetails && response !== previousDetails[predicateId]) {
+					if (!predicateChanged && response !== previousDetails![predicateId]) {
 						predicateChanged = true;
 					}
 				}
