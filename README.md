@@ -854,7 +854,7 @@ class MyClass extends WidgetBase {
 
 ### Containers & Injectors
 
-There is built-in support for side-loading/injecting values into sections of the widget tree and mapping them to a widget's properties. This is achieved by registering an injector factory with a `registry` and setting the registry as a property on the application's `projector` to ensure that is available to your application.
+There is built-in support for side-loading/injecting values into sections of the widget tree and mapping them to a widget's properties. This is achieved by registering an injector factory with a `registry` and setting the registry as a property on the application's `projector` to ensure the registry instance is available to your application.
 
 Create a factory function for a function that returns the required `payload`.
 
@@ -864,12 +864,12 @@ registry.defineInjector('my-injector', () => {
 });
 ```
 
-The injector factory gets passed an `invalidator` function that can be called when something has changed that requires connected widgets to `invalidate`.
+The injector factory gets passed an `invalidator` function that can get called when something has changed that requires connected widgets to `invalidate`.
 
 ```ts
 registry.defineInjector('my-injector', (invalidator) => {
-    // This could be a store, but for this example is simply an instance
-    // that accepts the injector and calls it when any of it's internal
+    // This could be a store, but for this example it is simply an instance
+    // that accepts the `invalidator` and calls it when any of its internal
     // state has changed.
     const appContext = new AppContext(invalidator);
     return () => appContext;
