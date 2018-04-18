@@ -65,7 +65,7 @@ export interface RegistryInterface {
 	 * @param label The label of the injector to register
 	 * @param registryItem The injector factory
 	 */
-	defineInjector(label: RegistryLabel, registryItem: InjectorFactory): void;
+	defineInjector(label: RegistryLabel, injectorFactory: InjectorFactory): void;
 
 	/**
 	 * Return an Injector registry item for the given label, null if an entry doesn't exist
