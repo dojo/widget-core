@@ -879,7 +879,7 @@ registry.defineInjector('my-injector', (invalidator) => {
 
 To connect the registered `payload` to a widget, we can use the `Container` HOC (higher order component) provided by `widget-core`. The `Container` accepts a widget `constructor`, `injector` label, and `getProperties` mapping function as arguments and returns a new class that returns the passed widget from its `render` function.
 
-`getProperties` receives the `payload` return from the injector function and the `properties` passed to the container HOC component. These are used to map into the wrapped widget's properties.
+`getProperties` receives the `payload` returned from the injector function and the `properties` passed to the container HOC component. These are used to map into the wrapped widget's properties.
 
 ```ts
 import { Container } from '@dojo/widget-core/Container';

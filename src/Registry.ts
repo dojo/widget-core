@@ -157,7 +157,7 @@ export class Registry extends Evented<{}, RegistryLabel, RegistryEventObject> im
 		}
 	}
 
-	public defineInjector(label: RegistryLabel, item: InjectorFactory): void {
+	public defineInjector(label: RegistryLabel, injectorFactory: InjectorFactory): void {
 		if (this._injectorRegistry === undefined) {
 			this._injectorRegistry = new Map();
 		}
@@ -169,7 +169,7 @@ export class Registry extends Evented<{}, RegistryLabel, RegistryEventObject> im
 		const invalidator = new Evented();
 
 		const injectorItem: InjectorItem = {
-			injector: item(() => invalidator.emit({ type: 'invalidate' })),
+			injector: injectorFactory(() => invalidator.emit({ type: 'invalidate' })),
 			invalidator
 		};
 
