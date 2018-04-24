@@ -604,9 +604,9 @@ export class MyWidget extends WidgetBase {
 			w(WidgetA, {
 				i18nBundle: overrideBundleForWidgetA
 			}),
-			w(WidgetB) {
+			w(WidgetB, {
 				i18nBundle: overrideMapForWidgetB
-			},
+			}),
 		];
 	}
 }
