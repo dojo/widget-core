@@ -300,7 +300,7 @@ const benchStartup: Benchmark = {
 	}
 };
 
-interface BenchmarkTuple extends Array<Benchmark> {
+export interface BenchmarkTuple extends Array<Benchmark> {
 	0: Benchmark;
 }
 

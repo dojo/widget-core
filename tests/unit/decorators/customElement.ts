@@ -5,7 +5,7 @@ import { customElement } from '../../../src/decorators/customElement';
 import { WidgetBase } from '../../../src/WidgetBase';
 import { CustomElementChildType } from '../../../src/registerCustomElement';
 
-interface CustomElementWidgetProperties {
+export interface CustomElementWidgetProperties {
 	label: string;
 	labelSuffix: string;
 	onClick: () => void;
