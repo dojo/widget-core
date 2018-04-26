@@ -1402,8 +1402,9 @@ class MyWidget extends WidgetBase<MyWidgetProperties> {
 Custom Elements in all browsers supported by Dojo 2, a polyfill needs to be
 included such as webcomponents/custom-elements/master/custom-elements.min.js.
 Dojo 2 does not include the polyfill by default, so will need to be
-added as a script tag in your index.html or alternatively imported in the
-application’s main.ts after including the dependency in your source tree.
+added as a script tag in your index.html. Note that this polyfill cannot 
+currently be ponyfilled like other polyfills used in Dojo 2, so it cannot 
+be added with @dojo/shim/browser or imported using ES modules.
 
 No additional steps are required. The custom element
 can be used in your application automatically. The decorator can be provided
