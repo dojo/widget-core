@@ -735,7 +735,7 @@ function addChildren(
 	if (projectorState.merge && childNodes === undefined) {
 		childNodes = arrayFrom(parentVNode.domNode!.childNodes) as (Element | Text)[];
 	}
-
+	const transitions = projectionOptions.transitions!;
 	projectionOptions = { ...projectionOptions, depth: projectionOptions.depth + 1 };
 
 	for (let i = 0; i < children.length; i++) {
@@ -755,6 +755,7 @@ function addChildren(
 		} else {
 			createDom(child, parentVNode, insertBefore, projectionOptions, parentInstance, childNodes);
 		}
+		nodeAdded(child, transitions);
 	}
 }
 
