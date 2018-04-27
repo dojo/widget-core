@@ -24,7 +24,7 @@ export const WNODE = Symbol('Identifier for a WNode.');
 export const VNODE = Symbol('Identifier for a VNode.');
 
 /**
- *
+ * The symbol identifier for a VNode type created using dom()
  */
 export const DOMVNODE = Symbol('Identifier for a VNode created using existing dom.');
 
