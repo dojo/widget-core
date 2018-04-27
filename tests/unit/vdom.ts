@@ -2306,10 +2306,12 @@ describe('vdom', () => {
 			const widget = getWidget(vnode);
 			const projection = dom.create(widget, { sync: true });
 			let root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual(root, divA);
 			assert.strictEqual(root.innerHTML, 'A');
 			vnode = d({ node: divB });
 			widget.renderResult = vnode;
 			root = projection.domNode.childNodes[0] as any;
+			assert.strictEqual(root, divB);
 			assert.strictEqual(root.innerHTML, 'B');
 		});
 	});
