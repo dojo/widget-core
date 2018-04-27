@@ -8,11 +8,9 @@
     "url": "https://github.com/dojo/widget-core/issues"
   },
   "license": "BSD-3-Clause",
-  "main": "main.js",
   "files": [
     "dist",
-    "src",
-    "typings.json"
+    "src"
   ],
   "engines": {
     "npm": ">=3.0.0"
