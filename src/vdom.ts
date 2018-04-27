@@ -113,9 +113,6 @@ function same(dnode1: InternalDNode, dnode2: InternalDNode) {
 				return false;
 			}
 		}
-		if (isDomVNode(dnode1) !== isDomVNode(dnode2)) {
-			return false;
-		}
 		if (dnode1.tag !== dnode2.tag) {
 			return false;
 		}
