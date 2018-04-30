@@ -3542,6 +3542,36 @@ describe('vdom', () => {
 				);
 			});
 
+			it('Should run exit animations when a widget is removed', () => {
+				const transitionStrategy = { enter: stub(), exit: stub() };
+				class Child extends WidgetBase {
+					render() {
+						return v('div', { exitAnimation: 'exit' });
+					}
+				}
+				class Parent extends WidgetBase {
+					items = [w(Child, { key: '1' }), w(Child, { key: '2' })];
+
+					removeItem() {
+						this.items = [this.items[0]];
+						this.invalidate();
+					}
+
+					render() {
+						return v('div', [...this.items]);
+					}
+				}
+				const widget = new Parent();
+				const projection = dom.create(widget, {
+					transitions: transitionStrategy,
+					sync: true
+				});
+				const node = (projection.domNode.childNodes[0] as Element).children[1];
+				widget.removeItem();
+				console.log(transitionStrategy.exit.called);
+				assert.isTrue(transitionStrategy.exit.calledWithExactly(node, match({}), 'exit', match({})));
+			});
+
 			it('will complain about a missing transitionStrategy', () => {
 				const widget = getWidget(v('div'));
 				dom.create(widget, { sync: true });
