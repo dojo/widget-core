@@ -529,35 +529,25 @@ function nodeAdded(dnode: InternalDNode, transitions: TransitionStrategy) {
 	}
 }
 
-function callOnDetach(dNodes: InternalDNode | InternalDNode[], parentInstance: DefaultWidgetBaseInterface): void {
-	dNodes = Array.isArray(dNodes) ? dNodes : [dNodes];
-	for (let i = 0; i < dNodes.length; i++) {
-		const dNode = dNodes[i];
-		if (isWNode(dNode)) {
-			if (dNode.rendered) {
-				callOnDetach(dNode.rendered, dNode.instance);
-			}
-			if (dNode.instance) {
-				const instanceData = widgetInstanceMap.get(dNode.instance)!;
-				instanceData.onDetach();
-			}
-		} else {
-			if (dNode.children) {
-				callOnDetach(dNode.children as InternalDNode[], parentInstance);
-			}
-		}
-	}
-}
-
 function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, projectionOptions: ProjectionOptions) {
 	if (isWNode(dnode)) {
 		const rendered = dnode.rendered || emptyArray;
+		if (dnode.instance) {
+			const instanceData = widgetInstanceMap.get(dnode.instance)!;
+			instanceData.onDetach();
+			instanceMap.delete(dnode.instance);
+		}
 		for (let i = 0; i < rendered.length; i++) {
 			nodeToRemove(rendered[i], transitions, projectionOptions);
 		}
 	} else {
 		const domNode = dnode.domNode;
 		const properties = dnode.properties;
+		if (dnode.children && dnode.children.length > 0) {
+			for (let i = 0; i < dnode.children.length; i++) {
+				nodeToRemove(dnode.children[i], transitions, projectionOptions);
+			}
+		}
 		const exitAnimation = properties.exitAnimation;
 		if (properties && exitAnimation) {
 			(domNode as HTMLElement).style.pointerEvents = 'none';
@@ -631,7 +621,7 @@ function updateChildren(
 	let i: number;
 	let textUpdated = false;
 	while (newIndex < newChildrenLength) {
-		const oldChild = oldIndex < oldChildrenLength ? oldChildren[oldIndex] : undefined;
+		let oldChild = oldIndex < oldChildrenLength ? oldChildren[oldIndex] : undefined;
 		const newChild = newChildren[newIndex];
 		if (isVNode(newChild) && typeof newChild.deferredPropertiesCallback === 'function') {
 			newChild.inserted = isVNode(oldChild) && oldChild.inserted;
@@ -687,10 +677,15 @@ function updateChildren(
 		const removeChild = () => {
 			const indexToCheck = oldIndex;
 			projectorState.afterRenderCallbacks.push(() => {
-				callOnDetach(oldChild, parentInstance);
 				checkDistinguishable(oldChildren, indexToCheck, parentInstance);
 			});
-			nodeToRemove(oldChild, transitions, projectionOptions);
+			if (isWNode(oldChild)) {
+				const item = instanceMap.get(oldChild.instance);
+				if (item) {
+					oldChild = item.dnode;
+				}
+			}
+			nodeToRemove(oldChild!, transitions, projectionOptions);
 		};
 		const findNewIndex = findIndexOfChild(newChildren, oldChild, newIndex + 1);
 
@@ -708,13 +703,18 @@ function updateChildren(
 	if (oldChildrenLength > oldIndex) {
 		// Remove child fragments
 		for (i = oldIndex; i < oldChildrenLength; i++) {
-			const oldChild = oldChildren[i];
 			const indexToCheck = i;
 			projectorState.afterRenderCallbacks.push(() => {
-				callOnDetach(oldChild, parentInstance);
 				checkDistinguishable(oldChildren, indexToCheck, parentInstance);
 			});
-			nodeToRemove(oldChildren[i], transitions, projectionOptions);
+			let childToRemove = oldChildren[i];
+			if (isWNode(childToRemove)) {
+				const item = instanceMap.get(childToRemove.instance);
+				if (item) {
+					childToRemove = item.dnode;
+				}
+			}
+			nodeToRemove(childToRemove, transitions, projectionOptions);
 		}
 	}
 	return textUpdated;
@@ -901,7 +901,6 @@ function updateDom(
 		instance.__setChildren__(dnode.children);
 		instance.__setProperties__(dnode.properties);
 		dnode.instance = instance;
-		instanceMap.set(instance, { dnode, parentVNode });
 		if (instanceData.dirty === true) {
 			const rendered = instance.__render__();
 			instanceData.rendering = false;
@@ -911,6 +910,7 @@ function updateDom(
 			instanceData.rendering = false;
 			dnode.rendered = previousRendered;
 		}
+		instanceMap.set(instance, { dnode, parentVNode });
 		instanceData.nodeHandler.addRoot();
 	} else {
 		if (previous === dnode) {
@@ -1057,12 +1057,15 @@ function render(projectionOptions: ProjectionOptions) {
 	const renders = [...renderQueue];
 	projectorState.renderQueue = [];
 	renders.sort((a, b) => a.depth - b.depth);
-
+	const previouslyRendered = [];
 	while (renders.length) {
 		const { instance } = renders.shift()!;
-		const { parentVNode, dnode } = instanceMap.get(instance)!;
-		const instanceData = widgetInstanceMap.get(instance)!;
-		updateDom(dnode, toInternalWNode(instance, instanceData), projectionOptions, parentVNode, instance);
+		if (instanceMap.has(instance) && previouslyRendered.indexOf(instance) === -1) {
+			previouslyRendered.push(instance);
+			const { parentVNode, dnode } = instanceMap.get(instance)!;
+			const instanceData = widgetInstanceMap.get(instance)!;
+			updateDom(dnode, toInternalWNode(instance, instanceData), projectionOptions, parentVNode, instance);
+		}
 	}
 	runAfterRenderCallbacks(projectionOptions);
 	runDeferredRenderCallbacks(projectionOptions);
