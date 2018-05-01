@@ -26,13 +26,13 @@ export interface LocaleData {
 	rtl?: boolean;
 }
 
-export interface I18nProperties<T extends Messages = Messages> extends LocaleData, WidgetProperties {
+export interface I18nProperties extends LocaleData, WidgetProperties {
 	/**
 	 * An optional override for the bundle passed to the `localizeBundle`. If the override contains a `messages` object,
 	 * then it will completely replace the underlying bundle. Otherwise, a new bundle will be created with the additional
 	 * locale loaders.
 	 */
-	i18nBundle?: Bundle<T> | Map<Bundle<T>, Bundle<T>>;
+	i18nBundle?: Bundle<Messages> | Map<Bundle<Messages>, Bundle<Messages>>;
 }
 
 /**
@@ -75,7 +75,7 @@ export type LocalizedMessages<T extends Messages> = {
 /**
  * interface for I18n functionality
  */
-export interface I18nMixin<T extends Messages = Messages> {
+export interface I18nMixin {
 	/**
 	 * Return the cached messages for the specified bundle for the current locale, assuming they have already
 	 * been loaded. If the locale-specific messages have not been loaded, they are fetched and the widget state
@@ -88,9 +88,9 @@ export interface I18nMixin<T extends Messages = Messages> {
 	 * An object containing the localized messages, along with a `format` method for formatting ICU-formatted
 	 * templates and an `isPlaceholder` property indicating whether the returned messages are the defaults.
 	 */
-	localizeBundle(bundle: Bundle<T>): LocalizedMessages<T>;
+	localizeBundle<T extends Messages>(bundle: Bundle<T>): LocalizedMessages<T>;
 
-	properties: I18nProperties<T>;
+	properties: I18nProperties;
 }
 
 export function registerI18nInjector(localeData: LocaleData, registry: Registry): Injector {
@@ -102,18 +102,16 @@ export function registerI18nInjector(localeData: LocaleData, registry: Registry)
 	return injector;
 }
 
-export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<any>>>(
-	Base: T
-): T & Constructor<I18nMixin<M>> {
+export function I18nMixin<T extends Constructor<WidgetBase<any>>>(Base: T): T & Constructor<I18nMixin> {
 	@inject({
 		name: INJECTOR_KEY,
-		getProperties: (localeData: LocaleData, properties: I18nProperties<M>) => {
+		getProperties: (localeData: LocaleData, properties: I18nProperties) => {
 			const { locale = localeData.locale, rtl = localeData.rtl } = properties;
 			return { locale, rtl };
 		}
 	})
 	abstract class I18n extends Base {
-		public abstract properties: I18nProperties<M>;
+		public abstract properties: I18nProperties;
 
 		/**
 		 * Return a localized messages object for the provided bundle, deferring to the `i18nBundle` property
@@ -127,7 +125,10 @@ export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<a
 		 * If `true`, the default messages will be used when the localized messages have not yet been loaded. If `false`
 		 * (the default), then a blank bundle will be returned (i.e., each key's value will be an empty string).
 		 */
-		public localizeBundle(baseBundle: Bundle<M>, useDefaults: boolean = false): LocalizedMessages<M> {
+		public localizeBundle<T extends Messages>(
+			baseBundle: Bundle<T>,
+			useDefaults: boolean = false
+		): LocalizedMessages<T> {
 			const bundle = this._resolveBundle(baseBundle);
 			const messages = this._getLocaleMessages(bundle);
 			const isPlaceholder = !messages;
@@ -177,8 +178,8 @@ export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<a
 		 * @return
 		 * The blank message bundle
 		 */
-		private _getBlankMessages(bundle: Bundle<M>): M {
-			const blank = {} as M;
+		private _getBlankMessages(bundle: Bundle<Messages>): Messages {
+			const blank = {} as Messages;
 			return Object.keys(bundle.messages).reduce((blank, key) => {
 				blank[key] = '';
 				return blank;
@@ -221,7 +222,7 @@ export function I18nMixin<M extends Messages, T extends Constructor<WidgetBase<a
 		 * @return
 		 * Either override bundle or the original bundle.
 		 */
-		private _resolveBundle(bundle: Bundle<M>): Bundle<M> {
+		private _resolveBundle(bundle: Bundle<Messages>): Bundle<Messages> {
 			let { i18nBundle } = this.properties;
 			if (i18nBundle) {
 				if (i18nBundle instanceof Map) {
