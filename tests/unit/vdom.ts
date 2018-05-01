@@ -770,7 +770,7 @@ describe('vdom', () => {
 			childTwoInvalidate!();
 			resolvers.resolve();
 			assert.lengthOf(projection.domNode.childNodes[0]!.childNodes, 1);
-			assert.strictEqual((projection.domNode.childNodes[0]!.childNodes[0] as Text).data, 'Client 1');
+			assert.strictEqual((projection.domNode.childNodes[0]!.childNodes[0] as Text).data, 'Child One');
 		});
 
 		it('should allow a widget returned from render', () => {
