@@ -563,6 +563,7 @@ function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, pro
 			(domNode as HTMLElement).style.pointerEvents = 'none';
 			const removeDomNode = function() {
 				domNode && domNode.parentNode && domNode.parentNode.removeChild(domNode);
+				dnode.domNode = undefined;
 			};
 			if (typeof exitAnimation === 'function') {
 				exitAnimation(domNode as Element, removeDomNode, properties);
@@ -573,6 +574,7 @@ function nodeToRemove(dnode: InternalDNode, transitions: TransitionStrategy, pro
 			}
 		}
 		domNode && domNode.parentNode && domNode.parentNode.removeChild(domNode);
+		dnode.domNode = undefined;
 	}
 }
 
@@ -644,27 +646,31 @@ function updateChildren(
 
 		const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
 		const addChild = () => {
-			let insertBefore: Element | Text | undefined = undefined;
+			let insertBeforeDomNode: Element | Text | undefined = undefined;
 			let child: InternalDNode = oldChildren[oldIndex];
 			if (child) {
 				let nextIndex = oldIndex + 1;
-				while (insertBefore === undefined) {
-					if (isWNode(child)) {
-						if (child.rendered) {
-							child = child.rendered[0];
-						} else if (oldChildren[nextIndex]) {
-							child = oldChildren[nextIndex];
-							nextIndex++;
-						} else {
-							break;
+				let insertBeforeChildren = [child];
+				while (insertBeforeChildren.length) {
+					const insertBefore = insertBeforeChildren.shift()!;
+					if (isWNode(insertBefore)) {
+						if (insertBefore.rendered) {
+							insertBeforeChildren.push(...insertBefore.rendered);
 						}
 					} else {
-						insertBefore = child.domNode;
+						if (insertBefore.domNode) {
+							insertBeforeDomNode = insertBefore.domNode;
+							break;
+						}
+					}
+					if (insertBeforeChildren.length === 0 && oldChildren[nextIndex]) {
+						insertBeforeChildren.push(oldChildren[nextIndex]);
+						nextIndex++;
 					}
 				}
 			}
 
-			createDom(newChild, parentVNode, insertBefore, projectionOptions, parentInstance);
+			createDom(newChild, parentVNode, insertBeforeDomNode, projectionOptions, parentInstance);
 			nodeAdded(newChild, transitions);
 			const indexToCheck = newIndex;
 			projectorState.afterRenderCallbacks.push(() => {
