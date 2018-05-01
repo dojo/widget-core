@@ -136,25 +136,23 @@ registerSuite('mixins/I18nMixin', {
 			}
 		},
 		'.localizeBundle() with an override': {
-			'Uses the `i18nBundle` property'(this: any) {
-				const dfd = this.async();
-
+			'Uses the `i18nBundle` property'() {
 				localized = new Localized();
 				localized.__setProperties__({ i18nBundle: overrideBundle });
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
-				setTimeout(
-					dfd.callback(() => {
+
+				return i18n(bundle, 'es')
+					.then(() => i18n(overrideBundle, 'es'))
+					.then(() => {
 						const { format, messages } = localized.localizeBundle(bundle);
 						assert.strictEqual(messages.hello, 'Hola');
 						assert.strictEqual(messages.goodbye, 'Adiós');
 						assert.strictEqual(format('welcome', { name: 'Jean' }), 'Bienvenido, Jean');
-					})
-				);
+					});
 			},
-			'Allows `i18nBundle` to be a `Map`'(this: any) {
-				const dfd = this.async();
+			'Allows `i18nBundle` to be a `Map`'() {
 				const i18nBundleMap = new Map<any, any>();
 				i18nBundleMap.set(bundle, overrideBundle);
 
@@ -163,17 +161,16 @@ registerSuite('mixins/I18nMixin', {
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
-				setTimeout(
-					dfd.callback(() => {
+				return i18n(bundle, 'es')
+					.then(() => i18n(overrideBundle, 'es'))
+					.then(() => {
 						const { format, messages } = localized.localizeBundle(bundle);
 						assert.strictEqual(messages.hello, 'Hola');
 						assert.strictEqual(messages.goodbye, 'Adiós');
 						assert.strictEqual(format('welcome', { name: 'Jean' }), 'Bienvenido, Jean');
-					})
-				);
+					});
 			},
-			'Uses the base bundle when the `i18nBundle` map does not contain an override'(this: any) {
-				const dfd = this.async();
+			'Uses the base bundle when the `i18nBundle` map does not contain an override'() {
 				const i18nBundleMap = new Map<any, any>();
 
 				localized = new Localized();
@@ -181,14 +178,14 @@ registerSuite('mixins/I18nMixin', {
 
 				switchLocale('es');
 				localized.localizeBundle(bundle);
-				setTimeout(
-					dfd.callback(() => {
+				return i18n(bundle, 'es')
+					.then(() => i18n(overrideBundle, 'es'))
+					.then(() => {
 						const { format, messages } = localized.localizeBundle(bundle);
 						assert.strictEqual(messages.hello, 'Hello');
 						assert.strictEqual(messages.goodbye, 'Goodbye');
 						assert.strictEqual(format('hello'), 'Hello');
-					})
-				);
+					});
 			}
 		},
 		'locale data can be injected by defining an Injector with a registry': {
