@@ -153,9 +153,12 @@ class DragController {
 		if (this._nodeMap.has(target)) {
 			return { state: this._nodeMap.get(target)!, target };
 		}
-		if (target.parentElement) {
-			return this._getData(target.parentElement);
-		}
+		// IE 11 does not support parentElement for SVGElement, so in case of parentElement undefined
+        // checking for parentNode.
+        const parent = (target.parentElement || target.parentNode) as HTMLElement;
+        if (parent) {
+            return this._getData(parent);
+        }
 	}
 
 	private _onDragStart = (event: PointerEvent) => {
