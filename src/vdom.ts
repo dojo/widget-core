@@ -620,6 +620,7 @@ function updateChildren(
 	let newIndex = 0;
 	let i: number;
 	let textUpdated = false;
+	let endInsertBeforeNode: any = undefined;
 	while (newIndex < newChildrenLength) {
 		let oldChild = oldIndex < oldChildrenLength ? oldChildren[oldIndex] : undefined;
 		const newChild = newChildren[newIndex];
@@ -636,8 +637,13 @@ function updateChildren(
 
 		const findOldIndex = findIndexOfChild(oldChildren, newChild, oldIndex + 1);
 		const addChild = () => {
-			let insertBeforeDomNode: Element | Text | undefined = undefined;
+			let useNextSibling = false;
+			let insertBeforeDomNode: Node | undefined = undefined;
 			let child: InternalDNode = oldChildren[oldIndex];
+			if (!child && !endInsertBeforeNode) {
+				child = oldChildren[oldIndex - 1];
+				useNextSibling = true;
+			}
 			if (child) {
 				let nextIndex = oldIndex + 1;
 				let insertBeforeChildren = [child];
@@ -649,6 +655,11 @@ function updateChildren(
 						}
 					} else {
 						if (insertBefore.domNode) {
+							if (useNextSibling) {
+								insertBeforeDomNode = insertBefore.domNode.nextSibling || undefined;
+								endInsertBeforeNode = insertBeforeDomNode;
+								break;
+							}
 							insertBeforeDomNode = insertBefore.domNode;
 							break;
 						}
@@ -658,6 +669,8 @@ function updateChildren(
 						nextIndex++;
 					}
 				}
+			} else if (endInsertBeforeNode) {
+				insertBeforeDomNode = endInsertBeforeNode;
 			}
 
 			createDom(newChild, parentVNode, insertBeforeDomNode, projectionOptions, parentInstance);
@@ -725,7 +738,7 @@ function addChildren(
 	children: InternalDNode[] | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface,
-	insertBefore: Element | Text | undefined = undefined,
+	insertBefore: Node | undefined = undefined,
 	childNodes?: (Element | Text)[]
 ) {
 	if (children === undefined) {
@@ -792,7 +805,7 @@ function initPropertiesAndChildren(
 function createDom(
 	dnode: InternalDNode,
 	parentVNode: InternalVNode,
-	insertBefore: Element | Text | undefined,
+	insertBefore: Node | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface,
 	childNodes?: (Element | Text)[]
