@@ -2948,6 +2948,48 @@ describe('vdom', () => {
 			assert.strictEqual(root.childNodes[14], childTwelve);
 		});
 
+		it('Can insert new nodes in a widget that returns an array from render', () => {
+			let addExtraNodes: any = undefined;
+
+			class A extends WidgetBase<any> {
+				render() {
+					if (this.properties.extra) {
+						return [
+							v('div', { key: '1' }, ['1']),
+							v('div', { key: '2' }, ['2']),
+							v('div', { key: '3' }, ['3'])
+						];
+					}
+					return [v('div', { key: '1' }, ['1'])];
+				}
+			}
+
+			class B extends WidgetBase {
+				private _extraNodes = false;
+				private a = () => {
+					this._extraNodes = !this._extraNodes;
+					this.invalidate();
+				};
+				constructor() {
+					super();
+					addExtraNodes = this.a;
+				}
+				render() {
+					return v('div', [w(A, { extra: this._extraNodes }), w(A, {})]);
+				}
+			}
+			const widget = new B();
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as Element;
+			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, '1');
+			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, '1');
+			addExtraNodes();
+			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, '1');
+			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, '2');
+			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, '3');
+			assert.strictEqual((root.childNodes[3].childNodes[0] as Text).data, '1');
+		});
+
 		it('can update single text nodes', () => {
 			const widget = getWidget(v('span', ['']));
 			const projection = dom.create(widget, { sync: true });
