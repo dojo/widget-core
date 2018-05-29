@@ -1089,7 +1089,16 @@ function render(projectionOptions: ProjectionOptions) {
 			previouslyRendered.push(instance);
 			const { parentVNode, dnode } = instanceMap.get(instance)!;
 			const instanceData = widgetInstanceMap.get(instance)!;
-			updateDom(dnode, toInternalWNode(instance, instanceData), projectionOptions, parentVNode, instance, []);
+			const index = (parentVNode.children || []).indexOf(dnode);
+			const siblings = (parentVNode.children || []).slice(index + 1);
+			updateDom(
+				dnode,
+				toInternalWNode(instance, instanceData),
+				projectionOptions,
+				parentVNode,
+				instance,
+				siblings
+			);
 		}
 	}
 	runAfterRenderCallbacks(projectionOptions);
