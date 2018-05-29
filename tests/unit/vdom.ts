@@ -3106,6 +3106,61 @@ describe('vdom', () => {
 			assert.strictEqual((root.childNodes[5].childNodes[0] as Text).data, '6');
 		});
 
+		it('Can insert new nodes in last widget that returns an array from render when previously returns null', () => {
+			let addExtraNodes: any = undefined;
+
+			class A extends WidgetBase<any> {
+				render() {
+					if (this.properties.extra) {
+						return [
+							v('div', { key: '1' }, ['1']),
+							v('div', { key: '2' }, ['2']),
+							v('div', { key: '3' }, ['3'])
+						];
+					}
+					return [null];
+				}
+			}
+
+			class C extends WidgetBase {
+				render() {
+					return [
+						v('div', { key: '1' }, ['4']),
+						v('div', { key: '2' }, ['5']),
+						v('div', { key: '3' }, ['6'])
+					];
+				}
+			}
+
+			class B extends WidgetBase {
+				private _extraNodes = false;
+				private a = () => {
+					this._extraNodes = !this._extraNodes;
+					this.invalidate();
+				};
+				constructor() {
+					super();
+					addExtraNodes = this.a;
+				}
+				render() {
+					return v('div', [w(C, {}), w(A, { extra: this._extraNodes })]);
+				}
+			}
+			const widget = new B();
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode.childNodes[0] as Element;
+			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, '4');
+			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, '5');
+			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, '6');
+			addExtraNodes();
+			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, '4');
+			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, '5');
+			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, '6');
+			assert.strictEqual((root.childNodes[3].childNodes[0] as Text).data, '1');
+			assert.strictEqual((root.childNodes[4].childNodes[0] as Text).data, '2');
+			assert.strictEqual((root.childNodes[5].childNodes[0] as Text).data, '3');
+		});
+
 		it('can update single text nodes', () => {
 			const widget = getWidget(v('span', ['']));
 			const projection = dom.create(widget, { sync: true });
