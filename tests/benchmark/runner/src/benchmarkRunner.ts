@@ -307,6 +307,7 @@ function buildDriver() {
 		options = options.addArguments('--headless');
 	}
 
+	options = options.addArguments('--no-sandbox');
 	options = options.addArguments('--js-flags=--expose-gc');
 	options = options.addArguments('--disable-infobars');
 	options = options.addArguments('--disable-background-networking');
