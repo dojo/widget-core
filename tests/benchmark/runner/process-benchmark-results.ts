@@ -30,6 +30,7 @@ export function processBenchmarkResults() {
 	});
 
 	console.dir(results, { colors: true });
+	console.log(' ---- \n');
 
 	results.forEach(({ vanillaResult, dojoResult }) => {
 		const percentSlower = (dojoResult.median - vanillaResult.median) / vanillaResult.median * 100;

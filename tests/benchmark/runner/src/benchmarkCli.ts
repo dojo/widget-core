@@ -15,8 +15,6 @@ let args = yargs(process.argv)
 	.array('framework')
 	.array('benchmark').argv;
 
-console.log(args);
-
 let runBenchmarks = args.benchmark && args.benchmark.length > 0 ? args.benchmark : [''];
 let runFrameworks = args.framework && args.framework.length > 0 ? args.framework : [''];
 let count = Number(args.count);
