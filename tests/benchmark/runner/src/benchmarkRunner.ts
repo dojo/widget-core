@@ -303,9 +303,9 @@ function buildDriver() {
 
 	let options = new chrome.Options();
 
-	// if (args.headless) {
-	// 	options = options.addArguments('--headless');
-	// }
+	if (config.HEADLESS) {
+		options = options.addArguments('--headless');
+	}
 
 	options = options.addArguments('--js-flags=--expose-gc');
 	options = options.addArguments('--disable-infobars');
@@ -477,9 +477,13 @@ async function runStartupBenchmark(framework: FrameworkData, benchmark: Benchmar
 	}
 }
 
-export async function runBench(frameworkNames: string[], benchmarkNames: string[], dir: string, count: number) {
-	if (count !== undefined) {
-		config.REPEAT_RUN = count;
+export async function runBench(frameworkNames: string[], benchmarkNames: string[], dir: string, args: any) {
+	if (args.count !== undefined) {
+		config.REPEAT_RUN = args.count;
+	}
+
+	if (args.headless !== undefined) {
+		config.HEADLESS = args.headless;
 	}
 
 	let runFrameworks = frameworks.filter((f) => frameworkNames.some((name) => f.name.indexOf(name) > -1));

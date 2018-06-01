@@ -1,4 +1,4 @@
-import { JSONResult, config, FrameworkData, frameworks } from './common';
+import { config } from './common';
 import * as yargs from 'yargs';
 import * as fs from 'fs';
 import { runBench } from './benchmarkRunner';

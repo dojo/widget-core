@@ -65,11 +65,14 @@ rimraf('./benchmark-results', function () {
     console.log('Old benchmark files removed'); 
 });
 
+const headless = (process.argv[2] == "false") ? false : true;
+console.log("Running headless? ", headless, "\n");
+
 runBench(
     ["vanillajs-non-keyed", "dojo2-v0.2.0-non-keyed"], 
     [''], 
     "benchmark-results", // Directory
-    3 // Count
+    { count : 3, headless : headless } // args
 ).then(() => {
     // Close the Dojo server
     server.close();
