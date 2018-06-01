@@ -20,9 +20,8 @@
     "url": "https://github.com/dojo/widget-core.git"
   },
   "scripts": {
-    "build" : "grunt dev",
-    "benchmark": "node ./run-benchmark.js false",
-    "benchmark:headless": "node ./run-benchmark.js true",
+    "dev" : "grunt dev",
+    "benchmark": "node ./run-benchmark.js",
     "prepublish": "grunt peerDepInstall",
     "precommit": "lint-staged",
     "prettier": "prettier --write 'src/**/*.ts*' 'tests/**/*.ts*'",

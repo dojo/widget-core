@@ -21,6 +21,7 @@ script:
 - grunt uploadCoverage
 - grunt dist
 - grunt doc
+- grunt dev
 - npm run benchmark
 notifications:
   slack:
