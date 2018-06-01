@@ -57,6 +57,7 @@
     "lint-staged": "6.0.0",
     "prettier": "1.9.2",
     "ramda": "0.25.0",
+    "rimraf": "^2.6.2",
     "selenium-webdriver": "3.6.0",
     "serve": "^6.4.1",
     "sinon": "~4.1.3",

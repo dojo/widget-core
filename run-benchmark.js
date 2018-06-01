@@ -1,22 +1,23 @@
 const { exec } = require('child_process');
 const rimraf = require('rimraf');
 const { runBench } = require('./_build/tests/benchmark/runner/src/benchmarkRunner.js')
-
+const { processBenchmarkResults } = require('./_build/tests/benchmark/runner/process-benchmark-results.js')
 const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const port = 8080;
 
+// Run a local webserver to serve our applications
 const server = http.createServer(function (req, res) {
-  console.log(`${req.method} ${req.url}`);
 
   // parse URL
   const parsedUrl = url.parse(req.url);
   // extract URL path
   let pathname = `.${parsedUrl.pathname}`;
   // based on the URL path, extract the file extention. e.g. .js, .doc, ...
-  const ext = path.parse(pathname).ext;
+  const ext = path.parse(pathname).ext || '.html';
+
   // maps file extention to MIME typere
   const map = {
     '.ico': 'image/x-icon',
@@ -35,6 +36,7 @@ const server = http.createServer(function (req, res) {
 
   fs.exists(pathname, function (exist) {
     if(!exist) {
+      // console.error("Server Error: File not found: ", pathname);
       // if the file is not found, return 404
       res.statusCode = 404;
       res.end(`File ${pathname} not found!`);
@@ -42,7 +44,7 @@ const server = http.createServer(function (req, res) {
     }
 
     // if is a directory search for index file matching the extention
-    if (fs.statSync(pathname).isDirectory()) pathname += '/index' + ext;
+    if (fs.statSync(pathname).isDirectory()) pathname += 'index' + ext;
 
     // read file from file system
     fs.readFile(pathname, function(err, data){
@@ -61,7 +63,6 @@ const server = http.createServer(function (req, res) {
 
 rimraf('./benchmark-results', function () { 
     console.log('Old benchmark files removed'); 
-
 });
 
 runBench(
@@ -72,4 +73,5 @@ runBench(
 ).then(() => {
     // Close the Dojo server
     server.close();
+    processBenchmarkResults();
 })

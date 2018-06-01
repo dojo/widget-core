@@ -368,6 +368,9 @@ interface Result {
 }
 
 function writeResult(res: Result, dir: string) {
+	if (!fs.existsSync(dir)) {
+		fs.mkdirSync(dir);
+	}
 	let benchmark = res.benchmark;
 	let framework = res.framework.name;
 	let data = res.results;
@@ -396,6 +399,9 @@ function writeResult(res: Result, dir: string) {
 }
 
 async function takeScreenshotOnError(driver: WebDriver, fileName: string, error: string, dir: string) {
+	if (!fs.existsSync(dir)) {
+		fs.mkdirSync(dir);
+	}
 	console.error('Benchmark failed', error);
 	let image = await driver.takeScreenshot();
 	console.error(`Writing screenshot ${fileName}`);
