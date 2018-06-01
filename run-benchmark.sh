@@ -7,9 +7,9 @@ echo '--- Benchmark starting ---'
 
 rm -rf benchmark-results
 
-node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless true --framework vanillajs-non-keyed
+node _build/tests/benchmark/runner/src/benchmarkCli.js --count 3 --headless true --framework vanillajs-non-keyed
 
-node _build/tests/benchmark/runner/src/benchmarkRunner.js --count 3 --headless true --framework dojo2-v0.2.0-non-keyed
+node _build/tests/benchmark/runner/src/benchmarkCli.js --count 3 --headless true --framework dojo2-v0.2.0-non-keyed
 
 ls benchmark-results
 

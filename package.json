@@ -44,7 +44,7 @@
     "@types/yargs": "^8.0.2",
     "@webcomponents/webcomponentsjs": "1.1.0",
     "bootstrap": "^3.3.7",
-    "chromedriver": "2.33.2",
+    "chromedriver": "2.38.3",
     "codecov.io": "0.1.6",
     "glob": "^7.0.6",
     "grunt": "^1.0.1",
