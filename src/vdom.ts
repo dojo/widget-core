@@ -604,7 +604,7 @@ function checkDistinguishable(
 
 function updateChildren(
 	parentVNode: InternalVNode,
-	siblings: any,
+	siblings: InternalDNode[],
 	oldChildren: InternalDNode[],
 	newChildren: InternalDNode[],
 	parentInstance: DefaultWidgetBaseInterface,
@@ -814,7 +814,7 @@ function initPropertiesAndChildren(
 function createDom(
 	dnode: InternalDNode,
 	parentVNode: InternalVNode,
-	siblings: any,
+	siblings: InternalDNode[],
 	insertBefore: Node | undefined,
 	projectionOptions: ProjectionOptions,
 	parentInstance: DefaultWidgetBaseInterface,
@@ -913,7 +913,7 @@ function updateDom(
 	projectionOptions: ProjectionOptions,
 	parentVNode: InternalVNode,
 	parentInstance: DefaultWidgetBaseInterface,
-	siblings: any
+	siblings: InternalDNode[]
 ) {
 	if (isWNode(dnode)) {
 		const { instance } = previous;
