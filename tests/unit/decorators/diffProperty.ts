@@ -74,7 +74,9 @@ registerSuite('decorators/diffProperty', {
 
 					@diffProperty('foo', customDiff)
 					@diffProperty('id', customDiff)
-					protected onFooOrBarChanged(): void {
+					protected onFooOrBarChanged(previousProperties: any, currentProperties: any): void {
+						assert.isEmpty(previousProperties);
+						assert.deepEqual(currentProperties, { id: '', foo: 'bar' });
 						this.reactionCalled = true;
 					}
 				}
