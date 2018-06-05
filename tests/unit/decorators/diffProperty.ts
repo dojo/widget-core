@@ -70,20 +70,20 @@ registerSuite('decorators/diffProperty', {
 				}
 
 				class TestWidget extends WidgetBase<TestProperties> {
-					reactionCalled = false;
+					callCount = 0;
 
 					@diffProperty('foo', customDiff)
 					@diffProperty('id', customDiff)
 					protected onFooOrBarChanged(previousProperties: any, currentProperties: any): void {
 						assert.isEmpty(previousProperties);
 						assert.deepEqual(currentProperties, { id: '', foo: 'bar' });
-						this.reactionCalled = true;
+						this.callCount++;
 					}
 				}
 				const testWidget = new TestWidget();
 				testWidget.__setProperties__({ id: '', foo: 'bar' });
 				assert.strictEqual(callCount, 2);
-				assert.isTrue(testWidget.reactionCalled);
+				assert.strictEqual(testWidget.callCount, 1);
 			}
 		}
 	},
