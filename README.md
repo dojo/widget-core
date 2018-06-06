@@ -701,7 +701,7 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 				return v('div', [
 					v('button', { onclick: this._previous }, ['Previous']),
 					v('button', { onclick: this._next }, ['Next']),
-					// `this.shouldFocus is passed to the child that requires focus based on
+					// `this.shouldFocus` is passed to the child that requires focus based on
 					// some widget logic. If the child is a widget it can then deal with that
 					// however is necessary. It may have internal logic of it's own and pass
 					// it's own `this.shouldFocus` down further or could apply directly to a
@@ -713,28 +713,30 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					}),
 					w(FocusInputChild, {
 						key: 1,
-						focus: this._focusedInputKey === 0 && this.shouldFocus,
+						focus: this._focusedInputKey === 1 && this.shouldFocus,
 						onFocus: () => this._onFocus(1)
 					}),
 					w(FocusInputChild, {
 						key: 2,
-						focus: this._focusedInputKey === 0 && this.shouldFocus,
+						focus: this._focusedInputKey === 2 && this.shouldFocus,
 						onFocus: () => this._onFocus(2)
 					}),
 					w(FocusInputChild, {
 						key: 3,
-						focus: this._focusedInputKey === 0 && this.shouldFocus,
+						focus: this._focusedInputKey === 3 && this.shouldFocus,
 						onFocus: () => this._onFocus(3)
 					}),
 					v('input', {
 						key: 4,
-						focus: this._focusedInputKey === 0 && this.shouldFocus,
+						focus: this._focusedInputKey === 4 && this.shouldFocus,
 						onfocus: () => this._onFocus(4)
 					})
 				]);
 			}
 		}
 ```
+
+Link to the example on [codesandbox.io](https://codesandbox.io/s/ox5y97vqz5).
 
 ### Advanced Properties
 

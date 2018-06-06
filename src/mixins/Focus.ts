@@ -1,6 +1,6 @@
 import { Constructor } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
-import { diffProperty } from '../decorators/diffProperty';
+import { diffProperty } from './../decorators/diffProperty';
 
 export interface FocusProperties {
 	focus?: (() => boolean) | boolean;
