@@ -2,14 +2,14 @@ import { Constructor } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
 import { diffProperty } from '../decorators/diffProperty';
 
+export interface FocusProperties {
+	focus?: (() => boolean) | boolean;
+}
+
 export interface FocusMixin {
 	focus: () => void;
 	shouldFocus: () => boolean;
 	properties: FocusProperties;
-}
-
-export interface FocusProperties {
-	focus?: () => boolean;
 }
 
 function diffFocus(previousProperty: Function, newProperty: Function) {
