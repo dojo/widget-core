@@ -4,12 +4,12 @@ import { diffProperty } from '../decorators/diffProperty';
 
 export interface FocusMixin {
 	focus: () => void;
-	shouldFocus: () => void;
+	shouldFocus: () => boolean;
 	properties: FocusProperties;
 }
 
 export interface FocusProperties {
-	focus?: () => void | boolean;
+	focus?: () => boolean;
 }
 
 function diffFocus(previousProperty: Function, newProperty: Function) {
@@ -46,3 +46,5 @@ export function FocusMixin<T extends Constructor<WidgetBase<FocusProperties>>>(B
 	}
 	return Focus;
 }
+
+export default FocusMixin;
