@@ -647,7 +647,7 @@ v('input', { type: 'text', focus: true })
 v('input', { type: 'text', focus: () => true) })
 ```
 
-This primitive is a base that enables building further abstractions to handle more complex behaviors, one of which is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` is designed to provide support for these scenarios and should be used by widgets that want to provide `focus` to it's children or can accept `focus` from a parent widget.
+This primitive is a base that enables building further abstractions to handle more complex behaviors, one of which is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` is designed to provide support for these scenarios and should be used by widgets that want to provide `focus` to its children or can accept `focus` from a parent widget.
 
 The mixin enhances a widgets API adding `focus` and `shouldFocus` methods, `shouldFocus` checks whether the widget is in a state to perform a focus action and will only return `true` once until the the widget's `focus` method has been called. This `shouldFocus` method is designed to be passed to child widgets or nodes as the value of the `focus` property.
 
@@ -682,7 +682,7 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					this._focusedInputKey--;
 				}
 				// calling focus resets the widget so that `this.shouldFocus`
-				// will return true on it's next use
+				// will return true on its next use
 				this.focus();
 			}
 
@@ -693,7 +693,7 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					this._focusedInputKey++;
 				}
 				// calling focus resets the widget so that `this.shouldFocus`
-				// will return true on it's next use
+				// will return true on its next use
 				this.focus();
 			}
 
@@ -703,8 +703,8 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					v('button', { onclick: this._next }, ['Next']),
 					// `this.shouldFocus` is passed to the child that requires focus based on
 					// some widget logic. If the child is a widget it can then deal with that
-					// however is necessary. It may have internal logic of it's own and pass
-					// it's own `this.shouldFocus` down further or could apply directly to a
+					// however is necessary. The widget may also have internal logic and pass
+					// its own `this.shouldFocus` down further or could apply directly to a
 					// VNode child.
 					w(FocusInputChild, {
 						key: 0,
