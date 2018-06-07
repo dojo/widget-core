@@ -632,9 +632,9 @@ This section provides some details on more advanced Dojo 2 functionality and con
 
 ### Handling Focus
 
-Handling focus is an important aspect in any application and can often be tricky to handle correctly. To help with this issue @dojo/widget-core provides a primitive mechanism built into the VDOM system that enables users to focus a virtual dom node once it is appended to the DOM. This uses a special property `focus` in the `VNodeProperties` interface that can be passed when using `v()`. The `focus` property is either a `boolean` or a function that returns a `boolean`.
+Handling focus is an important aspect in any application and can often be tricky to do correctly. To help with this issue @dojo/widget-core provides a primitive mechanism built into the VDOM system that enables users to focus a virtual dom node once it has been appended to the DOM. This uses a special property called `focus` on the `VNodeProperties` interface that can be passed when using `v()`. The `focus` property is either a `boolean` or a function that returns a `boolean`.
 
-When using passing a function focus will called when the `true` is returned without comparing the value of the previous result, however when passing a `boolean` focus will only be applied if the property is `true` and the previous property value was not.
+When using passing a function focus will called when `true` is returned without comparing the value of the previous result, however when passing a `boolean` focus will only be applied if the property is `true` and the previous property value was not.
 
 
 ```ts
@@ -649,9 +649,9 @@ v('input', { type: 'text', focus: () => true) })
 
 This primitive is a base that enables building further abstractions to handle more complex behaviors, one of which is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` is designed to provide support for these scenarios and should be used by widgets that want to provide `focus` to it's children or can accept `focus` from a parent widget.
 
-The mixin enhances a widgets API adding `focus` and `shouldFocus` methods, `shouldFocus` checks whether the widget is in a state to perform a focus action and will only return `true` once until the a widgets `focus` method has been called. This `shouldFocus` method is designed to be passed to child widgets or nodes as the value of the `focus` property.
+The mixin enhances a widgets API adding `focus` and `shouldFocus` methods, `shouldFocus` checks whether the widget is in a state to perform a focus action and will only return `true` once until the the widget's `focus` method has been called. This `shouldFocus` method is designed to be passed to child widgets or nodes as the value of the `focus` property.
 
-If passed to a widget it will be called as the properties are set on the child widget, meaning that any other usages of the parents `shouldFocus` method will result in a return value of `false`.
+When `shouldFocus` is passed to a widget it will be called as the properties are set on the child widget, meaning that any other usages of the parent's `shouldFocus` method will result in a return value of `false`.
 
 An example usage controlling focus across child VNodes (DOM) and WNodes (widgets):
 
