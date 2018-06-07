@@ -662,7 +662,7 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 
 		class FocusInputChild extends Focus(WidgetBase)<FocusInputChildProperties> {
 			protected render() {
-				// the child widgets `this.shouldFocus` is passed directly to the input nodes focus property
+				// the child widget's `this.shouldFocus` is passed directly to the input nodes focus property
 				return v('input', { onfocus: this.properties.onFocus, focus: this.shouldFocus });
 			}
 		}
