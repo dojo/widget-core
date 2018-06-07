@@ -982,7 +982,7 @@ describe('vdom', () => {
 		it('Should insert a new DNode at the beginning when returning an array in the correct position', () => {
 			class Foo extends WidgetBase {
 				render() {
-					return v('div', [v('div', { key: '3' }, ['one']), v('div', { key: '3' }, ['two']), w(Bar, {})]);
+					return v('div', [v('div', { key: '1' }, ['one']), v('div', { key: '2' }, ['two']), w(Bar, {})]);
 				}
 			}
 			let showBar = false;
@@ -1005,7 +1005,7 @@ describe('vdom', () => {
 					invalidateQux = this.invalidate.bind(this);
 				}
 				render() {
-					return showQux ? v('div', { key: '3' }, ['four']) : null;
+					return showQux ? v('div', { key: '4' }, ['four']) : null;
 				}
 			}
 
@@ -1027,7 +1027,7 @@ describe('vdom', () => {
 		it('Should insert a new DNode at the middle when returning an array in the correct position', () => {
 			class Foo extends WidgetBase {
 				render() {
-					return v('div', [v('div', { key: '3' }, ['one']), v('div', { key: '3' }, ['two']), w(Bar, {})]);
+					return v('div', [v('div', { key: '1' }, ['one']), v('div', { key: '2' }, ['two']), w(Bar, {})]);
 				}
 			}
 			let showBar = false;
@@ -1039,7 +1039,7 @@ describe('vdom', () => {
 				}
 				render() {
 					return showBar
-						? [v('div', { key: '3' }, ['three']), w(Qux, {}), v('div', { key: '3' }, ['five'])]
+						? [v('div', { key: '3' }, ['three']), w(Qux, {}), v('div', { key: '5' }, ['five'])]
 						: null;
 				}
 			}
@@ -1052,7 +1052,7 @@ describe('vdom', () => {
 					invalidateQux = this.invalidate.bind(this);
 				}
 				render() {
-					return showQux ? v('div', { key: '3' }, ['four']) : null;
+					return showQux ? v('div', { key: '4' }, ['four']) : null;
 				}
 			}
 
@@ -1063,13 +1063,17 @@ describe('vdom', () => {
 			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, 'two');
 			showBar = true;
 			invalidateBar();
+			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, 'one');
+			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, 'two');
+			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, 'three');
+			assert.strictEqual((root.childNodes[3].childNodes[0] as Text).data, 'five');
 			showQux = true;
 			invalidateQux();
 			assert.strictEqual((root.childNodes[0].childNodes[0] as Text).data, 'one');
 			assert.strictEqual((root.childNodes[1].childNodes[0] as Text).data, 'two');
-			assert.strictEqual((root.childNodes[3].childNodes[0] as Text).data, 'three');
-			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, 'four');
-			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, 'five');
+			assert.strictEqual((root.childNodes[2].childNodes[0] as Text).data, 'three');
+			assert.strictEqual((root.childNodes[3].childNodes[0] as Text).data, 'four');
+			assert.strictEqual((root.childNodes[4].childNodes[0] as Text).data, 'five');
 		});
 
 		it('should update an array of nodes to single node', () => {

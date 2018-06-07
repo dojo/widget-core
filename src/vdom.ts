@@ -1093,8 +1093,27 @@ function render(projectionOptions: ProjectionOptions) {
 			const instanceData = widgetInstanceMap.get(instance)!;
 			let siblings: InternalDNode[] = [];
 			if (parentVNode.children) {
-				const index = findIndexOfChild(parentVNode.children, dnode, 0);
-				siblings = parentVNode.children.slice(index + 1);
+				let searchChildren: InternalDNode[] = [parentVNode];
+				while (searchChildren.length) {
+					let searchChild = searchChildren.shift();
+					let children: InternalDNode[] = [];
+					if (isWNode(searchChild)) {
+						const item = instanceMap.get(searchChild.instance);
+						if (item) {
+							children = item.dnode.rendered;
+						}
+					} else if (isVNode(searchChild) && searchChild.children) {
+						children = searchChild.children;
+					}
+					if (children.length) {
+						const index = findIndexOfChild(children, dnode, 0);
+						if (index !== -1) {
+							siblings = children.slice(index + 1);
+							break;
+						}
+						searchChildren = [...children, ...searchChildren];
+					}
+				}
 			}
 			updateDom(
 				dnode,
