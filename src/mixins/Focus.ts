@@ -3,7 +3,7 @@ import { WidgetBase } from './../WidgetBase';
 import { diffProperty } from './../decorators/diffProperty';
 
 export interface FocusProperties {
-	focus?: (() => boolean) | boolean;
+	focus?: (() => boolean);
 }
 
 export interface FocusMixin {

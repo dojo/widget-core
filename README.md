@@ -708,27 +708,27 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					// VNode child.
 					w(FocusInputChild, {
 						key: 0,
-						focus: this._focusedInputKey === 0 && this.shouldFocus,
+						focus: this._focusedInputKey === 0 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(0)
 					}),
 					w(FocusInputChild, {
 						key: 1,
-						focus: this._focusedInputKey === 1 && this.shouldFocus,
+						focus: this._focusedInputKey === 1 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(1)
 					}),
 					w(FocusInputChild, {
 						key: 2,
-						focus: this._focusedInputKey === 2 && this.shouldFocus,
+						focus: this._focusedInputKey === 2 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(2)
 					}),
 					w(FocusInputChild, {
 						key: 3,
-						focus: this._focusedInputKey === 3 && this.shouldFocus,
+						focus: this._focusedInputKey === 3 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(3)
 					}),
 					v('input', {
 						key: 4,
-						focus: this._focusedInputKey === 4 && this.shouldFocus,
+						focus: this._focusedInputKey === 4 ? this.shouldFocus : undefined,
 						onfocus: () => this._onFocus(4)
 					})
 				]);
