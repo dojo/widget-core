@@ -634,7 +634,7 @@ This section provides some details on more advanced Dojo 2 functionality and con
 
 Handling focus is an important aspect in any application and can often be tricky to do correctly. To help with this issue @dojo/widget-core provides a primitive mechanism built into the VDOM system that enables users to focus a virtual dom node once it has been appended to the DOM. This uses a special property called `focus` on the `VNodeProperties` interface that can be passed when using `v()`. The `focus` property is either a `boolean` or a function that returns a `boolean`.
 
-When using passing a function focus will called when `true` is returned without comparing the value of the previous result, however when passing a `boolean` focus will only be applied if the property is `true` and the previous property value was not.
+When passing a function, focus will called when `true` is returned without comparing the value of the previous result. However when passing a `boolean` focus will only be applied if the property is `true` and the previous property value was not.
 
 
 ```ts
