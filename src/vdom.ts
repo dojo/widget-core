@@ -658,7 +658,7 @@ function updateChildren(
 			if (child) {
 				let insertBeforeChildren = [child];
 				while (insertBeforeChildren.length) {
-					let insertBefore = insertBeforeChildren.shift()!;
+					const insertBefore = insertBeforeChildren.shift()!;
 					if (isWNode(insertBefore)) {
 						const item = instanceMap.get(insertBefore.instance);
 						if (item && item.dnode.rendered) {
