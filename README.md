@@ -647,9 +647,9 @@ v('input', { type: 'text', focus: true })
 v('input', { type: 'text', focus: () => true) })
 ```
 
-This primitive is a base that enables building further abstractions to handle more complex behaviors, one of which is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` is designed to provide support for these scenarios and should be used by widgets that want to provide `focus` to its children or can accept `focus` from a parent widget.
+This primitive is a base that enables further abstractions to be built to handle more complex behaviors. One of these is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` should be used by widgets to provide `focus` to their children or to accept `focus` from a parent widget.
 
-The mixin enhances a widgets API adding `focus` and `shouldFocus` methods, `shouldFocus` checks whether the widget is in a state to perform a focus action and will only return `true` once until the the widget's `focus` method has been called. This `shouldFocus` method is designed to be passed to child widgets or nodes as the value of the `focus` property.
+The `FocusMixin` adds `focus` and `shouldFocus` to a widget's API. `shouldFocus` checks if the widget is in a state to perform a focus action and will only return `true` once until the widget's `focus` method has been called again. This `shouldFocus` method is designed to be passed to child widgets or nodes are the value of their `focus` property.
 
 When `shouldFocus` is passed to a widget it will be called as the properties are set on the child widget, meaning that any other usages of the parent's `shouldFocus` method will result in a return value of `false`.
 
