@@ -731,7 +731,7 @@ describe('vdom', () => {
 		it('should only insert before nodes that are not orphaned when returning from an array', () => {
 			class VeryParent extends WidgetBase {
 				render() {
-					return v('div', [w(Parent, {}), w(ChildOne, {})]);
+					return v('div', [w(Parent, {}), w(ChildOne, {}), v('div', ['insert before me'])]);
 				}
 			}
 
@@ -771,7 +771,8 @@ describe('vdom', () => {
 			}
 
 			const widget = new VeryParent();
-			dom.create(widget);
+			const projection = dom.create(widget);
+			const root = projection.domNode.childNodes[0] as any;
 			resolvers.resolve();
 			invalidateTwo();
 			resolvers.resolve();
@@ -780,6 +781,9 @@ describe('vdom', () => {
 			resolvers.resolve();
 			parentInvalidate();
 			resolvers.resolve();
+			assert.lengthOf(root.childNodes, 4);
+			assert.strictEqual(root.childNodes[2].childNodes[0].data, 'New');
+			assert.strictEqual(root.childNodes[3].childNodes[0].data, 'insert before me');
 		});
 
 		it('Should not render widgets that have been detached', () => {

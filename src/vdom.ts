@@ -658,10 +658,11 @@ function updateChildren(
 			if (child) {
 				let insertBeforeChildren = [child];
 				while (insertBeforeChildren.length) {
-					const insertBefore = insertBeforeChildren.shift()!;
+					let insertBefore = insertBeforeChildren.shift()!;
 					if (isWNode(insertBefore)) {
-						if (insertBefore.rendered) {
-							insertBeforeChildren.push(...insertBefore.rendered);
+						const item = instanceMap.get(insertBefore.instance);
+						if (item && item.dnode.rendered) {
+							insertBeforeChildren.push(...item.dnode.rendered);
 						}
 					} else {
 						if (insertBefore.domNode) {
