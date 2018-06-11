@@ -4290,7 +4290,7 @@ describe('vdom', () => {
 		});
 	});
 
-	describe('i18n Mixin', () => {
+	it('i18n Mixin', () => {
 		class MyWidget extends I18nMixin(WidgetBase) {
 			render() {
 				return v('span');
