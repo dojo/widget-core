@@ -668,6 +668,9 @@ function updateChildren(
 						}
 					} else {
 						if (insertBefore.domNode) {
+							if (insertBefore.domNode.parentElement !== parentVNode.domNode) {
+								break;
+							}
 							insertBeforeDomNode = insertBefore.domNode;
 							break;
 						}
