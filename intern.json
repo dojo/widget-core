@@ -73,7 +73,7 @@
 				{ "browserName": "chrome", "platform": "WINDOWS" },
 				{ "browserName": "firefox", "os": "Windows", "os_version": "10", "browser_version": "58.0" },
 				{ "browserName": "safari", "version": "10", "platform": "MAC" },
-				{ "browserName": "iPhone", "os_version": "10.3", "device": "iPhone 7", "realMobile": "true" }
+				{ "browserName": "iPhone", "os_version": "11.0", "device": "iPhone 8", "realMobile": "true" }
 			]
 		},
 		"saucelabs": {
