@@ -1076,6 +1076,47 @@ describe('vdom', () => {
 			assert.strictEqual((root.childNodes[4].childNodes[0] as Text).data, 'five');
 		});
 
+		it('Should only try to insert before nodes that share the same parent', () => {
+			let invalidate: any;
+			class Foo extends WidgetBase {
+				private _show = false;
+
+				constructor() {
+					super();
+					invalidate = this.show;
+				}
+
+				public show = () => {
+					this._show = !this._show;
+					this.invalidate();
+				};
+
+				render() {
+					return v('div', {}, [v('h2', this._show ? [v('a', ['link'])] : []), v('p', ['Hello'])]);
+				}
+			}
+
+			class App extends WidgetBase {
+				render() {
+					return v('div', [w(Foo, {})]);
+				}
+			}
+
+			const widget = new App();
+			const projection = dom.create(widget, { sync: true });
+			const root = projection.domNode;
+			const h2 = root.childNodes[0].childNodes[0].childNodes[0];
+			const p = root.childNodes[0].childNodes[0].childNodes[1];
+			assert.lengthOf(h2.childNodes, 0);
+			assert.lengthOf(p.childNodes, 1);
+			assert.strictEqual((p.childNodes[0] as Text).data, 'Hello');
+			invalidate();
+			assert.strictEqual(root.childNodes[0].childNodes[0].childNodes[0], h2);
+			assert.strictEqual(root.childNodes[0].childNodes[0].childNodes[1], p);
+			assert.lengthOf(h2.childNodes, 1);
+			assert.strictEqual((h2.childNodes[0].childNodes[0] as Text).data, 'link');
+		});
+
 		it('should update an array of nodes to single node', () => {
 			class Foo extends WidgetBase {
 				private _array = false;
