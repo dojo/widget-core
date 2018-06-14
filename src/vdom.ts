@@ -199,7 +199,7 @@ function updateEvent(
 
 function addClasses(domNode: Element, classes: SupportedClassName) {
 	if (classes) {
-		const classNames = classes.split(' ');
+		const classNames = classes.trim().split(/\s+/g);
 		for (let i = 0; i < classNames.length; i++) {
 			domNode.classList.add(classNames[i]);
 		}
@@ -208,7 +208,7 @@ function addClasses(domNode: Element, classes: SupportedClassName) {
 
 function removeClasses(domNode: Element, classes: SupportedClassName) {
 	if (classes) {
-		const classNames = classes.split(' ');
+		const classNames = classes.trim().split(/\s+/g);
 		for (let i = 0; i < classNames.length; i++) {
 			domNode.classList.remove(classNames[i]);
 		}
