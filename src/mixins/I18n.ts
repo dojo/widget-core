@@ -41,7 +41,7 @@ export interface I18nProperties extends LocaleData, WidgetProperties {
  */
 interface I18nVNodeProperties extends VNodeProperties {
 	dir: string;
-	lang: string | null;
+	lang: string;
 }
 
 export type LocalizedMessages<T extends Messages> = {
