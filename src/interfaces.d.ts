@@ -85,7 +85,7 @@ export type SupportedClassName = string | null | undefined;
 
 export type DeferredVirtualProperties = (inserted: boolean) => VNodeProperties;
 
-export type NodeOperationFunction = () => boolean;
+export type NodeOperationPredicate = () => boolean;
 
 export type DiffType = 'none' | 'dom' | 'vdom';
 
@@ -218,22 +218,22 @@ export interface VNodeProperties {
 	/**
 	 * determines if the node should be focused
 	 */
-	readonly focus?: boolean | NodeOperationFunction;
+	readonly focus?: boolean | NodeOperationPredicate;
 
 	/**
 	 * determines is the element needs to be clicked
 	 */
-	readonly click?: boolean | NodeOperationFunction;
+	readonly click?: boolean | NodeOperationPredicate;
 
 	/**
 	 * determines if the node should be scrolled to
 	 */
-	readonly scrollIntoView?: boolean | NodeOperationFunction;
+	readonly scrollIntoView?: boolean | NodeOperationPredicate;
 
 	/**
 	 * determines if the node should be blurred
 	 */
-	readonly blur?: boolean | NodeOperationFunction;
+	readonly blur?: boolean | NodeOperationPredicate;
 
 	/**
 	 * Everything that is not explicitly listed (properties and attributes that are either uncommon or custom).
