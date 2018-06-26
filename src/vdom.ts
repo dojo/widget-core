@@ -24,7 +24,7 @@ const NAMESPACE_XLINK = NAMESPACE_W3 + '1999/xlink';
 
 const emptyArray: (InternalWNode | InternalVNode)[] = [];
 
-const nodeOps = ['focus', 'blur', 'scrollIntoView', 'click'];
+const nodeOperations = ['focus', 'blur', 'scrollIntoView', 'click'];
 
 export type RenderResult = DNode<any> | DNode<any>[];
 
@@ -248,7 +248,7 @@ function buildPreviousProperties(domNode: any, previous: InternalVNode, current:
 	return newProperties;
 }
 
-function nodeOp(
+function nodeOperation(
 	propName: string,
 	propValue: any,
 	previousValue: any,
@@ -376,8 +376,8 @@ function updateProperties(
 					addClasses(domNode, currentClasses[i]);
 				}
 			}
-		} else if (nodeOps.indexOf(propName) !== -1) {
-			nodeOp(propName, propValue, previousValue, domNode, projectionOptions);
+		} else if (nodeOperations.indexOf(propName) !== -1) {
+			nodeOperation(propName, propValue, previousValue, domNode, projectionOptions);
 		} else if (propName === 'styles') {
 			const styleNames = Object.keys(propValue);
 			const styleCount = styleNames.length;
