@@ -1,24 +1,39 @@
 import { Constructor } from './../interfaces';
 import { WidgetBase } from './../WidgetBase';
-import { DNode, VNode, WNode } from '../interfaces';
+import { DNode, VNode, WNode, NodeOperationPredicate } from '../interfaces';
 import { decorate, isWNode, isVNode } from '../d';
 import { diffProperty } from './../decorators/diffProperty';
 import { afterRender } from './../decorators/afterRender';
 
 export interface FocusProperties {
-	focus?: (() => boolean);
+	/**
+	 * The focus property allows a widget to be focused by a parent.
+	 * It must be used in conjunction with focusKey, or have a custom implementation within the widget
+	 */
+	focus?: boolean | NodeOperationPredicate;
 }
 
 export interface FocusMixin {
+	/**
+	 * The focus method marks a specific node for decoration with focus: () => true;
+	 */
 	focus: (key: string) => void;
+	/**
+	 * The focusKey property is used with the focus widget property to allow a widget to be focused by a parent.
+	 * If present, a truthy FocusProperties.focus will decorate this node with focus: () => true
+	 */
 	focusKey?: string | number;
 	properties: FocusProperties;
 }
 
 function diffFocus(previousProperty: Function, newProperty: Function) {
-	const result = newProperty && newProperty();
+	let changed = newProperty !== previousProperty;
+	if (typeof newProperty === 'function') {
+		changed = newProperty();
+	}
+
 	return {
-		changed: result,
+		changed,
 		value: newProperty
 	};
 }
@@ -39,14 +54,14 @@ export function FocusMixin<T extends Constructor<WidgetBase<FocusProperties>>>(B
 		}
 
 		private _shouldFocusSelf() {
-			return this.properties.focus && this.focusKey !== undefined;
+			let { focus } = this.properties;
+			if (typeof focus === 'function') {
+				focus = focus();
+			}
+			return focus && this.focusKey !== undefined;
 		}
 
 		@diffProperty('focus', diffFocus)
-		protected isFocusedReaction() {
-			this._currentToken++;
-		}
-
 		@afterRender()
 		protected updateFocusProperties(result: DNode | DNode[]): DNode | DNode[] {
 			if (!this._shouldFocusChild() && !this._shouldFocusSelf()) {
@@ -79,6 +94,11 @@ export function FocusMixin<T extends Constructor<WidgetBase<FocusProperties>>>(B
 			return result;
 		};
 
+		/**
+		 * Will mark a node for decoration with the focus property and trigger a render
+		 *
+		 * @param key The key to call focus on
+		 */
 		public focus(key: string | number) {
 			this._currentFocusKey = key;
 			this._currentToken++;
