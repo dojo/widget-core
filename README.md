@@ -649,9 +649,9 @@ v('input', { type: 'text', focus: () => true) })
 
 This primitive is a base that enables further abstractions to be built to handle more complex behaviors. One of these is handling focus across the boundaries of encapsulated widgets. The `FocusMixin` should be used by widgets to provide `focus` to their children or to accept `focus` from a parent widget.
 
-The `FocusMixin` adds `focus` and `shouldFocus` to a widget's API. `shouldFocus` checks if the widget is in a state to perform a focus action and will only return `true` once until the widget's `focus` method has been called again. This `shouldFocus` method is designed to be passed to child widgets or nodes are the value of their `focus` property.
+The `FocusMixin` adds `focus` to a widget's API. When called with a key, `focus` decorates the corresponding child node with `focus: () => true` for one render.
 
-When `shouldFocus` is passed to a widget it will be called as the properties are set on the child widget, meaning that any other usages of the parent's `shouldFocus` method will result in a return value of `false`.
+The `FocusMixin` can also be used to handle receiving a `focus` property from a parent widget. If `focusKey` is defined on the widget class, the `FocusMixin` will pass on `widget.properties.focus` to the corresponding child node.
 
 An example usage controlling focus across child VNodes (DOM) and WNodes (widgets):
 
@@ -661,9 +661,10 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 		}
 
 		class FocusInputChild extends Focus(WidgetBase)<FocusInputChildProperties> {
+      // focusKey must be defined, or nothing will happen if the widget is passed a truthy focus property
+      focusKey = 'input';
 			protected render() {
-				// the child widget's `this.shouldFocus` is passed directly to the input nodes focus property
-				return v('input', { onfocus: this.properties.onFocus, focus: this.shouldFocus });
+				return v('input', { key: 'input', onfocus: this.properties.onFocus });
 			}
 		}
 
@@ -676,59 +677,43 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 			}
 
 			private _previous() {
-				if (this._focusedInputKey === 0) {
+        this._focusedInputKey--;
+				if (this._focusedInputKey < 0) {
 					this._focusedInputKey = 4;
-				} else {
-					this._focusedInputKey--;
 				}
-				// calling focus resets the widget so that `this.shouldFocus`
-				// will return true on its next use
-				this.focus();
+
+        // call this.focus with the updated focus key
+				this.focus(this._focusedInputKey);
 			}
 
 			private _next() {
-				if (this._focusedInputKey === 4) {
-					this._focusedInputKey = 0;
-				} else {
-					this._focusedInputKey++;
-				}
-				// calling focus resets the widget so that `this.shouldFocus`
-				// will return true on its next use
-				this.focus();
+        this._focusedInputKey = (this._focusedInputKey + 1) % 5;
+        // call this.focus with the updated focus key
+				this.focus(this._focusedInputKey);
 			}
 
 			protected render() {
 				return v('div', [
 					v('button', { onclick: this._previous }, ['Previous']),
 					v('button', { onclick: this._next }, ['Next']),
-					// `this.shouldFocus` is passed to the child that requires focus based on
-					// some widget logic. If the child is a widget it can then deal with that
-					// however is necessary. The widget may also have internal logic and pass
-					// its own `this.shouldFocus` down further or could apply directly to a
-					// VNode child.
 					w(FocusInputChild, {
 						key: 0,
-						focus: this._focusedInputKey === 0 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(0)
 					}),
 					w(FocusInputChild, {
 						key: 1,
-						focus: this._focusedInputKey === 1 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(1)
 					}),
 					w(FocusInputChild, {
 						key: 2,
-						focus: this._focusedInputKey === 2 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(2)
 					}),
 					w(FocusInputChild, {
 						key: 3,
-						focus: this._focusedInputKey === 3 ? this.shouldFocus : undefined,
 						onFocus: () => this._onFocus(3)
 					}),
 					v('input', {
 						key: 4,
-						focus: this._focusedInputKey === 4 ? this.shouldFocus : undefined,
 						onfocus: () => this._onFocus(4)
 					})
 				]);
