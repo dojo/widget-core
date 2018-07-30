@@ -1,3 +1,9 @@
+## The `@dojo/widget-core` repository has been deprecated and merged into [`@dojo/framework`](https://github.com/dojo/framework)
+
+You can read more about this change on our [blog](https://dojo.io/blog/). We will continue providing patches for `widget-core` and other Dojo 2 repositories, and a [CLI migration tool](https://github.com/dojo/cli-upgrade) is available to aid in migrating projects from v2 to v3.
+
+***
+
 # @dojo/widget-core
 
 [![Build Status](https://travis-ci.org/dojo/widget-core.svg?branch=master)](https://travis-ci.org/dojo/widget-core)
@@ -37,9 +43,6 @@ widget-core is a library to create powerful, composable user interface widgets.
     - [Inserting DOM Nodes Into The VDom Tree](#inserting-dom-nodes-into-the-vdom-tree)
     - [JSX Support](#jsx-support)
     - [Web Components](#web-components)
-- [How Do I Contribute?](#how-do-i-contribute)
-    - [Setup Installation](#setup-installation)
-    - [Testing](#testing)
 - [Licensing Information](#licensing-information)
 
 ## Installation
@@ -705,7 +708,7 @@ An example usage controlling focus across child VNodes (DOM) and WNodes (widgets
 					v('button', { onclick: this._next }, ['Next']),
 					// `this.shouldFocus` is passed to the child that requires focus based on
 					// some widget logic. If the child is a widget it can then deal with that
-					// in whatever manner is necessary. The widget may also have internal 
+					// in whatever manner is necessary. The widget may also have internal
 					// logic and pass its own `this.shouldFocus` down further or it could apply
 					// directly to a VNode child.
 					w(FocusInputChild, {
@@ -1546,8 +1549,8 @@ class MyWidget extends WidgetBase<MyWidgetProperties> {
 Custom Elements in all browsers supported by Dojo 2, a polyfill needs to be
 included such as webcomponents/custom-elements/master/custom-elements.min.js.
 Dojo 2 does not include the polyfill by default, so will need to be
-added as a script tag in your index.html. Note that this polyfill cannot 
-currently be ponyfilled like other polyfills used in Dojo 2, so it cannot 
+added as a script tag in your index.html. Note that this polyfill cannot
+currently be ponyfilled like other polyfills used in Dojo 2, so it cannot
 be added with @dojo/shim/browser or imported using ES modules.
 
 No additional steps are required. The custom element
@@ -1616,56 +1619,6 @@ The initialization function is run from the context of the HTML element.
 ```
 
 It should be noted that children nodes are removed from the DOM when attached, and added as children to the widget instance.
-
-## How Do I Contribute?
-
-We appreciate your interest!  Please see the [Dojo Meta Repository](https://github.com/dojo/meta#readme) for the Contributing Guidelines.
-
-### Code Style
-
-This repository uses [`prettier`](https://prettier.io/) for code styling rules and formatting. A pre-commit hook is installed automatically and configured to run `prettier` against all staged files as per the configuration in the project's `package.json`.
-
-An additional npm script to run `prettier` (with write set to `true`) against all `src` and `test` project files is available by running:
-
-```bash
-npm run prettier
-```
-
-### Setup Installation
-
-To start working with this package, clone the repository and run `npm install`.
-
-In order to build the project, run `grunt dev` or `grunt dist`.
-
-### Testing
-
-Test cases MUST be written using [Intern](https://theintern.github.io) using the Object test interface and Assert assertion interface.
-
-90% branch coverage MUST be provided for all code submitted to this repository, as reported by Istanbul’s combined coverage results for all supported platforms.
-
-To test locally in node run:
-
-`grunt test`
-
-To test against browsers with a local selenium server run:
-
-`grunt test:local`
-
-To test against BrowserStack or Sauce Labs run:
-
-`grunt test:browserstack`
-
-or
-
-`grunt test:saucelabs`
-
-### Benchmarks
-
-To run the JavaScript benchmarks, run:
-
-`npm run benchmark`
-
-The benchmarking setup relies heavily on [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) from GitHub.
 
 ## Licensing Information
 
